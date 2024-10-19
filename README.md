@@ -1,12 +1,12 @@
-# Dotfiles
+# ✨ Dotfiles
 
-Este repositório contém meus arquivos de configuração pessoais (**dotfiles**) e um script de gerenciamento que facilita a instalação, sincronização e restauração desses arquivos em diferentes máquinas.
+Este repositório contém meus **dotfiles** pessoais e um script de gerenciamento para facilitar a instalação, sincronização e restauração desses arquivos em múltiplas máquinas. Com ele, você pode manter suas configurações sempre consistentes e sincronizadas entre diferentes dispositivos.
 
-## Conteúdo
+## 📂 Conteúdo
 
-Este repositório armazena configurações para:
+Este repositório gerencia as configurações para:
 
-- **Bash** (`.bashrc`)
+- **Bash** (`~/.bashrc`)
 - **Starship** (`~/.config/starship.toml`)
 - **Fish** (`~/.config/fish/`)
 - **Foot** (`~/.config/foot/`)
@@ -15,76 +15,77 @@ Este repositório armazena configurações para:
 - **Sway** (`~/.config/sway/`)
 - **Waybar** (`~/.config/waybar/`)
 
-## Estrutura do Repositório
+## 🚀 Funcionalidades do Script
 
-- **dotfiles.conf**: Arquivo de configuração que lista todos os arquivos e diretórios que serão gerenciados.
-- **manage.sh**: Script para adicionar, restaurar e verificar os dotfiles. Facilita a criação de symlinks e a sincronização com este repositório.
+O script `manage.sh` permite gerenciar seus dotfiles de forma simples e eficaz. Aqui estão as principais funcionalidades:
 
-## Funcionalidades do Script
+### ⚙️ Inicializar
+Este comando inicializa o diretório de dotfiles e configura o Git.
+```bash
+./manage.sh init
+```
 
-O script `manage.sh` oferece as seguintes funções:
+### ➕ Adicionar arquivos/diretórios
+Move os arquivos/diretórios listados no `dotfiles.conf` para o diretório `.dotfiles`, cria symlinks na home folder e sugere um commit no Git.
+```bash
+./manage.sh add
+```
 
-1. **init**: Inicializa o diretório de dotfiles e configura o Git.
-   ```bash
-   ./manage.sh init
-   ```
+### 🔄 Restaurar dotfiles
+Restaura um arquivo ou diretório específico do repositório `.dotfiles` para seu local original na home folder.
+```bash
+./manage.sh restore ~/.bashrc
+```
 
-2. **add**: Move os arquivos listados no `dotfiles.conf` para o diretório `.dotfiles`, cria symlinks na home folder e sugere um commit no Git.
-   ```bash
-   ./manage.sh add
-   ```
+### 🔍 Verificar symlinks
+Verifica se todos os symlinks dos dotfiles estão corretamente configurados.
+```bash
+./manage.sh check
+```
 
-3. **restore [arquivo]**: Restaura um arquivo ou diretório específico da pasta `.dotfiles` para o local original.
-   ```bash
-   ./manage.sh restore ~/.bashrc
-   ```
+## 🖥️ Configuração em uma Nova Máquina
 
-4. **check**: Verifica se os symlinks dos dotfiles estão configurados corretamente.
-   ```bash
-   ./manage.sh check
-   ```
+Para configurar seus dotfiles em uma nova máquina, siga os passos abaixo:
 
-## Configuração em uma Nova Máquina
-
-Para configurar seus dotfiles em uma nova máquina:
-
-1. Clone o repositório:
+1. **Clone o repositório**:
    ```bash
    git clone https://github.com/seu-usuario/dotfiles.git ~/.dotfiles
    ```
 
-2. Navegue até a pasta `scripts` e execute o script de inicialização:
+2. **Navegue até a pasta `scripts` e execute o script de inicialização**:
    ```bash
    cd ~/.dotfiles/scripts
    ./manage.sh init
    ```
 
-3. Adicione os arquivos conforme definidos no `dotfiles.conf`:
+3. **Adicione os arquivos conforme definidos no `dotfiles.conf`**:
    ```bash
    ./manage.sh add
    ```
 
 Isso moverá os arquivos para o repositório `.dotfiles` e criará symlinks nos locais apropriados.
 
-## Personalizando
+## 🛠️ Personalização
 
-Se você quiser adicionar mais arquivos para serem gerenciados, basta editar o arquivo `dotfiles.conf` adicionando os caminhos completos dos arquivos ou diretórios desejados.
+Para adicionar novos arquivos ou diretórios ao repositório:
 
-Exemplo:
-```bash
-# Adicionando configurações do Zsh
-~/.zshrc
-```
+1. **Edite o arquivo `dotfiles.conf`** adicionando os caminhos completos dos arquivos ou diretórios desejados.
 
-Depois de editar o `dotfiles.conf`, execute novamente:
-```bash
-./manage.sh add
-```
+   Exemplo:
+   ```bash
+   # Adicionando configurações do Zsh
+   ~/.zshrc
+   ```
 
-## Contribuindo
+2. **Execute o comando `add`** novamente para que os novos arquivos sejam gerenciados:
+   ```bash
+   ./manage.sh add
+   ```
 
-Se você tem sugestões ou melhorias para o repositório ou o script de gerenciamento, sinta-se à vontade para abrir um pull request ou relatar um problema.
+## 📝 Contribuindo
 
-## Licença
+Se você tem sugestões, melhorias ou encontrou problemas, sinta-se à vontade para abrir um pull request ou relatar um problema!
 
-Este repositório é licenciado sob a [MIT License](LICENSE).
+## 🛡️ Licença
+
+Este projeto é licenciado sob a [MIT License](LICENSE). Sinta-se à vontade para usar e modificar conforme necessário.
