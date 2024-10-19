@@ -22,7 +22,8 @@ set $menu wmenu-run
 #
 # Default wallpaper (more resolutions are available in @datadir@/backgrounds/sway/)
 #output * bg @datadir@/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
-output * bg /home/jeff/Pictures/Wallpapers/pexels-eberhardgross-1287075.jpg fill
+#output * bg /home/jeff/Pictures/Wallpapers/pexels-eberhardgross-1287075.jpg fill
+# Wallpaper configurarion in the autostart section
 
 #
 # Example configuration:
@@ -243,6 +244,7 @@ gaps inner 10
 # Autostart
 #
 exec waybar
+exec swaybg -m fill -i "$(bash $HOME/scripts/select_random_wallpaper.sh $HOME/Pictures/Current_wallpapers)"
 
 
 include @sysconfdir@/sway/config.d/*
