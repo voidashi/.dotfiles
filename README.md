@@ -17,7 +17,7 @@ Este repositório gerencia as configurações para:
 
 ## 🚀 Funcionalidades do Script
 
-O script `manage.sh` permite gerenciar seus dotfiles de forma simples e eficaz. Aqui estão as principais funcionalidades:
+O script `manage.sh`, em  `scripts/manage.sh`, permite gerenciar seus dotfiles de forma simples e eficaz. Aqui estão as principais funcionalidades:
 
 ### ⚙️ Inicializar
 Este comando inicializa o diretório de dotfiles e configura o Git.
@@ -69,7 +69,7 @@ Isso moverá os arquivos para o repositório `.dotfiles` e criará symlinks nos 
 
 Para adicionar novos arquivos ou diretórios ao repositório:
 
-1. **Edite o arquivo `dotfiles.conf`** adicionando os caminhos completos dos arquivos ou diretórios desejados.
+1. **Edite o arquivo `dotfiles.conf`**, em `scripts/dotfiles.conf`, adicionando os caminhos completos dos arquivos ou diretórios desejados.
 
    Exemplo:
    ```bash
