@@ -8,7 +8,7 @@
         "sway/mode",
         "sway/scratchpad",
         "hyprland/workspaces",
-        "hyprland/mode",
+        "hyprland/submap",
         "custom/media"
     ],
     "modules-center": [
@@ -96,6 +96,12 @@
             "(.*) - fish": "> [$1]"
         },
         "separate-outputs": true
+    },
+
+    "hyprland/submap": {
+        "format": "✌️ {}",
+        "max-length": 8,
+        "tooltip": false
     },
 
     // System Modules

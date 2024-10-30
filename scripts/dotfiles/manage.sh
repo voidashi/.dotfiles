@@ -2,7 +2,7 @@
 
 # Diretórios e arquivos de configuração
 DOTFILES_DIR="$HOME/.dotfiles"
-CONFIG_FILE="$HOME/scripts/dotfiles.conf"
+CONFIG_FILE="$HOME/scripts/dotfiles/dotfiles.conf"
 
 # Função para inicializar o diretório de dotfiles e Git
 init_dotfiles() {
