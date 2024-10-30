@@ -1,10 +1,8 @@
 {
-    // Core Settings
     "height": 30,
     "spacing": 0,
-    "margin": "4 0 0 0",
-
-    // Module Layout
+    "margin": "0",
+    "position": "top",
     "modules-left": [
         "sway/workspaces",
         "sway/mode",
@@ -28,6 +26,7 @@
         "tray",
         "custom/power"
     ],
+
 
     // Window Manager Modules
     "sway/workspaces": {
