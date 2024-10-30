@@ -1,6 +1,6 @@
 * {
     /* `otf-font-awesome` is required to be installed for icons */
-    font-family: "Ubuntu", "RobotoMono", "Hack Nerd Font", FontAwesome, Roboto, Helvetica, Arial, sans-serif;
+    font-family: "Inter", "Ubuntu", "RobotoMono", "Hack Nerd Font", FontAwesome, Roboto, Helvetica, Arial, sans-serif;
     font-size: 14px;
 }
 
@@ -70,7 +70,7 @@ button:hover {
     background-color: #181616;
     color: #ffffff;
 
-    border-radius: 10px;
+    border-radius: 5px;
     padding-left: 0px;
     padding-right: 0px;
     margin-right: 3px;

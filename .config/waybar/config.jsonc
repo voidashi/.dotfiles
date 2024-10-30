@@ -89,14 +89,14 @@
         "warp-on-scroll": false,
         "format": "{icon}",
         "format-icons": {
-            "1": " ",
-            "2": " ",
-            "3": " ",
-            "4": " ",
-            "5": " ",
-            "urgent": " ",
+            //"1": " ",
+            //"2": " ",
+            //"3": " ",
+            //"4": " ",
+            //"5": " ",
+            //"urgent": " ",
             //"focused": "",
-            "default": " "
+            //"default": " "
         },
         "persistent-workspaces": {
           "1": [],
@@ -238,7 +238,8 @@
     },
     "pulseaudio": {
         // "scroll-step": 1, // %, can be a float
-        "format": "{volume}% {icon}   {format_source}",
+        //"format": "{volume}% {icon}   {format_source}",
+        "format": "{volume}% {icon} ",
         "format-bluetooth": "{volume}% {icon} {format_source}",
         "format-bluetooth-muted": " {icon} {format_source}",
         "format-muted": " {format_source}",
@@ -256,7 +257,7 @@
         "on-click": "pavucontrol"
     },
     "custom/media": {
-        "format": "{icon} {text}",
+        "format": "   {}",
         "return-type": "json",
         "max-length": 40,
         "format-icons": {
@@ -264,8 +265,8 @@
             "default": "🎜"
         },
         "escape": true,
-        "exec": "$HOME/.config/waybar/mediaplayer.py 2> /dev/null" // Script in resources folder
-        // "exec": "$HOME/.config/waybar/mediaplayer.py --player spotify 2> /dev/null" // Filter player based on name
+        "exec": "$HOME/.config/waybar/scripts/mediaplayer.py 2> /dev/null" // Script in resources folder
+        //"exec": "$HOME/.config/waybar/scripts/mediaplayer.py --player spotify 2> /dev/null" // Filter player based on name
     },
     "custom/power": {
         "format" : "",

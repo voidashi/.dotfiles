@@ -43,7 +43,8 @@ return {
           {
             desc = ' dotfiles',
             group = 'Number',
-            action = 'Telescope dotfiles',
+            -- action = 'Telescope dotfiles',
+            action = 'Telescope find_files cwd=$HOME/.dotfiles/ hidden=true',
             key = 'd',
           },
         },

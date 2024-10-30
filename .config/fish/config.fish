@@ -11,6 +11,6 @@ end
 function fish_greeting
 
     #pfetch
-    catnap
+    catnap -d arch
 
 end
