@@ -1,10 +1,10 @@
 # ✨ Dotfiles
 
-Este repositório contém meus **dotfiles** pessoais e um script de gerenciamento para facilitar a instalação, sincronização e restauração desses arquivos em múltiplas máquinas. Com ele, você pode manter suas configurações sempre consistentes e sincronizadas entre diferentes dispositivos.
+This repository contains my personal **dotfiles** and a management script to facilitate the installation, synchronization, and restoration of these files across multiple machines. With it, you can keep your configurations consistent and synchronized between different devices.
 
-## 📂 Conteúdo
+## 📂 Content
 
-Este repositório gerencia as configurações para:
+This repository manages configurations for:
 
 - **Bash** (`~/.bashrc`)
 - **Starship** (`~/.config/starship.toml`)
@@ -15,77 +15,113 @@ Este repositório gerencia as configurações para:
 - **Sway** (`~/.config/sway/`)
 - **Waybar** (`~/.config/waybar/`)
 
-## 🚀 Funcionalidades do Script
+## 🚀 Script Features
 
-O script `manage.sh`, em  `scripts/dotfiles/manage.sh`, permite gerenciar seus dotfiles de forma simples e eficaz. Aqui estão as principais funcionalidades:
+The `manage.sh`, inside `scripts/dotfiles/` script provides a comprehensive set of features to manage your dotfiles effectively. Here are the main functionalities:
 
-### ⚙️ Inicializar
-Este comando inicializa o diretório de dotfiles e configura o Git.
+### ⚙️ Initialize
+Initialize the dotfiles directory and set up Git repository:
 ```bash
 ./manage.sh init
 ```
 
-### ➕ Adicionar arquivos/diretórios
-Move os arquivos/diretórios listados no `dotfiles.conf` para o diretório `.dotfiles`, cria symlinks na home folder e sugere um commit no Git.
+### ➕ Add Files
+Move files/directories listed in `dotfiles.conf`, inside `scripts/dotfiles/` to the `.dotfiles` directory, create symlinks in the home folder, and optionally commit to Git:
 ```bash
 ./manage.sh add
 ```
 
-### 🔄 Restaurar dotfiles
-Restaura um arquivo ou diretório específico do repositório `.dotfiles` para seu local original na home folder.
-```bash
-./manage.sh restore ~/.bashrc
-```
-
-### 🔍 Verificar symlinks
-Verifica se todos os symlinks dos dotfiles estão corretamente configurados.
+### 🔍 Check Symlinks
+Verify if all dotfile symlinks are correctly configured:
 ```bash
 ./manage.sh check
 ```
 
-## 🖥️ Configuração em uma Nova Máquina
+### 👀 Preview Changes
+Preview planned changes before installation:
+```bash
+./manage.sh preview
+```
 
-Para configurar seus dotfiles em uma nova máquina, siga os passos abaixo:
+### 📦 Install
+Install all dotfiles or a specific category:
+```bash
+# Install all
+./manage.sh install
 
-1. **Clone o repositório**:
+# Install specific category
+./manage.sh install nvim
+```
+
+### 📋 List Categories
+Show available configuration categories:
+```bash
+./manage.sh list
+```
+
+### 🔄 Restore
+Restore files from the latest backup:
+```bash
+./manage.sh restore
+```
+
+## 🖥️ Setup on a New Machine
+
+To set up your dotfiles on a new machine, follow these steps:
+
+1. **Clone the repository**:
    ```bash
-   git clone https://github.com/seu-usuario/dotfiles.git ~/.dotfiles
+   git clone https://github.com/your-username/dotfiles.git ~/.dotfiles
    ```
 
-2. **Navegue até a pasta `scripts` e execute o script de inicialização**:
+2. **Review planned changes** (optional but recommended):
    ```bash
    cd ~/.dotfiles/scripts/dotfiles
-   ./manage.sh init
+   ./manage.sh preview
    ```
 
-3. **Adicione os arquivos conforme definidos no `dotfiles.conf`**:
+3. **Install the dotfiles**:
    ```bash
-   ./manage.sh add
+   # Install everything
+   ./manage.sh install
+
+   # Or install specific categories
+   ./manage.sh install nvim
+   ./manage.sh install bash
    ```
 
-Isso moverá os arquivos para o repositório `.dotfiles` e criará symlinks nos locais apropriados.
+The script will automatically create backups of existing files before making any changes. Backups are stored in `~/.dotfiles_backup/` with timestamps.
 
-## 🛠️ Personalização
+## 🛠️ Customization
 
-Para adicionar novos arquivos ou diretórios ao repositório:
+To add new files or directories to the repository:
 
-1. **Edite o arquivo `dotfiles.conf`**, em `scripts/dotfiles.conf`, adicionando os caminhos completos dos arquivos ou diretórios desejados.
+1. **Edit the `dotfiles.conf`** file in `scripts/dotfiles/dotfiles.conf`, adding the full paths of desired files or directories.
 
-   Exemplo:
+   Example:
    ```bash
-   # Adicionando configurações do Zsh
+   # Adding Zsh configuration
    ~/.zshrc
+   ~/.zsh_aliases
    ```
 
-2. **Execute o comando `add`** novamente para que os novos arquivos sejam gerenciados:
+2. **Run the add command** to move the files to the dotfiles repository:
    ```bash
    ./manage.sh add
    ```
 
-## 📝 Contribuindo
+## 🔒 Safety Features
 
-Se você tem sugestões, melhorias ou encontrou problemas, sinta-se à vontade para abrir um pull request ou relatar um problema!
+- **Automatic Backups**: The script creates timestamped backups before making any changes
+- **Preview Mode**: Review changes before applying them
+- **Diff Viewing**: Compare existing files with repository versions before installation
+- **Category-based Installation**: Install only specific configuration categories
+- **Symlink Verification**: Check if all symlinks are correctly configured
 
-## 🛡️ Licença
+## 📝 Contributing
 
-Este projeto é licenciado sob a [MIT License](LICENSE). Sinta-se à vontade para usar e modificar conforme necessário.
+If you have suggestions, improvements, or found issues, feel free to open a pull request or report a problem!
+
+## 🛡️ License
+
+This project is licensed under the [MIT License](LICENSE). Feel free to use and modify as needed.
