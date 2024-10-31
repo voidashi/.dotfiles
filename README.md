@@ -1,4 +1,4 @@
-# 🌟 My Dotfiles: Elegant Development Environment
+# 🌟 My Dotfiles
 
 ## 🚀 What's This?
 
