@@ -1,127 +1,54 @@
-# ✨ Dotfiles
+# 🌟 My Dotfiles: Elegant Development Environment
 
-This repository contains my personal **dotfiles** and a management script to facilitate the installation, synchronization, and restoration of these files across multiple machines. With it, you can keep your configurations consistent and synchronized between different devices.
+## 🚀 What's This?
 
-## 📂 Content
+Welcome to my meticulously crafted dotfiles repository! This is more than just configuration files – it's my personal development ecosystem, carefully designed to boost productivity, enhance workflow, and look absolutely stunning.
 
-This repository manages configurations for:
+## ✨ Highlights
 
-- **Bash** (`~/.bashrc`)
-- **Starship** (`~/.config/starship.toml`)
-- **Fish** (`~/.config/fish/`)
-- **Foot** (`~/.config/foot/`)
-- **Hyprland** (`~/.config/hypr/`)
-- **Neovim** (`~/.config/nvim/`)
-- **Sway** (`~/.config/sway/`)
-- **Waybar** (`~/.config/waybar/`)
+### 🖥️ Cutting-Edge Configurations
+- **Window Managers**: Hyprland and Sway for smooth, tiling window management
+- **Shell**: Powerful setup with Bash and Fish, enhanced by Starship prompt
+- **Terminal**: Foot terminal with custom styling
+- **Editor**: Neovim configured for ultimate coding efficiency
 
-## 🚀 Script Features
+### 🎨 Aesthetic & Functional
+- Clean, minimalist design
+- Consistent color schemes
+- Optimized for both productivity and visual appeal
+- Fully customizable and modular
 
-The `manage.sh`, inside `scripts/dotfiles/` script provides a comprehensive set of features to manage your dotfiles effectively. Here are the main functionalities:
+## 🛠️ Core Tools
 
-### ⚙️ Initialize
-Initialize the dotfiles directory and set up Git repository:
-```bash
-./manage.sh init
-```
+- **Hyprland**: Dynamic tiling Wayland compositor
+- **Sway**: I3-compatible Wayland window manager
+- **Neovim**: Hyperextensible text editor
+- **Starship**: Cross-shell prompt
+- **Waybar**: Highly customizable status bar
 
-### ➕ Add Files
-Move files/directories listed in `dotfiles.conf`, inside `scripts/dotfiles/` to the `.dotfiles` directory, create symlinks in the home folder, and optionally commit to Git:
-```bash
-./manage.sh add
-```
+## 🔧 Quick Installation
 
-### 🔍 Check Symlinks
-Verify if all dotfile symlinks are correctly configured:
-```bash
-./manage.sh check
-```
+Want to transform your development environment? 
 
-### 👀 Preview Changes
-Preview planned changes before installation:
-```bash
-./manage.sh preview
-```
-
-### 📦 Install
-Install all dotfiles or a specific category:
-```bash
-# Install all
-./manage.sh install
-
-# Install specific category
-./manage.sh install nvim
-```
-
-### 📋 List Categories
-Show available configuration categories:
-```bash
-./manage.sh list
-```
-
-### 🔄 Restore
-Restore files from the latest backup:
-```bash
-./manage.sh restore
-```
-
-## 🖥️ Setup on a New Machine
-
-To set up your dotfiles on a new machine, follow these steps:
-
-1. **Clone the repository**:
+1. **Peek Under the Hood**: [View Installation Details](/scripts/dotfiles/SCRIPT_README.md)
+2. **Clone the Repository**:
    ```bash
    git clone https://github.com/voidashi/.dotfiles.git ~/.dotfiles
    ```
-
-2. **Review planned changes** (optional but recommended):
+3. **Install with One Command**:
    ```bash
    cd ~/.dotfiles/scripts/dotfiles
-   ./manage.sh preview
-   ```
-
-3. **Install the dotfiles**:
-   ```bash
-   # Install everything
    ./manage.sh install
-
-   # Or install specific categories
-   ./manage.sh install nvim
-   ./manage.sh install bash
    ```
 
-The script will automatically create backups of existing files before making any changes. Backups are stored in `~/.dotfiles_backup/` with timestamps.
+## 🤝 Community & Customization
 
-## 🛠️ Customization
+These dotfiles are a living project. Star ⭐, fork 🍴, and customize to make them your own! 
 
-To add new files or directories to the repository:
+Suggestions, improvements, and contributions are always welcome. Open an issue or submit a pull request!
 
-1. **Edit the `dotfiles.conf`** file in `scripts/dotfiles/dotfiles.conf`, adding the full paths of desired files or directories.
+## 📄 License
 
-   Example:
-   ```bash
-   # Adding Zsh configuration
-   ~/.zshrc
-   ~/.zsh_aliases
-   ```
+[MIT License](LICENSE) - Free to use, modify, and share.
 
-2. **Run the add command** to move the files to the dotfiles repository:
-   ```bash
-   ./manage.sh add
-   ```
-
-## 🔒 Safety Features
-
-- **Automatic Backups**: The script creates timestamped backups before making any changes
-- **Preview Mode**: Review changes before applying them
-- **Diff Viewing**: Compare existing files with repository versions before installation
-- **Category-based Installation**: Install only specific configuration categories
-- **Symlink Verification**: Check if all symlinks are correctly configured
-
-## 📝 Contributing
-
-If you have suggestions, improvements, or found issues, feel free to open a pull request or report a problem!
-
-## 🛡️ License
-
-This project is licensed under the [MIT License](LICENSE). Feel free to use and modify as needed.
+**Disclaimer**: Requires a modern Linux environment with Wayland support.
