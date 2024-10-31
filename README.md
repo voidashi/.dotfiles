@@ -71,7 +71,7 @@ To set up your dotfiles on a new machine, follow these steps:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-username/dotfiles.git ~/.dotfiles
+   git clone https://github.com/voidashi/dotfiles.git ~/.dotfiles
    ```
 
 2. **Review planned changes** (optional but recommended):
