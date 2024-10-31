@@ -30,7 +30,7 @@ Welcome to my meticulously crafted dotfiles repository! This is more than just c
 
 Want to transform your development environment? 
 
-1. **Peek Under the Hood**: [View Installation Details](/scripts/dotfiles/SCRIPT_README.md)
+1. **Peek Under the Hood**: [View Installation Details for Detailed Installation](/scripts/dotfiles/README.md)
 2. **Clone the Repository**:
    ```bash
    git clone https://github.com/voidashi/.dotfiles.git ~/.dotfiles
