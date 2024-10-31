@@ -1,0 +1,7 @@
+[general]
+import = [
+"~/.config/alacritty/conf.d/flexoki.toml"
+]
+
+[window]
+opacity = 0.9
