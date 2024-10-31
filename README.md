@@ -12,7 +12,7 @@ Welcome to my meticulously crafted dotfiles repository! This is more than just c
 | **Terminals** | • [Foot](https://codeberg.org/dnkl/foot) - Minimal terminal emulator<br>• [Alacritty](https://alacritty.org/) - GPU-accelerated terminal<br>• [Kitty](https://sw.kovidgoyal.net/kitty/) - Feature-rich terminal |
 | **Shell & Prompt** | • [Fish](https://fishshell.com/) - User-friendly shell<br>• [Bash](https://www.gnu.org/software/bash/) - Classic shell<br>• [Starship](https://starship.rs/) - Cross-shell prompt |
 | **Development** | • [Neovim](https://neovim.io/) - Hyperextensible text editor |
-| **System Tools** | • [Waybar](https://github.com/Alexays/Waybar) - Wayland status bar<br>• [Dunst](https://dunst-project.org/) - Notification daemon<br>• [Bottom](https://github.com/ClementTsang/bottom) - System monitor<br>• [Catnap](https://github.com/rossy/catnap) - Screen lock utility |
+| **System Tools** | • [Waybar](https://github.com/Alexays/Waybar) - Wayland status bar<br>• [Dunst](https://dunst-project.org/) - Notification daemon<br>• [Bottom](https://github.com/ClementTsang/bottom) - System monitor<br>• [Catnap](https://github.com/rossy/catnap) - System fetch utility |
 | **File Management** | • [Ranger](https://ranger.github.io/) - Terminal file manager<br>• [Zathura](https://pwmt.org/projects/zathura/) - Document viewer |
 | **Theming** | • Flexoki theme<br>• Custom scripts |
 
