@@ -47,7 +47,7 @@ Ready to transform your development environment? Installation is straightforward
    ./manage.sh install
    ```
 
-For detailed installation options and management features, check out our [Script Documentation](/scripts/dotfiles/README.md).
+For detailed installation options and management features, check out the [Script Documentation](/scripts/dotfiles/README.md).
 
 ## 📸 Screenshots
 
