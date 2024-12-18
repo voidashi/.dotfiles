@@ -1,74 +1,75 @@
-# 🌟 My Dotfiles
+# Dotfiles Repository
 
-## 🚀 What's This?
+Welcome to my **dotfiles** repository! This project is a curated collection of my personal Linux configurations. It serves as a backup of my essential settings and a way to quickly set up a new environment with my preferred tools and tweaks.
 
-Welcome to my meticulously crafted dotfiles repository! This is more than just configuration files – it's my personal development ecosystem, carefully designed to boost productivity, enhance workflow, and look absolutely stunning.
+## Overview
+This repository includes configurations for:
 
-## 🛠️ Managed Configurations
+- Shell (e.g., `~/.bashrc`)
+- Terminal emulators (e.g., Alacritty, Kitty)
+- Editors (e.g., Neovim)
+- Window managers and compositors (e.g., Sway, Hypr)
+- Status bars (e.g., Waybar)
+- Various utilities (e.g., Fish shell, Starship prompt, Dunst notifications, etc.)
 
-| Category | Tools |
-|----------|-------|
-| **Window Management** | • [Hyprland](https://hyprland.org/) - Dynamic tiling Wayland compositor<br>• [Sway](https://swaywm.org/) - I3-compatible Wayland compositor |
-| **Terminals** | • [Foot](https://codeberg.org/dnkl/foot) - Minimal terminal emulator<br>• [Alacritty](https://alacritty.org/) - GPU-accelerated terminal<br>• [Kitty](https://sw.kovidgoyal.net/kitty/) - Feature-rich terminal |
-| **Shell & Prompt** | • [Fish](https://fishshell.com/) - User-friendly shell<br>• [Bash](https://www.gnu.org/software/bash/) - Classic shell<br>• [Starship](https://starship.rs/) - Cross-shell prompt |
-| **Development** | • [Neovim](https://neovim.io/) - Hyperextensible text editor |
-| **System Tools** | • [Waybar](https://github.com/Alexays/Waybar) - Wayland status bar<br>• [Dunst](https://dunst-project.org/) - Notification daemon<br>• [Bottom](https://github.com/ClementTsang/bottom) - System monitor<br>• [Catnap](https://github.com/iinsertNameHere/catnap) - System fetch utility |
-| **File Management** | • [Ranger](https://ranger.github.io/) - Terminal file manager<br>• [Zathura](https://pwmt.org/projects/zathura/) - Document viewer |
-| **Theming** | • Flexoki theme<br>• Custom scripts |
+## Managed Files and Directories
+The following files and directories are tracked in this repository:
 
-## ✨ Highlights
+### Individual Files
+- `~/.bashrc`
+- `~/.config/starship.toml`
 
-### 🎨 Design Philosophy
-- **Minimalist**: Clean, distraction-free interface
-- **Cohesive**: Unified Flexoki theming across applications
-- **Efficient**: Optimized keybindings and workflows
-- **Modular**: Install only what you need
+### Directories
+- `~/.config/alacritty`
+- `~/.config/bottom`
+- `~/.config/catnap`
+- `~/.config/dunst`
+- `~/.config/fish`
+- `~/.config/foot`
+- `~/.config/hypr`
+- `~/.config/kitty`
+- `~/.config/nvim`
+- `~/.config/sway`
+- `~/.config/waybar`
 
-### 🎯 Key Features
-- Complete Wayland-first configuration
-- Extensive terminal customization with three powerful emulators
-- Advanced Neovim setup for modern development
-- Comprehensive system utilities (monitoring, notifications, file management)
-- Custom scripts for enhanced functionality
-- Consistent theming across all applications
+## Features
+- **Simple Backup and Restore**: A straightforward setup to ensure that all critical configurations are preserved.
+- **Modular and Organized**: Easily customize or replace individual components without breaking the overall setup.
+- **Minimalist Design**: Focused on lightweight, efficient, and modern tools.
 
-## 🔧 Installation
+## Getting Started
+### Prerequisites
+- A Linux distribution (tested on [your preferred distro]).
+- Git installed.
 
-Ready to transform your development environment? Installation is straightforward:
+### Clone the Repository
+```bash
+cd ~
+git clone https://github.com/yourusername/dotfiles.git
+```
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/voidashi/.dotfiles.git ~/.dotfiles
-   ```
+### Backup Current Configurations
+Before applying these dotfiles, back up any existing configurations to avoid overwriting anything important.
 
-2. Install configurations:
-   ```bash
-   cd ~/.dotfiles/scripts/dotfiles
-   ./manage.sh install
-   ```
+```bash
+mkdir -p ~/backup_dotfiles
+mv ~/.bashrc ~/.config ~/.ssh ~/backup_dotfiles
+```
 
-For detailed installation options and management features, check out the [Script Documentation](/scripts/dotfiles/README.md).
+### Apply the Configurations
+Manually copy or create symbolic links for the tracked files and directories to their appropriate locations.
 
-## 📸 Screenshots
+## Customization
+Feel free to modify any configuration to suit your workflow. Contributions and suggestions are also welcome!
 
-[Coming Soon - Add screenshots of your setup here]
+## Future Plans
+- Add automated installation scripts for dependencies.
+- Expand support for more Linux applications.
+- Improve documentation and setup process.
 
-## 🤝 Community & Customization
+## License
+This repository is licensed under the [MIT License](LICENSE).
 
-These dotfiles are a living project that grows with community input. Feel free to:
-- ⭐ Star the repository if you find it useful
-- 🍴 Fork and customize for your needs
-- 🐛 Report issues or suggest improvements
-- 🎁 Submit pull requests to enhance the configurations
+---
+**Happy configuring!**
 
-## 📄 License
-
-[MIT License](LICENSE) - Feel free to use, modify, and share!
-
-## ⚠️ Requirements
-
-- Modern Linux distribution
-- Wayland compositor (for Hyprland/Sway configurations)
-- Git
-
-**Note**: Each configuration can be installed independently. Don't need everything? Just install what you want!
