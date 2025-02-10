@@ -1,75 +1,81 @@
-# Dotfiles Repository
+# 🖥️ Zen Linux Dotfiles
 
-Welcome to my **dotfiles** repository! This project is a curated collection of my personal Linux configurations. It serves as a backup of my essential settings and a way to quickly set up a new environment with my preferred tools and tweaks.
+*A curated collection of minimal, performant, and aesthetic Linux configurations*
 
-## Overview
-This repository includes configurations for:
+[![Linux](https://img.shields.io/badge/OS-Linux-informational?style=flat&logo=linux&logoColor=white)](https://www.linux.org/)
+[![Arch](https://img.shields.io/badge/Distro-Arch_Linux-informational?style=flat&logo=arch-linux&logoColor=white)](https://archlinux.org/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat)](LICENSE)
 
-- Shell (e.g., `~/.bashrc`)
-- Terminal emulators (e.g., Alacritty, Kitty)
-- Editors (e.g., Neovim)
-- Window managers and compositors (e.g., Sway, Hypr)
-- Status bars (e.g., Waybar)
-- Various utilities (e.g., Fish shell, Starship prompt, Dunst notifications, etc.)
+![Hyprland Screenshot](./.github/screenshot.png) *Example: Hyprland WM Setup*
 
-## Managed Files and Directories
-The following files and directories are tracked in this repository:
+## 📦 Features
 
-### Individual Files
-- `~/.bashrc`
-- `~/.config/starship.toml`
+### **Core Components**
+- Window Managers: Hyprland + Sway (Wayland)
+- Terminals: Ghostty • Alacritty • Kitty • Foot
+- Shell: Fish with Starship prompt
+- Editor: Neovim
+- System: Bottom • Dunst • Waybar • Wofi
 
-### Directories
-- `~/.config/alacritty`
-- `~/.config/bottom`
-- `~/.config/catnap`
-- `~/.config/dunst`
-- `~/.config/fish`
-- `~/.config/foot`
-- `~/.config/hypr`
-- `~/.config/kitty`
-- `~/.config/nvim`
-- `~/.config/sway`
-- `~/.config/waybar`
+### **Key Configurations**
+- Unified theming (Kanagawa Dragon)
+- Performance-optimized WM rules
+- Battery-friendly power management
+- Context-aware workspace layouts
+- Seamless clipboard integration
 
-## Features
-- **Simple Backup and Restore**: A straightforward setup to ensure that all critical configurations are preserved.
-- **Modular and Organized**: Easily customize or replace individual components without breaking the overall setup.
-- **Minimalist Design**: Focused on lightweight, efficient, and modern tools.
+### **Automation Tools**
+- `backup-configs.sh` - Smart config synchronization
+- `install-packages.sh` - Cross-distro package installer
+- 1-click restore for new installations
 
-## Getting Started
-### Prerequisites
-- A Linux distribution (tested on [your preferred distro]).
-- Git installed.
+## 🚀 Installation
 
-### Clone the Repository
+### Quick Start (For Brave Souls)
+#### WIP: TO BE ADDED
 ```bash
-cd ~
-git clone https://github.com/yourusername/dotfiles.git
+git clone https://github.com/voidashi/.dotfiles.git ~/.dotfiles
+cd ~/.dotfiles
+
+# Backup existing configs (optional but recommended)
+./scripts/backup-configs.sh add
+
+# Install packages and apply configs
+./scripts/install-packages.sh install
 ```
 
-### Backup Current Configurations
-Before applying these dotfiles, back up any existing configurations to avoid overwriting anything important.
+**Note:** Review config files before running install scripts!
 
-```bash
-mkdir -p ~/backup_dotfiles
-mv ~/.bashrc ~/.config ~/.ssh ~/backup_dotfiles
+## 🗂️ Structure
+#### WIP: TO BE ADDED
+```
+.
+├── config/               # Main config directory
+│   ├── hypr/            # Hyprland window manager
+│   ├── nvim/            # Neovim IDE setup
+│   ├── fish/            # Fish shell configuration
+│   └── ...              # Other app configs
+├── scripts/              # Maintenance utilities
+├── wallpapers/           # Curated desktop backgrounds
+├── backup-configs.sh     # Config synchronization tool
+└── install-packages.sh   # Package management system
 ```
 
-### Apply the Configurations
-Manually copy or create symbolic links for the tracked files and directories to their appropriate locations.
+## 🔧 Customization
+#### WIP: TO BE ADDED
+1. Edit `config_files.conf` to select tracked configurations
+2. Modify `packages.conf` to add/remove applications
+3. Adjust theme colors in `.config/colorscheme/`
 
-## Customization
-Feel free to modify any configuration to suit your workflow. Contributions and suggestions are also welcome!
+## 🤝 Contributing
+Found a bug? Have an improvement?  
+- Open an issue for feature requests
+- Submit PRs for well-documented fixes
+- Share your modified configs in Discussions
 
-## Future Plans
-- Add automated installation scripts for dependencies.
-- Expand support for more Linux applications.
-- Improve documentation and setup process.
-
-## License
-This repository is licensed under the [MIT License](LICENSE).
+## 📜 License
+MIT Licensed - See [LICENSE](LICENSE) for details
 
 ---
-**Happy configuring!**
 
+*Inspired by the Linux ricing community • Built with ❤️ and too much coffee*
