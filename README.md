@@ -32,40 +32,35 @@
 ## 🚀 Installation
 
 ### Quick Start (For Brave Souls)
-#### WIP: TO BE ADDED
 ```bash
 git clone https://github.com/voidashi/.dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 
-# Backup existing configs (optional but recommended)
-./scripts/backup-configs.sh add
-
-# Install packages and apply configs
+# Install packages
 ./scripts/install-packages.sh install
+
+# Install configs
+./scripts/backup-configs.sh install
 ```
 
 **Note:** Review config files before running install scripts!
 
 ## 🗂️ Structure
-#### WIP: TO BE ADDED
 ```
 .
-├── config/               # Main config directory
+├── .config/               # Main config directory
 │   ├── hypr/            # Hyprland window manager
 │   ├── nvim/            # Neovim IDE setup
 │   ├── fish/            # Fish shell configuration
 │   └── ...              # Other app configs
 ├── scripts/              # Maintenance utilities
 ├── wallpapers/           # Curated desktop backgrounds
-├── backup-configs.sh     # Config synchronization tool
-└── install-packages.sh   # Package management system
+...
 ```
 
 ## 🔧 Customization
-#### WIP: TO BE ADDED
-1. Edit `config_files.conf` to select tracked configurations
-2. Modify `packages.conf` to add/remove applications
-3. Adjust theme colors in `.config/colorscheme/`
+1. Edit `scripts/config_files.conf` to select tracked configurations
+2. Modify `scripts/packages.conf` to add/remove applications
 
 ## 🤝 Contributing
 Found a bug? Have an improvement?  
