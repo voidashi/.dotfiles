@@ -98,6 +98,10 @@ button:hover {
     animation-direction: alternate;
 }
 
+#custom-notification {
+    font-family: "NotoSansMono Nerd Font";
+}
+
 @keyframes blink {
     to {
         background-color: #ffffff;
