@@ -6,7 +6,7 @@
 [![Arch](https://img.shields.io/badge/Distro-Arch_Linux-informational?style=flat&logo=arch-linux&logoColor=white)](https://archlinux.org/)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat)](LICENSE)
 
-![Hyprland Screenshot](./.github/screenshot.png) *Example: Hyprland WM Setup*
+![Hyprland Screenshot](docs/screenshot.png)
 
 ## 📦 Features
 
