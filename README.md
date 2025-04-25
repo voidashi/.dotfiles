@@ -6,7 +6,8 @@
 [![Arch](https://img.shields.io/badge/Distro-Arch_Linux-informational?style=flat&logo=arch-linux&logoColor=white)](https://archlinux.org/)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat)](LICENSE)
 
-![Hyprland Screenshot](docs/screenshot.png)
+![Hyprland Screenshot 1](docs/screenshot1.png)
+![Hyprland Screenshot 2](docs/screenshot2.png)
 
 ## 📦 Features
 
