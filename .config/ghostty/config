@@ -43,7 +43,12 @@
 # resize-overlay-duration = 4s 200ms
 
 background-opacity = 0.8
-theme = Kanagawa Dragon
+
+
+# Built-in theme doesn't follow the palette correctly, using a custom one.
+#theme = Kanagawa Dragon
+theme = kanagawa-dragon
+
 window-padding-color = background
 
 font-family = "Hack Nerd Font"
