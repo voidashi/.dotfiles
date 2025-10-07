@@ -1,0 +1,72 @@
+--- Package Installer Log ter 07 out 2025 19:33:39 -03 ---
+
+[2025-10-07 19:33:39] [INFO] Using package manager: pacman
+[2025-10-07 19:33:39] [INFO] No extra pacman repositories required.
+[2025-10-07 19:33:39] [INFO] Updating package database...
+[2025-10-07 19:33:40] [INFO] Processing: [common] ([common])
+[2025-10-07 19:33:41] [ERROR] Failed to install: [common] ([common])
+[2025-10-07 19:33:41] [INFO] Processing: ranger (ranger)
+[2025-10-07 19:33:41] [SUCCESS] Installed: ranger
+[2025-10-07 19:33:41] [INFO] Processing: cava (cava)
+[2025-10-07 19:33:41] [SUCCESS] Installed: cava
+[2025-10-07 19:33:41] [INFO] Processing: git (git)
+[2025-10-07 19:33:41] [SUCCESS] Installed: git
+[2025-10-07 19:33:41] [INFO] Processing: kitty (kitty)
+[2025-10-07 19:33:41] [SUCCESS] Installed: kitty
+[2025-10-07 19:33:41] [INFO] Processing: firefox (firefox)
+[2025-10-07 19:33:41] [SUCCESS] Installed: firefox
+[2025-10-07 19:33:41] [INFO] Processing: catnap (catnap)
+[2025-10-07 19:33:42] [ERROR] Failed to install: catnap (catnap)
+[2025-10-07 19:33:42] [INFO] Processing: cmatrix (cmatrix)
+[2025-10-07 19:33:42] [SUCCESS] Installed: cmatrix
+[2025-10-07 19:33:42] [INFO] Processing: hyprshot (hyprshot)
+[2025-10-07 19:33:42] [SUCCESS] Installed: hyprshot
+[2025-10-07 19:33:42] [INFO] Processing: zathura (zathura)
+[2025-10-07 19:33:42] [SUCCESS] Installed: zathura
+[2025-10-07 19:33:42] [INFO] Processing: wofi (wofi)
+[2025-10-07 19:33:42] [SUCCESS] Installed: wofi
+[2025-10-07 19:33:42] [INFO] Processing: hyprpicker (hyprpicker)
+[2025-10-07 19:33:42] [SUCCESS] Installed: hyprpicker
+[2025-10-07 19:33:42] [INFO] Processing: swaync (swaync)
+[2025-10-07 19:33:43] [SUCCESS] Installed: swaync
+[2025-10-07 19:33:43] [INFO] Processing: hyprpaper (hyprpaper)
+[2025-10-07 19:33:43] [SUCCESS] Installed: hyprpaper
+[2025-10-07 19:33:43] [INFO] Processing: bat (bat)
+[2025-10-07 19:33:43] [SUCCESS] Installed: bat
+[2025-10-07 19:33:43] [INFO] Processing: neovim (neovim)
+[2025-10-07 19:33:43] [SUCCESS] Installed: neovim
+[2025-10-07 19:33:43] [INFO] Processing: pipes.sh (pipes.sh)
+[2025-10-07 19:33:43] [ERROR] Failed to install: pipes.sh (pipes.sh)
+[2025-10-07 19:33:43] [INFO] Processing: ghostty (ghostty)
+[2025-10-07 19:33:46] [SUCCESS] Installed: ghostty
+[2025-10-07 19:33:46] [INFO] Processing: bottom (bottom)
+[2025-10-07 19:33:46] [SUCCESS] Installed: bottom
+[2025-10-07 19:33:46] [INFO] Processing: alacritty (alacritty)
+[2025-10-07 19:33:46] [SUCCESS] Installed: alacritty
+[2025-10-07 19:33:46] [INFO] Processing: starship (starship)
+[2025-10-07 19:33:46] [SUCCESS] Installed: starship
+[2025-10-07 19:33:46] [INFO] Processing: swaybg (swaybg)
+[2025-10-07 19:33:46] [SUCCESS] Installed: swaybg
+[2025-10-07 19:33:46] [INFO] Processing: fastfetch (fastfetch)
+[2025-10-07 19:33:46] [SUCCESS] Installed: fastfetch
+[2025-10-07 19:33:46] [INFO] Processing: dunst (dunst)
+[2025-10-07 19:33:47] [SUCCESS] Installed: dunst
+[2025-10-07 19:33:47] [INFO] Processing: waybar (waybar)
+[2025-10-07 19:33:47] [SUCCESS] Installed: waybar
+[2025-10-07 19:33:47] [INFO] Processing: [pacman] ([pacman])
+[2025-10-07 19:33:47] [ERROR] Failed to install: [pacman] ([pacman])
+[2025-10-07 19:33:47] [INFO] Processing: fish (fish)
+[2025-10-07 19:33:47] [SUCCESS] Installed: fish
+[2025-10-07 19:33:47] [INFO] Processing: hyprland (hyprland)
+[2025-10-07 19:33:47] [SUCCESS] Installed: hyprland
+[2025-10-07 19:33:47] [INFO] Processing: wlogout (wlogout)
+[2025-10-07 19:33:47] [ERROR] Failed to install: wlogout (wlogout)
+[2025-10-07 19:33:47] [INFO] Processing: foot (foot)
+[2025-10-07 19:33:48] [SUCCESS] Installed: foot
+[2025-10-07 19:33:48] [INFO] Processing: gcc (gcc)
+[2025-10-07 19:33:48] [SUCCESS] Installed: gcc
+[2025-10-07 19:33:48] [INFO] Processing: sway (sway)
+[2025-10-07 19:33:48] [SUCCESS] Installed: sway
+[2025-10-07 19:33:48] [INFO] Processing: eza (eza)
+[2025-10-07 19:33:48] [SUCCESS] Installed: eza
+[2025-10-07 19:33:48] [SUMMARY] Installation complete. Success: 28, Failed: 6

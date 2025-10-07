@@ -3,5 +3,10 @@ import = [
 "~/.config/alacritty/conf.d/flexoki.toml"
 ]
 
+[terminal.shell]
+program = "/bin/fish"
+
 [window]
 opacity = 0.9
+
+[terminal]

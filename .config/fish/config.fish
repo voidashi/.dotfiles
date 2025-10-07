@@ -10,7 +10,7 @@ end
 
 function fish_greeting
 
-    #pfetch
-    catnap -d arch
+    pfetch
+    #catnap -d arch
 
 end
