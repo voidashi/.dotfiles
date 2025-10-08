@@ -10,7 +10,8 @@ end
 
 function fish_greeting
 
-    pfetch
+    #pfetch
     #catnap -d arch
+    fastfetch --config ~/.config/fastfetch/arch_small/config.jsonc
 
 end

@@ -85,9 +85,6 @@ add_repos() {
                 echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" | sudo tee /etc/apt/sources.list.d/vscode.list
             fi
             ;;
-        ### MODIFICATION ###
-        # The ghostty repository is no longer needed for pacman as the package
-        # is in the official 'extra' repository. This block has been removed.
         "pacman")
             # No third-party repositories needed by default in this configuration.
             log "INFO" "No extra pacman repositories required."
