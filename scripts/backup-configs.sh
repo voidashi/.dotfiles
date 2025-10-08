@@ -115,7 +115,9 @@ install_dotfiles() {
       fi
     fi
 
-    $DRY_RUN || ln -sf "$dest" "$target"
+    # The -n flag treats a symlink to a directory as a normal file,
+    # replacing it instead of creating a link inside it.
+    $DRY_RUN || ln -snf "$dest" "$target"
     log "SUCCESS" "Linked: $dest → $target"
   done < <(load_dotfiles)
 }
