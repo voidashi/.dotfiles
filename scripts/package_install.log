@@ -1,0 +1,87 @@
+--- Package Installer Log qua 28 jan 2026 23:14:40 -03 ---
+
+[2026-01-28 23:14:40] [INFO] Using package manager: pacman
+[2026-01-28 23:14:40] [WARNING] Sudo access is required. Please enter your password if prompted.
+[2026-01-28 23:14:44] [INFO] No extra pacman repositories required.
+[2026-01-28 23:14:44] [INFO] Updating package database...
+[2026-01-28 23:14:44] [INFO] Processing: [common] ([common])
+[2026-01-28 23:14:45] [ERROR] Failed to install: [common] ([common])
+[2026-01-28 23:14:45] [INFO] Processing: supergfxctl (supergfxctl)
+[2026-01-28 23:14:46] [SUCCESS] Installed: supergfxctl
+[2026-01-28 23:14:46] [INFO] Processing: ranger (ranger)
+[2026-01-28 23:14:59] [SUCCESS] Installed: ranger
+[2026-01-28 23:14:59] [INFO] Processing: cava (cava)
+[2026-01-28 23:15:09] [SUCCESS] Installed: cava
+[2026-01-28 23:15:09] [INFO] Processing: git (git)
+[2026-01-28 23:15:10] [SUCCESS] Installed: git
+[2026-01-28 23:15:10] [INFO] Processing: kitty (kitty)
+[2026-01-28 23:15:10] [SUCCESS] Installed: kitty
+[2026-01-28 23:15:10] [INFO] Processing: firefox (firefox)
+[2026-01-28 23:15:10] [SUCCESS] Installed: firefox
+[2026-01-28 23:15:10] [INFO] Processing: catnap (catnap)
+[2026-01-28 23:15:11] [ERROR] Failed to install: catnap (catnap)
+[2026-01-28 23:15:11] [INFO] Processing: cmatrix (cmatrix)
+[2026-01-28 23:15:21] [SUCCESS] Installed: cmatrix
+[2026-01-28 23:15:21] [INFO] Processing: hyprshot (hyprshot)
+[2026-01-28 23:15:32] [SUCCESS] Installed: hyprshot
+[2026-01-28 23:15:32] [INFO] Processing: zathura (zathura)
+[2026-01-28 23:15:43] [SUCCESS] Installed: zathura
+[2026-01-28 23:15:43] [INFO] Processing: code (code)
+[2026-01-28 23:15:44] [SUCCESS] Installed: code
+[2026-01-28 23:15:44] [INFO] Processing: wofi (wofi)
+[2026-01-28 23:15:44] [SUCCESS] Installed: wofi
+[2026-01-28 23:15:44] [INFO] Processing: qt6ct (qt6ct)
+[2026-01-28 23:15:55] [SUCCESS] Installed: qt6ct
+[2026-01-28 23:15:55] [INFO] Processing: hyprpicker (hyprpicker)
+[2026-01-28 23:16:06] [SUCCESS] Installed: hyprpicker
+[2026-01-28 23:16:06] [INFO] Processing: swaync (swaync)
+[2026-01-28 23:16:18] [SUCCESS] Installed: swaync
+[2026-01-28 23:16:18] [INFO] Processing: hyprpaper (hyprpaper)
+[2026-01-28 23:16:29] [SUCCESS] Installed: hyprpaper
+[2026-01-28 23:16:29] [INFO] Processing: xdg-desktop-portal-hyprland (xdg-desktop-portal-hyprland)
+[2026-01-28 23:16:29] [SUCCESS] Installed: xdg-desktop-portal-hyprland
+[2026-01-28 23:16:29] [INFO] Processing: bat (bat)
+[2026-01-28 23:16:30] [SUCCESS] Installed: bat
+[2026-01-28 23:16:30] [INFO] Processing: neovim (neovim)
+[2026-01-28 23:16:30] [SUCCESS] Installed: neovim
+[2026-01-28 23:16:30] [INFO] Processing: pipes.sh (pipes.sh)
+[2026-01-28 23:16:31] [ERROR] Failed to install: pipes.sh (pipes.sh)
+[2026-01-28 23:16:31] [INFO] Processing: ghostty (ghostty)
+[2026-01-28 23:16:41] [SUCCESS] Installed: ghostty
+[2026-01-28 23:16:41] [INFO] Processing: bottom (bottom)
+[2026-01-28 23:16:50] [SUCCESS] Installed: bottom
+[2026-01-28 23:16:50] [INFO] Processing: pfetch (pfetch)
+[2026-01-28 23:16:51] [ERROR] Failed to install: pfetch (pfetch)
+[2026-01-28 23:16:51] [INFO] Processing: alacritty (alacritty)
+[2026-01-28 23:16:51] [SUCCESS] Installed: alacritty
+[2026-01-28 23:16:51] [INFO] Processing: starship (starship)
+[2026-01-28 23:17:02] [SUCCESS] Installed: starship
+[2026-01-28 23:17:02] [INFO] Processing: swaybg (swaybg)
+[2026-01-28 23:17:13] [SUCCESS] Installed: swaybg
+[2026-01-28 23:17:13] [INFO] Processing: xdg-desktop-portal-gtk (xdg-desktop-portal-gtk)
+[2026-01-28 23:17:24] [SUCCESS] Installed: xdg-desktop-portal-gtk
+[2026-01-28 23:17:24] [INFO] Processing: fastfetch (fastfetch)
+[2026-01-28 23:17:25] [SUCCESS] Installed: fastfetch
+[2026-01-28 23:17:25] [INFO] Processing: dunst (dunst)
+[2026-01-28 23:17:35] [SUCCESS] Installed: dunst
+[2026-01-28 23:17:35] [INFO] Processing: nwg-look (nwg-look)
+[2026-01-28 23:17:46] [SUCCESS] Installed: nwg-look
+[2026-01-28 23:17:46] [INFO] Processing: waybar (waybar)
+[2026-01-28 23:17:46] [SUCCESS] Installed: waybar
+[2026-01-28 23:17:46] [INFO] Processing: [pacman] ([pacman])
+[2026-01-28 23:17:47] [ERROR] Failed to install: [pacman] ([pacman])
+[2026-01-28 23:17:47] [INFO] Processing: fish (fish)
+[2026-01-28 23:17:48] [SUCCESS] Installed: fish
+[2026-01-28 23:17:48] [INFO] Processing: hyprland (hyprland)
+[2026-01-28 23:17:48] [SUCCESS] Installed: hyprland
+[2026-01-28 23:17:48] [INFO] Processing: wlogout (wlogout)
+[2026-01-28 23:17:57] [SUCCESS] Installed: wlogout
+[2026-01-28 23:17:57] [INFO] Processing: foot (foot)
+[2026-01-28 23:17:58] [SUCCESS] Installed: foot
+[2026-01-28 23:17:58] [INFO] Processing: gcc (gcc)
+[2026-01-28 23:17:58] [SUCCESS] Installed: gcc
+[2026-01-28 23:17:58] [INFO] Processing: sway (sway)
+[2026-01-28 23:17:59] [SUCCESS] Installed: sway
+[2026-01-28 23:17:59] [INFO] Processing: eza (eza)
+[2026-01-28 23:17:59] [SUCCESS] Installed: eza
+[2026-01-28 23:17:59] [SUMMARY] Installation complete. Success: 35, Failed: 6

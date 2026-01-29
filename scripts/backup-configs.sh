@@ -168,14 +168,20 @@ main() {
   esac
 }
 
-# Parse flags
+# ---- Argument Parsing & Execution ----
+POSITIONAL_ARGS=()
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run) DRY_RUN=true; shift ;;
     --force) FORCE=true; shift ;;
     --verbose) VERBOSE=true; shift ;;
-    *) break ;;
+    # Se não for flag, guarda no array de argumentos posicionais e continua
+    *) POSITIONAL_ARGS+=("$1"); shift ;;
   esac
 done
+
+# Restaura os argumentos posicionais (ex: "install", "restore 2023...")
+set -- "${POSITIONAL_ARGS[@]}"
 
 main "$@"
