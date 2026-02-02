@@ -1,6 +1,6 @@
 [general]
 import = [
-"~/.config/alacritty/conf.d/flexoki.toml"
+"~/.config/alacritty/conf.d/kanagawa-dragon.toml"
 ]
 
 [terminal.shell]
