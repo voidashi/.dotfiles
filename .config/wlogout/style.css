@@ -4,15 +4,15 @@
 }
 
 window {
-	background-color: rgba(17, 24, 38, 0.9); /* cachydblue with alpha */
+	background-color: rgba(24, 22, 22, 0.902); /* cachydblue with alpha */
 }
 
 button {
     border-radius: 0;
-    border-color: #007d6f; /* cachydgreen */
-	text-decoration-color: #ffffff; /* cachywhite */
-    color: #ffffff; /* cachywhite */
-	background-color: #111826; /* cachydblue */
+    border-color: #c5c9c5; /* cachydgreen */
+	text-decoration-color: #c5c9c5; /* cachywhite */
+    color: #c5c9c5; /* cachywhite */
+	background-color: #181616; /* cachydblue */
 	border-style: solid;
 	border-width: 1px;
 	background-repeat: no-repeat;
@@ -21,30 +21,30 @@ button {
 }
 
 button:focus, button:active, button:hover {
-	background-color: #00aa84; /* cachymgreen */
+	background-color: #252424; /* cachymgreen */
 	outline-style: none;
 }
 
 #lock {
-    background-image: image(url("/usr/share/wlogout/icons/lock.png"), url("/usr/local/share/wlogout/icons/lock.png"));
+    background-image: url("/home/jeff/.config/wlogout/icons/lock.png");
 }
 
 #logout {
-    background-image: image(url("/usr/share/wlogout/icons/logout.png"), url("/usr/local/share/wlogout/icons/logout.png"));
+    background-image: url("/home/jeff/.config/wlogout/icons/logout.png");
 }
 
 #suspend {
-    background-image: image(url("/usr/share/wlogout/icons/suspend.png"), url("/usr/local/share/wlogout/icons/suspend.png"));
+    background-image: url("/home/jeff/.config/wlogout/icons/suspend.png");
 }
 
 #hibernate {
-    background-image: image(url("/usr/share/wlogout/icons/hibernate.png"), url("/usr/local/share/wlogout/icons/hibernate.png"));
+    background-image: url("/home/jeff/.config/wlogout/icons/hibernate.png");
 }
 
 #shutdown {
-    background-image: image(url("/usr/share/wlogout/icons/shutdown.png"), url("/usr/local/share/wlogout/icons/shutdown.png"));
+    background-image: url("/home/jeff/.config/wlogout/icons/shutdown.png");
 }
 
 #reboot {
-    background-image: image(url("/usr/share/wlogout/icons/reboot.png"), url("/usr/local/share/wlogout/icons/reboot.png"));
+    background-image: url("/home/jeff/.config/wlogout/icons/reboot.png");
 }
