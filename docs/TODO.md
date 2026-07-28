@@ -1,50 +1,71 @@
 # TODO
 
-Future work not yet done, carried across sessions. Check this before assuming the rice or
-repo is fully finished.
+Open work, carried across sessions. Check this before assuming the rice or the repo is
+finished.
 
-## Theming
+Each item carries a **difficulty** and a **priority**. Difficulty is about how much work
+and how much can go wrong; priority is about how much it costs to leave undone. They are
+independent: the two broken keybinds are trivial and urgent, the elegance pass is neither.
 
-- **Neovim colorscheme.** Not themed at all yet — needs a Voidashi highlight-group mapping
-  (editor role in `RICE-GUIDE.md`: void-00 background, ink for text, the identity families
-  + Verdigris for syntax categories, Ice for selection/cursor line, comments at ink-4).
-  This is its own scoped task, not a quick add-on.
-- **Wallpaper.** Still whatever it was before — needs actual image curation (material,
-  desaturated, dark, per `RICE-GUIDE.md`'s Wallpaper section), not just config edits.
-  Requires real assets, not something to do from config alone.
-- **`.config/dunst/`** — kept deliberately. Autostart runs `swaync`, not dunst, so it is
-  orphaned, but Jeff wants it there in case he switches back. Don't delete it, and don't
-  re-raise the question.
-- **Waybar, second pass.** The redesign landed — flat surface, bordeaux rule under the
-  active workspace instead of an Ice block, numerals instead of app glyphs, one shared
-  config. What still needs judging in daily use: whether the glyphs are the right size
-  now, whether the numerals actually beat the old icons, and whether the right-hand
-  modules want a separator between them or should stay spaced only.
-- **hyprlauncher is themed but not in use.** `conf/programs.lua` binds `mainMod+R` to wofi;
-  the hyprlauncher line above it is commented out. Its theme lives in
-  `.config/hypr/hyprtoolkit.conf` and is kept so switching back is a one-line change —
-  that file themes any hyprtoolkit application, not just this one.
+Decisions already made, and state that is merely being tracked, do not live here. Those
+belong in `CLAUDE.md` (rules and gotchas), `docs/design/THEME-STATUS.md` (what is themed)
+and `docs/SESSION-HISTORY.md` (what happened).
 
-## Recently closed
+## Now: things that are broken
 
-Kept briefly so a rollback has context; delete once they've held up in daily use.
+- **Workspaces are not clickable in waybar.** Clicking a workspace button does not switch
+  to it. The module has no `on-click`, and neither did the config that preceded the
+  rewrite, so this has most likely never worked rather than being a regression. Reproduce
+  first, then fix in `.config/waybar/common.jsonc`.
+  *Difficulty: low. Priority: high.*
 
-- Wofi's broken theme import (the palette is inlined now — see `CLAUDE.md`), terminal
-  padding and opacity unified at 8px/0.92, Hyprland animation durations, the blur and
-  window-rounding decisions, and starship's prompt glyph.
-- Waybar's three drifting configs, its glyph sizing, the Ice-on-active-workspace look, and
-  the inherited infinite battery blink (now a static `alert-critical` plus the glyph).
-  The dead `mpd` module was dropped with them — mpd isn't running, so it rendered a
-  permanent "Disconnected" in the bar, and `custom/media` already covers playback.
-- wlogout redesigned as a list and its orphaned lavender PNGs deleted; hyprlauncher themed
-  through `.config/hypr/hyprtoolkit.conf`; swaync's `config.json` created and its stylesheet
-  rewritten against the upstream `:root` variables.
+- **No bind moves a window by direction.** `SUPER + SHIFT + arrows` does nothing.
+  `conf/binds.lua` binds `SUPER + arrows` to focus only; directional window movement was
+  never bound at all, and `SUPER + SHIFT + [0-9]` covers workspaces rather than direction.
+  Add it with `hl.dsp.window.move`, checking whether the dwindle layout wants `move` or
+  `swap` for the behaviour Jeff expects.
+  *Difficulty: low. Priority: high.*
 
-## Repo housekeeping
+## Next: the largest visual gap
 
-- **`conf.d.legacy/` and `hyprland.conf.legacy`** (pre-Lua Hyprland config) — Jeff's own
-  call to delete once the Lua config has proven stable in daily use. Not a Claude task
-  unless he asks.
-- **Three stray `kitty` GUI windows** may still be open (idle fish shells, spawned by
-  `kitty +runpy` during config validation, nothing important running in them) — safe to
-  close whenever, low priority.
+- **GTK3 and GTK4 applications are unthemed.** Everything themed so far is a shell surface
+  (bar, launcher, notifications, power menu). Ordinary applications still render in their
+  stock theme, and GTK4/libadwaita is the worst of it: its default palette fights the
+  desktop around it. Either adapt an established theme to the Voidashi palette or build
+  one. GTK4 does not read `~/.themes` the way GTK3 does, so the two need different
+  mechanisms, and libadwaita applications need their named colours overridden rather than
+  a theme swapped underneath them.
+  *Difficulty: high. Priority: high.*
+
+- **Neovim colorscheme.** Not themed at all. Needs a Voidashi highlight-group mapping: the
+  editor role in `RICE-GUIDE.md` gives void-00 for background, ink for text, the identity
+  families plus Verdigris for syntax categories, Ice for selection and cursor line, and
+  comments at ink-4. A scoped task of its own, not an add-on to anything.
+  *Difficulty: high. Priority: medium.*
+
+## Then: quality and housekeeping
+
+- **Elegance pass over structure, organisation and code.** Several things work but are not
+  elegant. Worth a deliberate sweep for duplicated structure, files that exist for no
+  current reason, inconsistent naming across the scripts, and configs that repeat what a
+  shared source could hold. Open-ended by nature, so it should produce a list to approve
+  before anything is moved.
+  *Difficulty: high, and open-ended. Priority: medium.*
+
+- **Delete `conf.d.legacy/` and `hyprland.conf.legacy`.** The Lua config has proven itself
+  in daily use, so the pre-Lua rollback copies can go. Jeff has authorised this.
+  *Difficulty: trivial. Priority: medium.*
+
+- **Wallpaper curation.** Still whatever it was before. Needs real images chosen against
+  the Wallpaper section of `RICE-GUIDE.md`: material, desaturated, dark, sitting at or
+  below void-00 in perceived lightness. This needs assets, not config edits.
+  *Difficulty: medium, but blocked on sourcing images. Priority: medium.*
+
+## Ongoing: how the writing reads
+
+- **Drop the AI writing tells from the docs.** The em dash above all, which is scattered
+  through every document in `docs/` and most config comments. Also the tic of stating a
+  thing, then restating it inverted ("not x, but y"), and openers like "worth noting".
+  This applies to everything written from here on, and existing files get cleaned as they
+  are touched rather than in one pass.
+  *Difficulty: low per file, large in aggregate. Priority: low, but permanent.*

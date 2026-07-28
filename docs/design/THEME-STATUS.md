@@ -124,5 +124,11 @@ rules; this is just state tracking. Repo-wide (non-theme) history is in
 - The infinite-loop battery-critical blink in waybar predates this theme (inherited, only
   recolored) and technically reads as an anti-pattern ("no infinite loops outside
   loaders") — left alone since removing it would be a functional change, not a theming one.
-- Waybar's redesign is in, but only daily use will say whether the glyph sizing and the
-  numeral workspace labels are right. See `docs/TODO.md`.
+- Waybar's redesign is in and the sizing was tuned against live feedback, but three things
+  are still only settled provisionally: whether numerals beat the old app glyphs on the
+  workspace buttons, whether the right-hand modules want separators or should stay spaced
+  only, and whether 15px/500 is the right weight once it has been lived with.
+- **GTK application theming has not been done at all.** The apps themed so far are the
+  shell surfaces (bar, launcher, notifications, power menu). Ordinary GTK3 and especially
+  GTK4/libadwaita applications still render in their stock theme, which fights everything
+  around them. This is the largest remaining visual gap after the Neovim colorscheme.
