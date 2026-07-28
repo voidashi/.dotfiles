@@ -124,6 +124,32 @@ install_dotfiles() {
   done < <(load_dotfiles)
 }
 
+# fonts/ lives at the repo root, not mirrored under a $HOME-relative path like
+# config_files.conf entries, so it can't go through install_dotfiles() -- it
+# gets its own symlink into the XDG font directory instead.
+install_fonts() {
+  local fonts_src="$DOTFILES_DIR/fonts"
+  local fonts_dest="$HOME/.local/share/fonts/dotfiles"
+  [ -d "$fonts_src" ] || { log "WARNING" "No fonts/ directory in repo, skipping font install"; return 0; }
+
+  if [ -L "$fonts_dest" ] && [ "$(readlink "$fonts_dest")" = "$fonts_src" ]; then
+    log "INFO" "Fonts already linked: $fonts_dest"
+  else
+    if $DRY_RUN; then
+      log "INFO" "Simulate: Link $fonts_src → $fonts_dest"
+    else
+      mkdir -p "$(dirname "$fonts_dest")"
+      ln -snf "$fonts_src" "$fonts_dest"
+      log "SUCCESS" "Linked: $fonts_src → $fonts_dest"
+    fi
+  fi
+
+  if ! $DRY_RUN && command -v fc-cache >/dev/null; then
+    fc-cache -f "$fonts_dest" >/dev/null 2>&1
+    log "INFO" "Refreshed font cache"
+  fi
+}
+
 restore_backup() {
   local timestamp="$1"
   local backup="$BACKUP_DIR/$timestamp"
@@ -145,13 +171,16 @@ main() {
         add_dotfile "$file"
       done < <(load_dotfiles)
       ;;
-    "install") install_dotfiles ;;
+    "install") install_dotfiles; install_fonts ;;
     "check")
       while IFS= read -r file; do
         target="$(resolve_path "$file")"
         [ -L "$target" ] && [ "$(readlink "$target")" = "$DOTFILES_DIR/${target#$HOME/}" ] \
           && log "SUCCESS" "Valid: $target" || log "ERROR" "Broken: $target"
       done < <(load_dotfiles)
+      fonts_target="$HOME/.local/share/fonts/dotfiles"
+      [ -L "$fonts_target" ] && [ "$(readlink "$fonts_target")" = "$DOTFILES_DIR/fonts" ] \
+        && log "SUCCESS" "Valid: $fonts_target" || log "ERROR" "Broken: $fonts_target"
       ;;
     "restore") restore_backup "$2" ;;
     *)

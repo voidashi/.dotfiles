@@ -5,6 +5,8 @@ config-file = voidashi-colors
 
 window-padding-color = background
 
+# Mono primary voice (RICE-GUIDE.md); repeated font-family stacks as fallback.
+font-family = "Iosevka Extended"
 font-family = "Hack Nerd Font"
 
 shell-integration = fish

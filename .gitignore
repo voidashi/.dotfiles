@@ -1,3 +1,8 @@
 # Log gerado a cada execução de scripts/install-packages.sh
 # (o script sobrescreve o arquivo no início de cada run).
 package_install.log
+
+# Iosevka's full-family .ttc build is ~431MB (9 files bundling every width/weight).
+# Too large to version; install locally and symlink into ~/.local/share/fonts instead.
+# See README.md's Fonts section.
+fonts/Iosevka/

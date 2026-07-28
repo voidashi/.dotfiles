@@ -19,7 +19,7 @@
 - System: Bottom • Dunst • Waybar • Wofi
 
 ### **Key Configurations**
-- Unified theming (Kanagawa Dragon)
+- Unified theming (Voidashi — see `docs/design/`)
 - Performance-optimized WM rules
 - Battery-friendly power management
 - Context-aware workspace layouts
@@ -92,6 +92,19 @@ the first two once you've cloned.
 
 The lock screen is plain `swaylock`; its appearance comes from
 `.config/swaylock/config`.
+
+### Fonts
+
+`fonts/` bundles the faces the theme depends on (Hack Nerd Font, Inter, Roboto
+Mono, Ubuntu Mono, Instrument Sans, Spectral). `backup-configs.sh install`
+symlinks the whole directory to `~/.local/share/fonts/dotfiles` and refreshes
+the font cache, so a fresh clone gets them automatically — no separate step.
+
+**Iosevka is the exception.** Its full-family build is ~430MB and is
+`.gitignore`d rather than committed. Download the "Iosevka" SGr TTC build (or
+any variant you prefer) from https://github.com/be5invis/Iosevka/releases,
+drop it into `fonts/Iosevka/`, then rerun `backup-configs.sh install` — the
+symlink and cache refresh pick it up the same way as the tracked fonts.
 
 ## 🔧 Customization
 1. Edit `scripts/config_files.conf` to select tracked configurations
