@@ -1,0 +1,39 @@
+{
+  "_meta": {
+    "source": "docs/design/RICE-GUIDE.md (desktop-authoritative) + docs/design/DESIGN-SYSTEM.md §2 (full ramps, unchanged bg/border companions for alert tones)",
+    "note": "Single source of truth for rice colour. Edit here and rerun generate_theme.py -- never hand-edit a hex in an app config (RICE-GUIDE.md, 'Working rules for Claude Code'). Where RICE-GUIDE.md and DESIGN-SYSTEM.md differ for desktop use, RICE-GUIDE.md wins -- see cursor/selection/ANSI-cyan below."
+  },
+  "scales": {
+    "void": { "00": "#0a0908", "10": "#121110", "20": "#191817", "30": "#201f1d", "40": "#272625" },
+    "edge": { "10": "#1e1d1b", "20": "#2a2927", "30": "#393835", "40": "#4f4d4a" },
+    "ink": { "0": "#e8e8e8", "1": "#cecece", "2": "#b1b1b1", "3": "#929292", "4": "#6c6c6c", "5": "#4d4d4d" },
+    "bordeaux": { "100": "#e2afb1", "200": "#d78d91", "300": "#c76870", "400": "#b44955", "500": "#99303f", "600": "#7f1f2f", "700": "#621321", "800": "#490c17", "900": "#310c11", "deep": "#1c0b0c" },
+    "ice": { "100": "#b6d2e5", "200": "#90bbd6", "300": "#6aa3c7", "400": "#498bb2", "500": "#307399", "600": "#215b7c", "700": "#124560", "800": "#113144", "900": "#0a2230", "deep": "#0a141b" },
+    "ash": { "100": "#d3c4de", "200": "#bea7cd", "300": "#a98abc", "400": "#9270a7", "500": "#7a598e", "600": "#614572", "700": "#493258", "800": "#34243d", "900": "#23172a", "deep": "#150f18" },
+    "moss": { "100": "#b3d4bb", "200": "#90be9b", "300": "#6da97d", "400": "#4e9162", "500": "#3d784f", "600": "#2c5f3c", "700": "#23462d", "800": "#16321f", "900": "#0d2213", "deep": "#0b140d" },
+    "bronze": { "100": "#e3c5a0", "200": "#d1a978", "300": "#bb8f58", "400": "#a57636", "500": "#896027", "600": "#6e4a19", "700": "#53360a", "800": "#3b270c", "900": "#281a06", "deep": "#171008" },
+    "verdigris": { "300": "#64a9a9", "400": "#459192", "500": "#2b797a" }
+  },
+  "_verdigris_note": "Terminal-only extension (RICE-GUIDE.md 'Terminal extension'). Fills the cyan ANSI slots the core palette has no family for. Never use as a UI accent in bars/launchers/window chrome.",
+  "alert": {
+    "critical": { "fg": "#e14b39", "bg": "#200c09", "border": "#521710", "glyph": "✗" },
+    "caution": { "fg": "#d89529", "bg": "#1b1004", "border": "#482c00", "glyph": "!" },
+    "good": { "fg": "#57a26d", "bg": "#0a160d", "border": "#12361e", "glyph": "✓" },
+    "neutral": { "fg": "#5697bf", "bg": "#0a141b", "border": "#113144", "glyph": "i" }
+  },
+  "ansi16": [
+    "#191817", "#b44955", "#4e9162", "#a57636",
+    "#498bb2", "#9270a7", "#459192", "#b1b1b1",
+    "#4f4d4a", "#e14b39", "#6da97d", "#d89529",
+    "#6aa3c7", "#a98abc", "#64a9a9", "#e8e8e8"
+  ],
+  "terminal": {
+    "background": "#0a0908",
+    "foreground": "#b1b1b1",
+    "cursor": "#c76870",
+    "cursor_text": "#0a0908",
+    "selection_background": "#215b7c",
+    "selection_foreground": "#e8e8e8"
+  },
+  "focus_ring": "#6aa3c7"
+}
