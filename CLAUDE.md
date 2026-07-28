@@ -16,7 +16,8 @@ A personal Linux dotfiles repository (Arch Linux + Wayland, "Kanagawa Dragon" th
 - `scripts/config_files.conf` — the list of paths (relative to `~`) that `backup-configs.sh` manages. Add a new dotfile here before running `add`.
 - `scripts/packages.conf` — INI-style package list consumed by `install-packages.sh` (`[common]`, `[apt]`, `[pacman]`, `[dnf]`, `[hooks]` sections).
 - `scripts/wm/` — helpers invoked by the Hyprland/Sway configs *at runtime*, as opposed to the top-level `scripts/`, which you run by hand. Currently `select_random_wallpaper.sh`.
-- `fonts/`, `wallpapers/`, `docs/` — static assets referenced by configs/README.
+- `scripts/theme/` — `palette.json` (the single source of truth for every Voidashi colour token) and `generate_theme.py` (stdlib-only Python; renders it into the native colour-partial format each app can natively include — kitty/foot/ghostty/alacritty configs, a Hyprland Lua palette module, and a shared GTK CSS `@define-color` partial). Rerun the script after editing `palette.json`; never hand-edit its output files (they carry a `GENERATED` header).
+- `fonts/`, `wallpapers/`, `docs/` — static assets referenced by configs/README. `fonts/` is symlinked into `~/.local/share/fonts/dotfiles` by `backup-configs.sh install`; see the README's Fonts section for the one exception (Iosevka, gitignored for size).
 
 ## The dotfiles-management scripts (important, non-obvious behavior)
 
@@ -91,6 +92,12 @@ mapping, and the rules for how colour is assigned.
 | `docs/design/DESIGN-SYSTEM.md` | Canonical token reference; also when the task is web/document work rather than desktop |
 
 For desktop work, `RICE-GUIDE.md` overrides `DESIGN-SYSTEM.md` wherever they differ.
+
+**Propagation:** `scripts/theme/palette.json` is the machine-readable single source of
+truth transcribed from `RICE-GUIDE.md`; `scripts/theme/generate_theme.py` renders it into
+every app's native colour-include format. Apps whose colour keys mix with structural
+config (swaylock, bottom, starship, fastfetch) are hand-edited instead, referencing the
+same palette values directly — never a fresh hex.
 
 ### Non-negotiables
 

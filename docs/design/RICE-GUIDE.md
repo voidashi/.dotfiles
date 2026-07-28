@@ -273,10 +273,16 @@ accent.
 
 | Voice | Face | Where |
 |---|---|---|
-| **Mono — primary** | Iosevka Extended | Terminals, editors, TUIs, prompts, bar modules, anywhere fixed-width helps |
+| **Mono — primary** | Iosevka Extended | Terminals, editors, TUIs, prompts, non-toolkit bar text, anywhere fixed-width helps |
 | **Mono — glyphs** | Hack Nerd Font | Surfaces needing Nerd Font icons where Iosevka's glyph coverage falls short |
 | **Sans — secondary** | Instrument Sans | GTK/Qt application UI, dialog text, settings windows |
 | **Serif — exceptional** | Spectral | Lockscreens, greeters, fetch banners, wallpaper typography. Nowhere else. |
+
+**"Bar modules" means the bar's own rendering**, not a GTK/Qt-toolkit status bar. Waybar
+(and anything else built on GTK) is a GTK application first — it uses Instrument Sans per
+the GTK/Qt row below, with the previous font kept as a fallback ahead of generic
+`monospace`. The mono-primary row applies to bars that render text themselves outside a
+toolkit (rare on this desktop).
 
 **Rules:**
 
