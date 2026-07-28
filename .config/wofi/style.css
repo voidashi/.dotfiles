@@ -11,7 +11,7 @@ window {
     border-radius: 0px;
     border: none;
     background-color: #111826; /* cachydgreen */
-    color: #ffffffff; /* cachywhite */
+    color: #ffffff; /* cachywhite */
 }
 
 #inner-box {
@@ -30,7 +30,7 @@ window {
 
 #text {
     padding: 4px;
-    color: #ffffffff; /* cachywhite */
+    color: #ffffff; /* cachywhite */
 }
 
 #entry:nth-child(even){

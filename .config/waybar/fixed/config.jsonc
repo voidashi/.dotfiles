@@ -23,7 +23,6 @@
         "mpd",
         "pulseaudio",
         "battery",
-        "battery#bat2",
         "clock",
         "custom/power"
     ],
@@ -130,10 +129,6 @@
         // "format-full": "",
         "format-icons": ["", "", "", "", ""]
     },
-    "battery#bat2": {
-        "bat": "BAT2"
-    },
-
     // Network & Audio
     "network": {
         "format-wifi": "{essid} ",
