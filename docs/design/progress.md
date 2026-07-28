@@ -140,7 +140,22 @@ fish parado).
 
 ## 4 — Hyprland: `palette.lua` + bordas em `appearance.lua`
 
-**Status:** pendente
+**Status:** concluído
+
+`appearance.lua` agora faz `local palette = require("conf/palette")` e monta
+`active_border`/`inactive_border` a partir dele em vez de hex fixo. Papel corrigido:
+ativa = **Ice** (`ice-300`, o mesmo token de `--focus-ring`), inativa = `edge-30` — não
+bordeaux, que era o meu plano original errado (ver correção logo acima, etapa 1). Valores
+antigos (`rgba(8ba4b0ee)` / `rgba(625e5aaa)`, tema Kanagawa Dragon) ficaram comentados ao
+lado, não apagados.
+
+Verificado ao vivo de verdade (não só sintaxe): `hyprctl reload` (seguro agora, já estamos
+em modo `.lua`, não precisa restart completo) → `hyprctl configerrors` vazio →
+`hyprctl getoption general:col.active_border` confirma `ee6aa3c7` (ice-300 + alpha) e
+`general:col.inactive_border` confirma `bb393835` (edge-30 + alpha). Também recarreguei o
+waybar ao vivo (`kill -SIGUSR2`) e o swaync (`swaync-client --reload-css`) nesse ponto, já
+com a correção de fonte da etapa anterior — a tela agora reflete o tema Voidashi de
+verdade: barra, bordas de janela e notificações.
 
 ## 5 — Apps menores: swaylock, fastfetch, bottom, starship, fish
 

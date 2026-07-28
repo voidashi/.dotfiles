@@ -2,6 +2,8 @@
 --  APARÊNCIA (LOOK AND FEEL)
 -- =====================================================================
 -- https://wiki.hypr.land/Configuring/Basics/Variables/
+local palette = require("conf/palette")
+
 hl.config({
     general = {
         border_size = 2,
@@ -9,8 +11,10 @@ hl.config({
         gaps_out = 10,
 
         col = {
-            active_border = "rgba(8ba4b0ee)",
-            inactive_border = "rgba(625e5aaa)",
+            -- Voidashi: foco/ativo = Ice (RICE-GUIDE.md role table), inativa = edge-30
+            -- (era rgba(8ba4b0ee) / rgba(625e5aaa) -- tema Kanagawa Dragon)
+            active_border = "rgba(" .. palette.ice["300"]:gsub("#", "") .. "ee)",
+            inactive_border = "rgba(" .. palette.edge["30"]:gsub("#", "") .. "bb)",
         },
 
         layout = "dwindle",
