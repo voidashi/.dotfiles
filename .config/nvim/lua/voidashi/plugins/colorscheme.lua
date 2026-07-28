@@ -14,7 +14,8 @@ return {
         "rebelot/kanagawa.nvim",
         lazy = false,
         priority = 1000,
-        transparent = true,
+        -- "transparent" aqui era ignorado: não é uma chave de spec do
+        -- lazy.nvim. O que vale é o transparent dentro do setup() abaixo.
         config = function()
             require('kanagawa').setup({
             compile = false,             -- enable compiling the colorscheme

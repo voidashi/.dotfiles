@@ -41,9 +41,7 @@ return {
                 row = 0,
                 col = 1,
             },
-            yadm = {
-                enable = false,
-            },
+            -- A opção "yadm" foi removida do gitsigns.
         })
     end,
 }

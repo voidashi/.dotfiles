@@ -35,10 +35,12 @@ return {
             key = 'f',
           },
           {
-            desc = ' Apps',
+            desc = ' Recent',
             group = 'DiagnosticHint',
-            action = 'Telescope app',
-            key = 'a',
+            -- Era 'Telescope app', que nao e um picker do telescope nem
+            -- de nenhuma extensao instalada, e dava "Unknown command".
+            action = 'Telescope oldfiles',
+            key = 'r',
           },
           {
             desc = ' dotfiles',
