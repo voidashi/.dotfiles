@@ -93,6 +93,10 @@ mapping, and the rules for how colour is assigned.
 
 For desktop work, `RICE-GUIDE.md` overrides `DESIGN-SYSTEM.md` wherever they differ.
 
+**Continuity:** `docs/design/THEME-STATUS.md` tracks what's actually been themed and what
+hasn't; `docs/SESSION-HISTORY.md` is a repo-wide chronological log of recent work with
+commit refs. Check both before assuming something is (or isn't) already done.
+
 **Propagation:** `scripts/theme/palette.json` is the machine-readable single source of
 truth transcribed from `RICE-GUIDE.md`; `scripts/theme/generate_theme.py` renders it into
 every app's native colour-include format. Apps whose colour keys mix with structural
