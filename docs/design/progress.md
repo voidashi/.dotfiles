@@ -112,6 +112,32 @@ deixei pra fazer isso numa passada só, depois que o Hyprland (etapa 4) também 
 pronto, pra não deixar a tela num estado misto (barra nova + bordas de janela antigas) no
 meio do trabalho.
 
+### Correção — fonte errada nos apps GTK (waybar/wofi/wlogout/swaync)
+
+Jeff apontou, ao ver a barra ao vivo: eu tinha posto `"Iosevka Extended", "Hack Nerd
+Font", monospace` nesses quatro, seguindo literalmente a linha "bar modules" da tabela de
+tipografia do `RICE-GUIDE.md` (que lista "bar modules" sob Mono — primary). Mas
+waybar/wofi/wlogout/swaync são todos apps GTK3 de verdade, e o `RICE-GUIDE.md` tem uma
+seção própria pra isso — "GTK / Qt application theming: Instrument Sans for UI text" —
+que deveria ter prevalecido. Ambiguidade real do documento entre duas seções, resolvida
+por instrução direta do Jeff (autor do doc): apps GTK usam Instrument Sans.
+
+Corrigido para: `"Instrument Sans", <fonte antiga do arquivo>, monospace` nos quatro
+(waybar×3, wofi, wlogout, swaync). "Fonte antiga" = o que já estava no arquivo antes desse
+retema (Inter pro waybar, Hack pro wofi); wlogout e swaync não tinham fonte declarada
+antes, então vai direto pra `monospace`. Revalidado via `Gtk.CssProvider` (OK nos 6) e
+recarregado ao vivo (`kill -SIGUSR2` no waybar, `swaync-client --reload-css`).
+
+Vale considerar, na etapa 6 (revisão de docs), sugerir uma linha esclarecendo essa
+ambiguidade no `RICE-GUIDE.md` — a tabela de tipografia e a seção "Application classes"
+podem ser lidas como contraditórias pra qualquer app GTK que também seja uma barra.
+
+**Achado à parte:** `kitty +runpy "..."` (usado nesta sessão pra validar `kitty.conf`)
+abre uma janela de verdade, não roda headless. Sobraram 3 janelas vazias (fish ocioso) no
+sistema; tentei fechá-las mas o classificador de permissões bloqueou o `kill` — ficam pra
+você fechar manualmente quando quiser. Nenhuma tem nada rodando dentro (só o prompt do
+fish parado).
+
 ## 4 — Hyprland: `palette.lua` + bordas em `appearance.lua`
 
 **Status:** pendente

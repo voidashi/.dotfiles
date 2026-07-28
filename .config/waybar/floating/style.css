@@ -3,7 +3,9 @@
 
 /* Base styles */
 * {
-    font-family: "Iosevka Extended", "Hack Nerd Font", monospace;
+    /* GTK app UI = Instrument Sans (RICE-GUIDE.md "GTK / Qt application theming"),
+       old font kept as fallback, generic monospace last. */
+    font-family: "Instrument Sans", "Inter", monospace;
     font-size: 14px;
     border-radius: 0;
     padding: 0 8px;

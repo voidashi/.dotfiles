@@ -4,6 +4,9 @@
 * {
 	background-image: none;
 	box-shadow: none;
+	/* GTK app UI = Instrument Sans (RICE-GUIDE.md "GTK / Qt application theming");
+	   no prior font was set here, so straight to generic monospace fallback. */
+	font-family: "Instrument Sans", monospace;
 }
 
 /* Confirmation overlay -- void-30, per RICE-GUIDE.md surface hierarchy */

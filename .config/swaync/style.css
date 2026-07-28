@@ -2,7 +2,9 @@
 /* Voidashi theme. New file -- swaync had no tracked config before this. */
 
 * {
-    font-family: "Iosevka Extended", "Hack Nerd Font", monospace;
+    /* GTK app UI = Instrument Sans (RICE-GUIDE.md "GTK / Qt application theming"); no
+       prior config existed here to fall back to, so straight to generic monospace. */
+    font-family: "Instrument Sans", monospace;
     font-size: 14px;
 }
 

@@ -2,7 +2,9 @@
 /* Voidashi theme. Previous (Kanagawa) colors preserved in style.kanagawa.css. */
 
 * {
-    font-family: "Iosevka Extended", "Hack Nerd Font", monospace;
+    /* GTK app UI = Instrument Sans (RICE-GUIDE.md "GTK / Qt application theming"),
+       old font kept as fallback, generic monospace last. */
+    font-family: "Instrument Sans", "Inter", monospace;
     font-size: 14px;
 }
 
