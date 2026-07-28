@@ -7,6 +7,7 @@
 CONFIG_FILE="packages.conf"
 LOG_FILE="${LOG_FILE:-package_install.log}"
 DEFAULT_PACKAGE_MANAGER="auto"
+AUR_HELPER=""
 UNATTENDED=false
 NO_COLOR=false
 UPDATED_DB=false
@@ -62,6 +63,18 @@ detect_pkg_manager() {
     
     log "ERROR" "No supported package manager found (apt, pacman, dnf)."
     exit 1
+}
+
+detect_aur_helper() {
+    # Alguns pacotes do packages.conf (catnap, pfetch, pipes.sh) só existem
+    # no AUR. O pacman sozinho não os instala, então precisamos de um helper.
+    local helper
+    for helper in paru yay pikaur; do
+        if command -v "$helper" >/dev/null 2>&1; then
+            echo "$helper"
+            return
+        fi
+    done
 }
 
 check_sudo() {
@@ -127,8 +140,10 @@ load_packages() {
         PACKAGE_MAP["$key"]="${value:-$key}"
     done < <(
         awk -v pm="$PKG_MANAGER" '
-            # Identify the current section
-            $0 ~ /^\[.*\]$/ { section = substr($0, 2, length($0)-2) }
+            # Identify the current section. O "next" é necessário: sem ele a
+            # própria linha "[common]" casa com a regra abaixo e vira um
+            # "pacote" chamado [common], que nunca existe.
+            $0 ~ /^\[.*\]$/ { section = substr($0, 2, length($0)-2); next }
             # Process lines in [common] or the relevant distro section
             (section == pm || section == "common") && $0 !~ /^(#|;|$)/ {
                 # Standardize format to key=value and print
@@ -142,15 +157,28 @@ load_packages() {
 install_package() {
     local key="$1"
     local package_name="$2"
+    local status=0
     log "INFO" "Processing: $key ($package_name)"
-    
+
     case "$PKG_MANAGER" in
-        "apt") sudo apt-get install -yqq "$package_name" ;;
-        "pacman") sudo pacman -S --noconfirm --needed "$package_name" ;;
-        "dnf") sudo dnf install -y --quiet "$package_name" ;;
+        "apt") sudo apt-get install -yqq "$package_name" || status=$? ;;
+        "pacman")
+            # Se não estiver nos repos oficiais, o pacote provavelmente é do
+            # AUR: cai para o helper em vez de falhar direto.
+            if pacman -Si "$package_name" &>/dev/null; then
+                sudo pacman -S --noconfirm --needed "$package_name" || status=$?
+            elif [ -n "$AUR_HELPER" ]; then
+                log "INFO" "$key não está nos repos oficiais; usando $AUR_HELPER (AUR)"
+                "$AUR_HELPER" -S --noconfirm --needed "$package_name" || status=$?
+            else
+                log "ERROR" "$key só existe no AUR e nenhum helper (paru/yay/pikaur) foi encontrado"
+                status=1
+            fi
+            ;;
+        "dnf") sudo dnf install -y --quiet "$package_name" || status=$? ;;
     esac
-    
-    if [ $? -eq 0 ]; then
+
+    if [ $status -eq 0 ]; then
         log "SUCCESS" "Installed: $key"
         run_hooks "$key" # Use the key for hooks
         return 0
@@ -261,7 +289,16 @@ main() {
     fi
     
     log "INFO" "Using package manager: $PKG_MANAGER"
-    
+
+    if [ "$PKG_MANAGER" = "pacman" ]; then
+        AUR_HELPER="$(detect_aur_helper)"
+        if [ -n "$AUR_HELPER" ]; then
+            log "INFO" "Using AUR helper: $AUR_HELPER"
+        else
+            log "WARNING" "No AUR helper (paru/yay/pikaur) found; AUR-only packages will fail."
+        fi
+    fi
+
     if ! [ -f "$CONFIG_FILE" ]; then
         log "ERROR" "Configuration file not found: $CONFIG_FILE"
         exit 1

@@ -1,0 +1,3 @@
+# Log gerado a cada execução de scripts/install-packages.sh
+# (o script sobrescreve o arquivo no início de cada run).
+package_install.log
