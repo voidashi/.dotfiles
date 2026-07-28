@@ -1,0 +1,165 @@
+// =====================================================================
+//  WAYBAR -- shared configuration
+// =====================================================================
+// Everything both bars have in common: geometry, and every module
+// definition. hyprland.jsonc and sway.jsonc include this file and add
+// only the module list for their own compositor.
+//
+// Glyphs are written as \uXXXX escapes rather than literal characters.
+// They live in the Private Use Area, where they are invisible in most
+// editors and diffs and are easy to drop silently while editing -- which
+// leaves an empty <span> and a bar showing labels with no icons. The
+// escapes are unambiguous and survive any tooling.
+//
+// Each glyph is wrapped in <span size="110%"> where it sits next to text:
+// they come from Hack Nerd Font via fontconfig fallback, whose glyphs are
+// drawn smaller per em than Instrument Sans, so at a shared font-size they
+// render noticeably smaller than the label beside them. The percentage is
+// relative to the stylesheet's font-size, so the two move together -- raise
+// the label size in style.css and lower this if the glyphs start to dominate.
+{
+    "height": 32,
+    "spacing": 0,
+    "margin": "0",
+    "position": "top",
+
+    "modules-right": [
+        "tray",
+        "custom/notification",
+        "backlight",
+        "network",
+        "pulseaudio",
+        "battery",
+        "clock",
+        "custom/power"
+    ],
+
+    // ===== Window manager =====
+    // Workspaces are numerals in both bars: the active one is marked by a
+    // bordeaux rule under it, not by a coloured block (docs/design/RICE-GUIDE.md).
+    "sway/workspaces": {
+        "disable-scroll": true,
+        "all-outputs": true,
+        "format": "{name}"
+    },
+    "sway/mode": {
+        "format": "<span size=\"110%\"></span>  {}",
+        "max-length": 16,
+        "tooltip": false
+    },
+    "sway/scratchpad": {
+        "format": "<span size=\"110%\">{icon}</span> {count}",
+        "show-empty": false,
+        "format-icons": ["", ""],
+        "tooltip": true,
+        "tooltip-format": "{app}: {title}"
+    },
+    "hyprland/workspaces": {
+        "disable-scroll": true,
+        "all-outputs": true,
+        "format": "{name}",
+        "persistent-workspaces": {
+            "1": [], "2": [], "3": [], "4": [], "5": []
+        }
+    },
+    "hyprland/submap": {
+        "format": "<span size=\"110%\"></span>  {}",
+        "max-length": 16,
+        "tooltip": false
+    },
+
+    // ===== System =====
+    "clock": {
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+        "format-alt": "{:%d-%m-%Y}",
+        "format": "{:%H:%M}"
+    },
+    "backlight": {
+        "format": "{percent}% <span size=\"110%\">{icon}</span>",
+        "format-icons": [
+            "", "", "", "", "",
+            "", "", "", ""
+        ]
+    },
+    "battery": {
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{capacity}% <span size=\"110%\">{icon}</span>",
+        "format-full": "{capacity}% <span size=\"110%\">{icon}</span>",
+        "format-charging": "{capacity}% <span size=\"110%\"></span>",
+        "format-plugged": "{capacity}% <span size=\"110%\"></span>",
+        "format-alt": "{time} <span size=\"110%\">{icon}</span>",
+        "format-icons": ["", "", "", "", ""]
+    },
+    "network": {
+        "format-wifi": "{essid} <span size=\"110%\"></span>",
+        "format-ethernet": "{ipaddr}/{cidr} <span size=\"110%\"></span>",
+        "format-linked": "{ifname} (No IP) <span size=\"110%\"></span>",
+        "format-disconnected": "Disconnected <span size=\"110%\"></span>",
+        "format-alt": "{ifname}: {ipaddr}/{cidr}",
+        "tooltip-format": "{ifname} via {gwaddr}"
+    },
+    "pulseaudio": {
+        "format": "{volume}% <span size=\"110%\">{icon}</span>",
+        "format-bluetooth": "{volume}% <span size=\"110%\"></span> {format_source}",
+        "format-bluetooth-muted": "<span size=\"110%\"> </span> {format_source}",
+        "format-muted": "<span size=\"110%\"></span>",
+        "format-source": "{volume}% <span size=\"110%\"></span>",
+        "format-source-muted": "<span size=\"110%\"></span>",
+        "format-icons": {
+            "headphone": "",
+            "hands-free": "",
+            "headset": "",
+            "phone": "",
+            "portable": "",
+            "car": "",
+            "default": ["", "", ""]
+        },
+        "on-click": "pavucontrol"
+    },
+    "tray": {
+        "spacing": 10
+    },
+
+    // ===== Custom =====
+    "custom/media": {
+        "format": "<span size=\"110%\">{icon}</span>  {}",
+        "return-type": "json",
+        "max-length": 40,
+        "format-icons": {
+            "spotify": "",
+            "default": ""
+        },
+        "escape": true,
+        "exec": "$HOME/.config/waybar/scripts/mediaplayer.py 2> /dev/null"
+    },
+    "custom/power": {
+        "format": "<span size=\"110%\"></span>",
+        "tooltip": false,
+        "on-click": "wlogout"
+    },
+    // The dot marking unread notifications is alert-critical from the palette,
+    // not the literal keyword 'red' this module shipped with.
+    "custom/notification": {
+        "tooltip": false,
+        "format": "<span size=\"110%\">{icon}</span>",
+        "format-icons": {
+            "notification": "<span foreground='#e14b39'><sup></sup></span>",
+            "none": "",
+            "dnd-notification": "<span foreground='#e14b39'><sup></sup></span>",
+            "dnd-none": "",
+            "inhibited-notification": "<span foreground='#e14b39'><sup></sup></span>",
+            "inhibited-none": "",
+            "dnd-inhibited-notification": "<span foreground='#e14b39'><sup></sup></span>",
+            "dnd-inhibited-none": ""
+        },
+        "return-type": "json",
+        "exec-if": "which swaync-client",
+        "exec": "swaync-client -swb",
+        "on-click": "swaync-client -t -sw",
+        "on-click-right": "swaync-client -d -sw",
+        "escape": true
+    }
+}

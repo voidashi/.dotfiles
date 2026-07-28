@@ -17,13 +17,11 @@ repo is fully finished.
 - **swaync `config.json`** — never created, only `style.css`. Worth checking whether
   urgency levels get a distinct icon/glyph automatically or need explicit config to satisfy
   "state is never colour alone."
-- **Waybar's battery-critical blink** is an infinite-loop animation inherited from the old
-  theme (only recolored, not reconsidered) — technically reads as an anti-pattern. Decide
-  whether to keep it, tone it down, or replace with a non-looping treatment.
-- **Waybar icons should be bigger.** The current font size feels counter-intuitive: When writing the code, you think they'll appear good, but the
-  glyphs appear very small.
-- **Waybar design could be better.** Revisit the design and think about it better. Personally, i, Jeff, don't think the blue goes well on the selected workspaces... Looks like a default WM Status bar, not like a curated design. Maybe bordeaux can go better. Also the current design can improve. You can edit the md docs with my decisions so they better reflect the current decisions.
-- **Unify or improve Waybar theme organization.** The themes are unorganized, chaotic, and very messy. Organize them better, and keep consistency.
+- **Waybar, second pass.** The redesign landed — flat surface, bordeaux rule under the
+  active workspace instead of an Ice block, numerals instead of app glyphs, one shared
+  config. What still needs judging in daily use: whether the glyphs are the right size
+  now, whether the numerals actually beat the old icons, and whether the right-hand
+  modules want a separator between them or should stay spaced only.
 - **Hyprlauncher theme not currently exists.** The binary is installed
   (`/usr/bin/hyprlauncher`); determine whether it can be themed and add it if feasible.
   Note that it is a second launcher alongside wofi — worth deciding which one is actually
@@ -36,6 +34,10 @@ Kept briefly so a rollback has context; delete once they've held up in daily use
 - Wofi's broken theme import (the palette is inlined now — see `CLAUDE.md`), terminal
   padding and opacity unified at 8px/0.92, Hyprland animation durations, the blur and
   window-rounding decisions, and starship's prompt glyph.
+- Waybar's three drifting configs, its glyph sizing, the Ice-on-active-workspace look, and
+  the inherited infinite battery blink (now a static `alert-critical` plus the glyph).
+  The dead `mpd` module was dropped with them — mpd isn't running, so it rendered a
+  permanent "Disconnected" in the bar, and `custom/media` already covers playback.
 
 ## Repo housekeeping
 

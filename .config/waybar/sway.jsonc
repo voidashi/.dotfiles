@@ -1,0 +1,15 @@
+// =====================================================================
+//  WAYBAR -- Sway
+// =====================================================================
+// Launched by .config/sway/config. Everything except the compositor-specific
+// module list lives in common.jsonc.
+{
+    "include": ["$HOME/.config/waybar/common.jsonc"],
+
+    "modules-left": [
+        "sway/workspaces",
+        "sway/mode",
+        "sway/scratchpad",
+        "custom/media"
+    ]
+}

@@ -85,6 +85,25 @@ and windows get a 4px radius. `RICE-GUIDE.md` and `CLAUDE.md` were amended to de
 desktop that exists rather than the one they originally specified — including the motion
 table, whose UI-transition durations read as abrupt on full windows.
 
+## Waybar: one bar, described once
+
+Waybar was not three copies of one config. `.config/sway/config` ran plain `waybar`, which
+loads the default-path `config.jsonc` — so the root config was Sway's live bar, `fixed/`
+was Hyprland's, and only `floating/` was dead. That is why they drifted: nothing tied them
+together, and two of them were in use.
+
+Now `common.jsonc` holds the geometry and every module definition, and `hyprland.jsonc` /
+`sway.jsonc` include it and add only their own `modules-left`. One `style.css` serves both.
+Both compositors launch with explicit `-c`/`-s`, so neither bar is the default one — the
+tradeoff is that bare `waybar` no longer starts.
+
+The design changed with it: no more per-module `void-20` pills, and the active workspace is
+marked by a bordeaux rule beneath it rather than an Ice block. Also fixed along the way —
+glyphs are wrapped in Pango `<span size="large">` (they come from Nerd Font fallback and
+were rendering smaller than their own labels), the notification dot's literal `red` became
+`alert-critical`, the battery blink became static, and the `mpd` module was dropped, since
+mpd isn't running and the module rendered a permanent "Disconnected".
+
 ## Open items carried forward
 
 - `.config/dunst/` is still orphaned (autostart runs `swaync`, not dunst) — same
@@ -93,9 +112,8 @@ table, whose UI-transition durations read as abrupt on full windows.
   present for rollback, kept until daily use confirms the Lua config is stable.
 - Neovim colorscheme/highlight-group theming and wallpaper curation are still unthemed —
   both were explicitly scoped out of the Voidashi retheme so far.
-- Waybar is the largest open design question: three drifting config variants, glyphs that
-  render smaller than they look in the config, and an active-workspace colour Jeff reads as
-  generic. See `docs/TODO.md`.
+- Waybar's redesign needs a verdict from daily use: glyph sizing, numerals versus app icons
+  on the workspace buttons, and whether the right-hand modules want separators.
 - Three stray `kitty` GUI windows (idle fish shells, nothing running in them) were spawned
   by `kitty +runpy` during config validation and may still be open — harmless, safe to
   close whenever.

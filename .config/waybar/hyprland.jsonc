@@ -1,0 +1,14 @@
+// =====================================================================
+//  WAYBAR -- Hyprland
+// =====================================================================
+// Launched by .config/hypr/conf/autostart.lua. Everything except the
+// compositor-specific module list lives in common.jsonc.
+{
+    "include": ["$HOME/.config/waybar/common.jsonc"],
+
+    "modules-left": [
+        "hyprland/workspaces",
+        "hyprland/submap",
+        "custom/media"
+    ]
+}

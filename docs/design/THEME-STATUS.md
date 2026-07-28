@@ -45,6 +45,17 @@ rules; this is just state tracking. Repo-wide (non-theme) history is in
   **Verdigris** family fills the ANSI cyan slot the core palette has no family for.
   Terminal cursor is `bordeaux-300`; terminal selection background is `ice-600`.
   "Semantic states" are called **alert tones** (`alert-critical/caution/good/neutral`).
+- **Waybar is marked, not filled.** The active workspace carries a 2px `bordeaux-400` rule
+  beneath it instead of an `ice-800` block, and modules no longer sit on individual
+  `void-20` pills — a row of raised chips is what made the bar read as a default status
+  bar. Bordeaux stays the identity mark here rather than becoming a second focus colour;
+  Ice remains focus everywhere else, including Hyprland's window borders. Workspace labels
+  are numerals in both bars, where before Sway showed app glyphs and Hyprland showed
+  numbers.
+- **Bar glyphs are sized in the config, not the stylesheet.** They arrive from Hack Nerd
+  Font through fontconfig fallback and are drawn smaller per em than Instrument Sans, so
+  at a shared `font-size` they looked undersized next to their own labels. `common.jsonc`
+  wraps each `{icon}` in Pango `<span size="large">`.
 - **Terminals: 0.92 opacity and 8px padding, all four.** Both were inconsistent — three
   different opacities and no padding set anywhere, so each emulator used its own default.
   The guide's "opaque by default" was rewritten to describe the transparency actually in
@@ -81,6 +92,5 @@ rules; this is just state tracking. Repo-wide (non-theme) history is in
 - The infinite-loop battery-critical blink in waybar predates this theme (inherited, only
   recolored) and technically reads as an anti-pattern ("no infinite loops outside
   loaders") — left alone since removing it would be a functional change, not a theming one.
-- The waybar design as a whole is unresolved: Ice on the active workspace reads as a
-  default WM bar rather than a curated one, the glyphs render smaller than they look in
-  the config, and the three config variants are still unorganized. See `docs/TODO.md`.
+- Waybar's redesign is in, but only daily use will say whether the glyph sizing and the
+  numeral workspace labels are right. See `docs/TODO.md`.
