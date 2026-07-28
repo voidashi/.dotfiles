@@ -1,9 +1,14 @@
+# Opacity and padding are matched across all four emulators (RICE-GUIDE.md:
+# "padding from the spacing scale and matched between emulators"). 8 comes from
+# the spacing scale; 0.92 is the one transparency value the class shares.
 background-opacity = 0.92
 
 # theme = kanagawa-dragon  -- legacy theme, preserved for rollback
 config-file = voidashi-colors
 
 window-padding-color = background
+window-padding-x = 8
+window-padding-y = 8
 
 # Mono primary voice (RICE-GUIDE.md); repeated font-family stacks as fallback.
 font-family = "Iosevka Extended"

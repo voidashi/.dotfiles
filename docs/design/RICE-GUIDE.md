@@ -255,14 +255,17 @@ The system's first principle is material over digital. Heavy transparency and bl
 the most digital effects available on a desktop — they announce a compositor.
 
 - **Bars and panels:** opaque, or at most ~92% opacity.
-- **Terminals:** opaque by default. If transparency is used at all, stay above ~90% and
-  never combine it with blur — a terminal you can read through is a terminal you cannot
-  read.
+- **Terminals:** 92% opacity, the same value in every emulator. The number matters less
+  than the agreement: a terminal you can read through is a terminal you cannot read, and
+  four emulators at three different opacities is the same failure as four different ANSI
+  tables.
 - **Popups, launchers, notifications:** opaque.
-- **Blur:** avoid. If a compositor makes it nearly free and a specific surface genuinely
-  benefits, keep the radius small and the surface clearly darker than what is behind it.
+- **Blur:** small, or none. This desktop runs a small blur on the compositor
+  (`size=5, passes=1`) behind the terminals' 92% — deliberately, not by default. The rule
+  it has to satisfy is that the surface still reads as clearly darker than whatever is
+  behind it. A blur radius large enough to notice as an effect is the thing to avoid.
 
-Stone is not translucent. Iron is not translucent. Neither is this desktop.
+Stone is not translucent. Iron is barely. Neither is this desktop, much.
 
 ---
 
@@ -299,10 +302,14 @@ toolkit (rare on this desktop).
 
 ## Form
 
-- **Zero border radius everywhere it can be set** — windows, bars, popups, notifications,
-  launchers, tooltips. Sharp is the identity.
-- Where a toolkit refuses zero, accept its minimum rather than fighting it — but never
-  choose a radius voluntarily.
+- **Zero border radius on every flat surface** — bars, popups, notifications, launchers,
+  tooltips. Sharp is the identity.
+- **Compositor windows are the one exception: 4px.** A tiled window sits directly on the
+  wallpaper rather than inside another surface, and at that scale a hairline radius reads
+  as a cut edge, not a rounded one. It is a deliberate, bounded choice — 4px, windows
+  only. Anything the toolkit draws inside the window stays square.
+- Where a toolkit refuses zero, accept its minimum rather than fighting it. Outside the
+  window exception, never choose a radius voluntarily.
 - **Borders over shadows.** A 1px `edge-*` border is the separation mechanism.
 - **Window gaps:** even, and derived from the spacing scale — 4, 8, 12, 16, 24. Inner and
   outer gaps may differ; both come from the scale.
@@ -313,16 +320,21 @@ toolkit (rare on this desktop).
 
 ## Motion
 
-Compositor animations are the desktop's motion layer. The system's rules hold, with
-tighter numbers — a window manager animation is felt dozens of times an hour.
+Compositor animations are the desktop's motion layer. A window manager animation is felt
+dozens of times an hour, so it has to stay short — but a full window crossing the screen
+is not a button changing colour, and web-tight numbers read as abrupt at that size. These
+are the durations actually in use.
 
 | Interaction | Duration | Curve |
 |---|---|---|
-| Window open / close | 150–200 ms | ease-out |
-| Workspace switch | 200–250 ms | ease-out or a standard cubic curve |
-| Bar / popup reveal | 120–160 ms | ease-out |
-| Hover, focus change | ≤ 120 ms | ease-out |
+| Window open / close | 300 ms | ease-out |
+| Workspace switch | 350 ms | ease-out or a standard cubic curve |
+| Bar / popup reveal | 200 ms | ease-out |
+| Hover, focus change | 150 ms | ease-out |
 | Notification enter | 180–220 ms | ease-out |
+
+The ceiling is roughly 400 ms. Past that an animation stops being feedback and starts
+being something you wait for — which is exactly what these values replaced.
 
 **Never:** bounce, spring, overshoot, elastic, wobbly windows, or any curve that returns
 past its endpoint. The system does not bounce.
@@ -434,7 +446,8 @@ plus a glyph: low is inert ink, normal gets a subtle accent, critical gets
 `alert-critical` and a border in the same family.
 
 **Window manager and compositor.** Focused border Ice, unfocused `edge-30`, gaps from the
-scale, animations per the motion table. No blur, no rounding, no shadow theatrics.
+scale, animations per the motion table. A 4px window radius and a small blur are permitted
+here and nowhere else — see "Form" and "Transparency and blur". No shadow theatrics.
 
 **Lockscreen, greeter, fetch.** The one place the editorial voice is welcome — Spectral,
 spacious density, minimal information. This is the desktop's cover page: an identity
@@ -461,8 +474,8 @@ background, foreground, and accent right, accept the rest.
 - Neon, glow, saturated gradients, RGB effects of any kind.
 - More than two accent families visible at rest.
 - Every bar module a different colour.
-- Rounded corners chosen voluntarily.
-- Heavy transparency or blur on any surface.
+- Rounded corners anywhere but compositor windows, where the radius is 4px and fixed.
+- Heavy transparency, or a blur wide enough to notice as an effect.
 - Bounce, spring, or overshoot animation; infinite loops outside loaders.
 - Inconsistent ANSI, font sizes, or padding between programs of the same class.
 - Serif type in bars, launchers, or notifications.

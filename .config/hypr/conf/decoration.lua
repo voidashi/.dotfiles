@@ -4,9 +4,11 @@
 -- https://wiki.hypr.land/Configuring/Basics/Variables/
 hl.config({
     decoration = {
-        -- Voidashi: "Sharp corners. Zero border radius wherever it can be set"
-        -- is a non-negotiable (CLAUDE.md); was 10 (Kanagawa Dragon).
-        rounding = 0,
+        -- Compositor windows are the one Voidashi surface allowed a radius, and
+        -- it stays small: sharp enough to read as cut, not moulded (was 10 under
+        -- Kanagawa Dragon, then briefly 0). Every other surface -- bar, launcher,
+        -- notifications -- is still square. See RICE-GUIDE.md, "Geometry".
+        rounding = 4,
 
         active_opacity = 1.0,
         inactive_opacity = 1.0,

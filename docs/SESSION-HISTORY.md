@@ -63,6 +63,28 @@ along the way, and gets updated as new ones turn up.
 Then the Voidashi design system was introduced and the rice's theming work began — see
 `docs/design/THEME-STATUS.md`.
 
+## Voidashi follow-ups: the small stuff
+
+A pass over the loose ends the retheme left behind, plus two inconsistencies the TODO had
+not caught — the four terminals were running three different opacities, and none of them
+set padding at all, so each used its own default.
+
+The wofi theme bug turned out not to be a wrong path: the symlinks and the target file
+were correct all along. wofi hands its stylesheet to GTK as a string, so a relative
+`@import` resolves against the process cwd (`$HOME`) rather than the file's directory,
+which is where `/home/theme/voidashi-colors.css` came from. `generate_theme.py` now inlines
+the palette into wofi's `style.css` between markers instead.
+
+Hyprland's animations were running at 600–1000ms — the cause of the "too slow for daily
+workflow" complaint. Now 150–350ms, with the ease-out curve applied to every leaf rather
+than just `windows`.
+
+Three decisions the design docs had answered with a flat "no" went the other way, on
+Jeff's call: the small compositor blur stays, terminals keep transparency (0.92 everywhere),
+and windows get a 4px radius. `RICE-GUIDE.md` and `CLAUDE.md` were amended to describe the
+desktop that exists rather than the one they originally specified — including the motion
+table, whose UI-transition durations read as abrupt on full windows.
+
 ## Open items carried forward
 
 - `.config/dunst/` is still orphaned (autostart runs `swaync`, not dunst) — same
@@ -71,6 +93,9 @@ Then the Voidashi design system was introduced and the rice's theming work began
   present for rollback, kept until daily use confirms the Lua config is stable.
 - Neovim colorscheme/highlight-group theming and wallpaper curation are still unthemed —
   both were explicitly scoped out of the Voidashi retheme so far.
+- Waybar is the largest open design question: three drifting config variants, glyphs that
+  render smaller than they look in the config, and an active-workspace colour Jeff reads as
+  generic. See `docs/TODO.md`.
 - Three stray `kitty` GUI windows (idle fish shells, nothing running in them) were spawned
   by `kitty +runpy` during config validation and may still be open — harmless, safe to
   close whenever.

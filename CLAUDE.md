@@ -51,6 +51,7 @@ All three scripts resolve their `.conf` files from the script's own location (`S
 - Multiple terminal emulators (Ghostty, Alacritty, Kitty, Foot) and both Hyprland and Sway window managers are configured in parallel — when changing shared theming (colors, fonts), check whether the change needs to be mirrored across all of them rather than assuming one canonical source.
 - **Waybar has three configs**: `fixed/` is the one Hyprland actually launches; `config.jsonc` and `floating/` are alternates that drift out of sync (they kept a `hyprland/mode` module long after `fixed/` was corrected to `hyprland/submap`, and all three carried a dead `battery#bat2` module pointed at a battery this machine doesn't have — check `ls /sys/class/power_supply/` before trusting a hardcoded `bat` name). Change all three, or knowingly don't.
 - **GTK3 CSS (wofi, and anything else themed this way) rejects 8-digit hex colors** (`#RRGGBBAA`) on the `color` property — "Junk at end of value for color" on every launch. Use 6-digit hex or `rgba()` for alpha instead.
+- **wofi cannot `@import` the shared theme partial.** It hands its stylesheet to GTK as a string, so relative import URLs resolve against the *process cwd* (`$HOME` when launched from a keybind) instead of the CSS file's directory — the symptom is `Failed to import: Error opening file /home/theme/voidashi-colors.css` and no colours, with the paths and symlinks all correct. waybar, swaync and wlogout load by path and are unaffected. `generate_theme.py` therefore inlines the palette into `.config/wofi/style.css` between `/* >>> VOIDASHI COLORS (GENERATED) >>> */` markers; edit outside them freely, never inside.
 - **Orphaned configs kept intentionally**: `.config/hypr/hyprpaper.conf` is untouched by choice (Jeff wants it as a reference in case he switches back from swaybg); `.config/dunst/` looks similarly orphaned — Hyprland's autostart kills `mako` and starts `swaync`, with no mention of dunst and no dunst process running live, but this hasn't been explicitly decided yet. Don't delete either without asking first.
 - **Wallpapers**: `scripts/wm/select_random_wallpaper.sh` takes a list of directories and uses the first containing images — `~/Pictures/Current_wallpapers` (rotation), `~/Pictures/Wallpapers` (full library), then `wallpapers/` in this repo as the fallback that makes a fresh clone work. The personal folders are deliberately untracked. The script must print errors to **stderr**: callers embed it in `$(...)` and pass the result to `swaybg` as a filename.
 - The lock screen is plain `swaylock`, themed entirely by `.config/swaylock/config`. Don't reintroduce a wrapper script passing the same options as CLI flags — flags override the config file, which is how the committed theme silently stopped applying.
@@ -111,7 +112,8 @@ These hold for every visual change, without needing to re-read the guide:
   `void-*` scale. A background that reads as blue is a bug.
 - **Never invent a colour.** Every hex must come from the palette in `RICE-GUIDE.md`. If
   a role is not covered, use the nearest token and say so, or ask.
-- **Sharp corners.** Zero border radius wherever it can be set.
+- **Sharp corners.** Zero border radius on every surface — bars, launchers, popups,
+  notifications. The one exception is Hyprland's window rounding, fixed at 4px.
 - **No neon, glow, vibrant gradients, or RGB effects.**
 - **No bounce, spring, or overshoot animation.** No infinite loops outside loaders.
 - **Colour never carries state alone** — a coloured status always has a glyph too.

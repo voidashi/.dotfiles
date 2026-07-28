@@ -45,6 +45,23 @@ rules; this is just state tracking. Repo-wide (non-theme) history is in
   **Verdigris** family fills the ANSI cyan slot the core palette has no family for.
   Terminal cursor is `bordeaux-300`; terminal selection background is `ice-600`.
   "Semantic states" are called **alert tones** (`alert-critical/caution/good/neutral`).
+- **Terminals: 0.92 opacity and 8px padding, all four.** Both were inconsistent — three
+  different opacities and no padding set anywhere, so each emulator used its own default.
+  The guide's "opaque by default" was rewritten to describe the transparency actually in
+  use; foot's `alpha` sits in a second `[colors-dark]` block in `foot.ini`, since the
+  generated palette include must not be hand-edited.
+- **Hyprland keeps a small blur (`size=5, passes=1`) and gains a 4px window radius.** Both
+  were open questions the guide answered with a flat "no"; Jeff's call is that a small
+  amount of each is right for this desktop, and `RICE-GUIDE.md` and `CLAUDE.md` were
+  amended to say so. The radius applies to compositor windows only — every other surface
+  is still square.
+- **Animation durations sit a notch above the guide's original table** (windows 300ms,
+  workspace 350ms, focus 150ms, fade 200ms) with the ease-out curve now applied to every
+  leaf. The old values were 600–1000ms, slow enough to be the daily-use complaint that
+  started this; the guide's UI-transition numbers read as abrupt on full windows, so the
+  motion table was rewritten around a ~400ms ceiling.
+- **wofi's palette is inlined, not imported** — it is the one GTK app whose `@import`
+  resolves against the process cwd. See `CLAUDE.md`.
 - **GTK apps use Instrument Sans, not Iosevka Extended.** waybar, wofi, wlogout and swaync
   are GTK3 applications and fall under the guide's "GTK/Qt application theming" rule, not
   the typography table's mono-primary row (which is for bars that render their own text
@@ -64,5 +81,6 @@ rules; this is just state tracking. Repo-wide (non-theme) history is in
 - The infinite-loop battery-critical blink in waybar predates this theme (inherited, only
   recolored) and technically reads as an anti-pattern ("no infinite loops outside
   loaders") — left alone since removing it would be a functional change, not a theming one.
-- Hyprland blur is still on, at a small setting. The guide says avoid it, not never use it.
-- Terminal padding across the four emulators was never checked for consistency.
+- The waybar design as a whole is unresolved: Ice on the active workspace reads as a
+  default WM bar rather than a curated one, the glyphs render smaller than they look in
+  the config, and the three config variants are still unorganized. See `docs/TODO.md`.

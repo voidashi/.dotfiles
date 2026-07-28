@@ -22,23 +22,20 @@ repo is fully finished.
   whether to keep it, tone it down, or replace with a non-looping treatment.
 - **Waybar icons should be bigger.** The current font size feels counter-intuitive: When writing the code, you think they'll appear good, but the
   glyphs appear very small.
-- **Waybar design could be better.** Revisit the design and think about it better.
-- **Waybar text color could be better.**
+- **Waybar design could be better.** Revisit the design and think about it better. Personally, i, Jeff, don't think the blue goes well on the selected workspaces... Looks like a default WM Status bar, not like a curated design. Maybe bordeaux can go better. Also the current design can improve. You can edit the md docs with my decisions so they better reflect the current decisions.
 - **Unify or improve Waybar theme organization.** The themes are unorganized, chaotic, and very messy. Organize them better, and keep consistency.
-- **Starship icons look bad.** Evaluate the icons chosen for it.
-- **Hyprland animation time is too slow for daily workflow.** Review animation durations and
-  responsiveness across common actions.
-- **Wofi `--show drun`.** Fix the GTK theme import path and address any other programs using
-  the same theme file path issue.
-- **Wofi theme path error.** `(wofi:92862): Gtk-WARNING **: ... Failed to import: Error opening
-  file /home/theme/voidashi-colors.css: No such file or directory.` The import line is using the
-  wrong relative path and may affect other GTK apps.
-- **Hyprlauncher theme not currently exists.** Determine whether a Hyprlauncher theme can be
-  created and add it if feasible.
-- **Hyprland blur** is still on (small: `size=5, passes=1`). The guide says avoid, not
-  never — worth a deliberate call rather than leaving it by default.
-- **Terminal padding** across kitty/foot/ghostty/alacritty was never checked for
-  consistency (only font, size, and colour were).
+- **Hyprlauncher theme not currently exists.** The binary is installed
+  (`/usr/bin/hyprlauncher`); determine whether it can be themed and add it if feasible.
+  Note that it is a second launcher alongside wofi — worth deciding which one is actually
+  the daily driver before theming both.
+
+## Recently closed
+
+Kept briefly so a rollback has context; delete once they've held up in daily use.
+
+- Wofi's broken theme import (the palette is inlined now — see `CLAUDE.md`), terminal
+  padding and opacity unified at 8px/0.92, Hyprland animation durations, the blur and
+  window-rounding decisions, and starship's prompt glyph.
 
 ## Repo housekeeping
 
