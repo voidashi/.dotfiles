@@ -4,8 +4,12 @@
 # Usage: ./install-packages.sh [preview|install|check|repos] [--yes] [--no-color] [--log FILE]
 
 # ---- Configuration ----
-CONFIG_FILE="packages.conf"
-LOG_FILE="${LOG_FILE:-package_install.log}"
+# Resolvido a partir da localização do script, não do diretório atual: assim
+# ele funciona tanto rodando de dentro de scripts/ quanto do raiz do repo
+# (que é justamente como o README manda rodar).
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_FILE="${CONFIG_FILE:-$SCRIPT_DIR/packages.conf}"
+LOG_FILE="${LOG_FILE:-$SCRIPT_DIR/package_install.log}"
 DEFAULT_PACKAGE_MANAGER="auto"
 AUR_HELPER=""
 UNATTENDED=false

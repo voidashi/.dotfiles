@@ -12,7 +12,14 @@ hl.on("hyprland.start", function()
     -- Caminhos absolutos: com caminho relativo isto dependia do cwd com que
     -- o Hyprland foi iniciado, e a barra não subia dependendo de como logava.
     hl.exec_cmd("waybar -c $HOME/.config/waybar/fixed/config.jsonc -s $HOME/.config/waybar/fixed/style.css")
-    hl.exec_cmd("swaybg -m fill -i \"$(bash $HOME/scripts/select_random_wallpaper.sh $HOME/Pictures/Wallpapers)\"")
+    -- Ordem: os wallpapers em rotação, depois a coleção completa, depois o
+    -- wallpaper de exemplo do próprio repo (para uma instalação nova).
+    hl.exec_cmd(
+        "swaybg -m fill -i \"$($HOME/.dotfiles/scripts/wm/select_random_wallpaper.sh "
+            .. "$HOME/Pictures/Current_wallpapers "
+            .. "$HOME/Pictures/Wallpapers "
+            .. "$HOME/.dotfiles/wallpapers)\""
+    )
 
     hl.exec_cmd("kill mako & swaync")
 end)

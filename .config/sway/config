@@ -325,7 +325,9 @@ set $katanaGray     #717C7C
 # Autostart
 #
 exec waybar
-exec swaybg -m fill -i "$(bash $HOME/scripts/select_random_wallpaper.sh $HOME/Pictures/Current_wallpapers)"
+# Ordem: os wallpapers em rotação, depois a coleção completa, depois o
+# wallpaper de exemplo do próprio repo (para uma instalação nova).
+exec swaybg -m fill -i "$($HOME/.dotfiles/scripts/wm/select_random_wallpaper.sh $HOME/Pictures/Current_wallpapers $HOME/Pictures/Wallpapers $HOME/.dotfiles/wallpapers)"
 
 
 include @sysconfdir@/sway/config.d/*

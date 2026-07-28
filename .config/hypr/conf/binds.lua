@@ -84,7 +84,10 @@ hl.bind("Print", hl.dsp.exec_cmd("hyprshot -m output"))
 hl.bind("SHIFT + Print", hl.dsp.exec_cmd("hyprshot -m region"))
 
 -- Dispara quando a tampa (lid) é alternada
-hl.bind("switch:Lid Switch", hl.dsp.exec_cmd("~/scripts/lock.sh"), { locked = true })
+-- A aparência da tela de bloqueio vem de ~/.config/swaylock/config, que já é
+-- versionado neste repo. O antigo lock.sh passava as mesmas opções por linha
+-- de comando e sobrescrevia esse arquivo com um tema diferente.
+hl.bind("switch:Lid Switch", hl.dsp.exec_cmd("swaylock -f"), { locked = true })
 -- Dispara quando a tampa está fechando
 hl.bind("switch:on:Lid Switch", hl.dsp.exec_cmd('hyprctl keyword monitor "eDP-1, disable"'), { locked = true })
 -- Dispara quando a tampa está abrindo

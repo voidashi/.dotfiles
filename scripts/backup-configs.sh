@@ -5,9 +5,11 @@
 
 # ---- Configuration ----
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
-#CONFIG_FILE="${CONFIG_FILE:-$HOME/scripts/dotfiles/config_files.conf}"
-#CONFIG_FILE="${CONFIG_FILE:-$HOME/.dotfiles/scripts/config_files.conf}"
-CONFIG_FILE="config_files.conf"
+# Resolvido a partir da localização do script, não do diretório atual: assim
+# ele funciona tanto rodando de dentro de scripts/ quanto do raiz do repo
+# (que é justamente como o README manda rodar).
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_FILE="${CONFIG_FILE:-$SCRIPT_DIR/config_files.conf}"
 BACKUP_DIR="${BACKUP_DIR:-$HOME/.dotfiles_backup}"
 TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
 CURRENT_BACKUP="$BACKUP_DIR/$TIMESTAMP"

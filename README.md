@@ -27,7 +27,8 @@
 
 ### **Automation Tools**
 - `backup-configs.sh` - Smart config synchronization
-- `install-packages.sh` - Cross-distro package installer
+- `install-packages.sh` - Cross-distro package installer (with AUR support)
+- `unlink-dotfiles.sh` - Undo the symlinks and move files back to `$HOME`
 - 1-click restore for new installations
 
 ## 🚀 Installation
@@ -54,10 +55,43 @@ cd ~/.dotfiles
 │   ├── nvim/            # Neovim IDE setup
 │   ├── fish/            # Fish shell configuration
 │   └── ...              # Other app configs
-├── scripts/              # Maintenance utilities
-├── wallpapers/           # Curated desktop backgrounds
+├── scripts/              # Maintenance utilities (you run these by hand)
+│   └── wm/              # Helpers the WM configs call at runtime
+├── wallpapers/           # Sample wallpaper shipped with the repo
 ...
 ```
+
+## 📜 Scripts
+
+Two different kinds of script live here, split by **who runs them**:
+
+| Path | Who runs it |
+|---|---|
+| `scripts/*.sh` | You, by hand — installing packages, linking/unlinking configs |
+| `scripts/wm/*.sh` | Hyprland and Sway, automatically, while running |
+
+All of them resolve their config files relative to the script's own location,
+so they work from anywhere.
+
+### Wallpapers
+
+`scripts/wm/select_random_wallpaper.sh` takes a list of directories and picks a
+random image from the **first one that actually contains images**. Both WMs call
+it with the same three-tier chain:
+
+| Directory | Purpose |
+|---|---|
+| `~/Pictures/Current_wallpapers` | The set currently in rotation |
+| `~/Pictures/Wallpapers` | Full personal collection |
+| `~/.dotfiles/wallpapers` | Sample shipped with the repo |
+
+The last entry is the fallback, so a fresh clone shows a wallpaper immediately.
+The personal folders are deliberately **not** tracked here — GitHub is a poor
+place to store image libraries. Copy the sample out of `wallpapers/` into one of
+the first two once you've cloned.
+
+The lock screen is plain `swaylock`; its appearance comes from
+`.config/swaylock/config`.
 
 ## 🔧 Customization
 1. Edit `scripts/config_files.conf` to select tracked configurations
