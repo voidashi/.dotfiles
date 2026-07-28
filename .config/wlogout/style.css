@@ -1,60 +1,72 @@
 @import url("../theme/voidashi-colors.css");
-/* Voidashi theme. Previous (Cachy) colors preserved in style.kanagawa.css. */
+
+/* =====================================================================
+   WLOGOUT -- Voidashi
+   =====================================================================
+   Previous (Cachy) colours preserved in style.kanagawa.css.
+
+   The buttons used to carry their icons as PNG background-images from
+   wlogout/icons/. Those were lavender -- a colour from no Voidashi scale --
+   loaded through absolute /home/jeff paths that break on any other machine,
+   and being raster they could not follow the palette at all. The glyphs now
+   come from the layout file as text, so they inherit `color` like everything
+   else. The PNGs are kept in icons/ as a rollback reference, unreferenced.
+
+   Per RICE-GUIDE.md, "Lockscreen, greeter, fetch": this is a full-screen
+   surface, so it takes spacious density rather than the compact spacing the
+   bar uses. */
 
 * {
-	background-image: none;
-	box-shadow: none;
-	/* GTK app UI = Instrument Sans (RICE-GUIDE.md "GTK / Qt application theming");
-	   no prior font was set here, so straight to generic monospace fallback. */
-	font-family: "Instrument Sans", monospace;
+    background-image: none;
+    box-shadow: none;
+    text-shadow: none;
+    /* GTK app UI = Instrument Sans (RICE-GUIDE.md "GTK / Qt application
+       theming"); Hack Nerd Font supplies the action glyphs. */
+    font-family: "Instrument Sans", "Hack Nerd Font", monospace;
 }
 
-/* Confirmation overlay -- void-30, per RICE-GUIDE.md surface hierarchy */
+/* The overlay sits over whatever was on screen. void-00 rather than the
+   void-30 used before: this is the darkest moment on the desktop, and the
+   buttons need to read as lit surfaces above it. */
 window {
-	background-color: alpha(@void-30, 0.92);
+    background-color: alpha(@void-00, 0.94);
 }
 
 button {
+    margin: 12px;
     border-radius: 0;
-    border-color: @edge-30;
-	text-decoration-color: @ink-2;
-    color: @ink-2;
-	background-color: @void-20;
-	border-style: solid;
-	border-width: 1px;
-	background-repeat: no-repeat;
-	background-position: center;
-	background-size: 25%;
+    border-style: solid;
+    border-width: 1px;
+    border-color: @edge-20;
+    background-color: @void-20;
+    color: @ink-3;
+    font-size: 20px;
+    font-weight: 500;
+    /* No background-image: the glyph is text now, set in the layout file. */
+    background-image: none;
 }
 
-/* Focus/active/selected = Ice, per RICE-GUIDE.md role table */
-button:focus, button:active, button:hover {
-	background-color: @ice-800;
-	border-color: @ice-400;
-	color: @ink-0;
-	outline-style: none;
+/* Focus/active/selected = Ice (RICE-GUIDE.md role table). Keyboard focus and
+   hover are the same state here -- both mean "this is what Enter will do". */
+button:focus,
+button:active,
+button:hover {
+    background-color: @ice-800;
+    border-color: @ice-400;
+    color: @ink-0;
+    outline-style: none;
 }
 
-#lock {
-    background-image: url("/home/jeff/.config/wlogout/icons/lock.png");
-}
-
-#logout {
-    background-image: url("/home/jeff/.config/wlogout/icons/logout.png");
-}
-
-#suspend {
-    background-image: url("/home/jeff/.config/wlogout/icons/suspend.png");
-}
-
-#hibernate {
-    background-image: url("/home/jeff/.config/wlogout/icons/hibernate.png");
-}
-
-#shutdown {
-    background-image: url("/home/jeff/.config/wlogout/icons/shutdown.png");
-}
-
-#reboot {
-    background-image: url("/home/jeff/.config/wlogout/icons/reboot.png");
+/* The two actions that destroy running state announce themselves on approach.
+   Colour is not carrying this alone -- each button keeps its own glyph and
+   label -- it only raises the cost of the one you are about to pick. */
+#shutdown:focus,
+#shutdown:active,
+#shutdown:hover,
+#reboot:focus,
+#reboot:active,
+#reboot:hover {
+    background-color: @alert-critical-bg;
+    border-color: @alert-critical;
+    color: @alert-critical;
 }

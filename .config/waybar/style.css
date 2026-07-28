@@ -115,8 +115,20 @@ button {
     color: @ink-2;
 }
 
+/* Media sits at ink-4: it is the one module that is text rather than a value,
+   so it recedes furthest. Paused drops another step -- the glyph already says
+   which state it is in, the colour only reinforces it. */
 #custom-media {
     color: @ink-4;
+}
+
+#custom-media.playing {
+    color: @ink-3;
+}
+
+#custom-media.paused,
+#custom-media.stopped {
+    color: @ink-5;
 }
 
 #custom-power {

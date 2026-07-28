@@ -5,11 +5,13 @@
 // definition. hyprland.jsonc and sway.jsonc include this file and add
 // only the module list for their own compositor.
 //
-// Glyphs are written as \uXXXX escapes rather than literal characters.
-// They live in the Private Use Area, where they are invisible in most
-// editors and diffs and are easy to drop silently while editing -- which
-// leaves an empty <span> and a bar showing labels with no icons. The
-// escapes are unambiguous and survive any tooling.
+// The glyphs below live in Unicode's Private Use Area. They render as
+// blanks or boxes in most editors, diffs and terminals, so they are easy
+// to drop silently while editing -- the symptom is an empty <span> and a
+// bar showing labels with no icons at all. If that happens, recover the
+// codepoints from git rather than retyping them:
+//   git show <rev>:.config/waybar/common.jsonc | \
+//     python3 -c "import sys;[print(hex(ord(c))) for c in sys.stdin.read() if 0xE000<=ord(c)<=0xF8FF]"
 //
 // Each glyph is wrapped in <span size="110%"> where it sits next to text:
 // they come from Hack Nerd Font via fontconfig fallback, whose glyphs are
@@ -124,15 +126,24 @@
     },
 
     // ===== Custom =====
+    // The glyph tracks playback state rather than which player is running:
+    // state has to be readable without leaning on colour, and knowing it is
+    // Spotify is worth less at a glance than knowing it is paused. The player
+    // name still arrives as a CSS class, so it can be styled if that changes.
     "custom/media": {
-        "format": "<span size=\"110%\">{icon}</span>  {}",
+        "format": "<span size=\"110%\">{icon}</span>  {text}",
         "return-type": "json",
         "max-length": 40,
         "format-icons": {
-            "spotify": "",
+            "playing": "",
+            "paused": "",
+            "stopped": "",
             "default": ""
         },
         "escape": true,
+        "on-click": "playerctl play-pause",
+        "on-scroll-up": "playerctl next",
+        "on-scroll-down": "playerctl previous",
         "exec": "$HOME/.config/waybar/scripts/mediaplayer.py 2> /dev/null"
     },
     "custom/power": {

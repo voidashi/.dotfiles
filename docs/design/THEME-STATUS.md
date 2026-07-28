@@ -45,6 +45,12 @@ rules; this is just state tracking. Repo-wide (non-theme) history is in
   **Verdigris** family fills the ANSI cyan slot the core palette has no family for.
   Terminal cursor is `bordeaux-300`; terminal selection background is `ice-600`.
   "Semantic states" are called **alert tones** (`alert-critical/caution/good/neutral`).
+- **wlogout's icons were never themed.** It was listed as fully themed, but its six
+  buttons carried lavender PNGs from `wlogout/icons/` — a colour from no Voidashi scale,
+  raster so unreachable by the palette, and loaded through absolute `/home/jeff` paths that
+  break on any other machine. They are Nerd Font glyphs set in the `layout` file now, so
+  they inherit `color` like any other text. Shutdown and reboot turn `alert-critical` on
+  approach; they keep their glyph and label, so colour is reinforcing, not carrying.
 - **Waybar is marked, not filled.** The active workspace carries a 2px `bordeaux-400` rule
   beneath it instead of an `ice-800` block, and modules no longer sit on individual
   `void-20` pills — a row of raised chips is what made the bar read as a default status

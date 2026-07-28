@@ -104,6 +104,23 @@ were rendering smaller than their own labels), the notification dot's literal `r
 `alert-critical`, the battery blink became static, and the `mpd` module was dropped, since
 mpd isn't running and the module rendered a permanent "Disconnected".
 
+## The two custom waybar modules
+
+`mediaplayer.py` had three real defects. `add_argument("-x", "--exclude", "- Comma-separated
+list of excluded player")` passed the description as a third *option string* rather than
+`help=`, which argparse accepted silently. `title.replace(...)` ran before any None check,
+so a player reporting no title — streams, some web players — threw an AttributeError. And
+the script escaped `&` itself while the module also sets `"escape": true`, so an ampersand
+in a track name reached the bar as a literal `&amp;`.
+
+It now reports playback state as well: `alt` carries playing/paused/stopped so the glyph
+changes with it, and `class` carries the same state plus the player name, so a paused track
+dims. The module also takes click to play/pause and scroll to change track.
+
+wlogout's buttons were still lavender PNGs loaded from absolute `/home/jeff` paths — raster
+images the palette could never reach, which is how they survived the retheme untouched. The
+glyphs are text in the `layout` file now.
+
 ## Open items carried forward
 
 - `.config/dunst/` is still orphaned (autostart runs `swaync`, not dunst) — same

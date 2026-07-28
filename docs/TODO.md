@@ -22,6 +22,8 @@ repo is fully finished.
   config. What still needs judging in daily use: whether the glyphs are the right size
   now, whether the numerals actually beat the old icons, and whether the right-hand
   modules want a separator between them or should stay spaced only.
+- **`.config/wlogout/icons/`** — the six lavender PNGs are no longer referenced by
+  anything, kept only as a rollback reference (~92KB). Jeff's call whether to delete them.
 - **Hyprlauncher theme not currently exists.** The binary is installed
   (`/usr/bin/hyprlauncher`); determine whether it can be themed and add it if feasible.
   Note that it is a second launcher alongside wofi — worth deciding which one is actually
