@@ -1,0 +1,127 @@
+@import url("../theme/voidashi-colors.css");
+/* Voidashi theme. New file -- swaync had no tracked config before this. */
+
+* {
+    font-family: "Iosevka Extended", "Hack Nerd Font", monospace;
+    font-size: 14px;
+}
+
+/* Notifications: void-20, bordered, standard density (RICE-GUIDE.md) */
+.control-center,
+.floating-notifications {
+    background: transparent;
+}
+
+.notification-row {
+    padding: 4px;
+}
+
+.notification-background {
+    background: @void-20;
+    border: 1px solid @edge-20;
+    border-radius: 0;
+}
+
+.notification {
+    padding: 8px;
+}
+
+.notification-content {
+    padding: 4px;
+}
+
+.notification .summary {
+    color: @ink-0;
+    font-weight: bold;
+}
+
+.notification .body {
+    color: @ink-2;
+}
+
+.notification .time {
+    color: @ink-4;
+}
+
+/* Urgency: low = inert ink, normal = subtle accent, critical = alert-critical + glyph */
+.notification.low .notification-background {
+    border-color: @edge-20;
+}
+
+.notification.normal .notification-background {
+    border-color: @edge-30;
+}
+
+.notification.critical .notification-background {
+    border-color: @alert-critical-border;
+    background: @alert-critical-bg;
+}
+
+.notification.critical .summary {
+    color: @alert-critical;
+}
+
+.notification-action,
+.notification-default-action {
+    background: @void-10;
+    color: @ink-2;
+    border: 1px solid @edge-20;
+    border-radius: 0;
+}
+
+.notification-action:hover,
+.notification-default-action:hover {
+    background: @edge-20;
+    color: @ink-0;
+}
+
+.close-button {
+    background: @void-10;
+    color: @ink-3;
+    border-radius: 0;
+}
+
+.close-button:hover {
+    background: @alert-critical-bg;
+    color: @alert-critical;
+}
+
+/* Control center */
+.control-center {
+    background: @void-20;
+    border: 1px solid @edge-20;
+}
+
+.widget-title {
+    color: @ink-0;
+    background: @void-20;
+}
+
+.widget-title > button {
+    background: @void-10;
+    color: @ink-2;
+    border: 1px solid @edge-20;
+    border-radius: 0;
+}
+
+.widget-dnd {
+    color: @ink-2;
+}
+
+.widget-buttons-grid > flowbox > flowboxchild > button {
+    background: @void-10;
+    color: @ink-2;
+    border: 1px solid @edge-20;
+    border-radius: 0;
+}
+
+.widget-buttons-grid > flowbox > flowboxchild > button:hover {
+    background: @edge-20;
+}
+
+/* Focus/active/selected = Ice, per RICE-GUIDE.md role table */
+.widget-buttons-grid > flowbox > flowboxchild > button.toggle:checked {
+    background: @ice-800;
+    color: @ink-0;
+    border-color: @ice-400;
+}

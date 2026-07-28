@@ -1,22 +1,18 @@
-@import url("../theme/voidashi-colors.css");
-/* Voidashi theme. Previous (Cachy) colors preserved in style.kanagawa.css. */
-
 * {
 	background-image: none;
 	box-shadow: none;
 }
 
-/* Confirmation overlay -- void-30, per RICE-GUIDE.md surface hierarchy */
 window {
-	background-color: alpha(@void-30, 0.92);
+	background-color: rgba(24, 22, 22, 0.902); /* cachydblue with alpha */
 }
 
 button {
     border-radius: 0;
-    border-color: @edge-30;
-	text-decoration-color: @ink-2;
-    color: @ink-2;
-	background-color: @void-20;
+    border-color: #c5c9c5; /* cachydgreen */
+	text-decoration-color: #c5c9c5; /* cachywhite */
+    color: #c5c9c5; /* cachywhite */
+	background-color: #181616; /* cachydblue */
 	border-style: solid;
 	border-width: 1px;
 	background-repeat: no-repeat;
@@ -24,11 +20,8 @@ button {
 	background-size: 25%;
 }
 
-/* Focus/active/selected = Ice, per RICE-GUIDE.md role table */
 button:focus, button:active, button:hover {
-	background-color: @ice-800;
-	border-color: @ice-400;
-	color: @ink-0;
+	background-color: #252424; /* cachymgreen */
 	outline-style: none;
 }
 

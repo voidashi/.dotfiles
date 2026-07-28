@@ -1,15 +1,11 @@
-@import url("../../theme/voidashi-colors.css");
-/* Voidashi theme. Previous (Kanagawa) colors preserved in style.kanagawa.css. */
-
 * {
-    font-family: "Iosevka Extended", "Hack Nerd Font", monospace;
+    font-family: "Inter", "Ubuntu", "RobotoMono", "Hack Nerd Font", FontAwesome, Roboto, Helvetica, Arial, sans-serif;
     font-size: 14px;
 }
 
 window#waybar {
-    background-color: @void-10;
-    color: @ink-3;
-    border-bottom: 1px solid @edge-20;
+    background-color: #181616;
+    color: #ffffff;
 }
 
 window#waybar.hidden {
@@ -29,31 +25,28 @@ button {
 }
 
 button:hover {
-    background: @void-20;
+    background: inherit;
 }
 
 #workspaces button {
     background-color: transparent;
-    color: @ink-3;
+    color: #ffffff;
     padding-left: 0px;
     padding-right: 0px;
     margin-right: 3px;
 }
 
 #workspaces button:hover {
-    background: @void-20;
+    background: rgba(255, 255, 255, 0.1);
 }
 
-/* Focus/active/selected = Ice (RICE-GUIDE.md role table) */
 #workspaces button.active {
-    background-color: @ice-800;
-    color: @ink-0;
+    background-color: rgba(255, 255, 255, 0.2);
     border: none;
 }
 
 #workspaces button.urgent {
-    background-color: @alert-critical;
-    color: @ink-0;
+    background-color: #eb4d4b;
 }
 
 #clock,
@@ -75,12 +68,11 @@ button:hover {
 #power-profiles-daemon,
 #mpd {
     padding: 0 10px;
-    color: @ink-3;
+    color: #ffffff;
 }
 
 #window {
     background-color: transparent;
-    color: @ink-2;
 }
 
 #workspaces {
@@ -96,10 +88,9 @@ button:hover {
     margin-right: 0;
 }
 
-/* Attention state: Alert tones + the module keeps its glyph from the config */
 #battery.critical:not(.charging) {
-    background-color: @alert-critical;
-    color: @ink-0;
+    background-color: #f53c3c;
+    color: #ffffff;
     animation-name: blink;
     animation-duration: 0.5s;
     animation-timing-function: steps(12);
@@ -108,19 +99,12 @@ button:hover {
 }
 
 #custom-notification {
-    font-family: "Hack Nerd Font";
-    color: @ink-3;
-}
-
-/* Resize submap indicator -- an active mode with consequence */
-#mode {
-    color: @alert-caution;
-    border-bottom: 2px solid @alert-caution;
+    font-family: "NotoSansMono Nerd Font";
 }
 
 @keyframes blink {
     to {
-        background-color: @ink-0;
-        color: @void-10;
+        background-color: #ffffff;
+        color: #181616;
     }
 }

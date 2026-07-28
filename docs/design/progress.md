@@ -62,7 +62,55 @@ Validado com os comandos do `CLAUDE.md`: kitty via `+runpy` (`bad_lines: []`),
 
 ## 3 — GTK CSS: waybar/wofi/wlogout + bring-up do swaync
 
-**Status:** pendente
+**Status:** concluído
+
+Conteúdo anterior (Kanagawa/Cachy) de cada CSS preservado como `style.kanagawa.css`
+irmão, antes de reescrever o arquivo ativo com `@import` do partial compartilhado.
+
+**Papéis aplicados** (modelo corrigido — foco/ativo/selecionado = Ice, não Bordeaux):
+- waybar: `void-10` fundo da barra, `edge-20` borda, módulos em `ink-3` em repouso,
+  workspace ativo em `ice-800`/`ice-400`, urgente/crítico em `alert-critical`, submap do
+  Hyprland (`#mode`) em `alert-caution` (é um modo com consequência, não um erro).
+- wofi: `void-20` lista, `void-30` campo de busca (um degrau mais claro, conforme
+  `RICE-GUIDE.md`), item selecionado em `ice-700` + texto `ink-0`.
+- wlogout: overlay em `void-30` com leve transparência (`alpha(@void-30, 0.92)`), botão em
+  `void-20`, hover/focus em `ice-800`/`ice-400` (foco = Ice).
+- swaync (arquivo novo, `style.css` não existia antes): superfície `void-20`, borda
+  `edge-20` normal / `alert-*-border` por urgência, crítico usa `alert-critical-bg` +
+  `alert-critical` no texto.
+
+**Achados fora do escopo estrito de cor:**
+- Trocar a fonte da barra pra Iosevka Extended (pedido pelo `RICE-GUIDE.md` — mono virou a
+  voz primária, inclusive em módulos de barra) estourou a altura mínima da `waybar`
+  (`Requested height: 30 is less than the minimum height: 32`). Subi `"height"` de 30 pra
+  32 nas três configs — efeito colateral direto e trivial da troca de tipografia, não uma
+  mudança funcional.
+- `.config/waybar/style.css`/`floating/style.css` tinham `window#waybar { background-color:
+  rgba(0, 0, 0, 0); }` — bar totalmente transparente. `RICE-GUIDE.md` diz explicitamente
+  "Bars and panels: opaque, or at most ~92% opacity" (transparência pesada é o efeito mais
+  "digital" que existe, contraria o princípio material-sobre-digital). Mudei pra `void-10`
+  opaco.
+
+**Pegadinha de validação encontrada:** testar o wofi com `--style <caminho do repo>`
+explícito quebra a resolução do `@import` relativo (ele resolve pra um caminho errado,
+tipo `/home/jeff/theme/...` em vez de `.../theme/...`). Rodando `wofi` sem flags (via o
+symlink real `~/.config/wofi` → repo, que é como ele roda de verdade) o import relativo
+funciona normal. Não decifrei a causa exata — só documentando pra não perder tempo com
+isso de novo. Por causa disso, a validação real de CSS GTK passou a ser feita direto via
+`Gtk.CssProvider` em Python (`gi.repository.Gtk`), não pelas flags de cada app — mais
+confiável e não depende de como cada app resolve o caminho internamente.
+
+**Bring-up do swaync:** criado `.config/swaync/style.css` do zero. Adicionado
+`~/.config/theme` e `~/.config/swaync` ao `config_files.conf`, rodado
+`scripts/backup-configs.sh install` (dry-run primeiro) pra symlinkar os dois de verdade —
+não existiam em `$HOME` antes, então foi criação pura, nada sobrescrito. O swaync que já
+estava rodando ao vivo recebeu `swaync-client --reload-css` e confirmou
+`CSS reload success: true` — já está no tema novo agora, sem precisar reiniciar o daemon.
+
+**Waybar (a barra que está de fato na tela agora) não foi recarregada ao vivo ainda** —
+deixei pra fazer isso numa passada só, depois que o Hyprland (etapa 4) também estiver
+pronto, pra não deixar a tela num estado misto (barra nova + bordas de janela antigas) no
+meio do trabalho.
 
 ## 4 — Hyprland: `palette.lua` + bordas em `appearance.lua`
 

@@ -1,27 +1,32 @@
+@import url("../theme/voidashi-colors.css");
+/* Voidashi theme. Previous (Cachy) colors preserved in style.kanagawa.css. */
+
 * {
-    font-family: "Hack", monospace;
+    font-family: "Iosevka Extended", "Hack Nerd Font", monospace;
 }
 
 window {
-    background-color: #007d6f; /* cachydgreen */
+    background-color: @void-20;
 }
 
+/* Input field sits one step lighter than the list, per RICE-GUIDE.md */
 #input {
     margin: 5px;
     border-radius: 0px;
     border: none;
-    background-color: #111826; /* cachydgreen */
-    color: #ffffff; /* cachywhite */
+    background-color: @void-30;
+    color: @ink-0;
 }
 
 #inner-box {
-    background-color: #111826; /* cachydblue */
+    background-color: @void-20;
 }
 
 #outer-box {
     margin: 2px;
     padding: 10px;
-    background-color: #111826; /* cachydblue */
+    background-color: @void-20;
+    border: 1px solid @edge-20;
 }
 
 #scroll {
@@ -30,15 +35,20 @@ window {
 
 #text {
     padding: 4px;
-    color: #ffffff; /* cachywhite */
+    color: @ink-2;
 }
 
-#entry:nth-child(even){
-    background-color: #182545; /* cachymblue */
+#entry:nth-child(even) {
+    background-color: @void-30;
 }
 
+/* Selected entry = Ice (RICE-GUIDE.md role table: focus/active/selected) */
 #entry:selected {
-    background-color: #00aa84; /* cachymgreen */
+    background-color: @ice-700;
+}
+
+#entry:selected #text {
+    color: @ink-0;
 }
 
 #text:selected {

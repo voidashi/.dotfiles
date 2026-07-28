@@ -1,16 +1,18 @@
+@import url("../../theme/voidashi-colors.css");
+/* Voidashi theme. Previous (Kanagawa) colors preserved in style.kanagawa.css. */
+
 /* Base styles */
 * {
-    /* Font configuration */
-    font-family: "Inter", "Ubuntu", "RobotoMono", "Hack Nerd Font", FontAwesome, Roboto, Helvetica, Arial, sans-serif;
+    font-family: "Iosevka Extended", "Hack Nerd Font", monospace;
     font-size: 14px;
-    border-radius: 5px;
+    border-radius: 0;
     padding: 0 8px;
 }
 
-/* Waybar window */
+/* Waybar window -- opaque per RICE-GUIDE.md (bars stay opaque, never glass) */
 window#waybar {
-    background-color: rgba(0, 0, 0, 0);
-    color: #ffffff;
+    background-color: @void-10;
+    color: @ink-3;
     transition-property: background-color;
     transition-duration: .5s;
 }
@@ -33,11 +35,11 @@ window#waybar.empty #window {
 
 /* Application-specific styles */
 window#waybar.termite {
-    background-color: #181616;
+    background-color: @void-10;
 }
 
 window#waybar.chromium {
-    background-color: #181616;
+    background-color: @void-10;
     border: none;
 }
 
@@ -49,7 +51,7 @@ button {
 }
 
 button:hover {
-    background: inherit;
+    background: @void-20;
 }
 
 /* Module spacing and alignment */
@@ -67,31 +69,35 @@ button:hover {
 }
 
 #workspaces button {
-    background-color: #181616;
-    color: #ffffff;
-    border-radius: 5px;
+    background-color: @void-20;
+    color: @ink-3;
+    border-radius: 0;
     padding: 0 0px;
     margin-right: 3px;
 }
 
 #workspaces button:hover {
-    background: rgba(0, 0, 0, 0.8);
+    background: @edge-20;
 }
 
+/* Focus/active/selected = Ice (RICE-GUIDE.md role table) */
 #workspaces button.active {
-    background-color: #393836;
-    border: 2px solid #FFFFFF;
+    background-color: @ice-800;
+    color: @ink-0;
+    border: 2px solid @ice-400;
 }
 
 #workspaces button.urgent {
-    background-color: #aaaaaa;
+    background-color: @alert-critical;
+    color: @ink-0;
 }
 
 /* Window module */
 #window {
-    background-color: #181616;
+    background-color: @void-10;
     padding: 0 8px;
     margin: 0 4px;
+    color: @ink-2;
 }
 
 /* System modules common styles */
@@ -112,8 +118,8 @@ button:hover {
 #idle_inhibitor,
 #scratchpad,
 #mpd {
-    background-color: #181616;
-    color: #ffffff;
+    background-color: @void-20;
+    color: @ink-3;
     padding: 0 8px;
     margin: 0 2px;
 }
@@ -145,20 +151,21 @@ button:hover {
 
 /* Battery states */
 #battery.charging, #battery.plugged {
-    color: #FFFFFF;
-    background-color: #181616;
+    color: @ink-0;
+    background-color: @void-20;
 }
 
 @keyframes blink {
     to {
-        background-color: #ffffff;
-        color: #181616;
+        background-color: @ink-0;
+        color: @void-10;
     }
 }
 
+/* Attention state: Alert tones */
 #battery.critical:not(.charging) {
-    background-color: #f53c3c;
-    color: #ffffff;
+    background-color: @alert-critical;
+    color: @ink-0;
     animation-name: blink;
     animation-duration: 0.5s;
     animation-timing-function: steps(12);
@@ -169,17 +176,17 @@ button:hover {
 /* Custom modules */
 #custom-power {
     margin-right: 8px;
-    background-color: #181616;
+    background-color: @void-20;
 }
 
 #custom-media {
     min-width: 100px;
-    background-color: #181616;
+    background-color: @void-20;
 }
 
 /* Tray */
 #tray {
-    background-color: #181616;
+    background-color: @void-20;
 }
 
 #tray > .passive {
@@ -188,24 +195,24 @@ button:hover {
 
 #tray > .needs-attention {
     -gtk-icon-effect: highlight;
-    background-color: #eb4d4b;
+    background-color: @alert-critical;
 }
 
 /* MPD states */
 #mpd {
-    background-color: #181616;
+    background-color: @void-20;
 }
 
 #mpd.disconnected {
-    background-color: #181616;
+    background-color: @void-20;
 }
 
 #mpd.stopped {
-    background-color: #181616;
+    background-color: @void-20;
 }
 
 #mpd.paused {
-    background-color: #181616;
+    background-color: @void-20;
 }
 
 /* Privacy indicators */
@@ -215,34 +222,35 @@ button:hover {
 
 #privacy-item {
     padding: 0 5px;
-    color: white;
+    color: @ink-2;
 }
 
 #privacy-item.screenshare {
-    background-color: #181616;
+    background-color: @void-20;
 }
 
 #privacy-item.audio-in {
-    background-color: #181616;
+    background-color: @void-20;
 }
 
 #privacy-item.audio-out {
-    background-color: #181616;
+    background-color: @void-20;
 }
 
-/* Hover effects for modules */
+/* Hover effects for modules -- neutral surface hover, not a semantic color */
 #pulseaudio:hover {
-    background-color: #a37800;
+    background-color: @edge-20;
 }
 
-/* Additional specific module styles */
+/* Additional specific module styles -- resize submap, an active mode with consequence */
 #mode {
-    background-color: #181616;
-    border-bottom: 3px solid #ffffff;
+    background-color: @void-20;
+    border-bottom: 3px solid @alert-caution;
+    color: @alert-caution;
 }
 
 #scratchpad {
-    background: rgba(0, 0, 0, 0.2);
+    background: @void-20;
 }
 
 #scratchpad.empty {
