@@ -149,7 +149,7 @@
     "custom/power": {
         "format": "<span size=\"110%\"></span>",
         "tooltip": false,
-        "on-click": "wlogout"
+        "on-click": "$HOME/.dotfiles/scripts/wm/power_menu.sh"
     },
     // The dot marking unread notifications is alert-critical from the palette,
     // not the literal keyword 'red' this module shipped with.

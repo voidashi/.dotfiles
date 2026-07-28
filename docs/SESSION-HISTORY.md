@@ -119,7 +119,20 @@ dims. The module also takes click to play/pause and scroll to change track.
 
 wlogout's buttons were still lavender PNGs loaded from absolute `/home/jeff` paths — raster
 images the palette could never reach, which is how they survived the retheme untouched. The
-glyphs are text in the `layout` file now.
+glyphs are text in the `layout` file now, and the menu was redesigned around that: a centred
+vertical list of six labelled rows rather than a grid of tiles, ordered by escalating
+consequence with reboot and shutdown last.
+
+Two constraints shaped it. wlogout renders each label on a single line, so a `\n` between
+glyph and label arrives as a visible control-character box — glyph and label share a line by
+necessity. And its geometry is CLI-only, with no config-file equivalent, so
+`scripts/wm/power_menu.sh` holds it and derives the margins from the focused output's
+resolution. That is the opposite of the swaylock lesson recorded in `CLAUDE.md`, where the
+wrapper was the bug; here there is nothing for flags to override.
+
+The design was iterated against real screenshots rather than by eye, using a throwaway copy
+of the layout with every action replaced by `true` — a power menu is not something to open
+speculatively next to a keyboard someone is typing on.
 
 ## Open items carried forward
 

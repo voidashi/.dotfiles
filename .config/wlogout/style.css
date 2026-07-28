@@ -8,58 +8,60 @@
    The buttons used to carry their icons as PNG background-images from
    wlogout/icons/. Those were lavender -- a colour from no Voidashi scale --
    loaded through absolute /home/jeff paths that break on any other machine,
-   and being raster they could not follow the palette at all. The glyphs now
-   come from the layout file as text, so they inherit `color` like everything
+   and being raster they could not follow the palette at all. The glyphs come
+   from the layout file as text now, so they inherit `color` like anything
    else. The PNGs are kept in icons/ as a rollback reference, unreferenced.
 
-   Per RICE-GUIDE.md, "Lockscreen, greeter, fetch": this is a full-screen
-   surface, so it takes spacious density rather than the compact spacing the
-   bar uses. */
+   The shape is a centred vertical list, not the default grid of tiles: six
+   labelled rows ordered by escalating consequence. Geometry comes from
+   scripts/wm/power_menu.sh, since wlogout accepts it only as CLI flags --
+   launch through that wrapper, not through `wlogout` directly.
+
+   Note that wlogout renders each button's label on a single line: a \n in the
+   layout's text field comes through as a visible control-character box, not a
+   line break. Glyph and label share one line by necessity. */
 
 * {
     background-image: none;
     box-shadow: none;
     text-shadow: none;
-    /* GTK app UI = Instrument Sans (RICE-GUIDE.md "GTK / Qt application
+    /* GTK app UI = Instrument Sans (RICE-GUIDE.md, "GTK / Qt application
        theming"); Hack Nerd Font supplies the action glyphs. */
     font-family: "Instrument Sans", "Hack Nerd Font", monospace;
 }
 
-/* The overlay sits over whatever was on screen. void-00 rather than the
-   void-30 used before: this is the darkest moment on the desktop, and the
-   buttons need to read as lit surfaces above it. */
+/* The darkest moment on the desktop. Near-opaque rather than fully opaque:
+   enough of the session shows through to remember what you are leaving,
+   not enough to compete with the list. */
 window {
-    background-color: alpha(@void-00, 0.94);
+    background-color: rgba(10, 9, 8, 0.97);
 }
 
 button {
-    margin: 12px;
     border-radius: 0;
-    border-style: solid;
-    border-width: 1px;
-    border-color: @edge-20;
-    background-color: @void-20;
+    border: 1px solid @edge-20;
+    background-color: @void-10;
     color: @ink-3;
-    font-size: 20px;
+    font-size: 17px;
     font-weight: 500;
-    /* No background-image: the glyph is text now, set in the layout file. */
     background-image: none;
 }
 
 /* Focus/active/selected = Ice (RICE-GUIDE.md role table). Keyboard focus and
-   hover are the same state here -- both mean "this is what Enter will do". */
+   hover are one state here: both mean "this is what Enter will do". */
 button:focus,
 button:active,
 button:hover {
-    background-color: @ice-800;
+    background-color: @void-20;
     border-color: @ice-400;
     color: @ink-0;
     outline-style: none;
 }
 
-/* The two actions that destroy running state announce themselves on approach.
-   Colour is not carrying this alone -- each button keeps its own glyph and
-   label -- it only raises the cost of the one you are about to pick. */
+/* The two actions that destroy running state announce themselves on approach,
+   and sit last in the list for the same reason. Colour is not carrying this
+   alone -- each row keeps its glyph and label -- it raises the cost of the
+   one you are about to pick. */
 #shutdown:focus,
 #shutdown:active,
 #shutdown:hover,
