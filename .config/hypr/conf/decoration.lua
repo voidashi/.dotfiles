@@ -4,7 +4,9 @@
 -- https://wiki.hypr.land/Configuring/Basics/Variables/
 hl.config({
     decoration = {
-        rounding = 10,
+        -- Voidashi: "Sharp corners. Zero border radius wherever it can be set"
+        -- is a non-negotiable (CLAUDE.md); was 10 (Kanagawa Dragon).
+        rounding = 0,
 
         active_opacity = 1.0,
         inactive_opacity = 1.0,
@@ -21,7 +23,8 @@ hl.config({
             enabled = true,
             range = 4,
             render_power = 3,
-            color = "rgba(1a1a1aee)",
+            -- void-00, not an invented gray (was rgba(1a1a1aee))
+            color = "rgba(0a0908ee)",
         },
     },
 })

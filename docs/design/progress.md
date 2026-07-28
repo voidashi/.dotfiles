@@ -241,9 +241,82 @@ próprio fish, "don't edit this file") ficaram intocados. Criado
 nenhum `fish_color_*` em escopo universal que pudesse sobrescrever isso por baixo dos
 panos. Testado com `fish -c` de verdade (startup limpo, variáveis com os valores certos).
 
-## 6 — Docs: nota no `CLAUDE.md`, linha nova em `rice.md` §13, checklist §15
+## 6 — Docs e auditoria final
 
-**Status:** pendente
+**Status:** concluído
+
+A checklist numerada §15 do `rice.md` antigo **não existe mais** na versão reescrita
+(`RICE-GUIDE.md`) — o documento novo não tem uma seção de checklist formal, só os
+"Non-negotiables"/"Scope discipline"/"When something is unspecified" no `CLAUDE.md` e a
+lista de "Anti-patterns" no próprio `RICE-GUIDE.md`. Fiz a auditoria contra essas duas
+listas em vez da checklist antiga, item por item, e reporto o resultado abaixo.
+
+### Docs atualizados
+
+- `CLAUDE.md`: nova entrada em "Repo layout" para `scripts/theme/`; novo parágrafo
+  "Propagation" na seção "Visual identity" apontando pro mecanismo.
+- `RICE-GUIDE.md`: linha nova na tabela de tipografia esclarecendo que "bar modules" na
+  linha do Mono-primary significa uma barra que renderiza o próprio texto fora de um
+  toolkit — não uma barra GTK como o waybar, que usa a linha GTK/Qt (Instrument Sans).
+  Registra por escrito a correção que o Jeff fez ao vivo na etapa 3/4.
+
+### Auditoria final contra Non-negotiables + Anti-patterns
+
+**3 bugs reais encontrados e corrigidos nesta auditoria** (não faziam parte do escopo
+original de nenhuma etapa — só apareceram ao checar sistematicamente contra as regras
+não-negociáveis):
+
+1. **`decoration.lua` tinha `rounding = 10`** — nunca tinha sido tocado em nenhuma etapa
+   anterior. Viola diretamente "Sharp corners. Zero border radius wherever it can be set."
+   Corrigido pra `0`. De quebra, a cor da sombra (`rgba(1a1a1aee)`) também era um cinza
+   inventado, não um token da paleta — trocada por `rgba(0a0908ee)` (void-00).
+2. **A curva bezier `myBezier` em `animations.lua` tinha overshoot matemático**
+   (`{0.15, 1.1}` — Y acima de 1). Viola "No bounce, spring, or overshoot animation."
+   Trocada pela curva padrão documentada no `RICE-GUIDE.md`
+   (`cubic-bezier(.4,0,.2,1)` → `{0.4, 0}, {0.2, 1}`). O estilo `"popin 80%"` também saiu
+   do `windowsOut` — o próprio `RICE-GUIDE.md` cita "popin" pelo nome como um dos termos
+   que curvas de overshoot recebem em compositores.
+3. **Tamanho de fonte inconsistente entre terminais** — só o `foot` tinha `size=12`
+   explícito; kitty/ghostty/alacritty ficariam cada um no seu próprio default (que não
+   necessariamente batem). Viola "Keep terminal font size consistent across every
+   emulator... different sizes... is the same failure as different ANSI." Adicionado
+   `font_size 12.0` / `font-size = 12` / `size = 12` nos três, igualando ao foot.
+
+Todos os três corrigidos e revalidados com os checkers de cada app; o Hyprland foi
+recarregado ao vivo de novo (`hyprctl reload` → `configerrors` vazio →
+`hyprctl getoption decoration:rounding` confirma `0`).
+
+**Auditoria programática de hex ("never invent a colour"):** extraí todo hex de 6
+dígitos de todo arquivo tematizado (excluindo os `*.kanagawa.css`/`*.legacy` de
+rollback) e cross-referenciei contra os 78 valores do `palette.json`. Zero hex fora da
+lista — os únicos "positivos" do grep eram falsos: fragmentos dentro de comentários
+citando os valores antigos, e um artefato do regex de 6 dígitos capturando uma janela
+deslocada dentro de um `rgba(0a0908ee)` válido de 8 dígitos.
+
+**Itens verificados e OK:** ANSI idêntico nos 4 terminais (gerado da mesma fonte, por
+construção); nenhum canto arredondado sobrou em nenhum CSS/Lua tocado; nenhuma
+serifa em waybar/wofi/wlogout/swaync; no máximo dois acentos simultâneos numa view
+típica em repouso (Ice do foco de janela/workspace + Bordeaux do cursor do terminal);
+módulos de barra ficam em `ink-3` por padrão, cor só entra com estado real.
+
+**Itens não totalmente verificados / decisões conscientes de não mexer:**
+- O blink infinito do `#battery.critical` no waybar (herdado do Kanagawa, só recolorido)
+  tecnicamente colide com "no infinite loops... never in content or decoration" — mas é
+  comportamento pré-existente, não algo que eu introduzi, e removê-lo seria mudança
+  funcional fora do escopo de "theming" (`CLAUDE.md`: "does not change... functional
+  options"). Sinalizando em vez de decidir por conta própria.
+- swaync: não configurei `config.json` (só `style.css`), então não sei se o glifo por
+  urgência já vem por padrão do swaync ou precisaria de config explícita — "estado sem
+  glifo" é um anti-padrão nomeado, mas isso está fora do que toquei nesta leva.
+- Blur do Hyprland continua ligado (`size=5, passes=1`, já era um valor pequeno). O guia
+  diz "avoid" (não "never") e permite blur pequeno quando a superfície compensa — não
+  mexi, é uma chamada de julgamento eu prefiro não fazer sem perguntar.
+- Padding entre os 4 terminais não foi verificado/igualado — nenhum dos 4 tinha padding
+  explícito antes ou depois, então não é uma regressão minha, mas também não é uma
+  garantia de consistência visual real.
+- `dunst.conf` continua órfão e intocado (mesmo tratamento do `hyprpaper.conf`, ainda sem
+  decisão do Jeff).
+- Wallpaper e tema do Neovim continuam fora do escopo desta leva, por acordo explícito.
 
 ---
 

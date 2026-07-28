@@ -15,3 +15,5 @@ opacity = 0.9
 # Mono primary voice (RICE-GUIDE.md); glyph fallback is automatic via fontconfig.
 [font]
 normal = { family = "Iosevka Extended" }
+size = 12
+# Matches every other terminal in the repo.

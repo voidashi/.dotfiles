@@ -8,5 +8,7 @@ window-padding-color = background
 # Mono primary voice (RICE-GUIDE.md); repeated font-family stacks as fallback.
 font-family = "Iosevka Extended"
 font-family = "Hack Nerd Font"
+# Matches every other terminal in the repo.
+font-size = 12
 
 shell-integration = fish
