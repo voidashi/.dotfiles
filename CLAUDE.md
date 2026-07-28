@@ -70,3 +70,54 @@ nvim --headless "+checkhealth vim.deprecated" +qa
 ```
 
 For Neovim, note that lazy-loaded plugins won't surface their deprecations until actually loaded — run the relevant command (e.g. `+Telescope find_files`) before `checkhealth`, or you'll get a false all-clear.
+
+
+---
+
+## Visual identity
+
+This repository follows a personal design identity called **Voidashi**. Any work that
+changes how something *looks* — colours, fonts, spacing, borders, animation, wallpaper,
+themes — must follow it.
+
+**Read `docs/design/RICE-GUIDE.md` before making any visual change.** It is the
+authoritative document for desktop work and contains the palette, the canonical ANSI
+mapping, and the rules for how colour is assigned.
+
+| Document | When to read it |
+|---|---|
+| `docs/design/RICE-GUIDE.md` | **Always**, before any theming or visual change |
+| `docs/design/AESTHETIC-DIRECTION.md` | When a judgement call is not covered by the rules and you need to know what the system is trying to feel like |
+| `docs/design/DESIGN-SYSTEM.md` | Canonical token reference; also when the task is web/document work rather than desktop |
+
+For desktop work, `RICE-GUIDE.md` overrides `DESIGN-SYSTEM.md` wherever they differ.
+
+### Non-negotiables
+
+These hold for every visual change, without needing to re-read the guide:
+
+- **Darkness is warm-neutral charcoal, never blue-black.** Backgrounds come from the
+  `void-*` scale. A background that reads as blue is a bug.
+- **Never invent a colour.** Every hex must come from the palette in `RICE-GUIDE.md`. If
+  a role is not covered, use the nearest token and say so, or ask.
+- **Sharp corners.** Zero border radius wherever it can be set.
+- **No neon, glow, vibrant gradients, or RGB effects.**
+- **No bounce, spring, or overshoot animation.** No infinite loops outside loaders.
+- **Colour never carries state alone** — a coloured status always has a glyph too.
+- **ANSI is identical across every terminal and TUI**, taken verbatim from the guide's
+  mapping table.
+- **Consistency within a class.** After changing one terminal, bar, or launcher, the
+  others of the same kind must match.
+
+### Scope discipline
+
+A theming task changes colours, fonts, padding, borders, and radii. It does not change
+keybindings, module ordering, scripts, or functional options. If a functional change is
+genuinely required to reach a visual goal, raise it separately instead of folding it in.
+
+### When something is unspecified
+
+The guide deliberately leaves per-application decisions open. Make the call, then state
+the assumption in one line so it can be corrected — do not stall on it, and do not
+silently invent a rule that will then propagate.
+
