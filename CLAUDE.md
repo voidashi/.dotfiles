@@ -48,7 +48,9 @@ All three scripts resolve their `.conf` files from the script's own location (`S
   - Formatting on save belongs to conform.nvim only; don't also add an LSP format-on-save autocmd or files get formatted twice.
 - **Fish (`.config/fish/`)**: `config.fish` is the entry point; `conf.d/*.fish` files autoload (colorscheme/theme/keybinding files are split out there). `fish_variables` is fish's own generated state file, not meant to be hand-edited.
 - Multiple terminal emulators (Ghostty, Alacritty, Kitty, Foot) and both Hyprland and Sway window managers are configured in parallel — when changing shared theming (colors, fonts), check whether the change needs to be mirrored across all of them rather than assuming one canonical source.
-- **Waybar has three configs**: `fixed/` is the one Hyprland actually launches; `config.jsonc` and `floating/` are alternates that drift out of sync (they kept a `hyprland/mode` module long after `fixed/` was corrected to `hyprland/submap`). Change all three, or knowingly don't.
+- **Waybar has three configs**: `fixed/` is the one Hyprland actually launches; `config.jsonc` and `floating/` are alternates that drift out of sync (they kept a `hyprland/mode` module long after `fixed/` was corrected to `hyprland/submap`, and all three carried a dead `battery#bat2` module pointed at a battery this machine doesn't have — check `ls /sys/class/power_supply/` before trusting a hardcoded `bat` name). Change all three, or knowingly don't.
+- **GTK3 CSS (wofi, and anything else themed this way) rejects 8-digit hex colors** (`#RRGGBBAA`) on the `color` property — "Junk at end of value for color" on every launch. Use 6-digit hex or `rgba()` for alpha instead.
+- **Orphaned configs kept intentionally**: `.config/hypr/hyprpaper.conf` is untouched by choice (Jeff wants it as a reference in case he switches back from swaybg); `.config/dunst/` looks similarly orphaned — Hyprland's autostart kills `mako` and starts `swaync`, with no mention of dunst and no dunst process running live, but this hasn't been explicitly decided yet. Don't delete either without asking first.
 - **Wallpapers**: `scripts/wm/select_random_wallpaper.sh` takes a list of directories and uses the first containing images — `~/Pictures/Current_wallpapers` (rotation), `~/Pictures/Wallpapers` (full library), then `wallpapers/` in this repo as the fallback that makes a fresh clone work. The personal folders are deliberately untracked. The script must print errors to **stderr**: callers embed it in `$(...)` and pass the result to `swaybg` as a filename.
 - The lock screen is plain `swaylock`, themed entirely by `.config/swaylock/config`. Don't reintroduce a wrapper script passing the same options as CLI flags — flags override the config file, which is how the committed theme silently stopped applying.
 
@@ -62,7 +64,7 @@ sway --validate -c .config/sway/config
 foot --check-config -c .config/foot/foot.ini
 ghostty +validate-config --config-file=.config/ghostty/config
 alacritty migrate --dry-run -c <file>     # flags deprecated syntax
-kitty --debug-config -c .config/kitty/kitty.conf
+kitty +runpy "from kitty.config import load_config; bad=[]; load_config('.config/kitty/kitty.conf', accumulate_bad_lines=bad); print(bad)"  # [] == clean; --debug-config no longer exists (gone by 0.48.1)
 waybar -c <config> -s <style>             # warns about unknown modules
 nvim --headless "+checkhealth vim.deprecated" +qa
 ```
