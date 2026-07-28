@@ -12,5 +12,8 @@ terminal = "kitty"
 -- fileManager = "dolphin"
 fileManager = "cosmic-files"
 
--- menu = "wofi --show drun"
-menu = "hyprlauncher"
+-- hyprlauncher is themed through .config/hypr/hyprtoolkit.conf rather than any
+-- config of its own -- that file stays in place, so switching back is a matter
+-- of swapping these two lines.
+-- menu = "hyprlauncher"
+menu = "wofi --show drun"

@@ -20,10 +20,10 @@ repo is fully finished.
   config. What still needs judging in daily use: whether the glyphs are the right size
   now, whether the numerals actually beat the old icons, and whether the right-hand
   modules want a separator between them or should stay spaced only.
-- **wofi is no longer the launcher.** `conf/programs.lua` binds `mainMod+R` to
-  `hyprlauncher`; the wofi line above it is commented out. wofi is themed and working, but
-  nothing launches it — decide whether to keep it as a fallback or drop it from
-  `config_files.conf` and `packages.conf`.
+- **hyprlauncher is themed but not in use.** `conf/programs.lua` binds `mainMod+R` to wofi;
+  the hyprlauncher line above it is commented out. Its theme lives in
+  `.config/hypr/hyprtoolkit.conf` and is kept so switching back is a one-line change —
+  that file themes any hyprtoolkit application, not just this one.
 
 ## Recently closed
 

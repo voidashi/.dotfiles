@@ -52,11 +52,12 @@ rules; this is just state tracking. Repo-wide (non-theme) history is in
   every GTK app — Regular thins out on surfaces this dark. Both live in `palette.json`
   under `geometry`; Hyprland and swaync read them, while GTK3 apps (waybar, wofi, wlogout)
   carry the literal because GTK3 has no CSS custom properties.
-- **hyprlauncher is themed through the toolkit, not through itself.** It is the launcher
-  actually bound to `mainMod+R`, and it has no colour options: its own config covers
-  behaviour only (`general:grab_focus`, `ui:window_size`, `finders:*`). Appearance comes
-  from hyprtoolkit, which reads `.config/hypr/hyprtoolkit.conf` — a new file, top-level
-  keys, no sections. Roles follow the launcher entry in the guide: void-20 surface, the
+- **hyprlauncher is themed through the toolkit, not through itself.** It has no colour
+  options: its own config covers behaviour only (`general:grab_focus`, `ui:window_size`,
+  `finders:*`). Appearance comes from hyprtoolkit, which reads
+  `.config/hypr/hyprtoolkit.conf` — a new file, top-level keys, no sections. The launcher
+  on `mainMod+R` is wofi; the hyprlauncher theme is kept because that file covers any
+  hyprtoolkit application and makes switching back a one-line change. Roles follow the launcher entry in the guide: void-20 surface, the
   input one step lighter, Ice for selection, Bordeaux as the identity mark, radius 0.
 - **swaync now has a `config.json`**, which it never had — it had been running entirely on
   `/etc/xdg` defaults, so nothing about it was a deliberate choice. Its stylesheet was also
