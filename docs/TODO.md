@@ -20,6 +20,21 @@ repo is fully finished.
 - **Waybar's battery-critical blink** is an infinite-loop animation inherited from the old
   theme (only recolored, not reconsidered) — technically reads as an anti-pattern. Decide
   whether to keep it, tone it down, or replace with a non-looping treatment.
+- **Waybar icons should be bigger.** The current font size feels counter-intuitive: When writing the code, you think they'll appear good, but the
+  glyphs appear very small.
+- **Waybar design could be better.** Revisit the design and think about it better.
+- **Waybar text color could be better.**
+- **Unify or improve Waybar theme organization.** The themes are unorganized, chaotic, and very messy. Organize them better, and keep consistency.
+- **Starship icons look bad.** Evaluate the icons chosen for it.
+- **Hyprland animation time is too slow for daily workflow.** Review animation durations and
+  responsiveness across common actions.
+- **Wofi `--show drun`.** Fix the GTK theme import path and address any other programs using
+  the same theme file path issue.
+- **Wofi theme path error.** `(wofi:92862): Gtk-WARNING **: ... Failed to import: Error opening
+  file /home/theme/voidashi-colors.css: No such file or directory.` The import line is using the
+  wrong relative path and may affect other GTK apps.
+- **Hyprlauncher theme not currently exists.** Determine whether a Hyprlauncher theme can be
+  created and add it if feasible.
 - **Hyprland blur** is still on (small: `size=5, passes=1`). The guide says avoid, not
   never — worth a deliberate call rather than leaving it by default.
 - **Terminal padding** across kitty/foot/ghostty/alacritty was never checked for
