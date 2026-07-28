@@ -159,6 +159,32 @@ charcoal. Both now live in `palette.json` under `geometry`, and the generator pr
 them to Hyprland and the GTK partial. GTK3 has no CSS custom properties, so waybar, wofi
 and wlogout carry the literal with a comment pointing back at the source.
 
+## Directional window movement, and a click that never arrives
+
+Moving a window by direction turned out not to be a broken bind but a missing one:
+`conf/binds.lua` bound `SUPER + arrows` to focus and nothing to movement. `SUPER + SHIFT +
+arrows` now swaps the active window with its neighbour. `swap` rather than `move` because
+dwindle is what Jeff runs: swapping preserves the tree geometry, so the windows keep their
+sizes, while `movewindow` reinserts into the split tree and resizes things on the way. The
+`move` variant sits commented above it.
+
+Four glyphs in the waybar config were rendering as boxes, the battery-charging icon among
+them. They came from the `nf-mdi-*` range, which Nerd Fonts v3 removed, so fontconfig had
+been falling back to a font that has nothing at those codepoints. All the config's glyphs
+were checked against Hack Nerd Font, and the four were replaced with Font Awesome
+equivalents. Muting now uses the waveless speaker, which also fixes it having doubled as
+the "low volume" icon.
+
+Clicking a workspace still does nothing, and it is not our configuration. The bisect ruled
+out the stylesheet, the layer, the `persistent-workspaces` format and a missing `on-click`,
+one at a time; probes bound to every mouse button never fired, while hover highlights and
+other modules' clicks work normally. In waybar 0.15.0 those buttons appear to receive
+motion events but no button events. Parked with the evidence recorded in `docs/TODO.md`.
+Three real config defects were found and fixed on the way, none of them the cause: the bar
+was on waybar's default `bottom` layer rather than `top`, `persistent-workspaces` used a
+key form the current version reads as an output name, and a `sway/workspaces` option had
+been copied into the hyprland module.
+
 ## Open items carried forward
 
 - `.config/dunst/` is still orphaned (autostart runs `swaync`, not dunst) — same

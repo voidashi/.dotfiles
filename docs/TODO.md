@@ -13,18 +13,29 @@ and `docs/SESSION-HISTORY.md` (what happened).
 
 ## Now: things that are broken
 
-- **Workspaces are not clickable in waybar.** Clicking a workspace button does not switch
-  to it. The module has no `on-click`, and neither did the config that preceded the
-  rewrite, so this has most likely never worked rather than being a regression. Reproduce
-  first, then fix in `.config/waybar/common.jsonc`.
-  *Difficulty: low. Priority: high.*
+- **Workspaces are not clickable in waybar, and it is not our config.** A full bisect ruled
+  out everything on our side, so this is parked rather than solved. What is established:
 
-- **No bind moves a window by direction.** `SUPER + SHIFT + arrows` does nothing.
-  `conf/binds.lua` binds `SUPER + arrows` to focus only; directional window movement was
-  never bound at all, and `SUPER + SHIFT + [0-9]` covers workspaces rather than direction.
-  Add it with `hl.dsp.window.move`, checking whether the dwindle layout wants `move` or
-  `swap` for the behaviour Jeff expects.
-  *Difficulty: low. Priority: high.*
+  - Not the stylesheet. It fails identically with `/etc/xdg/waybar/style.css`.
+  - Not the layer. It fails on both `bottom` (waybar's default) and `top`.
+  - Not `persistent-workspaces`. It fails with both the legacy `{"1": [], ...}` form and
+    the documented `{"*": 5}` form.
+  - Not a missing `on-click`. Probes on `on-click`, `on-click-right`, `on-click-middle`
+    and `on-scroll-up` running `notify-send` never fired once.
+  - Not the bar's input in general. `clock` toggles and `custom/power` opens the menu, and
+    hovering a workspace button does highlight it, so the widget receives motion events.
+  - Nothing reaches Hyprland either: with `-l debug`, a click produces no dispatch line and
+    no `workspace>>` event, while a keyboard switch produces both.
+
+  So the buttons in waybar 0.15.0's `hyprland/workspaces` take motion events but no button
+  events at all, in this build. Next avenues, in order of cost: check upstream issues for
+  this version, try a different waybar build, or replace the module with a `custom` one
+  that renders and dispatches workspaces itself, which would cost the module's live
+  updates. Three genuine config defects were fixed along the way and are worth keeping
+  regardless: `layer` is now `top`, `persistent-workspaces` uses the documented form, and a
+  `disable-scroll` that belongs to `sway/workspaces` was removed.
+  *Difficulty: high, now that the cheap explanations are gone. Priority: medium, since
+  keyboard switching works and this is a convenience.*
 
 ## Next: the largest visual gap
 

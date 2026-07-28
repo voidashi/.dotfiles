@@ -42,6 +42,21 @@ hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
 hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
 hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
 
+-- Mover a janela ativa com SHIFT + setas.
+-- swap troca a janela de lugar com a vizinha e preserva a geometria da árvore
+-- do dwindle, então o resultado é o que se vê acontecer. move reinsere a janela
+-- na árvore de splits, o que recalcula proporções e faz as janelas mudarem de
+-- tamanho ao serem movidas; em compensação alcança monitores vizinhos quando
+-- não há janela na direção. Para trocar de comportamento, troque as linhas.
+-- hl.bind(mainMod .. " + SHIFT + left",  hl.dsp.window.move({ direction = "left" }))
+-- hl.bind(mainMod .. " + SHIFT + right", hl.dsp.window.move({ direction = "right" }))
+-- hl.bind(mainMod .. " + SHIFT + up",    hl.dsp.window.move({ direction = "up" }))
+-- hl.bind(mainMod .. " + SHIFT + down",  hl.dsp.window.move({ direction = "down" }))
+hl.bind(mainMod .. " + SHIFT + left",  hl.dsp.window.swap({ direction = "left" }))
+hl.bind(mainMod .. " + SHIFT + right", hl.dsp.window.swap({ direction = "right" }))
+hl.bind(mainMod .. " + SHIFT + up",    hl.dsp.window.swap({ direction = "up" }))
+hl.bind(mainMod .. " + SHIFT + down",  hl.dsp.window.swap({ direction = "down" }))
+
 -- Alternar workspaces com mainMod + [0-9]
 -- Enviar janela ativa para outro workspace com mainMod + SHIFT + [0-9]
 for i = 1, 10 do

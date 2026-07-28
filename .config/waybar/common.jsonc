@@ -24,6 +24,11 @@
     "spacing": 0,
     "margin": "0",
     "position": "top",
+    // waybar's own default for this is "bottom", meaning behind the windows:
+    // the bar still draws in its reserved strip, but pointer input goes to the
+    // window stack above it, so nothing on the bar is clickable. Every example
+    // in waybar(5) sets it to top for this reason.
+    "layer": "top",
 
     "modules-right": [
         "tray",
@@ -56,12 +61,16 @@
         "tooltip": true,
         "tooltip-format": "{app}: {title}"
     },
+    // disable-scroll is a sway/workspaces option and was copied in with the rest
+    // of that block; the hyprland module has never had it.
     "hyprland/workspaces": {
-        "disable-scroll": true,
         "all-outputs": true,
         "format": "{name}",
+        // The key is the output name (or * for all) and the value is how many
+        // workspaces to keep; the old form used the workspace name as the key,
+        // which current waybar reads as an output that does not exist.
         "persistent-workspaces": {
-            "1": [], "2": [], "3": [], "4": [], "5": []
+            "*": 5
         }
     },
     "hyprland/submap": {
@@ -90,15 +99,15 @@
         },
         "format": "{capacity}% <span size=\"110%\">{icon}</span>",
         "format-full": "{capacity}% <span size=\"110%\">{icon}</span>",
-        "format-charging": "{capacity}% <span size=\"110%\"></span>",
+        "format-charging": "{capacity}% <span size=\"110%\"></span>",
         "format-plugged": "{capacity}% <span size=\"110%\"></span>",
         "format-alt": "{time} <span size=\"110%\">{icon}</span>",
         "format-icons": ["", "", "", "", ""]
     },
     "network": {
         "format-wifi": "{essid} <span size=\"110%\"></span>",
-        "format-ethernet": "{ipaddr}/{cidr} <span size=\"110%\"></span>",
-        "format-linked": "{ifname} (No IP) <span size=\"110%\"></span>",
+        "format-ethernet": "{ipaddr}/{cidr} <span size=\"110%\"></span>",
+        "format-linked": "{ifname} (No IP) <span size=\"110%\"></span>",
         "format-disconnected": "Disconnected <span size=\"110%\"></span>",
         "format-alt": "{ifname}: {ipaddr}/{cidr}",
         "tooltip-format": "{ifname} via {gwaddr}"
@@ -106,18 +115,18 @@
     "pulseaudio": {
         "format": "{volume}% <span size=\"110%\">{icon}</span>",
         "format-bluetooth": "{volume}% <span size=\"110%\"></span> {format_source}",
-        "format-bluetooth-muted": "<span size=\"110%\"> </span> {format_source}",
-        "format-muted": "<span size=\"110%\"></span>",
+        "format-bluetooth-muted": "<span size=\"110%\"> </span> {format_source}",
+        "format-muted": "<span size=\"110%\"></span>",
         "format-source": "{volume}% <span size=\"110%\"></span>",
         "format-source-muted": "<span size=\"110%\"></span>",
         "format-icons": {
             "headphone": "",
-            "hands-free": "",
-            "headset": "",
+            "hands-free": "",
+            "headset": "",
             "phone": "",
             "portable": "",
             "car": "",
-            "default": ["", "", ""]
+            "default": ["", ""]
         },
         "on-click": "pavucontrol"
     },
