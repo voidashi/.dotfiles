@@ -12,22 +12,18 @@ repo is fully finished.
 - **Wallpaper.** Still whatever it was before — needs actual image curation (material,
   desaturated, dark, per `RICE-GUIDE.md`'s Wallpaper section), not just config edits.
   Requires real assets, not something to do from config alone.
-- **`.config/dunst/`** — orphaned (autostart runs `swaync`, not dunst). No decision made on
-  whether to delete it, keep it as a rollback reference, or actually theme it too.
-- **swaync `config.json`** — never created, only `style.css`. Worth checking whether
-  urgency levels get a distinct icon/glyph automatically or need explicit config to satisfy
-  "state is never colour alone."
+- **`.config/dunst/`** — kept deliberately. Autostart runs `swaync`, not dunst, so it is
+  orphaned, but Jeff wants it there in case he switches back. Don't delete it, and don't
+  re-raise the question.
 - **Waybar, second pass.** The redesign landed — flat surface, bordeaux rule under the
   active workspace instead of an Ice block, numerals instead of app glyphs, one shared
   config. What still needs judging in daily use: whether the glyphs are the right size
   now, whether the numerals actually beat the old icons, and whether the right-hand
   modules want a separator between them or should stay spaced only.
-- **`.config/wlogout/icons/`** — the six lavender PNGs are no longer referenced by
-  anything, kept only as a rollback reference (~92KB). Jeff's call whether to delete them.
-- **Hyprlauncher theme not currently exists.** The binary is installed
-  (`/usr/bin/hyprlauncher`); determine whether it can be themed and add it if feasible.
-  Note that it is a second launcher alongside wofi — worth deciding which one is actually
-  the daily driver before theming both.
+- **wofi is no longer the launcher.** `conf/programs.lua` binds `mainMod+R` to
+  `hyprlauncher`; the wofi line above it is commented out. wofi is themed and working, but
+  nothing launches it — decide whether to keep it as a fallback or drop it from
+  `config_files.conf` and `packages.conf`.
 
 ## Recently closed
 
@@ -40,6 +36,9 @@ Kept briefly so a rollback has context; delete once they've held up in daily use
   the inherited infinite battery blink (now a static `alert-critical` plus the glyph).
   The dead `mpd` module was dropped with them — mpd isn't running, so it rendered a
   permanent "Disconnected" in the bar, and `custom/media` already covers playback.
+- wlogout redesigned as a list and its orphaned lavender PNGs deleted; hyprlauncher themed
+  through `.config/hypr/hyprtoolkit.conf`; swaync's `config.json` created and its stylesheet
+  rewritten against the upstream `:root` variables.
 
 ## Repo housekeeping
 

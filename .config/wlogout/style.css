@@ -38,7 +38,8 @@ window {
 }
 
 button {
-    border-radius: 0;
+    /* Floating surface: 4px, from palette.json (geometry.radius_floating). */
+    border-radius: 4px;
     border: 1px solid @edge-20;
     background-color: @void-10;
     color: @ink-3;

@@ -2,13 +2,15 @@
 --  DECORAÇÃO (SHADOWS, TRANSPARÊNCIA)
 -- =====================================================================
 -- https://wiki.hypr.land/Configuring/Basics/Variables/
+local palette = require("conf/palette")
+
 hl.config({
     decoration = {
-        -- Compositor windows are the one Voidashi surface allowed a radius, and
-        -- it stays small: sharp enough to read as cut, not moulded (was 10 under
-        -- Kanagawa Dragon, then briefly 0). Every other surface -- bar, launcher,
-        -- notifications -- is still square. See RICE-GUIDE.md, "Geometry".
-        rounding = 4,
+        -- A floating surface takes the system radius; anything docked to a
+        -- screen edge stays square. Small enough to read as cut rather than
+        -- moulded (was 10 under Kanagawa Dragon, then briefly 0). The value
+        -- lives in scripts/theme/palette.json -- see RICE-GUIDE.md, "Form".
+        rounding = palette.geometry.radius_floating,
 
         active_opacity = 1.0,
         inactive_opacity = 1.0,

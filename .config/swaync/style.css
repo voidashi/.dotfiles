@@ -1,14 +1,63 @@
 @import url("../theme/voidashi-colors.css");
-/* Voidashi theme. New file -- swaync had no tracked config before this. */
 
-* {
-    /* GTK app UI = Instrument Sans (RICE-GUIDE.md "GTK / Qt application theming"); no
-       prior config existed here to fall back to, so straight to generic monospace. */
-    font-family: "Instrument Sans", monospace;
-    font-size: 14px;
+/* =====================================================================
+   SWAYNC -- Voidashi
+   =====================================================================
+   swaync's own stylesheet (/etc/xdg/swaync/style.css) drives everything
+   from custom properties declared on :root, so the theme is applied by
+   overriding those rather than by re-declaring each rule. An earlier pass
+   here wrote its own selectors instead, which is why it only half-worked:
+   corners stayed at the upstream 12px radius and critical notifications
+   kept the default surface, because the rules that actually paint them
+   read from the variables below.
+
+   Two structural facts worth keeping, both from the upstream stylesheet:
+   the box that carries border, radius and background is `.notification`,
+   nested inside `.notification-background` -- not the other way round --
+   and the urgency class sits on `.notification` too. */
+
+:root {
+    /* Surfaces. The triplet form is required: upstream composes it as
+       rgba(var(--noti-bg), var(--noti-bg-alpha)). */
+    --noti-bg: 25, 24, 23;              /* void-20 */
+    --noti-bg-alpha: 1;                 /* opaque -- notifications never glass */
+    --noti-bg-darker: rgb(18, 17, 16);  /* void-10 */
+    --noti-bg-hover: rgb(32, 31, 29);   /* void-30 */
+    --noti-bg-focus: rgb(32, 31, 29);   /* void-30 */
+    --noti-border-color: rgb(42, 41, 39); /* edge-20 */
+    --cc-bg: rgb(25, 24, 23);           /* void-20 */
+
+    --noti-close-bg: rgb(18, 17, 16);   /* void-10 */
+    --noti-close-bg-hover: rgb(32, 12, 9); /* alert-critical-bg */
+
+    --text-color: rgb(232, 232, 232);          /* ink-0 */
+    --text-color-disabled: rgb(108, 108, 108); /* ink-4 */
+    --bg-selected: rgb(73, 139, 178);          /* ice-400 -- focus is Ice */
+
+    /* Notifications and the control center float over other content, so they
+       take the 4px floating-surface radius from palette.json. Only surfaces
+       docked to a screen edge stay square. Upstream ships 12px, which is a
+       different thing entirely -- that reads as moulded, this reads as cut. */
+    --border-radius: 4px;
+    --border: 1px solid var(--noti-border-color);
+
+    /* Borders over shadows (RICE-GUIDE.md, Form). Upstream stacks three. */
+    --notification-shadow: none;
+
+    --font-size-body: 14px;
+    --font-size-summary: 15px;
 }
 
-/* Notifications: void-20, bordered, standard density (RICE-GUIDE.md) */
+* {
+    /* GTK app UI = Instrument Sans (RICE-GUIDE.md, "GTK / Qt application
+       theming"). Weight 500 is the system UI weight from palette.json. */
+    font-family: "Instrument Sans", monospace;
+    font-size: 14px;
+    font-weight: 500;
+    text-shadow: none;
+    box-shadow: none;
+}
+
 .control-center,
 .floating-notifications {
     background: transparent;
@@ -18,23 +67,23 @@
     padding: 4px;
 }
 
-.notification-background {
+.notification-row .notification-background .notification {
+    border-radius: var(--border-radius);
+    border: var(--border);
     background: @void-20;
-    border: 1px solid @edge-20;
-    border-radius: 0;
 }
 
-.notification {
-    padding: 8px;
+.notification-row .notification-background .notification:hover {
+    background: @void-30;
 }
 
 .notification-content {
-    padding: 4px;
+    padding: 8px;
 }
 
 .notification .summary {
     color: @ink-0;
-    font-weight: bold;
+    font-weight: 600;
 }
 
 .notification .body {
@@ -45,42 +94,55 @@
     color: @ink-4;
 }
 
-/* Urgency: low = inert ink, normal = subtle accent, critical = alert-critical + glyph */
-.notification.low .notification-background {
+/* ===== Urgency ========================================================
+   The class is on .notification. "Colour never carries state alone" is a
+   non-negotiable, and swaync offers no hook to inject a per-urgency glyph
+   -- the icon shown belongs to the sending application and no config key
+   overrides it by urgency. The second signal is therefore shape: critical
+   carries a heavy left rule, which survives greyscale and does not ask
+   anyone to separate two dark reds from surrounding charcoal. */
+
+.notification-row .notification-background .notification.low {
     border-color: @edge-20;
 }
 
-.notification.normal .notification-background {
+.notification-row .notification-background .notification.normal {
     border-color: @edge-30;
 }
 
-.notification.critical .notification-background {
+.notification-row .notification-background .notification.critical {
     border-color: @alert-critical-border;
+    border-left: 4px solid @alert-critical;
     background: @alert-critical-bg;
 }
 
-.notification.critical .summary {
+.notification-row .notification-background .notification.critical .summary {
     color: @alert-critical;
 }
 
+/* ===== Actions and controls =========================================== */
+
 .notification-action,
 .notification-default-action {
-    background: @void-10;
+    border-radius: var(--border-radius);
+    background: transparent;
     color: @ink-2;
-    border: 1px solid @edge-20;
-    border-radius: 0;
 }
 
-.notification-action:hover,
-.notification-default-action:hover {
+.notification-action {
+    background: @void-10;
+    border: 1px solid @edge-20;
+}
+
+.notification-action:hover {
     background: @edge-20;
     color: @ink-0;
 }
 
 .close-button {
+    border-radius: var(--border-radius);
     background: @void-10;
     color: @ink-3;
-    border-radius: 0;
 }
 
 .close-button:hover {
@@ -88,42 +150,52 @@
     color: @alert-critical;
 }
 
-/* Control center */
+/* ===== Control center ================================================= */
+
 .control-center {
     background: @void-20;
     border: 1px solid @edge-20;
+    border-radius: var(--border-radius);
 }
 
 .widget-title {
     color: @ink-0;
     background: @void-20;
+    font-size: 15px;
 }
 
-.widget-title > button {
+.widget-title > button,
+.widget-buttons-grid > flowbox > flowboxchild > button {
     background: @void-10;
     color: @ink-2;
     border: 1px solid @edge-20;
-    border-radius: 0;
+    border-radius: var(--border-radius);
+}
+
+.widget-title > button:hover,
+.widget-buttons-grid > flowbox > flowboxchild > button:hover {
+    background: @edge-20;
+    color: @ink-0;
 }
 
 .widget-dnd {
     color: @ink-2;
 }
 
-.widget-buttons-grid > flowbox > flowboxchild > button {
+.widget-dnd > switch {
+    border-radius: var(--border-radius);
     background: @void-10;
-    color: @ink-2;
     border: 1px solid @edge-20;
-    border-radius: 0;
 }
 
-.widget-buttons-grid > flowbox > flowboxchild > button:hover {
-    background: @edge-20;
-}
-
-/* Focus/active/selected = Ice, per RICE-GUIDE.md role table */
+/* Focus/active/selected = Ice (RICE-GUIDE.md role table) */
+.widget-dnd > switch:checked,
 .widget-buttons-grid > flowbox > flowboxchild > button.toggle:checked {
     background: @ice-800;
     color: @ink-0;
     border-color: @ice-400;
+}
+
+.notification-group {
+    border-radius: var(--border-radius);
 }

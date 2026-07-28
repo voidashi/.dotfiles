@@ -113,8 +113,10 @@ These hold for every visual change, without needing to re-read the guide:
   `void-*` scale. A background that reads as blue is a bug.
 - **Never invent a colour.** Every hex must come from the palette in `RICE-GUIDE.md`. If
   a role is not covered, use the nearest token and say so, or ask.
-- **Sharp corners.** Zero border radius on every surface — bars, launchers, popups,
-  notifications. The one exception is Hyprland's window rounding, fixed at 4px.
+- **Two radii, and which one applies is not a matter of taste.** A surface that floats over
+  other content (window, launcher, notification, menu) takes **4px**; a surface docked to a
+  screen edge (the bar) takes **0**. No other value exists — 4px reads as cut, anything
+  larger as moulded. Both live in `scripts/theme/palette.json` under `geometry`.
 - **No neon, glow, vibrant gradients, or RGB effects.**
 - **No bounce, spring, or overshoot animation.** No infinite loops outside loaders.
 - **Colour never carries state alone** — a coloured status always has a glyph too.

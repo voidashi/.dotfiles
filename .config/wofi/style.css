@@ -102,22 +102,37 @@
 @define-color alert-neutral-border #113144;
 
 @define-color focus-ring #6aa3c7;
+
+/* Non-colour tokens, for reference. GTK3 -- waybar, wofi, wlogout -- has no
+   CSS custom properties, so these cannot be consumed as variables there the
+   way the colours above are: each GTK3 stylesheet carries the literal and
+   points back at palette.json. swaync is GTK4 and does read them.
+     radius, floating surface: 4px
+     radius, docked surface:   0px
+     UI font weight:           500 */
 /* <<< END VOIDASHI COLORS <<< */
 
 * {
     /* GTK app UI = Instrument Sans (RICE-GUIDE.md "GTK / Qt application theming"),
-       old font kept as fallback, generic monospace last. */
+       old font kept as fallback, generic monospace last. Weight 500 is the
+       system UI weight from palette.json: Regular optically erodes on these
+       dark surfaces. */
     font-family: "Instrument Sans", "Hack", monospace;
+    font-weight: 500;
 }
 
+/* A launcher floats over other content, so it takes the 4px floating-surface
+   radius (palette.json, geometry.radius_floating). Only surfaces docked to a
+   screen edge -- the bar -- stay square. */
 window {
     background-color: @void-20;
+    border-radius: 4px;
 }
 
 /* Input field sits one step lighter than the list, per RICE-GUIDE.md */
 #input {
     margin: 5px;
-    border-radius: 0px;
+    border-radius: 4px;
     border: none;
     background-color: @void-30;
     color: @ink-0;
@@ -132,6 +147,7 @@ window {
     padding: 10px;
     background-color: @void-20;
     border: 1px solid @edge-20;
+    border-radius: 4px;
 }
 
 #scroll {

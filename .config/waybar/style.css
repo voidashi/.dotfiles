@@ -24,6 +24,9 @@
        Nerd Font glyphs are drawn smaller per em than the label beside them. */
     font-family: "Instrument Sans", "Hack Nerd Font", monospace;
     font-size: 15px;
+    /* The bar is docked to the top edge, so it takes the docked radius: 0.
+       Floating surfaces -- launcher, notifications, windows -- take 4px.
+       Both values live in palette.json (geometry.*). */
     /* Medium, not Regular. At 14px on a void-10 bar, Instrument Sans Regular
        reads as thin -- dark backgrounds optically erode light strokes. This is
        a bar-only weight: the launcher and notifications sit at standard density

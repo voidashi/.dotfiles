@@ -45,6 +45,26 @@ rules; this is just state tracking. Repo-wide (non-theme) history is in
   **Verdigris** family fills the ANSI cyan slot the core palette has no family for.
   Terminal cursor is `bordeaux-300`; terminal selection background is `ice-600`.
   "Semantic states" are called **alert tones** (`alert-critical/caution/good/neutral`).
+- **Radius became a system rule instead of a one-off exception.** It had been "0 everywhere,
+  except Hyprland windows at 4px". It is now decided by whether a surface floats: floating
+  surfaces (windows, launcher, notifications, the power menu) take 4px, docked ones (the
+  bar) take 0. Two values, no scale. Alongside it, **weight 500 is the UI font weight** for
+  every GTK app — Regular thins out on surfaces this dark. Both live in `palette.json`
+  under `geometry`; Hyprland and swaync read them, while GTK3 apps (waybar, wofi, wlogout)
+  carry the literal because GTK3 has no CSS custom properties.
+- **hyprlauncher is themed through the toolkit, not through itself.** It is the launcher
+  actually bound to `mainMod+R`, and it has no colour options: its own config covers
+  behaviour only (`general:grab_focus`, `ui:window_size`, `finders:*`). Appearance comes
+  from hyprtoolkit, which reads `.config/hypr/hyprtoolkit.conf` — a new file, top-level
+  keys, no sections. Roles follow the launcher entry in the guide: void-20 surface, the
+  input one step lighter, Ice for selection, Bordeaux as the identity mark, radius 0.
+- **swaync now has a `config.json`**, which it never had — it had been running entirely on
+  `/etc/xdg` defaults, so nothing about it was a deliberate choice. Its stylesheet was also
+  rewritten: swaync paints from custom properties on `:root`, and the earlier pass wrote
+  its own selectors instead of overriding those, so notifications kept upstream's 12px
+  radius and critical ones kept the default surface. Urgency now carries a **shape**
+  signal — a heavy left rule on critical — because swaync exposes no way to inject a glyph
+  per urgency, and colour may not carry a state alone.
 - **wlogout was rebuilt, not just recoloured.** It had been listed as fully themed, but its
   six buttons carried lavender PNGs from `wlogout/icons/` — a colour from no Voidashi
   scale, raster so unreachable by the palette, and loaded through absolute `/home/jeff`

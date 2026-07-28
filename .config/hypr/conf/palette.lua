@@ -95,4 +95,8 @@ return {
         good = { fg = "#57a26d", bg = "#0a160d", border = "#12361e" },
         neutral = { fg = "#5697bf", bg = "#0a141b", border = "#113144" },
     },
+    geometry = {
+        radius_floating = 4,
+        radius_docked = 0,
+    },
 }

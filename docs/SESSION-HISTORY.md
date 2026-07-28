@@ -134,6 +134,31 @@ The design was iterated against real screenshots rather than by eye, using a thr
 of the layout with every action replaced by `true` — a power menu is not something to open
 speculatively next to a keyboard someone is typing on.
 
+## hyprlauncher, swaync, and a radius that became a rule
+
+hyprlauncher — which is the launcher actually bound to `mainMod+R`, the wofi line above it
+in `programs.lua` having been commented out — has no colour options at all. Its own config
+covers behaviour only. It is built on hyprtoolkit, and the toolkit reads
+`.config/hypr/hyprtoolkit.conf`, a file that did not exist. That is where the theme went.
+Verified by control: with the file present the toolkit logs nothing, and removing it makes
+it log "no hyprtoolkit.conf found, using defaults".
+
+swaync had no `config.json` either, so it had been running entirely on `/etc/xdg` defaults.
+Its stylesheet also had to be rewritten rather than extended: swaync paints from custom
+properties on `:root`, and the earlier pass wrote its own selectors instead of overriding
+those, so notifications kept upstream's 12px radius and critical ones kept the default
+surface — the rules that actually paint them read from variables nobody had set. Urgency
+now carries shape as well as colour, a heavy left rule on critical, because swaync gives no
+way to inject a glyph per urgency and colour may not carry a state alone.
+
+The 4px radius stopped being an exception for Hyprland windows and became the system rule:
+a surface that floats takes 4px, a surface docked to a screen edge takes 0. Two values, no
+scale, and which applies is answered by the surface rather than by taste. Weight 500 became
+the UI font weight everywhere for the same kind of reason — Regular optically erodes on
+charcoal. Both now live in `palette.json` under `geometry`, and the generator propagates
+them to Hyprland and the GTK partial. GTK3 has no CSS custom properties, so waybar, wofi
+and wlogout carry the literal with a comment pointing back at the source.
+
 ## Open items carried forward
 
 - `.config/dunst/` is still orphaned (autostart runs `swaync`, not dunst) — same

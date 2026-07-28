@@ -302,14 +302,22 @@ toolkit (rare on this desktop).
 
 ## Form
 
-- **Zero border radius on every flat surface** — bars, popups, notifications, launchers,
-  tooltips. Sharp is the identity.
-- **Compositor windows are the one exception: 4px.** A tiled window sits directly on the
-  wallpaper rather than inside another surface, and at that scale a hairline radius reads
-  as a cut edge, not a rounded one. It is a deliberate, bounded choice — 4px, windows
-  only. Anything the toolkit draws inside the window stays square.
-- Where a toolkit refuses zero, accept its minimum rather than fighting it. Outside the
-  window exception, never choose a radius voluntarily.
+- **Radius is decided by whether a surface floats.** A surface that floats over other
+  content — a window, a launcher, a notification, a menu, a dialog — takes **4px**. A
+  surface docked to a screen edge — the bar above all — takes **0**. The distinction is
+  physical, not decorative: a floating thing has an edge you can see all the way round,
+  and at 4px that edge reads as *cut*, which is the identity. A docked thing has no such
+  edge to soften, and rounding one corner of something flush to the screen only makes it
+  look like it slipped.
+- **4px is the ceiling, and it is not a scale.** There is no 8px, no 12px, no per-surface
+  tuning. Two values exist — 4 and 0 — and which one applies is answered by the question
+  above, not by taste. Anything larger reads as moulded rather than cut and belongs to a
+  different design language.
+- Where a toolkit refuses both values, accept its minimum rather than fighting it.
+- **The values live in `scripts/theme/palette.json`** under `geometry`, alongside the UI
+  font weight. GTK3 (waybar, wofi, wlogout) has no CSS custom properties, so those
+  stylesheets carry the literal with a comment pointing back; GTK4 (swaync) and Hyprland
+  read it. Change it there, not in an app.
 - **Borders over shadows.** A 1px `edge-*` border is the separation mechanism.
 - **Window gaps:** even, and derived from the spacing scale — 4, 8, 12, 16, 24. Inner and
   outer gaps may differ; both come from the scale.
@@ -446,8 +454,9 @@ plus a glyph: low is inert ink, normal gets a subtle accent, critical gets
 `alert-critical` and a border in the same family.
 
 **Window manager and compositor.** Focused border Ice, unfocused `edge-30`, gaps from the
-scale, animations per the motion table. A 4px window radius and a small blur are permitted
-here and nowhere else — see "Form" and "Transparency and blur". No shadow theatrics.
+scale, animations per the motion table. Windows float, so they take the 4px radius; the
+small blur is permitted here and nowhere else — see "Form" and "Transparency and blur".
+No shadow theatrics.
 
 **Lockscreen, greeter, fetch.** The one place the editorial voice is welcome — Spectral,
 spacious density, minimal information. This is the desktop's cover page: an identity
@@ -461,9 +470,11 @@ rainbow ramp.
 for syntax categories, `void-00` background, Ice for selection and cursor line. Comments
 at `ink-4` — visible, recessive.
 
-**GTK / Qt application theming.** Instrument Sans for UI text, palette surfaces mapped to
-the toolkit's layer names, sharp corners where permitted. Expect imperfect control: get
-background, foreground, and accent right, accept the rest.
+**GTK / Qt application theming.** Instrument Sans for UI text at **weight 500**, palette
+surfaces mapped to the toolkit's layer names, the radius rule from "Form". Regular weight
+optically erodes on surfaces this dark — the stroke thins out and small labels start to
+look washed rather than quiet, which is a different thing from restraint. Expect imperfect
+control: get background, foreground, and accent right, accept the rest.
 
 ---
 
@@ -474,7 +485,7 @@ background, foreground, and accent right, accept the rest.
 - Neon, glow, saturated gradients, RGB effects of any kind.
 - More than two accent families visible at rest.
 - Every bar module a different colour.
-- Rounded corners anywhere but compositor windows, where the radius is 4px and fixed.
+- Any radius other than the two the system has: 4px on a floating surface, 0 when docked.
 - Heavy transparency, or a blur wide enough to notice as an effect.
 - Bounce, spring, or overshoot animation; infinite loops outside loaders.
 - Inconsistent ANSI, font sizes, or padding between programs of the same class.

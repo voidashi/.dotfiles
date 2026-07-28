@@ -1,0 +1,63 @@
+{
+    "$schema": "/etc/xdg/swaync/configSchema.json",
+
+    "//": "Voidashi. This file did not exist before -- swaync ran entirely on /etc/xdg defaults, so nothing here was a deliberate choice. Values that match the upstream default are still written out where the guide has an opinion about them, so a future default change cannot silently move the theme.",
+
+    "ignore-gtk-theme": true,
+    "cssPriority": "user",
+
+    "//positioning": "Top right, under the bar, matching where the bar's own notification module sits.",
+    "positionX": "right",
+    "positionY": "top",
+    "layer": "overlay",
+    "control-center-layer": "top",
+    "layer-shell": true,
+    "layer-shell-cover-screen": true,
+
+    "//density": "Standard density per RICE-GUIDE.md, 'Notifications'. Narrower than the 500px default: a notification is a glance, not a document.",
+    "notification-window-width": 440,
+    "control-center-width": 440,
+    "control-center-height": 600,
+    "control-center-margin-top": 8,
+    "control-center-margin-right": 8,
+    "control-center-margin-bottom": 8,
+    "control-center-margin-left": 8,
+
+    "//motion": "200ms is the notification-enter figure from RICE-GUIDE.md's motion table.",
+    "transition-time": 200,
+
+    "//timeouts": "Critical never auto-dismisses -- an urgency that disappears on its own was not urgent. Low clears fastest.",
+    "timeout": 10,
+    "timeout-low": 5,
+    "timeout-critical": 0,
+
+    "notification-grouping": true,
+    "relative-timestamps": true,
+    "image-visibility": "when-available",
+    "notification-body-image-height": 100,
+    "notification-body-image-width": 200,
+    "fit-to-screen": true,
+    "keyboard-shortcuts": true,
+    "hide-on-clear": false,
+    "hide-on-action": true,
+    "text-empty": "No notifications",
+
+    "widgets": [
+        "title",
+        "dnd",
+        "notifications"
+    ],
+    "widget-config": {
+        "title": {
+            "text": "Notifications",
+            "clear-all-button": true,
+            "button-text": "Clear all"
+        },
+        "dnd": {
+            "text": "Do not disturb"
+        },
+        "notifications": {
+            "vexpand": true
+        }
+    }
+}

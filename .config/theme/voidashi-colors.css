@@ -93,3 +93,11 @@
 @define-color alert-neutral-border #113144;
 
 @define-color focus-ring #6aa3c7;
+
+/* Non-colour tokens, for reference. GTK3 -- waybar, wofi, wlogout -- has no
+   CSS custom properties, so these cannot be consumed as variables there the
+   way the colours above are: each GTK3 stylesheet carries the literal and
+   points back at palette.json. swaync is GTK4 and does read them.
+     radius, floating surface: 4px
+     radius, docked surface:   0px
+     UI font weight:           500 */

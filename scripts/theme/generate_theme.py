@@ -146,6 +146,11 @@ def gen_hypr_palette(p: dict) -> str:
     for name, entry in p["alert"].items():
         out += f'        {name} = {{ fg = "{entry["fg"]}", bg = "{entry["bg"]}", border = "{entry["border"]}" }},\n'
     out += "    },\n"
+    g = p["geometry"]
+    out += "    geometry = {\n"
+    out += f'        radius_floating = {g["radius_floating"]},\n'
+    out += f'        radius_docked = {g["radius_docked"]},\n'
+    out += "    },\n"
     out += "}\n"
     return out
 
@@ -162,6 +167,16 @@ def gen_gtk_css(p: dict) -> str:
         out += f"@define-color alert-{name}-border {entry['border']};\n"
     out += "\n"
     out += f"@define-color focus-ring {p['focus_ring']};\n"
+    g = p["geometry"]
+    out += (
+        "\n/* Non-colour tokens, for reference. GTK3 -- waybar, wofi, wlogout -- has no\n"
+        "   CSS custom properties, so these cannot be consumed as variables there the\n"
+        "   way the colours above are: each GTK3 stylesheet carries the literal and\n"
+        "   points back at palette.json. swaync is GTK4 and does read them.\n"
+        f"     radius, floating surface: {g['radius_floating']}px\n"
+        f"     radius, docked surface:   {g['radius_docked']}px\n"
+        f"     UI font weight:           {g['font_weight_ui']} */\n"
+    )
     return out
 
 
