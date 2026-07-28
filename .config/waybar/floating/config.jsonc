@@ -10,7 +10,7 @@
         "sway/mode",
         "sway/scratchpad",
         "hyprland/workspaces",
-        "hyprland/mode",
+        "hyprland/submap",
         "custom/media"
     ],
     "modules-center": [
@@ -46,6 +46,11 @@
     },
     "sway/mode": {
         "format": "<span style=\"italic\">{}</span>"
+    },
+    "hyprland/submap": {
+        "format": "✌️ {}",
+        "max-length": 8,
+        "tooltip": false
     },
     "sway/window": {
         "format": "{}",
