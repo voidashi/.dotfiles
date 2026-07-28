@@ -1,6 +1,7 @@
 [general]
 import = [
-"~/.config/alacritty/conf.d/kanagawa-dragon.toml"
+    # "~/.config/alacritty/conf.d/kanagawa-dragon.toml",  # legacy theme, preserved for rollback
+    "~/.config/alacritty/conf.d/voidashi-colors.toml",
 ]
 
 [terminal.shell]

@@ -35,7 +35,30 @@ criados. `scripts/config_files.conf` ainda não tem `~/.config/theme` nem `~/.co
 
 ## 2 — Terminais (kitty/foot/ghostty/alacritty)
 
-**Status:** pendente
+**Status:** concluído
+
+Cada terminal aponta o include ativo pro `voidashi-colors.*` gerado; o include/tema antigo
+(Kanagawa Dragon) fica comentado do lado, não apagado. `foot.ini` também manteve o
+`#include=.../flexoki.ini` que já estava lá desativado.
+
+Dois bugs achados no gerador ao validar de verdade com `foot --check-config` (não eram
+visíveis só olhando o palette.json, só apareceram testando contra o parser real do foot):
+
+- Comentário do header usava `;`, mas foot usa `#` para comentário — `;` virava tentativa
+  de key/value e quebrava o parse.
+- Cursor gerado numa seção `[cursor]` com chave `color` — essa chave foi removida do foot
+  (mesma depreciação que o `CLAUDE.md` já documentava para `flexoki.ini`, eu só repeti o
+  erro no gerador). Corrigido: cursor agora é a chave `cursor = <texto> <fundo>` dentro de
+  `[colors-dark]`.
+
+Ajuste feito fora do escopo estrito de cor, mas coberto pela seção "Surface hierarchy /
+Transparency and blur" do `RICE-GUIDE.md` ("Terminals: opaque by default... stay above
+~90%"): `ghostty`'s `background-opacity` estava em `0.8` (abaixo do piso) — subi pra
+`0.92`. `kitty`/`alacritty` já estavam em `0.9`, no limite aceitável, não mexi.
+
+Validado com os comandos do `CLAUDE.md`: kitty via `+runpy` (`bad_lines: []`),
+`foot --check-config` (exit 0), `ghostty +validate-config` (exit 0),
+`alacritty migrate --dry-run` (sem avisos).
 
 ## 3 — GTK CSS: waybar/wofi/wlogout + bring-up do swaync
 

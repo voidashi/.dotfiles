@@ -57,18 +57,20 @@ def gen_kitty(p: dict) -> str:
 def gen_foot(p: dict) -> str:
     t, a = p["terminal"], p["ansi16"]
     strip = lambda h: h.lstrip("#")
-    out = header(";")
+    out = header("#")
     out += "[colors-dark]\n"
     out += f"background={strip(t['background'])}\n"
     out += f"foreground={strip(t['foreground'])}\n"
     out += f"selection-foreground={strip(t['selection_foreground'])}\n"
-    out += f"selection-background={strip(t['selection_background'])}\n\n"
+    out += f"selection-background={strip(t['selection_background'])}\n"
+    # [cursor].color was removed by foot; the replacement lives here as
+    # "cursor = <text> <bg>" (see CLAUDE.md's foot/flexoki.ini note).
+    out += f"cursor={strip(t['cursor_text'])} {strip(t['cursor'])}\n\n"
     for i in range(8):
         out += f"regular{i}={strip(a[i])}\n"
     out += "\n"
     for i in range(8):
         out += f"bright{i}={strip(a[8 + i])}\n"
-    out += f"\n[cursor]\ncolor={strip(t['cursor_text'])} {strip(t['cursor'])}\n"
     return out
 
 
