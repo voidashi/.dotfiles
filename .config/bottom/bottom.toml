@@ -128,57 +128,52 @@
 
 # These are all the components that support custom theming.  Note that colour support
 # will depend on terminal support.
-#[styles] # Uncomment if you want to use custom styling
-
-# Built-in themes. Valid values are:
-# - "default"
-# - "default-light"
-# - "gruvbox"
-# - "gruvbox-light"
-# - "nord"
-# - "nord-light".
 #
-# This will have the lowest precedence if a custom colour palette is set,
-# or overridden if the command-line flag for a built-in theme is set.
+# Voidashi (RICE-GUIDE.md, "System monitors and TUIs"): Ice for normal ranges, Alert
+# tones for thresholds, never a rainbow ramp. Per-core/per-source colour lists below
+# only draw from Ice/Moss/Bordeaux -- Ash and Bronze are excluded (both are documented
+# as incompatible with Ice in the same view).
+[styles]
+
 #theme = "default"
 
-#[styles.cpu]
-#all_entry_color = "green"
-#avg_entry_color = "red"
-#cpu_core_colors = ["light magenta", "light yellow", "light cyan", "light green", "light blue", "cyan", "green", "blue"]
+[styles.cpu]
+all_entry_color = "#498bb2"       # ice-400
+avg_entry_color = "#b44955"       # bordeaux-400
+cpu_core_colors = ["#498bb2", "#4e9162", "#b44955", "#307399", "#3d784f", "#7f1f2f", "#215b7c", "#23462d"]
 
-#[styles.memory]
-#ram_color = "light magenta"
-#cache_color = "light red"
-#swap_color = "light yellow"
-#arc_color = "light cyan"
-#gpu_colors = ["light blue", "light red", "cyan", "green", "blue", "red"]
+[styles.memory]
+ram_color = "#498bb2"      # ice-400
+cache_color = "#307399"    # ice-500
+swap_color = "#d89529"     # alert-caution
+arc_color = "#215b7c"      # ice-600
+gpu_colors = ["#498bb2", "#4e9162", "#307399", "#3d784f", "#215b7c", "#23462d"]
 
-#[styles.network]
-#rx_color = "light magenta"
-#tx_color = "light yellow"
-#rx_total_color = "light cyan"
-#tx_total_color = "light green"
+[styles.network]
+rx_color = "#498bb2"        # ice-400
+tx_color = "#4e9162"        # moss-400
+rx_total_color = "#307399"  # ice-500
+tx_total_color = "#3d784f"  # moss-500
 
-#[styles.battery]
-#high_battery_color = "green"
-#medium_battery_color = "yellow"
-#low_battery_color = "red"
+[styles.battery]
+high_battery_color = "#57a26d"    # alert-good
+medium_battery_color = "#d89529"  # alert-caution
+low_battery_color = "#e14b39"     # alert-critical
 
-#[styles.tables]
-#headers = {color = "light blue", bold = true}
+[styles.tables]
+headers = { color = "#b1b1b1", bold = true }  # ink-2
 
-#[styles.graphs]
-#graph_color = "gray"
-#legend_text = {color = "gray"}
+[styles.graphs]
+graph_color = "#4f4d4a"              # edge-40
+legend_text = { color = "#b1b1b1" }  # ink-2
 
-#[styles.widgets]
-#border_color = "gray"
-#selected_border_color = "light blue"
-#widget_title = {color = "gray"}
-#text = {color = "gray"}
-#selected_text = {color = "black", bg_color = "light blue"}
-#disabled_text = {color = "dark gray"}
+[styles.widgets]
+border_color = "#393835"                                    # edge-30
+selected_border_color = "#498bb2"                            # ice-400 (focus/active = Ice)
+widget_title = { color = "#e8e8e8" }                          # ink-0
+text = { color = "#b1b1b1" }                                  # ink-2
+selected_text = { color = "#0a0908", bg_color = "#6aa3c7" }   # void-00 on ice-300
+disabled_text = { color = "#6c6c6c" }                         # ink-4
 
 # Layout - layouts follow a pattern like this:
 # [[row]] represents a row in the application.

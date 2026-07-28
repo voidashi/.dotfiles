@@ -1,6 +1,8 @@
 ignore-empty-password
 disable-caps-lock-text
-font=Cantarell
+# Serif is welcome exactly here (RICE-GUIDE.md: "the one place the editorial
+# voice is welcome" -- lockscreens, greeters, fetch banners, nowhere else).
+font=Spectral
 
 screenshots
 effect-blur=7x5
@@ -11,13 +13,39 @@ indicator-thickness=20
 clock
 timestr=%I:%M %p
 datestr=%A, %d %B
-ring-color=00aa84
-key-hl-color=82dccc
-line-color=007d6f
-separator-color=111826
-inside-color=111826
-bs-hl-color=01ccff
-layout-bg-color=111826
-layout-border-color=00aa84
-layout-text-color=ffffff
-text-color=ffffff
+
+# Voidashi -- previous (Cachy) colors preserved in config.kanagawa.legacy.
+# Typing indicator = Bordeaux (lockscreen accent, RICE-GUIDE.md role table).
+ring-color=393835
+ring-clear-color=2a2927
+ring-ver-color=498bb2
+ring-wrong-color=e14b39
+ring-caps-lock-color=d89529
+
+key-hl-color=b44955
+caps-lock-key-hl-color=d89529
+bs-hl-color=c76870
+caps-lock-bs-hl-color=d89529
+
+line-color=2a2927
+line-clear-color=1e1d1b
+line-ver-color=498bb2
+line-wrong-color=e14b39
+line-caps-lock-color=d89529
+
+separator-color=2a2927
+inside-color=191817
+inside-clear-color=121110
+inside-ver-color=191817
+inside-wrong-color=200c09
+inside-caps-lock-color=191817
+
+text-color=e8e8e8
+text-clear-color=b1b1b1
+text-ver-color=6aa3c7
+text-wrong-color=e14b39
+text-caps-lock-color=d89529
+
+layout-bg-color=191817
+layout-border-color=2a2927
+layout-text-color=b1b1b1

@@ -38,10 +38,10 @@
     "hideCursor": false,
     "separator": ": ",
     "color": {
-      "keys": "",
-      "title": "",
-      "output": "",
-      "separator": ""
+      "keys": "#6c6c6c",
+      "title": "#b44955",
+      "output": "#b1b1b1",
+      "separator": "#4f4d4a"
     },
     "brightColor": true,
     "duration": {
@@ -125,15 +125,15 @@
       "keyIcon": "",
       "fqdn": false,
       "color": {
-        "user": "",
-        "at": "",
-        "host": ""
+        "user": "#b44955",
+        "at": "#6c6c6c",
+        "host": "#b44955"
       }
     },
     {
       "type": "separator",
       "string": "-",
-      "outputColor": "",
+      "outputColor": "#4f4d4a",
       "times": 0
     },
     {

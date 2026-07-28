@@ -159,7 +159,87 @@ verdade: barra, bordas de janela e notificações.
 
 ## 5 — Apps menores: swaylock, fastfetch, bottom, starship, fish
 
-**Status:** pendente
+**Status:** concluído (com um desvio grande no meio: instalação de fontes)
+
+### Desvio: nenhuma das fontes do tema estava instalada
+
+Ao chegar no swaylock (que precisa de Spectral) percebi que Iosevka Extended, Instrument
+Sans e Spectral não estavam em lugar nenhum que o fontconfig escaneia — só a correção de
+fonte GTK da etapa 3/4 (Instrument Sans) já tinha ficado inerte por causa disso. Perguntei
+a Jeff como resolver; ele já tinha baixado as três fontes manualmente e adicionado a
+`fonts/` no repo (`fonts/Iosevka`, `fonts/Instrument_Sans`, `fonts/Spectral`), mas nada
+lincava isso no sistema de verdade — nem `~/.local/share/fonts` existia.
+
+O que fiz:
+- Criei `~/.local/share/fonts/dotfiles` → `fonts/` (symlink) e rodei `fc-cache -f`.
+  Confirmado via `fc-match` que os três nomes resolvem certo agora.
+- **`fonts/Iosevka/` são 431MB** (9 arquivos `.ttc`, cada um bundlando todos os
+  pesos/larguras da família). Perguntei a Jeff antes de commitar algo desse tamanho —
+  decidiu **não versionar**: adicionei ao `.gitignore` com uma nota de onde baixar de
+  novo, documentada também no `README.md` (seção "Fonts" nova). `Instrument_Sans` (2.1M) e
+  `Spectral` (3.6M) são pequenos o bastante e foram commitados normalmente.
+- Jeff pediu pra formalizar o symlink no script, pra não quebrar numa instalação nova:
+  adicionei `install_fonts()` em `scripts/backup-configs.sh`, chamada depois de
+  `install_dotfiles()` no comando `install` (fonts/ fica na raiz do repo, não espelha um
+  caminho de `$HOME` como as entradas de `config_files.conf`, por isso não dava pra
+  reusar o mecanismo genérico — ganhou função própria). `check` também passou a validar
+  esse symlink. Testado com `--dry-run` e de verdade, idempotente.
+- Com as fontes resolvendo, voltei e completei a etapa 2 (que só tinha feito cor, não
+  fonte): kitty/foot/ghostty/alacritty agora usam `Iosevka Extended` como voz mono
+  primária, com `Hack Nerd Font` como fallback de cobertura de glifo (RICE-GUIDE.md
+  seção de Tipografia). Revalidado com os checkers de cada um.
+
+### swaylock
+
+Backup em `config.kanagawa.legacy` antes de reescrever. `font=Cantarell` → `font=Spectral`
+— **é o único lugar do desktop onde serifa é bem-vinda** ("Lockscreens, greeters, fetch
+banners... nowhere else", RICE-GUIDE.md). Todas as chaves de cor confirmadas contra
+`swaylock --help` antes de escrever (não rodei o swaylock de verdade — travaria a tela
+ao vivo): indicador de digitação (`key-hl-color`) em bordeaux (identidade/lockscreen
+accent), erro de senha (`*-wrong-color`) em `alert-critical`, verificando em `ice-400`,
+caps lock em `alert-caution`, superfícies em void/edge.
+
+### fastfetch
+
+`display.color` (keys/title/output/separator) e o módulo `title` (user/at/host) e
+`separator` estavam todos com `""` (vazio = usa o default do fastfetch, que aqui herdava
+verde/ciano do logo da CachyOS). Setei hex direto (fastfetch aceita `#rrggbb`, confirmado
+rodando ao vivo): título/usuário/host em bordeaux, labels em ink-4, valores em ink-2,
+separador em edge-40. As cores dos módulos `temp`/`percent`/`bar` (verde/amarelo/vermelho
+via código ANSI cru tipo `"32"`/`"93"`/`"91"`) **não precisaram de mudança** — já herdam o
+Voidashi automaticamente porque são índices da paleta ANSI de 16 cores dos terminais, que
+já está toda recolorida. As cores do logo (`logo.color.1-9`) ficaram no default — não dá
+pra saber o mapeamento exato dos placeholders do logo da CachyOS sem testar visualmente
+em cada um, e o bloco `colors` (type: "colors") no fim do fetch já mostra a paleta ANSI
+completa e correta, que é a vitrine real da paleta.
+
+### bottom
+
+Config inteira comentada antes (tema default do bottom). Descomentei e preenchi
+`[styles.*]` inteiro: `cpu_core_colors`/`gpu_colors` usam só ice/moss/bordeaux em
+variação de tom — não uma lista arco-íris de cores nomeadas aleatórias, que é
+exatamente o que "never a rainbow ramp" (RICE-GUIDE.md, "System monitors and TUIs")
+proíbe. Bordas/seleção seguem foco = Ice.
+
+### starship
+
+Config já era mínima (só `character.error_symbol`). Adicionei `success_symbol` e cor,
+mais `[directory]` (ink-2), `[git_branch]` (moss-400) e `[git_status]` (alert-caution) —
+exatamente os pontos que "Shell and prompt" no RICE-GUIDE.md menciona. Não inventei
+módulos novos só para caber mais cor — o resto fica no default do starship, por
+restrição/"restraint" deliberada. Verificado com `starship explain`, RGB bate exato com
+os hex esperados.
+
+### fish
+
+Mesmo padrão do Hyprland: `conf.d/*.fish` carrega TUDO automaticamente, então só um
+arquivo de `fish_color_*` pode ficar ativo por vez. Movi `colorscheme.fish` (Flexoki
+ativo) e `flexoki-theme.fish` (duplicata) pra `conf.d.legacy/` — nada apagado, só
+desativado. `fish_frozen_theme.fish` e `fish_frozen_key_bindings.fish` (gerados pelo
+próprio fish, "don't edit this file") ficaram intocados. Criado
+`conf.d/voidashi-colorscheme.fish` novo e ativo. Confirmei que `fish_variables` não tem
+nenhum `fish_color_*` em escopo universal que pudesse sobrescrever isso por baixo dos
+panos. Testado com `fish -c` de verdade (startup limpo, variáveis com os valores certos).
 
 ## 6 — Docs: nota no `CLAUDE.md`, linha nova em `rice.md` §13, checklist §15
 

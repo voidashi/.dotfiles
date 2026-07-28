@@ -4,10 +4,21 @@
 # Inserts a blank line between shell prompts
 add_newline = true
 
-# Edits success and error characters 
+# Voidashi (RICE-GUIDE.md "Shell and prompt"): ink for the path, moss/alert tones
+# for VCS and exit status. Everything else stays at starship's defaults -- restraint
+# applies to text as much as to pixels.
 [character]
-#success_symbol = '[➜](bold green) '
-error_symbol = '[✗](bold red) '
+success_symbol = '[➜](#57a26d) '  # alert-good
+error_symbol = '[✗](#e14b39) '    # alert-critical
+
+[directory]
+style = '#b1b1b1'  # ink-2
+
+[git_branch]
+style = '#4e9162'  # moss-400
+
+[git_status]
+style = '#d89529'  # alert-caution
 
 # Disable the package module, hiding it from the prompt completely
 #[package]
