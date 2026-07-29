@@ -120,9 +120,10 @@ mapping, and the rules for how colour is assigned.
 For desktop work, `RICE-GUIDE.md` overrides `DESIGN-SYSTEM.md` wherever they differ.
 
 **Continuity:** `docs/design/THEME-STATUS.md` tracks what has actually been themed and what
-has not. `docs/SESSION-HISTORY.md` records turning points, meaning decisions that still
-explain the shape of the repo; it is deliberately not a session log. `docs/TODO.md` lists
-open work. Check all three before assuming something is or is not already done.
+has not. `docs/TURNING-POINTS.md` records decisions whose result is visible in the tree but
+whose reason is not; it is deliberately not a session log. `docs/TODO.md` lists open work.
+Check all three before assuming something is or is not already done. `docs/README.md`
+indexes the six and says which question each owns.
 
 **Propagation:** `scripts/theme/palette.json` is the machine-readable single source of
 truth transcribed from `RICE-GUIDE.md`; `scripts/theme/generate_theme.py` renders it into

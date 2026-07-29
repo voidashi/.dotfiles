@@ -1,14 +1,13 @@
 # Turning points
 
-Why this repo is shaped the way it is. Each entry is a decision that still
-explains something you can see in the tree today.
+Why this repository is shaped the way it is. Each entry is a decision whose
+result is visible in the tree but whose reason is not, which is the only kind of
+thing worth keeping here.
 
-**This is not a session log.** It used to be, one section per working session,
-and that contract guaranteed two things: unbounded growth, and rot, because
-nobody goes back to prune a diary. It reached 324 lines and had started
-contradicting itself. The git log holds the blow by blow far better, attached to
-the diffs that prove it. Add an entry here only when a decision changes the
-shape of the repo.
+Not a changelog. The git log holds the blow by blow, attached to the diffs that
+prove it. An entry earns a place here only when a decision changed the shape of
+the repository, and the test is whether someone reading the configs would
+otherwise be left guessing.
 
 ## Hyprland moved from hyprlang to Lua
 
@@ -67,9 +66,13 @@ semantic roles, highlight groups that read only from roles) but depends on
 nothing at runtime, because an override matched by key name breaks silently when
 upstream renames a key.
 
-## Open questions
+## Some configs are kept deliberately, and are not dead weight
 
-- Clicking a workspace in waybar does nothing, and it is not our configuration.
-  The full bisect is recorded in `docs/TODO.md`; do not re-derive it.
-- `.config/dunst/` and `.config/hypr/hyprpaper.conf` are kept deliberately,
-  unthemed, as references in case of a switch back. Decided, not pending.
+`.config/dunst/` and `.config/hypr/hyprpaper.conf` configure programs nothing
+launches: swaync catches notifications and swaybg draws the wallpaper. Both are
+kept unthemed as references, so switching back is reading a file rather than
+writing one. They look like leftovers and are not, which is the only reason this
+entry exists.
+
+Open work of every kind lives in `docs/TODO.md`, including what is diagnosed and
+deliberately parked. It is not repeated here.

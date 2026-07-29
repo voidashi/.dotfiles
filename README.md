@@ -183,14 +183,14 @@ pick it up the same way as the tracked fonts.
 
 ## Documentation
 
-| Document | Answers |
-|---|---|
-| `docs/design/RICE-GUIDE.md` | How the identity applies to a desktop: the palette, the ANSI table, the rules |
-| `docs/design/AESTHETIC-DIRECTION.md` | Why it looks like this, in sensory terms, with no values |
-| `docs/design/DESIGN-SYSTEM.md` | The canonical token reference, written for web and document work |
-| `docs/design/THEME-STATUS.md` | What has actually been themed, and how each application receives the palette |
-| `docs/SESSION-HISTORY.md` | Why the repository is shaped the way it is |
-| `docs/TODO.md` | What is still open, and what is deliberately not being done |
+[`docs/README.md`](docs/README.md) indexes all six documents and says which
+question each one owns. The two worth knowing about up front:
+
+- [`docs/design/RICE-GUIDE.md`](docs/design/RICE-GUIDE.md) is the authority on
+  anything visual. The palette, the ANSI mapping, and the rules for how colour
+  gets assigned all live there.
+- [`docs/TODO.md`](docs/TODO.md) is what is open, what is parked with the
+  explanations already ruled out, and what has been decided against.
 
 ## Known gaps
 

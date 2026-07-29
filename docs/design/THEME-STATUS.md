@@ -1,8 +1,8 @@
 # Voidashi theme: status
 
 Where the retheme to Voidashi stands. Read `RICE-GUIDE.md` first for the actual rules; this
-is state tracking only. Repo-wide history that is not about theming lives in
-`docs/SESSION-HISTORY.md`.
+is state tracking only. Decisions that shaped the repo beyond theming live in
+`docs/TURNING-POINTS.md`.
 
 ## Shell surfaces: done
 
