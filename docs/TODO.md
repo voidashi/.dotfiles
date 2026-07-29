@@ -94,6 +94,19 @@ and `docs/SESSION-HISTORY.md` (what happened).
   some future Qt application that is not a KDE one. Costs nothing where it is.
   *Difficulty: trivial. Priority: low.*
 
+## Before publishing
+
+- **The docs are written for us, not for someone who cloned this.** `SESSION-HISTORY.md` is
+  about personal working decisions, and several documents mention the agent that helped
+  write them, which is irrelevant to anyone who just wants the rice: nothing here needs
+  Claude to be installed or understood. Some of those turning points are worth keeping,
+  reframed as explanations of why something is built the way it is, but not as a record of
+  who decided what and when. Worth doing as a deliberate pass rather than file by file,
+  possibly as a proper docs structure or a wiki instead of the current flat `docs/`.
+  Nothing blocks a publish today; this is about the repo reading like it was written for a
+  reader.
+  *Difficulty: medium, and open-ended. Priority: medium, and it rises the moment you push.*
+
 ## Ongoing: how the writing reads
 
 - **Clean the AI writing tells out of the remaining documents.** No em dashes, no saying a
