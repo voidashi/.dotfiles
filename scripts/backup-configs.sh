@@ -125,7 +125,7 @@ install_dotfiles() {
       # Create the parent first: an entry can live under a directory that does
       # not exist yet, such as ~/.local/share/color-schemes on a machine that
       # has never had a KDE colour scheme installed. And report what actually
-      # happened -- announcing success unconditionally is what hid that failure.
+      # happened, since announcing success unconditionally is what hid that failure.
       mkdir -p "$(dirname "$target")"
       if ln -snf "$dest" "$target"; then
         log "SUCCESS" "Linked: $dest → $target"
@@ -137,7 +137,7 @@ install_dotfiles() {
 }
 
 # fonts/ lives at the repo root, not mirrored under a $HOME-relative path like
-# config_files.conf entries, so it can't go through install_dotfiles() -- it
+# config_files.conf entries, so it can't go through install_dotfiles(); it
 # gets its own symlink into the XDG font directory instead.
 install_fonts() {
   local fonts_src="$DOTFILES_DIR/fonts"

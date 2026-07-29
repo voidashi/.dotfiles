@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Voidashi power menu -- wlogout with the geometry the theme expects.
+# Voidashi power menu: wlogout with the geometry the theme expects.
 #
 # wlogout takes its layout from a file but its geometry only from CLI flags,
 # so this wrapper is the single source of truth for both. Call it instead of

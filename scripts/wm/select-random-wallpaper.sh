@@ -14,7 +14,7 @@
 # pastas ainda não existem, cai no wallpaper que vem junto do repositório.
 #
 # IMPORTANTE: mensagens de erro vão para stderr. Indo para stdout, o $(...)
-# de quem chama capturaria a mensagem e a passaria como nome de arquivo --
+# de quem chama capturaria a mensagem e a passaria como nome de arquivo:
 # era exatamente esse o bug que deixava o swaybg sem wallpaper no Sway.
 
 set -uo pipefail
