@@ -18,8 +18,9 @@ under "Known gaps" at the bottom.
 - **Hyprland**: window borders and decoration recolored.
 - **swaylock, fastfetch, bottom, starship, fish**: themed by hand (their colour keys mix
   with structural config, so they aren't generated). Fish's `conf.d/` only autoloads one
-  colorscheme at a time, so the previous Flexoki theme files moved to `conf.d.legacy/`
-  rather than being deleted.
+  colorscheme at a time, so the previous Flexoki theme files moved to
+  `.config/fish/conf.d.legacy/` rather than being deleted. That is the only `conf.d.legacy`
+  left; Hyprland's was deleted once the Lua config had proven itself.
 - A full audit against the guide's non-negotiables and anti-patterns caught three real bugs
   no earlier pass had touched: Hyprland's window rounding was still at the inherited
   Kanagawa 10px, one animation curve had a mathematical overshoot, which is forbidden
