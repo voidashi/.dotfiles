@@ -9,8 +9,11 @@
 -- terminal = "ghostty"
 terminal = "kitty"
 
--- fileManager = "dolphin"
-fileManager = "cosmic-files"
+-- This pointed at cosmic-files, which is not installed, so SUPER+E ran a binary
+-- that does not exist. Dolphin is themed through kdeglobals; yazi below is the
+-- terminal counterpart and inherits the emulator's palette.
+fileManager = "dolphin"
+terminalFileManager = "yazi"
 
 -- hyprlauncher is themed through .config/hypr/hyprtoolkit.conf rather than any
 -- config of its own -- that file stays in place, so switching back is a matter

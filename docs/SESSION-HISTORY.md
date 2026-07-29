@@ -213,6 +213,33 @@ GTK config directories were also untracked until now, which is how they had quie
 territory of `kde-gtk-config`; the files that are ours are tracked, and the Breeze artifacts
 beside them are left alone.
 
+## Qt applications, and a file manager that was never installed
+
+Dolphin came up white, and the reason was not a missing theme. `QT_QPA_PLATFORMTHEME` was
+set to `qt6ct`, which exists for Qt applications that are not KDE, and `~/.config/qt6ct` did
+not exist. With nothing to read, it served its own default light palette on top of a
+kdeglobals that was already dark. A theming engine pointed at nothing, sitting in front of a
+configuration that was fine.
+
+Since all nine Qt applications here are KDE ones, the variable now points at `kde` and the
+palette is generated into kdeglobals, which is the file those applications actually read.
+The scheme is also installed as `Voidashi.colors` so it is selectable in KDE's own settings.
+The merge replaces only the colour sections and copies KDE's other keys through, because
+that file is shared: KDE tools write to it too. Verified by sampling pixels, Dolphin's
+chrome is void-10 and its content area void-00, both warm, where BreezeDark would have given
+blue-tinted greys the guide forbids.
+
+Separately, `programs.lua` had `fileManager = "cosmic-files"`, which is not installed, so
+`SUPER + E` had been running a binary that does not exist. Dolphin takes that bind now, and
+yazi was added as the terminal counterpart on `SUPER + SHIFT + E`, themed by hand so it
+inherits the emulator's background and supplies only its own chrome.
+
+One defect turned up in `backup-configs.sh` on the way: it printed SUCCESS after every `ln`
+without checking whether the link was made, and it did not create missing parent
+directories. Linking `~/.local/share/color-schemes/Voidashi.colors` failed silently on a
+machine that had never had a KDE colour scheme, while the script reported success. Both
+fixed.
+
 ## Open items carried forward
 
 - `.config/dunst/` is still orphaned (autostart runs `swaync`, not dunst) — same

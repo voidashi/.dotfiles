@@ -59,6 +59,23 @@ under "Known gaps" at the bottom.
   every GTK app — Regular thins out on surfaces this dark. Both live in `palette.json`
   under `geometry`; Hyprland and swaync read them, while GTK3 apps (waybar, wofi, wlogout)
   carry the literal because GTK3 has no CSS custom properties.
+- **Qt applications are themed through kdeglobals, which is generated too.** All nine Qt
+  applications here are KDE ones, and they read their palette from that file rather than
+  from anything GTK. `generate_theme.py` emits a KDE colour scheme, installs it as
+  `Voidashi.colors` so it is selectable, and merges its colour sections into kdeglobals,
+  which is what applications actually read. Window chrome is void-10, content void-00,
+  buttons void-20, tooltips void-30, selection ice-600, matching the GTK mapping so the two
+  toolkits agree.
+
+  The bug behind the white Dolphin was not a missing theme. `QT_QPA_PLATFORMTHEME` was set
+  to `qt6ct`, which exists for Qt applications that are not KDE, and with no `~/.config/qt6ct`
+  to read it served its own default light palette over a kdeglobals that was already dark.
+  It now points at `kde`. Worth noting for its own sake: the dark scheme it was hiding was
+  BreezeDark, whose greys are blue-tinted, which the guide forbids outright.
+- **yazi is the terminal file manager**, themed by hand in `.config/yazi/theme.toml` since
+  its colours mix with structural config. It inherits the emulator's background and ANSI
+  table and supplies only its own chrome: Ice for the hovered row, Bordeaux on the mode
+  indicator as the identity mark, alert tones for real states.
 - **Ordinary GTK applications are themed by overriding named colours, not by shipping a
   theme.** `generate_theme.py` maps the palette onto the names GTK and libadwaita already
   paint from and writes `.config/gtk-{3.0,4.0}/voidashi.css`, which each `gtk.css` imports

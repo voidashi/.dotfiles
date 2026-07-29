@@ -119,8 +119,20 @@ install_dotfiles() {
 
     # The -n flag treats a symlink to a directory as a normal file,
     # replacing it instead of creating a link inside it.
-    $DRY_RUN || ln -snf "$dest" "$target"
-    log "SUCCESS" "Linked: $dest → $target"
+    if $DRY_RUN; then
+      log "SUCCESS" "Linked: $dest → $target"
+    else
+      # Create the parent first: an entry can live under a directory that does
+      # not exist yet, such as ~/.local/share/color-schemes on a machine that
+      # has never had a KDE colour scheme installed. And report what actually
+      # happened -- announcing success unconditionally is what hid that failure.
+      mkdir -p "$(dirname "$target")"
+      if ln -snf "$dest" "$target"; then
+        log "SUCCESS" "Linked: $dest → $target"
+      else
+        log "ERROR" "Failed to link: $dest → $target"
+      fi
+    fi
   done < <(load_dotfiles)
 }
 

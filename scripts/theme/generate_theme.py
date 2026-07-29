@@ -313,6 +313,130 @@ radiobutton radio {{
     return out
 
 
+def merge_kde_globals(path: Path, scheme: str) -> None:
+    """Replace only the colour sections of kdeglobals, leaving the rest alone.
+
+    KDE applications read their palette from kdeglobals itself, not from the
+    .colors file, which systemsettings only uses as a source to copy from. But
+    kdeglobals also holds settings that are none of our business (animation
+    factors, recent documents, shortcuts), and KDE tools write to it too. So
+    this replaces the sections we own and copies everything else through
+    untouched.
+    """
+    owned = lambda name: (
+        name.startswith("Colors:") or name == "WM" or name.startswith("ColorEffects:")
+    )
+
+    kept, current, keep_current = [], None, True
+    if path.exists():
+        for line in path.read_text(encoding="utf-8").splitlines():
+            stripped = line.strip()
+            if stripped.startswith("[") and stripped.endswith("]"):
+                current = stripped[1:-1]
+                keep_current = not owned(current)
+            if keep_current:
+                kept.append(line)
+
+    # Drop the scheme's own [General], which would collide with the one already
+    # in kdeglobals; only its colour sections are wanted here.
+    body, current, emit = [], None, False
+    for line in scheme.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("[") and stripped.endswith("]"):
+            current = stripped[1:-1]
+            emit = owned(current)
+        if emit:
+            body.append(line)
+
+    text = "\n".join(l for l in kept if l.strip() or kept).rstrip() + "\n\n"
+    text += "\n".join(body).rstrip() + "\n"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+    print(f"  merged colours into {path.relative_to(REPO_ROOT)}")
+
+
+def gen_kde_colors(p: dict) -> str:
+    """KDE colour scheme, for the Qt half of the desktop.
+
+    Nine KDE applications are installed (dolphin, ark, gwenview, kate,
+    spectacle, and so on) and they read their colours from kdeglobals rather
+    than from anything GTK. The format is INI with one block per role and
+    values as "R,G,B" rather than hex.
+
+    The blocks are not interchangeable: Window is the chrome, View is the
+    content area a list or a text buffer draws on, Button is a raised control,
+    Tooltip floats above everything. Mapping them all to one colour is what
+    makes a Qt application look flat and wrong.
+    """
+    s, a = p["scales"], p["alert"]
+    rgb = lambda h: ",".join(str(int(h.lstrip("#")[i:i + 2], 16)) for i in (0, 2, 4))
+
+    ice_focus = s["ice"]["400"]
+    shared = {
+        "DecorationFocus": ice_focus,
+        "DecorationHover": ice_focus,
+        "ForegroundActive": s["ice"]["300"],
+        "ForegroundInactive": s["ink"]["4"],
+        "ForegroundLink": s["ice"]["300"],
+        "ForegroundVisited": s["ash"]["300"],
+        "ForegroundNegative": a["critical"]["fg"],
+        "ForegroundNeutral": a["caution"]["fg"],
+        "ForegroundPositive": a["good"]["fg"],
+    }
+
+    # background normal, background alternate, foreground normal
+    roles = {
+        "Window": (s["void"]["10"], s["void"]["20"], s["ink"]["1"]),
+        "View": (s["void"]["00"], s["void"]["10"], s["ink"]["1"]),
+        "Button": (s["void"]["20"], s["void"]["30"], s["ink"]["1"]),
+        "Selection": (s["ice"]["600"], s["ice"]["700"], s["ink"]["0"]),
+        "Tooltip": (s["void"]["30"], s["void"]["40"], s["ink"]["1"]),
+        "Complementary": (s["void"]["10"], s["void"]["20"], s["ink"]["1"]),
+        "Header": (s["void"]["20"], s["void"]["30"], s["ink"]["1"]),
+    }
+
+    out = header("#")
+    for role, (bg, alt, fg) in roles.items():
+        out += f"[Colors:{role}]\n"
+        out += f"BackgroundNormal={rgb(bg)}\n"
+        out += f"BackgroundAlternate={rgb(alt)}\n"
+        out += f"ForegroundNormal={rgb(fg)}\n"
+        for key, hexval in shared.items():
+            # Selection inverts: its foreground roles read against Ice, not void.
+            if role == "Selection" and key == "ForegroundInactive":
+                hexval = s["ink"]["2"]
+            out += f"{key}={rgb(hexval)}\n"
+        out += "\n"
+
+    # Title bars. activeBlend/inactiveBlend are the gradient partner Breeze uses;
+    # keeping them equal to the background is what removes the gradient.
+    out += "[WM]\n"
+    out += f"activeBackground={rgb(s['void']['20'])}\n"
+    out += f"activeBlend={rgb(s['void']['20'])}\n"
+    out += f"activeForeground={rgb(s['ink']['0'])}\n"
+    out += f"inactiveBackground={rgb(s['void']['10'])}\n"
+    out += f"inactiveBlend={rgb(s['void']['10'])}\n"
+    out += f"inactiveForeground={rgb(s['ink']['3'])}\n\n"
+
+    # Disabled and inactive text. These control fading only, never hue; the
+    # values are Breeze's, which are tuned and not worth reinventing.
+    out += (
+        "[ColorEffects:Disabled]\n"
+        "Color=56,56,56\nColorAmount=0\nColorEffect=0\n"
+        "ContrastAmount=0.65\nContrastEffect=1\n"
+        "IntensityAmount=0.1\nIntensityEffect=2\n\n"
+        "[ColorEffects:Inactive]\n"
+        "ChangeSelectionColor=true\nColor=112,111,110\nColorAmount=0.025\n"
+        "ColorEffect=2\nContrastAmount=0.1\nContrastEffect=2\n"
+        "IntensityAmount=0\nIntensityEffect=0\n\n"
+        "[General]\n"
+        "ColorScheme=Voidashi\n"
+        "Name=Voidashi\n"
+        "shadeSortColumn=true\n"
+    )
+    return out
+
+
 def main() -> None:
     p = load_palette()
     print("Generating Voidashi theme files from palette.json:")
@@ -326,6 +450,9 @@ def main() -> None:
     inline_block(CONFIG / "wofi" / "style.css", gtk_css)
     write(CONFIG / "gtk-3.0" / "voidashi.css", gen_gtk_app_css(p, "gtk3"))
     write(CONFIG / "gtk-4.0" / "voidashi.css", gen_gtk_app_css(p, "gtk4"))
+    kde = gen_kde_colors(p)
+    write(REPO_ROOT / ".local" / "share" / "color-schemes" / "Voidashi.colors", kde)
+    merge_kde_globals(CONFIG / "kdeglobals", kde)
     print("Done. Diff the results before committing.")
 
 
