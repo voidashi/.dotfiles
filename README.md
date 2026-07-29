@@ -95,10 +95,23 @@ The lock screen is plain `swaylock`; its appearance comes from
 
 ### Fonts
 
-`fonts/` bundles the faces the theme depends on (Hack Nerd Font, Inter, Roboto
-Mono, Ubuntu Mono, Instrument Sans, Spectral). `backup-configs.sh install`
-symlinks the whole directory to `~/.local/share/fonts/dotfiles` and refreshes
-the font cache, so a fresh clone gets them automatically — no separate step.
+`fonts/` bundles the four faces the theme actually uses, one per voice in
+`docs/design/RICE-GUIDE.md`'s typography table:
+
+| Face | Voice | Where |
+|---|---|---|
+| Iosevka Extended | mono, primary | terminals, editor, TUIs |
+| Hack Nerd Font | mono, glyphs | icons Iosevka does not cover |
+| Instrument Sans | sans, secondary | GTK and Qt application UI |
+| Spectral | serif, exceptional | lockscreen, fetch banners |
+
+`backup-configs.sh install` symlinks the whole directory to
+`~/.local/share/fonts/dotfiles` and refreshes the font cache, so a fresh clone
+gets them automatically, with no separate step.
+
+Inter, Roboto Mono and Ubuntu Mono used to sit here too. Nothing referenced any
+of them, so they were 22MB being versioned and installed into the font
+directory for no reason.
 
 **Iosevka is the exception.** Its full-family build is ~430MB and is
 `.gitignore`d rather than committed. Download the "Iosevka" SGr TTC build (or
