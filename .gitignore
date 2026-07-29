@@ -12,3 +12,9 @@ fonts/Iosevka/
 # a binary diff beside the real one.
 __pycache__/
 *.pyc
+
+# A local clone of thevibeworks/claude-code-docs, kept as an offline reference.
+# ~3700 files that update upstream on their own, so versioning them here would
+# be committing someone else's repo and watching it go stale. Clone it back with
+# `git clone https://github.com/thevibeworks/claude-code-docs docs/claude-code-docs`.
+docs/claude-code-docs/

@@ -48,13 +48,21 @@ and `docs/SESSION-HISTORY.md` (what happened).
   `breeze-dark` to `breeze`, the cursor to `breeze_cursors`, and deleted every explanatory
   comment.
 
+  The same event also **replaced both `gtk.css` symlinks with real files**, which
+  `backup-configs.sh check` caught as two broken links. That half is already repaired: the
+  content was byte-identical apart from a trailing newline, so nothing was lost and the
+  links are back, 30 valid again. Worth knowing that it happens, because a `gtk.css` that
+  is a real file means edits in the repo stop reaching GTK while everything still looks
+  fine.
+
   So the file has two owners and KDE wins whenever kded6 starts, which is any KDE
-  application launch. Restoring by hand only survives until the next one. Options, in
-  ascending order of giving up: set these values through KDE's own config so kded6 writes
-  what we want, teach `generate_theme.py` to own the file the way it owns `kdeglobals`, or
-  stop tracking `settings.ini` and keep only `gtk.css`, which KDE does not touch. Decide
-  before restoring, or the restore is thrown away. Note the earlier `kdeglobals` rewrite at
-  02:07 is the same family of event.
+  application launch. Restoring `settings.ini` by hand only survives until the next one.
+  Options, in ascending order of giving up: set these values through KDE's own config so
+  kded6 writes what we want, teach `generate_theme.py` to own the file the way it owns
+  `kdeglobals`, or stop tracking `settings.ini` and keep only `gtk.css`. Decide before
+  restoring, or the restore is thrown away. The earlier `kdeglobals` rewrite at 02:07 is
+  the same family of event, and `CLAUDE.md`'s note blaming nwg-look needs correcting once
+  this is settled.
   *Difficulty: low to restore, medium to make it stick. Priority: medium, since the GTK font
   is currently off-palette on every GTK application.*
 
