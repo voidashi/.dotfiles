@@ -69,8 +69,8 @@ and `docs/SESSION-HISTORY.md` (what happened).
 ## Ongoing: how the writing reads
 
 - **Clean the AI writing tells out of the remaining documents.** The rule lives in
-  `docs/CONVENTIONS.md`. `RICE-GUIDE.md`, `DESIGN-SYSTEM.md` and `THEME-STATUS.md` are
-  done; what is left is `CLAUDE.md` (30), `AESTHETIC-DIRECTION.md` (40) and the README (4).
+  `docs/portable/CONVENTIONS.md`. `RICE-GUIDE.md`, `DESIGN-SYSTEM.md` and `THEME-STATUS.md`
+  are done; what is left is `CLAUDE.md` (30), `AESTHETIC-DIRECTION.md` (40), README (4).
   Clean each when something else takes you into it. Note from doing the first three: an em
   dash joining two independent clauses needs a semicolon, not a comma, and a subordinate
   clause opening with "If" or "When" needs the comma, so a blanket substitution produces

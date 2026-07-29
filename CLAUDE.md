@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-See @docs/CONVENTIONS.md for how we work in this repo: where each kind of fact lives, what to verify and how, and the session discipline. Rules there are marked **(paid)** when they came from a failure here, with the incident named, or **(borrowed)** when they are general practice that has not yet cost us anything. `docs/ADOPTING-CONVENTIONS.md` covers copying the setup into another project and is not loaded.
+See @docs/portable/CONVENTIONS.md for how we work in this repo: where each kind of fact lives, what to verify and how, and the session discipline. Rules there are marked **(paid)** when they came from a failure here, with the incident named, or **(borrowed)** when they are general practice that has not yet cost us anything. `docs/portable/` holds the whole set, written to be copied into another project; the rest of it is not loaded.
 
 ## What this repo is
 
