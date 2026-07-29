@@ -67,10 +67,15 @@ All three scripts resolve their `.conf` files from the script's own location (`S
 
 ## Validating changes
 
-Run `python3 scripts/theme/check_palette.py` after any colour change. It fails on two
-things: a hex anywhere in a tracked config that is not in `palette.json`, and a `GENERATED`
-file that no longer matches what the generator would produce, which is how hand-edits to
-generated output get caught. Deliberate exceptions (`DESIGN-SYSTEM.md`, the orphaned
+Run `python3 scripts/theme/check_palette.py` after any colour change. It fails on three
+things: a hex anywhere in a tracked config that is not in `palette.json`, a **named**
+terminal colour (`green`, `brwhite`, `cyan`) inside fish or starship config, and a
+`GENERATED` file that no longer matches what the generator would produce, which is how
+hand-edits to generated output get caught. The named-colour check exists because twelve
+fish variables sat on stock names for the whole retheme while the hex-only check passed.
+Colour names are searched only in fish and starship, since words like "red" appear in prose
+everywhere else, and comments are stripped first so a colour discussed is not a colour
+applied. Deliberate exceptions (`DESIGN-SYSTEM.md`, the orphaned
 `dunstrc`) are listed in the script with the reason, so a decided exception does not become
 permanent noise.
 

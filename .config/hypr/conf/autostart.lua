@@ -21,5 +21,8 @@ hl.on("hyprland.start", function()
             .. "$HOME/.dotfiles/wallpapers)\""
     )
 
-    hl.exec_cmd("kill mako & swaync")
+    -- Era "kill mako & swaync", com dois defeitos numa linha: kill so aceita
+    -- PID e nunca aceitou nome de processo, entao aquilo so gerava erro; e o
+    -- mako nem esta instalado nesta maquina, entao nao havia o que matar.
+    hl.exec_cmd("swaync")
 end)

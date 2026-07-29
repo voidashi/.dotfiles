@@ -48,8 +48,11 @@ Antes de mexer em qualquer app, veja por qual linha ele entra:
 | **Escrito à mão** | Cor se mistura com config estrutural, então gerar arriscaria corromper o que não é cor | swaylock, bottom, starship, fastfetch, fish, yazi, `nvim/theme/roles.lua`, Sway |
 
 Os escritos à mão são os que envelhecem em silêncio quando a paleta muda, e por isso
-existe `scripts/theme/check_palette.py`: ele acusa qualquer hex fora da paleta e qualquer
-arquivo `GENERATED` que tenha sido editado à mão. Rode depois de mexer em cor.
+existe `scripts/theme/check_palette.py`: ele acusa hex fora da paleta, nome de cor de
+terminal em config de fish ou starship, e arquivo `GENERATED` editado à mão. Rode depois de
+mexer em cor. A verificação por nome existe porque doze variáveis do fish passaram o
+retheme inteiro em `green`, `red` e `brgreen` enquanto a verificação por hex passava
+limpa.
 
 ## Architecture
 
