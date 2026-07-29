@@ -4,9 +4,9 @@
 
 # Configuration (MUST match your original script's settings)
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
-# Resolvido a partir da localização do script, igual ao backup-configs.sh.
-# Antes apontava para ~/scripts/dotfiles/, que era uma cópia separada e já
-# não existe mais.
+# Resolved from the script's own location, same as backup-configs.sh. It used
+# to point at ~/scripts/dotfiles/, which was a separate copy and no longer
+# exists.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_FILE="${CONFIG_FILE:-$SCRIPT_DIR/config_files.conf}"
 BACKUP_DIR="${BACKUP_DIR:-$HOME/.dotfiles_backup}"
@@ -57,7 +57,7 @@ restore() {
   done < <(load_dotfiles)
 
   # Cleanup empty directories in the repo. O -not -path protege o .git:
-  # ele tem diretórios legitimamente vazios (refs/tags, por exemplo).
+  # it has legitimately empty directories of its own (refs/tags, for one).
   find "$DOTFILES_DIR" -type d -empty -not -path "$DOTFILES_DIR/.git/*" -delete 2>/dev/null
 }
 

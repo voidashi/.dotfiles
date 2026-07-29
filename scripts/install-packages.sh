@@ -4,9 +4,9 @@
 # Usage: ./install-packages.sh [preview|install|check|repos] [--yes] [--no-color] [--log FILE]
 
 # ---- Configuration ----
-# Resolvido a partir da localização do script, não do diretório atual: assim
-# ele funciona tanto rodando de dentro de scripts/ quanto do raiz do repo
-# (que é justamente como o README manda rodar).
+# Resolved from the script's own location, not the current directory, so it
+# works both from inside scripts/ and from the repo root, which is exactly how
+# the README tells you to run it.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_FILE="${CONFIG_FILE:-$SCRIPT_DIR/packages.conf}"
 LOG_FILE="${LOG_FILE:-$SCRIPT_DIR/package_install.log}"
@@ -70,8 +70,8 @@ detect_pkg_manager() {
 }
 
 detect_aur_helper() {
-    # Alguns pacotes do packages.conf (catnap, pfetch, pipes.sh) só existem
-    # no AUR. O pacman sozinho não os instala, então precisamos de um helper.
+    # A few packages in packages.conf (catnap, pfetch, pipes.sh) exist only in
+    # the AUR. pacman alone will not install them, so a helper is required.
     local helper
     for helper in paru yay pikaur; do
         if command -v "$helper" >/dev/null 2>&1; then
@@ -144,9 +144,9 @@ load_packages() {
         PACKAGE_MAP["$key"]="${value:-$key}"
     done < <(
         awk -v pm="$PKG_MANAGER" '
-            # Identify the current section. O "next" é necessário: sem ele a
-            # própria linha "[common]" casa com a regra abaixo e vira um
-            # "pacote" chamado [common], que nunca existe.
+            # Identify the current section. The "next" is required: without it
+            # the "[common]" line itself matches the rule below and becomes a
+            # "package" named [common], which never exists.
             $0 ~ /^\[.*\]$/ { section = substr($0, 2, length($0)-2); next }
             # Process lines in [common] or the relevant distro section
             (section == pm || section == "common") && $0 !~ /^(#|;|$)/ {
@@ -167,8 +167,8 @@ install_package() {
     case "$PKG_MANAGER" in
         "apt") sudo apt-get install -yqq "$package_name" || status=$? ;;
         "pacman")
-            # Se não estiver nos repos oficiais, o pacote provavelmente é do
-            # AUR: cai para o helper em vez de falhar direto.
+            # If it is not in the official repos the package is probably from
+            # the AUR, so fall back to the helper instead of failing outright.
             if pacman -Si "$package_name" &>/dev/null; then
                 sudo pacman -S --noconfirm --needed "$package_name" || status=$?
             elif [ -n "$AUR_HELPER" ]; then

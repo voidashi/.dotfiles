@@ -1,13 +1,13 @@
 # =====================================================================
 #  SWAY
 # =====================================================================
-# Compositor alternativo ao Hyprland, mantido em paralelo. O tema e espelhado
-# entre os dois por exigencia do CLAUDE.md: cor, terminal e launcher iguais.
+# The alternative compositor to Hyprland, kept in parallel. CLAUDE.md requires
+# the theme to be mirrored between the two: same colour, terminal and launcher.
 #
-# Os blocos de exemplo comentados que o sway distribui por padrao (output,
-# idle, input) foram removidos. Nenhum tinha config real dentro, somavam mais
-# de quarenta linhas, e foi entre eles que um bloco de paleta morto passou
-# despercebido durante todo o retheme. `man 5 sway` cobre o que eles cobriam.
+# The commented example blocks sway ships by default (output, idle, input) were
+# removed. None held real config, together they ran to over forty lines, and it
+# was among them that a dead palette block went unnoticed through the whole
+# retheme. `man 5 sway` covers what they covered.
 
 ### Variables
 #
@@ -18,8 +18,8 @@ set $left h
 set $down j
 set $up k
 set $right l
-# Mesmo terminal e mesmo launcher que o Hyprland usa, em conf/programs.lua.
-# Divergiam sem motivo: foot e wmenu-run aqui, kitty e wofi la.
+# The same terminal and launcher Hyprland uses, in conf/programs.lua. They had
+# diverged for no reason: foot and wmenu-run here, kitty and wofi there.
 set $term kitty
 set $menu wofi --show drun
 
@@ -178,9 +178,9 @@ bindsym $mod+r mode "resize"
 #
 # Status Bar:
 #
-# A barra e o waybar, lancado na secao de Autostart abaixo com sway.jsonc.
-# O bloco de exemplo do swaybar que vinha aqui foi removido: estava comentado,
-# nunca seria usado, e trazia quatro cores fora da paleta.
+# The bar is waybar, launched from the Autostart section below with sway.jsonc.
+# The swaybar example block that used to sit here was removed: it was commented
+# out, would never be used, and carried four colours from outside the palette.
 
 #
 # Appearance
@@ -197,13 +197,13 @@ gaps inner 10
 # Theme
 #
 
-# Cores. Espelham .config/hypr/conf/appearance.lua, porque o CLAUDE.md pede que
-# tema seja espelhado entre os dois compositores: foco em Ice, inativa em
-# edge-30, superficies na escala void.
+# Colours. These mirror .config/hypr/conf/appearance.lua, because CLAUDE.md asks
+# for the theme to be mirrored across both compositors: focus in Ice, inactive in
+# edge-30, surfaces on the void scale.
 #
-# O bloco que estava aqui antes trazia as 41 cores do Kanagawa em variaveis e
-# nao usava nenhuma: nao havia um unico client.* no arquivo, entao o Sway rodava
-# com as cores de fabrica dele enquanto o repo aparentava ter tema.
+# The block that used to sit here carried Kanagawa's 41 colours as variables and
+# used none of them: there was not a single client.* directive in the file, so
+# Sway ran on its factory colours while the repo appeared to be themed.
 set $void00 #0a0908
 set $void10 #121110
 set $edge20 #2a2927
@@ -214,8 +214,8 @@ set $ink4   #6c6c6c
 set $ice300 #6aa3c7
 set $critical #e14b39
 
-# client.<estado> <borda> <fundo> <texto> <indicador> <borda-filho>
-# O indicador mostra onde a proxima janela abre, entao usa Ice tambem: e foco.
+# client.<state> <border> <background> <text> <indicator> <child-border>
+# The indicator shows where the next window opens, so it takes Ice too: it is focus.
 client.focused          $ice300 $void10 $ink0 $ice300 $ice300
 client.focused_inactive $edge30 $void10 $ink2 $edge30 $edge30
 client.unfocused        $edge30 $void00 $ink4 $edge30 $edge30
@@ -230,8 +230,8 @@ client.background       $void00
 # Both compositors pass -c/-s explicitly: neither bar is "the default one",
 # and the module list is the only thing that differs between them.
 exec waybar -c $HOME/.config/waybar/sway.jsonc -s $HOME/.config/waybar/style.css
-# Ordem: os wallpapers em rotação, depois a coleção completa, depois o
-# wallpaper de exemplo do próprio repo (para uma instalação nova).
+# In order: the wallpapers in rotation, then the full collection, then the
+# repo's own sample wallpaper (which is what makes a fresh install work).
 exec swaybg -m fill -i "$($HOME/.dotfiles/scripts/wm/select-random-wallpaper.sh $HOME/Pictures/Current_wallpapers $HOME/Pictures/Wallpapers $HOME/.dotfiles/wallpapers)"
 
 

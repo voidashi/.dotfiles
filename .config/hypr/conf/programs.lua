@@ -2,8 +2,8 @@
 --  PROGRAMAS
 -- =====================================================================
 -- https://wiki.hypr.land/Configuring/Basics/Binds/
--- Configuração dos programas padrão e apps iniciais
--- Definidas como globais (sem "local") para conf.d/binds.lua poder usá-las.
+-- Default programs and startup apps.
+-- Declared global (no "local") so that conf/binds.lua can reach them.
 
 -- terminal = "foot"
 -- terminal = "ghostty"
@@ -16,7 +16,7 @@ fileManager = "dolphin"
 terminalFileManager = "yazi"
 
 -- hyprlauncher is themed through .config/hypr/hyprtoolkit.conf rather than any
--- config of its own -- that file stays in place, so switching back is a matter
+-- config of its own; that file stays in place, so switching back is a matter
 -- of swapping these two lines.
 -- menu = "hyprlauncher"
 menu = "wofi --show drun"

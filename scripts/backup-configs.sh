@@ -5,9 +5,9 @@
 
 # ---- Configuration ----
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
-# Resolvido a partir da localização do script, não do diretório atual: assim
-# ele funciona tanto rodando de dentro de scripts/ quanto do raiz do repo
-# (que é justamente como o README manda rodar).
+# Resolved from the script's own location, not the current directory, so it
+# works both from inside scripts/ and from the repo root, which is exactly how
+# the README tells you to run it.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_FILE="${CONFIG_FILE:-$SCRIPT_DIR/config_files.conf}"
 BACKUP_DIR="${BACKUP_DIR:-$HOME/.dotfiles_backup}"
@@ -219,7 +219,7 @@ while [[ $# -gt 0 ]]; do
     --dry-run) DRY_RUN=true; shift ;;
     --force) FORCE=true; shift ;;
     --verbose) VERBOSE=true; shift ;;
-    # Se não for flag, guarda no array de argumentos posicionais e continua
+    # Not a flag: store it in the positional argument array and carry on
     *) POSITIONAL_ARGS+=("$1"); shift ;;
   esac
 done

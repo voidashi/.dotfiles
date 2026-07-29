@@ -9,7 +9,7 @@ hl.config({
         -- A floating surface takes the system radius; anything docked to a
         -- screen edge stays square. Small enough to read as cut rather than
         -- moulded (was 10 under Kanagawa Dragon, then briefly 0). The value
-        -- lives in scripts/theme/palette.json -- see RICE-GUIDE.md, "Form".
+        -- lives in scripts/theme/palette.json; see RICE-GUIDE.md, "Form".
         rounding = palette.geometry.radius_floating,
 
         active_opacity = 1.0,

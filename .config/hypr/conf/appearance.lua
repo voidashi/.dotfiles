@@ -12,7 +12,7 @@ hl.config({
 
         col = {
             -- Voidashi: foco/ativo = Ice (RICE-GUIDE.md role table), inativa = edge-30
-            -- (era rgba(8ba4b0ee) / rgba(625e5aaa) -- tema Kanagawa Dragon)
+            -- (era rgba(8ba4b0ee) / rgba(625e5aaa), tema Kanagawa Dragon)
             active_border = "rgba(" .. palette.ice["300"]:gsub("#", "") .. "ee)",
             inactive_border = "rgba(" .. palette.edge["30"]:gsub("#", "") .. "bb)",
         },
