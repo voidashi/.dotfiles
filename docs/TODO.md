@@ -36,41 +36,37 @@ The documentation pass ran on 2026-07-29 and is done; what it left behind is her
 
 ## Features to build
 
-Four gaps found by checking the README's claims against the configs during the documentation
-survey. The README stopped claiming them; these entries are the intent to build them.
+Found by checking the README's claims against the configs during the documentation survey.
+Three of the four are built; what is below is what is left of them.
 
-- **Clipboard integration.** Nothing exists: no `cliphist`, no `wl-clipboard`, no binding,
-  nothing in `packages.conf`. The usual shape on Wayland is `wl-clipboard` for copy and paste
-  plus `cliphist` for history, with the picker on a keybind through wofi, which is already
-  the launcher on both compositors. Mirror the binding across Hyprland and Sway, since
-  anything shell-adjacent has to exist in both.
-  *Difficulty: low. Priority: medium, it is a daily-use convenience that is simply absent.*
+- **Nothing is installed yet.** The three packages behind the work just done are declared but
+  not on the machine: `cliphist`, `hypridle`, `swayidle`. Run
+  `./scripts/install-packages.sh install`, then log out and back in so both autostarts run.
+  Until then the clipboard keybind reports that cliphist is missing and nothing idles.
+  *Difficulty: trivial. Priority: high, the feature does not exist until this runs.*
 
-- **Battery-friendly power management.** Also nothing: no `hypridle`, no `swayidle`, no
-  `tlp`, no `power-profiles-daemon`. Two separate pieces sit behind this label. Idle
-  behaviour, meaning dim, lock and suspend after a timeout, which needs `hypridle` on
-  Hyprland and `swayidle` on Sway and should reach the same `swaylock` that is already
-  themed. And power profiles proper, which is a system daemon rather than a compositor
-  concern. Decide whether both belong here or only the idle half.
-  *Difficulty: medium, since it is two mechanisms and touches both compositors. Priority:
-  medium, and higher if this machine runs on battery often.*
+- **Power profiles, the other half of power management.** Idle handling is done; switching a
+  CPU governor or a platform profile is not. `power-profiles-daemon` is the usual answer and
+  it needs `systemctl enable`, which is a system service rather than a dotfile, so
+  `backup-configs.sh` has no way to do it and it was left out deliberately. `supergfxctl` is
+  already declared here, which suggests the graphics half was once considered. Decide whether
+  this repo should carry system services at all before adding one.
+  *Difficulty: low. Priority: low, and it is a decision about scope more than about work.*
 
 - **Context-aware workspace layouts.** Something real exists underneath, so this one is an
   extension rather than a build: `hypr/conf/window_rules.lua:10-16` already drops gaps and
   borders when a workspace holds a single window, through Hyprland's `w[tv1]` and `f[1]`
   selectors. What does not exist is any per-application assignment, which is what the phrase
   promises. Decide what the rule should actually be before writing it, because a workspace
-  map that fights how you work is worse than none.
+  map that fights how you work is worse than none. Whatever it becomes has to be mirrored in
+  the Sway config, which has no equivalent of those selectors and would need explicit
+  `assign` rules.
   *Difficulty: low to write, and the design is the real work. Priority: low.*
 
-- **Sway has no notification daemon.** Its only `exec` lines are waybar and swaybg, so
-  swaync runs under Hyprland and nothing catches notifications under Sway. The config and
-  the stylesheet already exist and are themed, so this is one `exec` line plus a check that
-  it does not collide with anything Sway starts on its own. Note also that `dunst` is still
-  declared in `packages.conf` although nothing launches it; `.config/dunst/` is kept
-  deliberately as a reference, but installing the package is a separate question.
-  *Difficulty: low. Priority: medium, since it is a silent failure of exactly the kind this
-  repo keeps producing: configured, looks configured, never runs.*
+- **`dunst` is still declared in `packages.conf` although nothing launches it.**
+  `.config/dunst/` is kept deliberately as a reference and that decision is final, but
+  installing the package on every fresh clone is a separate question that was never asked.
+  *Difficulty: trivial. Priority: low.*
 
 ## Parked: diagnosed, not solved
 

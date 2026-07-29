@@ -41,9 +41,11 @@ The generator is stdlib-only Python, no dependencies. Its output files carry a
 | Compositor | Sway | The fallback, themed to match |
 | Bar | Waybar | One config described once, with a thin per-compositor file on top |
 | Launcher | wofi | `hyprlauncher` is configured too, commented out |
-| Notifications | swaync | Hyprland only at the moment, see Known gaps |
+| Notifications | swaync | Started by both compositors |
 | Lock screen | swaylock | Themed entirely from its own config file, no wrapper |
 | Power menu | wlogout | Launched through `scripts/wm/power-menu.sh`, never bare |
+| Clipboard | cliphist | History on `SUPER`+`Shift`+`V`, through the same wofi |
+| Idle | hypridle, swayidle | Lock at 5 min, screen off at 6, suspend at 30 |
 | Terminals | Kitty, Ghostty, Alacritty, Foot | Identical palette, font and padding in all four |
 | Shell | fish + starship | |
 | Editor | Neovim | lazy.nvim, with a colorscheme written for this palette rather than a plugin |
@@ -121,6 +123,7 @@ The entry points under Hyprland, with `SUPER` as the modifier. The full set is i
 | `SUPER` + `E` | File manager, `SUPER` + `Shift` + `E` for yazi in a terminal |
 | `SUPER` + `Q` | Close window, `SUPER` + `Shift` + `Q` to kill it |
 | `SUPER` + `F` | Fullscreen, `SUPER` + `V` to toggle floating |
+| `SUPER` + `Shift` + `V` | Clipboard history |
 | `SUPER` + `1`…`9` | Switch workspace, add `Shift` to move the window there |
 | `Print` | Screenshot the output, `Shift` for a region, `SUPER` for the window |
 | `SUPER` + `M` | Exit the compositor |
@@ -196,16 +199,13 @@ question each one owns. The two worth knowing about up front:
 
 Named here rather than left for you to discover:
 
-- **No clipboard manager.** Nothing is configured, so there is no clipboard history.
-- **No idle or power management.** No dim, no automatic lock, no suspend on a timeout.
-  Closing the lid locks the screen, and that is all there is.
-- **Notifications work under Hyprland only.** swaync is themed and configured but Sway
-  does not start it.
 - **Workspace buttons in the bar are not clickable.** Traced to the Waybar build rather
   than to this configuration; the full elimination is written down in `docs/TODO.md`.
   Keyboard switching works.
 - **Workspace layouts are geometric, not per-application.** A workspace holding a single
   window drops its gaps and borders, but no application is assigned to a workspace.
+- **No power profiles.** Idle handling exists, but switching a CPU governor or a platform
+  profile does not, since that is a system service rather than a dotfile.
 
 `docs/TODO.md` carries these with the shape of the work each one needs.
 

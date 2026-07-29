@@ -132,6 +132,30 @@ retheme on `green`, `red` and `brgreen` while the hex check passed clean.
   `settings.ini` files, which KDE's `gtkconfig` daemon had been reverting to its own
   defaults: it copies those same values across, so feeding it the right ones was cheaper
   than fighting it, and it cannot be turned off. The full account is in `CLAUDE.md`.
+- **The lock screen had been grey, not themed, and every colour in it was correct.** The
+  config was written for `swaylock-effects` while plain swaylock is what is installed, so
+  seven of its options were unknown to the binary. One of those mattered: `screenshots` was
+  the only thing setting a background, and with no `color=` line the lock fell back to
+  swaylock's own default light grey on a warm-charcoal desktop. It is now solid `void-00`,
+  which the guide calls always legitimate and often the strongest. The blur went with it and
+  is no loss, since a blur wide enough to notice as an effect is an anti-pattern and `7x5`
+  was. `show-failed-attempts` was added because a wrong password had been signalled by the
+  ring turning `alert-critical` and nothing else, and colour never carries a state alone.
+
+  This is also why `check_palette.py` gained a bare-hex scope. swaylock writes
+  `ring-color=393835` with no `#`, so the hex check had never read one of its 28 values.
+
+- **fastfetch is on the palette in all five of its configs, and was on ANSI defaults.**
+  Measured rather than eyeballed: the fish greeter rendered its logo and title in `ESC[36m`,
+  cyan, which is Verdigris, a family the guide restricts to ANSI slots 6 and 14 and to syntax
+  highlighting; and its keys in bold `ESC[33m`, which resolves to bright yellow, meaning
+  `alert-caution` used as decoration. A greeter is an identity surface, so Bordeaux is the
+  accent now and everything else is ink, one family at rest. The three dormant presets were
+  aligned too, `arch_large` and `crow` off ice-400 and `home` off a six-colour rotation that
+  was the "every module a different colour" anti-pattern outright. Percentage tinting is off
+  everywhere: fastfetch colours a percentage by threshold, and memory at 16% was green, an
+  accent on screen at rest for nothing.
+
 - **yazi is the terminal file manager**, themed by hand in `.config/yazi/theme.toml` since
   its colours mix with structural config. It inherits the emulator's background and ANSI
   table and supplies only its own chrome: Ice for the hovered row, Bordeaux on the mode
