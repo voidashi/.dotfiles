@@ -1,8 +1,13 @@
-# Default config for sway
+# =====================================================================
+#  SWAY
+# =====================================================================
+# Compositor alternativo ao Hyprland, mantido em paralelo. O tema e espelhado
+# entre os dois por exigencia do CLAUDE.md: cor, terminal e launcher iguais.
 #
-# Copy this to ~/.config/sway/config and edit it to your liking.
-#
-# Read `man 5 sway` for a complete reference.
+# Os blocos de exemplo comentados que o sway distribui por padrao (output,
+# idle, input) foram removidos. Nenhum tinha config real dentro, somavam mais
+# de quarenta linhas, e foi entre eles que um bloco de paleta morto passou
+# despercebido durante todo o retheme. `man 5 sway` cobre o que eles cobriam.
 
 ### Variables
 #
@@ -17,47 +22,6 @@ set $right l
 # Divergiam sem motivo: foot e wmenu-run aqui, kitty e wofi la.
 set $term kitty
 set $menu wofi --show drun
-
-### Output configuration
-#
-# Default wallpaper (more resolutions are available in @datadir@/backgrounds/sway/)
-#output * bg @datadir@/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
-#output * bg /home/jeff/Pictures/Wallpapers/pexels-eberhardgross-1287075.jpg fill
-# Wallpaper configurarion in the autostart section
-
-#
-# Example configuration:
-#
-#   output HDMI-A-1 resolution 1920x1080 position 1920,0
-#
-# You can get the names of your outputs by running: swaymsg -t get_outputs
-
-### Idle configuration
-#
-# Example configuration:
-#
-# exec swayidle -w \
-#          timeout 300 'swaylock -f -c 000000' \
-#          timeout 600 'swaymsg "output * power off"' resume 'swaymsg "output * power on"' \
-#          before-sleep 'swaylock -f -c 000000'
-#
-# This will lock your screen after 300 seconds of inactivity, then turn off
-# your displays after another 300 seconds, and turn your screens back on when
-# resumed. It will also lock your screen before your computer goes to sleep.
-
-### Input configuration
-#
-# Example configuration:
-#
-#   input "2:14:SynPS/2_Synaptics_TouchPad" {
-#       dwt enabled
-#       tap enabled
-#       natural_scroll enabled
-#       middle_emulation enabled
-#   }
-#
-# You can get the names of your inputs by running: swaymsg -t get_inputs
-# Read `man 5 sway-input` for more information about this section.
 
 ### Key bindings
 #

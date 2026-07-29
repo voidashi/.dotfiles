@@ -3,8 +3,7 @@
 /* =====================================================================
    WAYBAR -- Voidashi
    =====================================================================
-   One stylesheet for both bars (hyprland.jsonc and sway.jsonc). The previous
-   Kanagawa colours are preserved in style.kanagawa.css.
+   One stylesheet for both bars (hyprland.jsonc and sway.jsonc).
 
    Per docs/design/RICE-GUIDE.md, "Bars and panels": void-10 surface, edge-20
    edge, compact density, modules at ink-3 at rest. Colour appears only on a

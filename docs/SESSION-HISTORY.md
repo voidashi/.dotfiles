@@ -285,6 +285,30 @@ A `THEME-STATUS.md` ganhou uma tabela de qual app recebe a paleta por qual mecan
 cinco, porque cinco toolkits não aceitam o mesmo tratamento, e era informação que só existia
 espalhada.
 
+## Passada de elegância: os defeitos e o peso morto
+
+O levantamento achou nove itens, dois deles defeito e não arrumação.
+
+Doze variáveis de cor do fish passaram o retheme inteiro no padrão de fábrica. O
+`fish_frozen_theme.fish`, que o próprio fish gerou ao migrar para a 4.3, definia 27 contra
+as 19 do nosso, e o `conf.d` carrega em ordem alfabética: o nosso vencia onde coincidia e o
+resto ficava em `green`, `red`, `brgreen`. Passou despercebido porque a sintaxe da linha de
+comando, que é o que se olha primeiro, estava certa. O `check_palette.py` não pegava porque
+só olhava hex, e aquilo eram nomes; agora olha nome também, restrito a fish e starship, com
+comentário removido antes para não ler prosa como cor aplicada.
+
+O `kill mako & swaync` do autostart tinha dois defeitos numa linha: `kill` nunca aceitou
+nome de processo, e o mako não está instalado.
+
+Depois, 17 arquivos de peso morto. Os temas Flexoki e Kanagawa guardados como rollback em
+nove apps, o `conf.d.legacy` do fish, e um `power_menu.xml` na pasta de scripts do waybar
+que não era referenciado por nada. Junto saíram as oito referências comentadas que
+apontavam para eles, que é o que fazia parecer haver escolha entre temas onde não havia
+mais. O rollback é o git.
+
+O `sway/config` perdeu 47 linhas de bloco de exemplo de fábrica, que era onde o bloco de
+paleta morto tinha se escondido durante todo o retheme.
+
 ## Open items carried forward
 
 - `.config/dunst/` is still orphaned (autostart runs `swaync`, not dunst) — same

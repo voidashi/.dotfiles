@@ -1,4 +1,4 @@
-/* Voidashi theme. Previous (Cachy) colors preserved in style.kanagawa.css.
+/* Voidashi theme.
 
    The palette is inlined below by scripts/theme/generate_theme.py rather than
    @import-ed: wofi loads this stylesheet as a string, so GTK resolves relative

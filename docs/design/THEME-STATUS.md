@@ -24,9 +24,9 @@ under "Known gaps" at the bottom.
   against kitty and wofi) and now match.
 - **swaylock, fastfetch, bottom, starship, fish**: themed by hand (their colour keys mix
   with structural config, so they aren't generated). Fish's `conf.d/` only autoloads one
-  colorscheme at a time, so the previous Flexoki theme files moved to
-  `.config/fish/conf.d.legacy/` rather than being deleted. That is the only `conf.d.legacy`
-  left; Hyprland's was deleted once the Lua config had proven itself.
+  colorscheme at a time. O `voidashi-colorscheme.fish` define todas as variáveis de cor do
+  fish, não só as visíveis: doze ficaram no padrão de fábrica durante todo o retheme porque
+  um arquivo que o próprio fish gerou numa migração definia mais variáveis que o nosso.
 - A full audit against the guide's non-negotiables and anti-patterns caught three real bugs
   no earlier pass had touched: Hyprland's window rounding was still at the inherited
   Kanagawa 10px, one animation curve had a mathematical overshoot, which is forbidden
@@ -66,11 +66,11 @@ limpa.
 - **Hand-edited apps**: swaylock, bottom, starship, fastfetch, fish — colour there mixes
   with structural config, so generating into them risked corrupting settings unrelated to
   colour. Values still come straight from the palette, just pasted rather than generated.
-- **Recolouring preserves the previous version; restructuring does not.** Files whose
-  colours changed keep their old version beside them (`*.kanagawa.css`, `*.kanagawa.legacy`,
-  commented-out `include` lines). Files removed by a redesign are gone from the working
-  tree and recoverable from git instead: wlogout's lavender PNGs, and waybar's three
-  drifting config variants.
+- **O rollback é o git, não o diretório.** Durante o retheme cada arquivo recolorido
+  guardava sua versão anterior ao lado (`*.kanagawa.css`, `*.kanagawa.legacy`, `include`
+  comentado, `conf.d.legacy/`). Com o Voidashi completo e provado em todo o desktop, os 17
+  arquivos foram removidos junto com as referências comentadas que apontavam para eles.
+  Estavam dando a impressão de que havia escolha ativa entre temas onde não havia mais.
 
 ## Key decisions
 

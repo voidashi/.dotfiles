@@ -3,7 +3,6 @@
 # the spacing scale; 0.92 is the one transparency value the class shares.
 background-opacity = 0.92
 
-# theme = kanagawa-dragon  -- legacy theme, preserved for rollback
 config-file = voidashi-colors
 
 window-padding-color = background

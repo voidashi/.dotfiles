@@ -14,7 +14,7 @@ clock
 timestr=%I:%M %p
 datestr=%A, %d %B
 
-# Voidashi -- previous (Cachy) colors preserved in config.kanagawa.legacy.
+# Voidashi.
 # Typing indicator = Bordeaux (lockscreen accent, RICE-GUIDE.md role table).
 ring-color=393835
 ring-clear-color=2a2927

@@ -3,14 +3,13 @@
 /* =====================================================================
    WLOGOUT -- Voidashi
    =====================================================================
-   Previous (Cachy) colours preserved in style.kanagawa.css.
 
    The buttons used to carry their icons as PNG background-images from
-   wlogout/icons/. Those were lavender -- a colour from no Voidashi scale --
+   wlogout/icons/. Those were lavender, a colour from no Voidashi scale,
    loaded through absolute /home/jeff paths that break on any other machine,
-   and being raster they could not follow the palette at all. The glyphs come
-   from the layout file as text now, so they inherit `color` like anything
-   else. The PNGs are kept in icons/ as a rollback reference, unreferenced.
+   and being raster the palette could never reach them. The glyphs are text in
+   the layout file now, so they inherit `color` like anything else, and the
+   PNGs were deleted once that proved out.
 
    The shape is a centred vertical list, not the default grid of tiles: six
    labelled rows ordered by escalating consequence. Geometry comes from
