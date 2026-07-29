@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**Read `docs/CONVENTIONS.md` first.** It defines how the documents here divide the work, and the working rules this repo holds itself to: where a decision goes once decided, why a rule that nobody checks gets violated, why verification means measuring the result rather than reading the config. Each rule there records the failure that produced it. It is written to be portable to other projects, and it is also what keeps this one from drifting away from its own decisions.
+
 ## What this repo is
 
 A personal Linux dotfiles repository (Arch Linux + Wayland), themed throughout with **Voidashi**, the design identity documented under `docs/design/`. It replaced Kanagawa Dragon everywhere, including Sway and the Neovim colorscheme. It is not a software project with a build/test pipeline: it is a curated set of config files, three bash scripts that sync them to `$HOME` and install the packages they depend on, and two Python scripts that generate and verify the theme. There is no compiler or test suite; "correctness" means the shell scripts behave safely, the config files are valid for their apps, and `check_palette.py` passes.
@@ -117,9 +119,10 @@ mapping, and the rules for how colour is assigned.
 
 For desktop work, `RICE-GUIDE.md` overrides `DESIGN-SYSTEM.md` wherever they differ.
 
-**Continuity:** `docs/design/THEME-STATUS.md` tracks what's actually been themed and what
-hasn't; `docs/SESSION-HISTORY.md` is a repo-wide log of recent work. `docs/TODO.md` lists
-known future work. Check all three before assuming something is (or isn't) already done.
+**Continuity:** `docs/design/THEME-STATUS.md` tracks what has actually been themed and what
+has not. `docs/SESSION-HISTORY.md` records turning points, meaning decisions that still
+explain the shape of the repo; it is deliberately not a session log. `docs/TODO.md` lists
+open work. Check all three before assuming something is or is not already done.
 
 **Propagation:** `scripts/theme/palette.json` is the machine-readable single source of
 truth transcribed from `RICE-GUIDE.md`; `scripts/theme/generate_theme.py` renders it into

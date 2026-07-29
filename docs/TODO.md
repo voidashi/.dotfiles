@@ -68,9 +68,10 @@ and `docs/SESSION-HISTORY.md` (what happened).
 
 ## Ongoing: how the writing reads
 
-- **Drop the AI writing tells from the docs.** The em dash above all, which is scattered
-  through every document in `docs/` and most config comments. Also the tic of stating a
-  thing, then restating it inverted ("not x, but y"), and openers like "worth noting".
-  This applies to everything written from here on, and existing files get cleaned as they
-  are touched rather than in one pass.
-  *Difficulty: low per file, large in aggregate. Priority: low, but permanent.*
+- **Clean the AI writing tells out of the older documents.** The rule itself now lives in
+  `docs/CONVENTIONS.md` and applies to everything written from here on, so what remains
+  here is only the backlog: 279 em dashes across the design docs, `CLAUDE.md` and the
+  README, concentrated in `DESIGN-SYSTEM.md` (128) and `RICE-GUIDE.md` (64). Clean each
+  file when something else takes you into it rather than in one sweep, since a pass that
+  only rewrites punctuation is a large diff nobody can review.
+  *Difficulty: low per file, large in aggregate. Priority: low.*
