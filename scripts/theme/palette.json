@@ -150,5 +150,18 @@
     "radius_floating": 4,
     "radius_docked": 0,
     "font_weight_ui": 500
+  },
+  "typography": {
+    "_note": "The GTK/Qt row of RICE-GUIDE.md's typography table, plus the mono face for Qt's fixed-width slot. Only KDE consumes these: kdeglobals is where Qt applications read their font, and KDE's gtkconfig daemon copies the same values into the GTK settings.ini files. Everything else here sets its font in its own config, because font mixes with structural settings.",
+    "_weight_note": "kde_weight is the Qt 0-99 scale KDE still writes in kdeglobals, not the CSS scale: 57 is Medium and matches geometry.font_weight_ui of 500. Writing 500 there is silently clamped and renders as Black.",
+    "ui_family": "Instrument Sans",
+    "mono_family": "Iosevka Extended",
+    "ui_size": 10,
+    "small_size": 8,
+    "kde_weight": 57,
+    "kde_weight_mono": 50,
+    "icon_theme": "breeze-dark",
+    "cursor_theme": "capitaine-cursors",
+    "cursor_size": 24
   }
 }

@@ -1,11 +1,20 @@
 [General]
 ColorSchemeHash=9d38eb71ded8ff549da26d57d7cbab9164da243a
+fixed=Iosevka Extended,10,-1,5,50,0,0,0,0,0
+font=Instrument Sans,10,-1,5,57,0,0,0,0,0
+menuFont=Instrument Sans,10,-1,5,57,0,0,0,0,0
+smallestReadableFont=Instrument Sans,8,-1,5,57,0,0,0,0,0
+toolBarFont=Instrument Sans,10,-1,5,57,0,0,0,0,0
+
+[Icons]
+Theme=breeze-dark
 
 [KDE]
 AnimationDurationFactor=0.25
 LookAndFeelPackage=org.kde.breezedark.desktop
 contrast=4
 frameContrast=0.2
+gtkTheme=adw-gtk3-dark
 
 [KFileDialog Settings]
 Allow Expansion=false
@@ -129,6 +138,7 @@ activeForeground=232,232,232
 inactiveBackground=18,17,16
 inactiveBlend=18,17,16
 inactiveForeground=146,146,146
+activeFont=Instrument Sans,10,-1,5,57,0,0,0,0,0
 
 [ColorEffects:Disabled]
 Color=56,56,56

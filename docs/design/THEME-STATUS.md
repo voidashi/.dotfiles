@@ -116,8 +116,16 @@ retheme on `green`, `red` and `brgreen` while the hex check passed clean.
   The bug behind the white Dolphin was not a missing theme. `QT_QPA_PLATFORMTHEME` was set
   to `qt6ct`, which exists for Qt applications that are not KDE, and with no `~/.config/qt6ct`
   to read it served its own default light palette over a kdeglobals that was already dark.
-  It now points at `kde`. Worth noting for its own sake: the dark scheme it was hiding was
+  It now points at `kde`. Worth knowing for its own sake: the dark scheme it was hiding was
   BreezeDark, whose greys are blue-tinted, which the guide forbids outright.
+- **Typography reaches Qt and GTK through the same file, and did not before.** kdeglobals
+  defined no font at all, so every Qt application ran on Noto Sans while the typography
+  table asks for Instrument Sans; the Qt audit had checked colour and never looked at font.
+  The generator now writes the font keys into kdeglobals and the cursor into kcminputrc,
+  both from a `typography` block in `palette.json`. That is also what fixed the GTK
+  `settings.ini` files, which KDE's `gtkconfig` daemon had been reverting to its own
+  defaults: it copies those same values across, so feeding it the right ones was cheaper
+  than fighting it, and it cannot be turned off. The full account is in `CLAUDE.md`.
 - **yazi is the terminal file manager**, themed by hand in `.config/yazi/theme.toml` since
   its colours mix with structural config. It inherits the emulator's background and ANSI
   table and supplies only its own chrome: Ice for the hovered row, Bordeaux on the mode

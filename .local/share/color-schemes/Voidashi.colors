@@ -107,6 +107,7 @@ activeForeground=232,232,232
 inactiveBackground=18,17,16
 inactiveBlend=18,17,16
 inactiveForeground=146,146,146
+activeFont=Instrument Sans,10,-1,5,57,0,0,0,0,0
 
 [ColorEffects:Disabled]
 Color=56,56,56

@@ -363,6 +363,23 @@ radiobutton radio {{
 #  KDE
 # =====================================================================
 
+def kde_font(p: dict, size_key: str = "ui_size", mono: bool = False) -> str:
+    """One font in the ten-field form KDE writes into kdeglobals.
+
+    The fields are family, point size, pixel size, style hint, weight, italic,
+    underline, strikeout, fixed pitch, raw mode. Only the first, second and
+    fifth carry a decision; the rest are the defaults KDE itself writes.
+
+    The weight is the Qt 0-99 scale, not the CSS one. Passing 500 there, which
+    is what geometry.font_weight_ui holds, does not fail: it clamps and renders
+    as Black. 57 is the Medium that 500 means.
+    """
+    t = p["typography"]
+    family = t["mono_family"] if mono else t["ui_family"]
+    weight = t["kde_weight_mono"] if mono else t["kde_weight"]
+    return f"{family},{t[size_key]},-1,5,{weight},0,0,0,0,0"
+
+
 def gen_kde_colors(p: dict) -> str:
     """KDE colour scheme, for the Qt half of the desktop.
 
@@ -424,7 +441,10 @@ def gen_kde_colors(p: dict) -> str:
     out += f"activeForeground={rgb(s['ink']['0'])}\n"
     out += f"inactiveBackground={rgb(s['void']['10'])}\n"
     out += f"inactiveBlend={rgb(s['void']['10'])}\n"
-    out += f"inactiveForeground={rgb(s['ink']['3'])}\n\n"
+    out += f"inactiveForeground={rgb(s['ink']['3'])}\n"
+    # The title bar font lives in [WM], and this whole section is replaced on
+    # merge, so it has to be emitted here or it is dropped on the next run.
+    out += f"activeFont={kde_font(p)}\n\n"
 
     # Disabled and inactive text. These control fading only, never hue; the
     # values are Breeze's, which are tuned and not worth reinventing.
@@ -445,8 +465,60 @@ def gen_kde_colors(p: dict) -> str:
     return out
 
 
-def merge_kde_globals(path: Path, scheme: str) -> None:
-    """Replace only the colour sections of kdeglobals, leaving the rest alone.
+def merge_ini_keys(lines: list, keyed: dict) -> list:
+    """Set specific keys in an INI file, leaving every other line untouched.
+
+    For files where the keys we own sit beside keys another program writes, so
+    replacing whole sections would throw away settings that are not ours. A key
+    the file does not already carry is inserted under its section, and a section
+    that does not exist is appended, because a fresh config must still come out
+    complete rather than silently missing a font.
+    """
+    out, current = [], None
+    seen = {section: set() for section in keyed}
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("[") and stripped.endswith("]"):
+            current = stripped[1:-1]
+        elif current in keyed and "=" in stripped:
+            key = stripped.split("=", 1)[0].strip()
+            if key in keyed[current]:
+                seen[current].add(key)
+                line = f"{key}={keyed[current][key]}"
+        out.append(line)
+
+    for section, pairs in keyed.items():
+        missing = [k for k in pairs if k not in seen[section]]
+        if not missing:
+            continue
+        try:
+            at = out.index(f"[{section}]") + 1
+            for key in reversed(missing):
+                out.insert(at, f"{key}={pairs[key]}")
+        except ValueError:
+            out += ["", f"[{section}]"] + [f"{k}={pairs[k]}" for k in missing]
+    return out
+
+
+def merge_kcm_input(path: Path, p: dict) -> None:
+    """The cursor theme and size, which live in kcminputrc rather than kdeglobals.
+
+    KDE's gtkconfig daemon reads them from here and writes them into both GTK
+    settings.ini files, so this is the only place the cursor has to be set for
+    Qt and GTK to agree.
+    """
+    t = p["typography"]
+    lines = path.read_text(encoding="utf-8").splitlines() if path.exists() else []
+    keyed = {"Mouse": {"cursorTheme": t["cursor_theme"],
+                       "cursorSize": str(t["cursor_size"])}}
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(merge_ini_keys(lines, keyed)).strip() + "\n",
+                    encoding="utf-8")
+    print(f"  merged cursor into {path.relative_to(REPO_ROOT)}")
+
+
+def merge_kde_globals(path: Path, scheme: str, p: dict) -> None:
+    """Replace the colour sections of kdeglobals and set the font keys.
 
     KDE applications read their palette from kdeglobals itself, not from the
     .colors file, which systemsettings only uses as a source to copy from. But
@@ -454,10 +526,28 @@ def merge_kde_globals(path: Path, scheme: str) -> None:
     factors, recent documents, shortcuts), and KDE tools write to it too. So
     this replaces the sections we own and copies everything else through
     untouched.
+
+    Fonts are the exception to that shape, because they sit in [General]
+    alongside keys we must not touch, so they are set key by key instead of by
+    replacing the section. They matter beyond Qt: KDE's gtkconfig daemon reads
+    them here and writes them into both GTK settings.ini files, which is why
+    those two files stopped being worth hand-editing. See CLAUDE.md.
     """
     owned = lambda name: (
         name.startswith("Colors:") or name == "WM" or name.startswith("ColorEffects:")
     )
+    # section -> key -> value, merged in rather than replacing the section.
+    t = p["typography"]
+    keyed = {
+        "General": {
+            "font": kde_font(p),
+            "fixed": kde_font(p, mono=True),
+            "menuFont": kde_font(p),
+            "toolBarFont": kde_font(p),
+            "smallestReadableFont": kde_font(p, size_key="small_size"),
+        },
+        "Icons": {"Theme": t["icon_theme"]},
+    }
 
     kept, current, keep_current = [], None, True
     if path.exists():
@@ -468,6 +558,7 @@ def merge_kde_globals(path: Path, scheme: str) -> None:
                 keep_current = not owned(current)
             if keep_current:
                 kept.append(line)
+    kept = merge_ini_keys(kept, keyed)
 
     # Drop the scheme's own [General], which would collide with the one already
     # in kdeglobals; only its colour sections are wanted here.
@@ -526,7 +617,8 @@ def main() -> None:
     # These two are merged into files that are partly hand-written, so they go
     # through their own paths rather than through write().
     inline_block(CONFIG / "wofi" / "style.css", gen_gtk_css(p))
-    merge_kde_globals(CONFIG / "kdeglobals", gen_kde_colors(p))
+    merge_kde_globals(CONFIG / "kdeglobals", gen_kde_colors(p), p)
+    merge_kcm_input(CONFIG / "kcminputrc", p)
     print("Done. Diff the results before committing.")
 
 
