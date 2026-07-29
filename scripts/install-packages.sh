@@ -224,7 +224,16 @@ install_all() {
     
     local success=0 failures=0
     for key in "${!PACKAGE_MAP[@]}"; do
-        install_package "$key" "${PACKAGE_MAP[$key]}" && ((success++)) || ((failures++))
+        # Not "&& ((success++)) || ((failures++))". Post-increment evaluates to
+        # the old value, so on the first success the arithmetic result is 0,
+        # (( )) exits 1, the || fires, and one phantom failure is counted on
+        # every run. That also made the exit 1 below trigger on an install where
+        # nothing had failed.
+        if install_package "$key" "${PACKAGE_MAP[$key]}"; then
+            success=$((success + 1))
+        else
+            failures=$((failures + 1))
+        fi
     done
     
     log "SUMMARY" "Installation complete. Success: $success, Failed: $failures"
