@@ -392,9 +392,11 @@ highlights.
 
 ---
 
-## Working rules for Claude Code
+## Working rules
 
-How to make changes here without eroding the system.
+How to make changes here without eroding the system. These are the rules that
+theming this desktop actually taught, and each one is here because breaking it cost
+something.
 
 **Single source of truth.** Colour values live in this palette. When theming an
 application, derive from the tables above; never sample a hex from another config file,
@@ -420,7 +422,8 @@ include mechanism, its comment style. Do not restructure a config to resemble an
 future reader needs to know which role a colour is serving.
 
 **State what you assumed.** This guide deliberately leaves most per-application decisions
-open. Make the call, then name it in one line so it can be corrected.
+open. Make the call, then write it down in one line, in a comment beside the value or in
+the commit message, so a later reader can tell a decision from an accident.
 
 **When in doubt, remove.** A module carrying no information, a colour marking nothing, a
 separator between things already separated; cut it.
