@@ -12,40 +12,21 @@ Decisions already made, and state that is merely being tracked, do not live here
 belong in `CLAUDE.md` (rules and gotchas), `docs/design/THEME-STATUS.md` (what is themed)
 and `docs/TURNING-POINTS.md` (why the repo is shaped this way).
 
-## In progress: the documentation pass for publication
+## Before publishing
 
-The repo is headed for publication and already has stars, so the question every document has
-to answer is no longer "does this help us" but "does this help someone who cloned this".
-Nothing here blocks a publish; this is about the repo reading like it was written for a
-reader. The survey ran on 2026-07-29 and produced the batches below, one commit each.
+The documentation pass ran on 2026-07-29 and is done; what it left behind is here. See
+`docs/TURNING-POINTS.md` for what it changed and why.
 
-**Settled by the survey, so it does not get re-opened.** Flat `docs/` stays: six markdown
-files and two images do not need a hierarchy, and a wiki would move the prose out of the
-clone, which is a loss for documents that get read in an editor beside the configs.
-`DESIGN-SYSTEM.md` stays as well, since it is the only reason the palette does not look
-arbitrary, but the three sections it already marks "not applicable to desktop work" collapse
-to a pointer each. Mentions of the agent turned out to be two rather than many:
-`RICE-GUIDE.md`'s "Working rules for Claude Code" section, and `CLAUDE.md`'s framing line.
-
-1. **Done.** README rewritten around the palette pipeline, which is the only unusual thing
-   here, with a Known gaps section in place of four claims that were not true.
-2. **Done.** `THEME-STATUS.md`'s four factual errors.
-3. **Done.** `SESSION-HISTORY.md` became `TURNING-POINTS.md`, its framing cut to the rule a
-   maintainer needs, and `docs/README.md` now indexes the six documents.
-4. `RICE-GUIDE.md:395` retitled and reworded so it stops addressing an agent, plus
-   `CLAUDE.md`'s 31 em dashes.
-5. `DESIGN-SYSTEM.md`: sections 6.2, 15 and 16 collapse to pointers.
-6. `AESTHETIC-DIRECTION.md`'s 42 em dashes.
-
-**What this pass deliberately does not touch.** The agent workflow keeps working as it is, so
-`CLAUDE.md` keeps its framing and the two lines that name Jeff; those files are to be removed
-at publication rather than reworded now. Before that happens, the pitfalls in `CLAUDE.md` are
-worth moving into a document under `docs/` instead of leaving with it: they are the most
-useful prose here for anyone who cloned this, and each one cost a real debugging session to
-find. `.claude/skills/verify-repo/` is the opposite case and stays either way, since it is
-about this repo's own validators.
-
-*Difficulty: low per remaining batch. Priority: high, and it rises the moment you push.*
+- **Decide what happens to `CLAUDE.md` and `.claude/`.** The plan is to remove them at
+  publication, since a clone does not need them, and the agent workflow keeps using them
+  until then. But the pitfalls in `CLAUDE.md` are the most useful prose here for anyone who
+  cloned this repo, and each one cost a real debugging session to find: the Nerd Font
+  codepoints that silently fall back to a box, the GTK4 accent that only answers to custom
+  properties, the KDE daemon that rewrites `settings.ini`, the wofi import that resolves
+  against the process cwd. Deleting the file throws that away. Moving it into a document
+  under `docs/` keeps it. `.claude/skills/verify-repo/` is the opposite case and stays either
+  way, since it only runs this repo's own validators.
+  *Difficulty: low to move, and the decision is the work. Priority: high, it gates the push.*
 
 - **Retake the screenshots.** `docs/screenshot1.png` and `screenshot2.png` were committed in
   April 2025, before the retheme, so the two images at the top of the README show the
@@ -142,16 +123,13 @@ survey. The README stopped claiming them; these entries are the intent to build 
 
 ## Ongoing: how the writing reads
 
-- **Clean the AI writing tells out of the remaining documents.** No em dashes, no saying a
-  thing then restating it inverted. `RICE-GUIDE.md`, `DESIGN-SYSTEM.md` and
-  `THEME-STATUS.md` are done and verified at zero; what is left is `CLAUDE.md` (31),
-  `AESTHETIC-DIRECTION.md` (42) and the README (4).
-  Clean each when something else takes you into it. Note from doing the first three: an em
-  dash joining two independent clauses needs a semicolon, not a comma, and a subordinate
-  clause opening with "If" or "When" needs the comma, so a blanket substitution produces
-  comma splices either way and the changed lines have to be read. The tic also appears as a
-  double hyphen standing in for the dash, which is what the code carried; those are done.
-  **Fold this into the documentation pass above rather than doing it separately**, since
-  that pass opens all three remaining files anyway and reading a paragraph twice for two
-  different reasons is the waste.
-  *Difficulty: low per file. Priority: low on its own, but free alongside the pass.*
+Every document is at zero em dashes, verified rather than assumed, and the double hyphens
+that stood in for them are out of the code as well. What stays is the standard, not a task:
+no em dashes, and no saying a thing then restating it inverted.
+
+Worth keeping from having done it, because the next person to try will hit it: a blanket
+substitution does not work. An em dash between two independent clauses wants a semicolon, one
+introducing an explanation wants a colon, one around a parenthetical wants parentheses, and
+some sentences want rewording because no mark carries the sense. Comma everywhere produces
+comma splices; semicolon everywhere produces fragments. The changed lines have to be read
+afterwards, and doing that caught a broken sentence in two of the three passes.

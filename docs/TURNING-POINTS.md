@@ -66,6 +66,28 @@ semantic roles, highlight groups that read only from roles) but depends on
 nothing at runtime, because an override matched by key name breaks silently when
 upstream renames a key.
 
+## The documents were rewritten for a reader who did not write them
+
+They had been written for the two people making the thing, which is a different
+document from the one someone who cloned it needs. The rewrite happened in one
+pass and left three marks worth knowing about.
+
+The README had been claiming four features that did not exist, found by checking
+its own feature list against the configs rather than reading it. They are now in
+`docs/TODO.md` as work to do and in the README as a Known gaps section, because a
+gap you are told about costs a reader nothing and a gap you discover costs trust.
+
+`DESIGN-SYSTEM.md` is the identity system for web and document work, and three of
+its sections describe apparatus a desktop has no equivalent for: a 12-column
+grid, the three-context matrix, and WCAG conformance through a high-contrast
+alternate mode. They are summaries rather than specifications here, keeping the
+decision and dropping the tables, which is why those sections read thinner than
+the rest of the file.
+
+This document was called `SESSION-HISTORY.md` and read as a log of who decided
+what. What survived the rename is the six decisions whose result is visible in
+the tree while the reason is not, which is a smaller and more useful thing.
+
 ## Some configs are kept deliberately, and are not dead weight
 
 `.config/dunst/` and `.config/hypr/hyprpaper.conf` configure programs nothing

@@ -45,7 +45,9 @@ actually returned rather than describing it.
 How to read these:
 
 - **kitty** prints `[]` when clean. Anything else is the list of bad lines.
-- **Tracked symlinks** should be 30 valid with no `Broken` lines. A broken one
+- **Tracked symlinks** should equal the number of paths in
+  `scripts/config_files.conf`, which is 31 as of this writing, with no `Broken`
+  lines. If the count differs, check that file before assuming a fault. A broken one
   usually means an external program replaced the symlink with a real file, which
   `kded6` has done to `gtk.css` before; the repair is to re-link, but check the
   content first, because the same event has also overwritten what the repo held.
