@@ -16,6 +16,12 @@ under "Known gaps" at the bottom.
   partial, except wofi, which inlines it for the reason recorded in `CLAUDE.md`. swaync had
   no config anywhere before this, in the repo or on the live system.
 - **Hyprland**: window borders and decoration recolored.
+- **Sway**: focus in Ice, unfocused in edge-30, surfaces on the void scale, mirroring
+  `hypr/conf/appearance.lua`. It had never been themed at all: the config carried the 41
+  Kanagawa colours as variables and used none of them, since there was not a single
+  `client.*` directive in the file, so Sway ran on its stock blue while the repo looked
+  themed. Terminal and launcher were also diverging from Hyprland (foot and wmenu-run
+  against kitty and wofi) and now match.
 - **swaylock, fastfetch, bottom, starship, fish**: themed by hand (their colour keys mix
   with structural config, so they aren't generated). Fish's `conf.d/` only autoloads one
   colorscheme at a time, so the previous Flexoki theme files moved to
@@ -27,6 +33,23 @@ under "Known gaps" at the bottom.
   outright, and terminal font sizes were inconsistent across the four emulators. All fixed.
   Every hex in every themed file was checked against the palette, and nothing was invented.
   The rounding later became the deliberate 4px recorded under "Key decisions".
+
+## Como cada app recebe a paleta
+
+Cinco mecanismos, porque cinco toolkits diferentes não aceitam o mesmo tratamento.
+Antes de mexer em qualquer app, veja por qual linha ele entra:
+
+| Mecanismo | Como funciona | Apps |
+|---|---|---|
+| **Partial gerado + include** | O gerador escreve um arquivo só de cor, no formato nativo do app, e a config o inclui | kitty, foot, ghostty, alacritty, Hyprland (`conf/palette.lua`) |
+| **Bloco gerado inline** | Mesmo conteúdo, mas colado dentro da folha entre marcadores, porque o app não consegue importar | wofi |
+| **Cores nomeadas geradas** | O gerador mapeia a paleta nos nomes que o toolkit já pinta, e o app segue sem saber | GTK3, GTK4/libadwaita |
+| **INI mesclado** | O gerador substitui só as seções de cor de um arquivo que outro programa também escreve | KDE (`kdeglobals`) |
+| **Escrito à mão** | Cor se mistura com config estrutural, então gerar arriscaria corromper o que não é cor | swaylock, bottom, starship, fastfetch, fish, yazi, `nvim/theme/roles.lua`, Sway |
+
+Os escritos à mão são os que envelhecem em silêncio quando a paleta muda, e por isso
+existe `scripts/theme/check_palette.py`: ele acusa qualquer hex fora da paleta e qualquer
+arquivo `GENERATED` que tenha sido editado à mão. Rode depois de mexer em cor.
 
 ## Architecture
 

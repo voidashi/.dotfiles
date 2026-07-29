@@ -263,6 +263,28 @@ Verified by reading the highlight groups back rather than by eye: `Comment` at i
 `Type` at verdigris-300. Transparency stays, so `Normal` is unpainted and the editor matches
 the terminal, while neo-tree and popups sit opaque on their own surfaces.
 
+## A verificação que achou o Sway
+
+"Never invent a colour" era regra de honra: sete arquivos carregam hex colados à mão porque
+cor se mistura com estrutura neles, e nada avisava quando um envelhecia. `check_palette.py`
+passou a verificar duas coisas, hex fora da paleta e arquivo `GENERATED` editado à mão, e
+achou algo na primeira execução.
+
+O Sway nunca tinha sido temizado. A config trazia as 41 cores do Kanagawa em variáveis e não
+usava nenhuma: não havia um único `client.*` no arquivo inteiro, então o Sway rodava com o
+azul de fábrica enquanto o repo aparentava ter tema. O `CLAUDE.md` já mandava espelhar tema
+entre os dois compositores, e o retheme inteiro passou por cima disso sem ninguém notar,
+inclusive eu, que escrevi uma config de waybar específica para ele.
+
+Agora tem cores aplicadas de verdade, espelhando `hypr/conf/appearance.lua`, e terminal e
+launcher deixaram de divergir do Hyprland. Saíram também o bloco `swaybar` comentado, que
+era exemplo de fábrica com quatro cores fora da paleta, e uma variável que eu mesmo deixei
+sem uso no bloco novo, que seria o mesmo defeito em escala menor.
+
+A `THEME-STATUS.md` ganhou uma tabela de qual app recebe a paleta por qual mecanismo. São
+cinco, porque cinco toolkits não aceitam o mesmo tratamento, e era informação que só existia
+espalhada.
+
 ## Open items carried forward
 
 - `.config/dunst/` is still orphaned (autostart runs `swaync`, not dunst) — same

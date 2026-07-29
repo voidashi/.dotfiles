@@ -467,23 +467,42 @@ def gen_kde_colors(p: dict) -> str:
     return out
 
 
+def generated_files(p: dict) -> dict:
+    """Every file written wholesale, as path -> content.
+
+    Kept as one mapping rather than a sequence of write() calls so that
+    check_palette.py can compare what the palette says against what is on disk
+    without duplicating the list, which would drift the first time one of them
+    gained an entry.
+
+    The two files that are merged rather than written (wofi's stylesheet and
+    kdeglobals) are not here: their content is partly hand-written, so there is
+    nothing to compare them against.
+    """
+    return {
+        CONFIG / "kitty" / "voidashi-colors.conf": gen_kitty(p),
+        CONFIG / "foot" / "voidashi-colors.ini": gen_foot(p),
+        CONFIG / "ghostty" / "voidashi-colors": gen_ghostty(p),
+        CONFIG / "alacritty" / "conf.d" / "voidashi-colors.toml": gen_alacritty(p),
+        CONFIG / "hypr" / "conf" / "palette.lua": gen_hypr_palette(p),
+        CONFIG / "theme" / "voidashi-colors.css": gen_gtk_css(p),
+        CONFIG / "gtk-3.0" / "voidashi.css": gen_gtk_app_css(p, "gtk3"),
+        CONFIG / "gtk-4.0" / "voidashi.css": gen_gtk_app_css(p, "gtk4"),
+        CONFIG / "nvim" / "lua" / "voidashi" / "theme" / "palette.lua": gen_nvim_palette(p),
+        REPO_ROOT / ".local" / "share" / "color-schemes" / "Voidashi.colors": gen_kde_colors(p),
+    }
+
+
 def main() -> None:
     p = load_palette()
     print("Generating Voidashi theme files from palette.json:")
-    write(CONFIG / "kitty" / "voidashi-colors.conf", gen_kitty(p))
-    write(CONFIG / "foot" / "voidashi-colors.ini", gen_foot(p))
-    write(CONFIG / "ghostty" / "voidashi-colors", gen_ghostty(p))
-    write(CONFIG / "alacritty" / "conf.d" / "voidashi-colors.toml", gen_alacritty(p))
-    write(CONFIG / "hypr" / "conf" / "palette.lua", gen_hypr_palette(p))
-    gtk_css = gen_gtk_css(p)
-    write(CONFIG / "theme" / "voidashi-colors.css", gtk_css)
-    inline_block(CONFIG / "wofi" / "style.css", gtk_css)
-    write(CONFIG / "gtk-3.0" / "voidashi.css", gen_gtk_app_css(p, "gtk3"))
-    write(CONFIG / "gtk-4.0" / "voidashi.css", gen_gtk_app_css(p, "gtk4"))
-    write(CONFIG / "nvim" / "lua" / "voidashi" / "theme" / "palette.lua", gen_nvim_palette(p))
-    kde = gen_kde_colors(p)
-    write(REPO_ROOT / ".local" / "share" / "color-schemes" / "Voidashi.colors", kde)
-    merge_kde_globals(CONFIG / "kdeglobals", kde)
+    files = generated_files(p)
+    for path, content in files.items():
+        write(path, content)
+    # These two are merged into files that are partly hand-written, so they go
+    # through their own paths rather than through write().
+    inline_block(CONFIG / "wofi" / "style.css", gen_gtk_css(p))
+    merge_kde_globals(CONFIG / "kdeglobals", gen_kde_colors(p))
     print("Done. Diff the results before committing.")
 
 
