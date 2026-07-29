@@ -61,11 +61,6 @@ and `docs/SESSION-HISTORY.md` (what happened).
   decision, not a config one.
   *Difficulty: low once a set is chosen. Priority: low.*
 
-- **`qt6ct` is installed and now unused.** `QT_QPA_PLATFORMTHEME` points at `kde`, so it
-  does nothing. Decide whether it comes out of `packages.conf` or stays as a fallback for
-  some future Qt application that is not a KDE one. Costs nothing where it is.
-  *Difficulty: trivial. Priority: low.*
-
 ## Before publishing
 
 - **The docs are written for us, not for someone who cloned this.** `SESSION-HISTORY.md` is
