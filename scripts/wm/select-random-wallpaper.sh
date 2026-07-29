@@ -1,7 +1,7 @@
 #!/bin/bash
 # Seleciona um wallpaper aleatório e imprime o caminho dele em stdout.
 #
-# Uso: select_random_wallpaper.sh DIR [DIR_FALLBACK...]
+# Uso: select-random-wallpaper.sh DIR [DIR_FALLBACK...]
 #
 # Percorre os diretórios na ordem em que foram passados e usa o primeiro que
 # contenha imagens. Isso reflete a convenção deste repositório:

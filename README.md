@@ -75,7 +75,7 @@ so they work from anywhere.
 
 ### Wallpapers
 
-`scripts/wm/select_random_wallpaper.sh` takes a list of directories and picks a
+`scripts/wm/select-random-wallpaper.sh` takes a list of directories and picks a
 random image from the **first one that actually contains images**. Both WMs call
 it with the same three-tier chain:
 

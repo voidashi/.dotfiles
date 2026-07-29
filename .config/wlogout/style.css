@@ -13,7 +13,7 @@
 
    The shape is a centred vertical list, not the default grid of tiles: six
    labelled rows ordered by escalating consequence. Geometry comes from
-   scripts/wm/power_menu.sh, since wlogout accepts it only as CLI flags --
+   scripts/wm/power-menu.sh, since wlogout accepts it only as CLI flags --
    launch through that wrapper, not through `wlogout` directly.
 
    Note that wlogout renders each button's label on a single line: a \n in the

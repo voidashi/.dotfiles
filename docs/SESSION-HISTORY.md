@@ -36,7 +36,7 @@ gitsigns/conform/colorizer/kanagawa.
 being parsed as package names and always failed to install (missing `next` in the awk
 rule) — fixed, and AUR helper fallback (paru/yay/pikaur) added for AUR-only packages.
 
-The WM helper scripts (`select_random_wallpaper.sh`, the lockscreen binding,
+The WM helper scripts (`select-random-wallpaper.sh`, the lockscreen binding,
 `unlink-dotfiles.sh`) used to live only in a separate scripts repo, so a fresh clone of
 just this repo had a broken wallpaper and lockscreen. Consolidated into
 `scripts/wm/` and `scripts/` here. The wallpaper script also had a real bug: it wrote
@@ -126,7 +126,7 @@ consequence with reboot and shutdown last.
 Two constraints shaped it. wlogout renders each label on a single line, so a `\n` between
 glyph and label arrives as a visible control-character box — glyph and label share a line by
 necessity. And its geometry is CLI-only, with no config-file equivalent, so
-`scripts/wm/power_menu.sh` holds it and derives the margins from the focused output's
+`scripts/wm/power-menu.sh` holds it and derives the margins from the focused output's
 resolution. That is the opposite of the swaylock lesson recorded in `CLAUDE.md`, where the
 wrapper was the bug; here there is nothing for flags to override.
 

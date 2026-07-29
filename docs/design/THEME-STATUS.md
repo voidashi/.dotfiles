@@ -160,7 +160,7 @@ limpa.
   list of six labelled rows instead of a grid of tiles, ordered by escalating consequence,
   with reboot and shutdown last and turning `alert-critical` on approach — they keep glyph
   and label, so colour reinforces rather than carries. Focus stays Ice, per the role table.
-  Geometry lives in `scripts/wm/power_menu.sh` because wlogout accepts it only as CLI
+  Geometry lives in `scripts/wm/power-menu.sh` because wlogout accepts it only as CLI
   flags; the wrapper reads the focused output's resolution so the proportions survive a
   different screen.
 - **Waybar is marked, not filled.** The active workspace carries a 3px `bordeaux-400` rule

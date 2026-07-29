@@ -15,7 +15,7 @@ hl.on("hyprland.start", function()
     -- Ordem: os wallpapers em rotação, depois a coleção completa, depois o
     -- wallpaper de exemplo do próprio repo (para uma instalação nova).
     hl.exec_cmd(
-        "swaybg -m fill -i \"$($HOME/.dotfiles/scripts/wm/select_random_wallpaper.sh "
+        "swaybg -m fill -i \"$($HOME/.dotfiles/scripts/wm/select-random-wallpaper.sh "
             .. "$HOME/Pictures/Current_wallpapers "
             .. "$HOME/Pictures/Wallpapers "
             .. "$HOME/.dotfiles/wallpapers)\""
