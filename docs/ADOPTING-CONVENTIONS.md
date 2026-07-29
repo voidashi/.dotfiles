@@ -23,12 +23,13 @@ Run `/init` **before** copying anything in.
 
 5. Create `docs/TODO.md` with the first real task in it. Create nothing else.
 
-Order matters in one direction only: `/init` inspects the repository, so a
-`CONVENTIONS.md` already sitting there is likely to be summarised into the
-generated `CLAUDE.md`, duplicating the content you are about to import on the
-next line. Running it first avoids the overlap. This is reasoning about how
-`/init` behaves rather than a measured result, so if you watch it do something
-else, correct this file.
+Order matters in one direction only. `/init` analyses the codebase to detect
+build systems, test frameworks and code patterns, so a `CONVENTIONS.md` already
+sitting there is one more file for it to read and fold into the `CLAUDE.md` you
+are about to point at it, duplicating on line four what you copied in on line
+three. Running it first avoids the overlap. That the duplication happens is
+inference rather than something measured here; if you watch it do otherwise,
+correct this file.
 
 ## Loading: import or reference
 
@@ -44,6 +45,15 @@ for reference material.
 Whichever you choose, make the repo actually do it. A file that prescribes one
 loading method while the repo uses another is the first inconsistency someone
 will copy.
+
+Where the importing file sits decides who gets the rules. A `CLAUDE.md` in the
+project root is checked in and applies to everyone working on the repo, which is
+right for conventions the team has agreed to. `CLAUDE.local.md`, gitignored, is
+the same load for you alone, and is where these belong in a repo whose owners
+have not signed up for them. `~/.claude/CLAUDE.md` applies to every project you
+open, which suits how you work rather than how a project works. Copying a
+personal working style into a shared root file is how a convention starts being
+resented instead of followed.
 
 ## Day zero: the empty documents stay empty
 
@@ -92,6 +102,18 @@ about colours and window managers. The failures were not about colours:
   three sessions running.
 - A history document written as a session diary reached 324 lines and started
   contradicting itself, because nobody prunes a diary.
+- A verified-sounding result was reported twice from a misread measurement, and
+  both times the person watching the screen was the one who caught it.
 
 Every one of those is a documentation or verification failure wearing a
 domain-specific costume. That is the part that transfers.
+
+## Where the borrowed rules come from
+
+The ones marked **(borrowed)** are general practice, most of it stated in
+Anthropic's own guidance at <https://code.claude.com/docs/en/best-practices>.
+Read that for the mechanisms this file does not cover, since it describes tools
+rather than habits: hooks that gate a turn on a check, `/goal` conditions,
+non-interactive runs, and parallel sessions. Do not copy it in. It is versioned
+upstream and will drift, and the point of `CONVENTIONS.md` is the subset that
+survived contact with a real project.
