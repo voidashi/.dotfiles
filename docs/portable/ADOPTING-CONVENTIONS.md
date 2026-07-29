@@ -13,15 +13,23 @@ Run `/init` **before** copying anything in.
 2. Prune what it wrote. `/init` is generous, and the rule about paying for every
    line applies to its output first. Delete anything the agent could have
    learned by reading the code.
-3. Copy `CONVENTIONS.md` into the repo, and this file beside it if you want the
-   setup notes.
+3. Bring in `docs/portable/`: `CONVENTIONS.md` is the entry point and
+   `rules/*.md` are the rules it imports, grouped by subject. Take this file too
+   if you want the setup notes; it is not imported and costs nothing per session.
 4. Add one line to `CLAUDE.md`:
 
    ```markdown
-   See @docs/CONVENTIONS.md for how we work in this repo.
+   See @docs/portable/CONVENTIONS.md for how we work in this repo.
    ```
 
 5. Create `docs/TODO.md` with the first real task in it. Create nothing else.
+6. Run `/context` and confirm the files appear under **Memory files**. An import
+   that does not resolve fails silently: nothing errors, the rules simply never
+   load. This has already happened once, when moving the files into
+   `docs/portable/` left the import pointing at the old path.
+
+Step 3 says "bring in" rather than "copy" because copying is the weakest of the
+options. See the section on that below.
 
 Order matters in one direction only. `/init` analyses the codebase to detect
 build systems, test frameworks and code patterns, so a `CONVENTIONS.md` already
@@ -30,6 +38,41 @@ are about to point at it, duplicating on line four what you copied in on line
 three. Running it first avoids the overlap. That the duplication happens is
 inference rather than something measured here; if you watch it do otherwise,
 correct this file.
+
+## Getting the files there: copy, symlink, or user-level
+
+Copying is what this file used to say, and it is the option that ages worst. N
+copies in N projects diverge, and a fix made in one is a fix the others never
+see. That is not a hypothetical here: the rule about a shared source existing so
+that copies cannot drift was paid for by three window-manager bar configs that
+had silently diverged.
+
+Two mechanisms avoid it. `.claude/rules/` resolves symlinks normally, so one
+canonical copy can be linked into every project that wants it:
+
+```bash
+ln -s ~/where-the-canonical-copy-lives .claude/rules/conventions
+```
+
+And `~/.claude/rules/` holds personal rules that load in every project on the
+machine with no per-project step at all. They load before project rules, so a
+project can still override them.
+
+Which to use is a question about scope, not about storage. Rules that describe
+how *you* work travel with you and belong at user level. Rules that assume the
+project has a `TODO.md`, a design document or a generator are about *this*
+project and belong in it, where a collaborator can see and argue with them.
+Putting the second kind at user level is how an agent starts citing a document
+that does not exist.
+
+Wherever the canonical copy lives, it should be somewhere that gets pushed. The
+cheapest version of that is a repository you already back up, with the link
+created by whatever already installs your dotfiles, so the conventions arrive on
+a new machine in the same step as everything else.
+
+One thing to verify rather than assume: symlink support is documented for a
+project's `.claude/rules/` and is not stated either way for `~/.claude/rules/`.
+`/context` answers it in one command.
 
 ## Loading: import or reference
 
