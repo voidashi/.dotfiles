@@ -1,20 +1,37 @@
 ignore-empty-password
 disable-caps-lock-text
+# A failed attempt has to show as something other than a colour change: the ring
+# turning alert-critical was the only signal, and colour never carries a state
+# alone (RICE-GUIDE.md, non-negotiables).
+show-failed-attempts
 # Serif is welcome exactly here (RICE-GUIDE.md: "the one place the editorial
-# voice is welcome" -- lockscreens, greeters, fetch banners, nowhere else).
+# voice is welcome"), meaning lockscreens, greeters and fetch banners, nowhere
+# else.
 font=Spectral
 
-screenshots
-effect-blur=7x5
-effect-vignette=0.5:0.5
-indicator
+# This file was written for swaylock-effects and now targets plain swaylock,
+# which is what is installed and declared. Seven options here were unknown to
+# it: screenshots, effect-blur, effect-vignette, indicator, clock, timestr and
+# datestr. That mattered because "screenshots" was the only thing setting a
+# background, so with it ignored and no color= line, the lock screen came up in
+# swaylock's own default light grey on a warm-charcoal desktop.
+#
+# The background is now solid void-00, which the guide calls always legitimate
+# and often the strongest choice. The blur is no loss: a blur wide enough to
+# notice as an effect is on the anti-pattern list, and 7x5 was. There is no
+# clock, since plain swaylock has none, and a lockscreen is meant to be a
+# spacious identity surface rather than an informative one.
+color=0a0908
+
+# "indicator" does not exist here. indicator-idle-visible is the supported way
+# to say the same thing, which is that the ring shows before a key is pressed.
+indicator-idle-visible
 indicator-radius=120
 indicator-thickness=20
-clock
-timestr=%I:%M %p
-datestr=%A, %d %B
 
-# Voidashi.
+# Voidashi. Values are palette tokens written without the leading "#", because
+# that is swaylock's format; check_palette.py knows to look here for bare hex for
+# exactly that reason, and did not before.
 # Typing indicator = Bordeaux (lockscreen accent, RICE-GUIDE.md role table).
 ring-color=393835
 ring-clear-color=2a2927

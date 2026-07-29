@@ -50,6 +50,14 @@ NAMED_RE = re.compile(
 # inequivocamente uma cor aplicada.
 NAMED_SCOPE = (".config/fish/", ".config/starship.toml")
 
+# Hex sem "#". O swaylock escreve "ring-color=393835", entao a regex de cima nao
+# ve nenhuma das 28 cores dele: ficaram sem conferencia desde sempre, e por sorte
+# estavam certas. Restrito a este arquivo de proposito, porque seis digitos hex
+# sem "#" casam com qualquer coisa (um hash de commit, um id) em qualquer outro
+# lugar do repo.
+BARE_HEX_SCOPE = (".config/swaylock/config",)
+BARE_HEX = re.compile(r"^[a-z-]*color=([0-9a-fA-F]{6})$", re.MULTILINE)
+
 # Caminhos que não fazem parte do tema vivo. Os .legacy e os arquivos de tema
 # antigo guardam de propósito as cores de antes; a paleta em si é a fonte, não
 # um consumidor; e binários não têm cor para conferir.
@@ -135,6 +143,9 @@ def check_drift(known: set) -> list:
         if any(rel.startswith(scope) for scope in NAMED_SCOPE):
             code = strip_comments(text)
             stray += sorted({m.group(1) for m in NAMED_RE.finditer(code)})
+        if rel in BARE_HEX_SCOPE:
+            bare = {"#" + m.group(1).lower() for m in BARE_HEX.finditer(text)}
+            stray += sorted(bare - known)
         if stray:
             problems.append((rel, stray))
     return problems
