@@ -1,26 +1,31 @@
-# Voidashi theme — status
+# Voidashi theme: status
 
-Where the rice's retheme to Voidashi stands. Read `RICE-GUIDE.md` first for the actual
-rules; this is just state tracking. Repo-wide (non-theme) history is in
+Where the retheme to Voidashi stands. Read `RICE-GUIDE.md` first for the actual rules; this
+is state tracking only. Repo-wide history that is not about theming lives in
 `docs/SESSION-HISTORY.md`.
 
-## Status: fully themed
+## Shell surfaces: done
+
+These are the surfaces the compositor puts on screen: bar, launcher, notifications, power
+menu, lock screen, terminals. Ordinary applications are a separate matter and are covered
+under "Known gaps" at the bottom.
 
 - **Terminals** (kitty, foot, ghostty, alacritty): full palette + Iosevka Extended at size
   12, matched across all four.
-- **waybar, wofi, wlogout, swaync**: themed via a shared GTK CSS partial. swaync had no
-  config anywhere before this (repo or live system) — its `style.css` was created from
-  scratch and added to `config_files.conf`.
+- **waybar, wofi, wlogout** (GTK3) and **swaync** (GTK4): themed from the shared GTK CSS
+  partial, except wofi, which inlines it for the reason recorded in `CLAUDE.md`. swaync had
+  no config anywhere before this, in the repo or on the live system.
 - **Hyprland**: window borders and decoration recolored.
 - **swaylock, fastfetch, bottom, starship, fish**: themed by hand (their colour keys mix
   with structural config, so they aren't generated). Fish's `conf.d/` only autoloads one
   colorscheme at a time, so the previous Flexoki theme files moved to `conf.d.legacy/`
   rather than being deleted.
-- A full audit against the guide's non-negotiables and anti-patterns caught three real
-  bugs no earlier pass had touched: Hyprland's window rounding was still 10px (must be 0),
-  one animation curve had a mathematical overshoot (forbidden outright), and terminal font
-  sizes weren't consistent across the four emulators. All fixed. Every hex value in every
-  themed file was also checked against the palette — nothing invented.
+- A full audit against the guide's non-negotiables and anti-patterns caught three real bugs
+  no earlier pass had touched: Hyprland's window rounding was still at the inherited
+  Kanagawa 10px, one animation curve had a mathematical overshoot, which is forbidden
+  outright, and terminal font sizes were inconsistent across the four emulators. All fixed.
+  Every hex in every themed file was checked against the palette, and nothing was invented.
+  The rounding later became the deliberate 4px recorded under "Key decisions".
 
 ## Architecture
 
@@ -34,9 +39,11 @@ rules; this is just state tracking. Repo-wide (non-theme) history is in
 - **Hand-edited apps**: swaylock, bottom, starship, fastfetch, fish — colour there mixes
   with structural config, so generating into them risked corrupting settings unrelated to
   colour. Values still come straight from the palette, just pasted rather than generated.
-- **Nothing was deleted**: every file whose active colours changed has its previous version
-  preserved alongside it (`*.kanagawa.css`, `*.kanagawa.legacy`, `conf.d.legacy/`,
-  commented-out `include` lines) rather than removed.
+- **Recolouring preserves the previous version; restructuring does not.** Files whose
+  colours changed keep their old version beside them (`*.kanagawa.css`, `*.kanagawa.legacy`,
+  commented-out `include` lines). Files removed by a redesign are gone from the working
+  tree and recoverable from git instead: wlogout's lavender PNGs, and waybar's three
+  drifting config variants.
 
 ## Key decisions
 
@@ -52,6 +59,21 @@ rules; this is just state tracking. Repo-wide (non-theme) history is in
   every GTK app — Regular thins out on surfaces this dark. Both live in `palette.json`
   under `geometry`; Hyprland and swaync read them, while GTK3 apps (waybar, wofi, wlogout)
   carry the literal because GTK3 has no CSS custom properties.
+- **Ordinary GTK applications are themed by overriding named colours, not by shipping a
+  theme.** `generate_theme.py` maps the palette onto the names GTK and libadwaita already
+  paint from and writes `.config/gtk-{3.0,4.0}/voidashi.css`, which each `gtk.css` imports
+  after the Breeze files that `kde-gtk-config` leaves there. Window chrome sits at void-10
+  and content at void-00, so a text view reads as recessed into the window, the same
+  relationship the terminals have. `adw-gtk3-dark` is the GTK3 theme, which gives GTK3 and
+  GTK4 applications the same widget shapes as well as the same colours. The font moved from
+  Noto Sans, which no part of the design system uses, to Instrument Sans.
+
+  Two things made this harder than it reads. On GTK 4.22 the accent answers only to CSS
+  custom properties, while surfaces still answer to `@define-color`, so half the file
+  appeared to work and the accent stayed Adwaita blue. And the GTK4 apps here are the ones
+  worth caring about: pavucontrol, which the bar opens on the volume click, plus zenity,
+  zathura and the network dialogs. The GTK3 side is nearly empty, since the only GTK3 apps
+  on this machine are waybar, wofi and wlogout, all of which we style directly.
 - **hyprlauncher is themed through the toolkit, not through itself.** It has no colour
   options: its own config covers behaviour only (`general:grab_focus`, `ui:window_size`,
   `finders:*`). Appearance comes from hyprtoolkit, which reads
@@ -77,7 +99,7 @@ rules; this is just state tracking. Repo-wide (non-theme) history is in
   Geometry lives in `scripts/wm/power_menu.sh` because wlogout accepts it only as CLI
   flags; the wrapper reads the focused output's resolution so the proportions survive a
   different screen.
-- **Waybar is marked, not filled.** The active workspace carries a 2px `bordeaux-400` rule
+- **Waybar is marked, not filled.** The active workspace carries a 3px `bordeaux-400` rule
   beneath it instead of an `ice-800` block, and modules no longer sit on individual
   `void-20` pills — a row of raised chips is what made the bar read as a default status
   bar. Bordeaux stays the identity mark here rather than becoming a second focus colour;
@@ -85,19 +107,21 @@ rules; this is just state tracking. Repo-wide (non-theme) history is in
   are numerals in both bars, where before Sway showed app glyphs and Hyprland showed
   numbers.
 - **Bar glyphs are sized in the config, not the stylesheet.** They arrive from Hack Nerd
-  Font through fontconfig fallback and are drawn smaller per em than Instrument Sans, so
-  at a shared `font-size` they looked undersized next to their own labels. `common.jsonc`
-  wraps each `{icon}` in Pango `<span size="large">`.
+  Font through fontconfig fallback and are drawn smaller per em than Instrument Sans, so at
+  a shared `font-size` they looked undersized next to their own labels. `common.jsonc` wraps
+  each `{icon}` in Pango `<span size="110%">`, which is relative to the stylesheet size, so
+  the two move together. Glyph codepoints need checking before use: Nerd Fonts v3 dropped
+  the `nf-mdi-*` range, and four icons inherited from the old config had been rendering as
+  boxes because of it.
 - **Terminals: 0.92 opacity and 8px padding, all four.** Both were inconsistent — three
   different opacities and no padding set anywhere, so each emulator used its own default.
   The guide's "opaque by default" was rewritten to describe the transparency actually in
   use; foot's `alpha` sits in a second `[colors-dark]` block in `foot.ini`, since the
   generated palette include must not be hand-edited.
-- **Hyprland keeps a small blur (`size=5, passes=1`) and gains a 4px window radius.** Both
-  were open questions the guide answered with a flat "no"; Jeff's call is that a small
-  amount of each is right for this desktop, and `RICE-GUIDE.md` and `CLAUDE.md` were
-  amended to say so. The radius applies to compositor windows only — every other surface
-  is still square.
+- **Hyprland keeps a small blur (`size=5, passes=1`).** The guide had answered this with a
+  flat "no"; Jeff's call is that a small amount is right for this desktop, and
+  `RICE-GUIDE.md` and `CLAUDE.md` were amended to say so. The window radius that arrived
+  with it has since been generalised into the floating/docked rule above.
 - **Animation durations sit a notch above the guide's original table** (windows 300ms,
   workspace 350ms, focus 150ms, fade 200ms) with the ease-out curve now applied to every
   leaf. The old values were 600–1000ms, slow enough to be the daily-use complaint that
@@ -105,10 +129,10 @@ rules; this is just state tracking. Repo-wide (non-theme) history is in
   motion table was rewritten around a ~400ms ceiling.
 - **wofi's palette is inlined, not imported** — it is the one GTK app whose `@import`
   resolves against the process cwd. See `CLAUDE.md`.
-- **GTK apps use Instrument Sans, not Iosevka Extended.** waybar, wofi, wlogout and swaync
-  are GTK3 applications and fall under the guide's "GTK/Qt application theming" rule, not
-  the typography table's mono-primary row (which is for bars that render their own text
-  outside a toolkit). The guide's typography table now says so explicitly.
+- **GTK apps use Instrument Sans, not Iosevka Extended.** waybar, wofi and wlogout (GTK3)
+  and swaync (GTK4) fall under the guide's "GTK / Qt application theming" rule, not the
+  typography table's mono-primary row, which is for bars that render their own text outside
+  a toolkit. The guide's typography table now says so explicitly.
 - Iosevka Extended, Instrument Sans and Spectral are symlinked from `fonts/` into
   `~/.local/share/fonts/dotfiles` by `backup-configs.sh install`. `fonts/Iosevka/` itself is
   `.gitignore`d — its full-family build is ~430MB, too large to version; see the README's
@@ -116,19 +140,10 @@ rules; this is just state tracking. Repo-wide (non-theme) history is in
 
 ## Known gaps / deliberately not done
 
-- `.config/dunst/` is still orphaned and untouched (same as `hyprpaper.conf` — no decision
-  made either way).
-- Neovim colorscheme and wallpaper curation are explicitly out of scope for this pass.
-- swaync's `config.json` was never created (only `style.css`) — whether urgency levels get
-  a distinct icon/glyph automatically or need explicit config is unverified.
-- The infinite-loop battery-critical blink in waybar predates this theme (inherited, only
-  recolored) and technically reads as an anti-pattern ("no infinite loops outside
-  loaders") — left alone since removing it would be a functional change, not a theming one.
+- Neovim colorscheme and wallpaper curation remain untouched. Both are scoped tasks of
+  their own; see `docs/TODO.md`.
 - Waybar's redesign is in and the sizing was tuned against live feedback, but three things
   are still only settled provisionally: whether numerals beat the old app glyphs on the
   workspace buttons, whether the right-hand modules want separators or should stay spaced
   only, and whether 15px/500 is the right weight once it has been lived with.
-- **GTK application theming has not been done at all.** The apps themed so far are the
-  shell surfaces (bar, launcher, notifications, power menu). Ordinary GTK3 and especially
-  GTK4/libadwaita applications still render in their stock theme, which fights everything
-  around them. This is the largest remaining visual gap after the Neovim colorscheme.
+- The Neovim colorscheme is now the largest remaining visual gap.

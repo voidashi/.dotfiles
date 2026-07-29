@@ -185,6 +185,34 @@ was on waybar's default `bottom` layer rather than `top`, `persistent-workspaces
 key form the current version reads as an output name, and a `sway/workspaces` option had
 been copied into the hyprland module.
 
+## GTK applications, and a docs audit
+
+The docs had drifted, mostly in `THEME-STATUS.md`, because sections kept being appended
+without the old ones being pruned. It ended up contradicting itself: the "Known gaps"
+section still said swaync had no `config.json` and that the urgency-glyph question was
+unanswered, sixty lines after the same file described both being resolved. It also called
+all four shell apps GTK3 when swaync is GTK4, which mattered, since GTK3 versus GTK4 is the
+whole axis of the theming work that followed. Pruned rather than rewritten.
+
+The pre-Lua Hyprland configs were deleted, along with `hyprland.conf` itself, which existed
+only to source them. A session restart mid-session gave a clean natural experiment for
+whether it was inert: a freshly started Hyprland came up with rounding at 4 and 66 binds,
+both Lua-only values, confirming that `hyprland.lua` wins when both exist.
+
+Then GTK application theming, which turned out narrower and deeper than the TODO described.
+Narrower because the only GTK3 applications here are waybar, wofi and wlogout, all styled
+directly already; the applications that actually render untouched are GTK4, and the one that
+matters is pavucontrol, which the bar opens on the volume click. Deeper because of a
+version-specific trap: on GTK 4.22 the accent colour responds only to CSS custom properties
+while surfaces still respond to `@define-color`, so the first attempt looked half-successful,
+with charcoal surfaces and a stock Adwaita blue accent. Both forms are emitted now.
+
+`generate_theme.py` grew a function that maps the palette onto the named colours GTK and
+libadwaita paint from, so applications nobody wrote a stylesheet for follow the desktop. The
+GTK config directories were also untracked until now, which is how they had quietly become
+territory of `kde-gtk-config`; the files that are ours are tracked, and the Breeze artifacts
+beside them are left alone.
+
 ## Open items carried forward
 
 - `.config/dunst/` is still orphaned (autostart runs `swaync`, not dunst) — same

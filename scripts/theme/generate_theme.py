@@ -180,6 +180,139 @@ def gen_gtk_css(p: dict) -> str:
     return out
 
 
+def gen_gtk_app_css(p: dict, toolkit: str) -> str:
+    """Named-colour overrides for ordinary GTK applications.
+
+    Distinct from gen_gtk_css, which exports the raw palette for stylesheets we
+    write ourselves. This one maps the palette onto the names GTK and libadwaita
+    already paint from, so applications nobody wrote a stylesheet for follow the
+    desktop: pavucontrol, zenity, file choosers, network dialogs.
+
+    Surfaces follow RICE-GUIDE.md's hierarchy. The window chrome sits at void-10
+    and content at void-00, so a text view reads as recessed into the window
+    rather than floating on it, matching how the terminals are built.
+    """
+    s, a, g = p["scales"], p["alert"], p["geometry"]
+    out = header("/*", " */")
+    out += f"/* {toolkit} named colours, mapped from palette.json */\n\n"
+
+    if toolkit == "gtk4":
+        pairs = [
+            ("window_bg_color", s["void"]["10"]),
+            ("window_fg_color", s["ink"]["1"]),
+            ("view_bg_color", s["void"]["00"]),
+            ("view_fg_color", s["ink"]["1"]),
+            ("headerbar_bg_color", s["void"]["20"]),
+            ("headerbar_fg_color", s["ink"]["1"]),
+            ("headerbar_border_color", s["edge"]["20"]),
+            ("headerbar_backdrop_color", s["void"]["10"]),
+            ("headerbar_shade_color", s["edge"]["10"]),
+            ("sidebar_bg_color", s["void"]["10"]),
+            ("sidebar_fg_color", s["ink"]["2"]),
+            ("sidebar_border_color", s["edge"]["20"]),
+            ("sidebar_backdrop_color", s["void"]["10"]),
+            ("secondary_sidebar_bg_color", s["void"]["10"]),
+            ("secondary_sidebar_fg_color", s["ink"]["2"]),
+            ("card_bg_color", s["void"]["20"]),
+            ("card_fg_color", s["ink"]["1"]),
+            ("dialog_bg_color", s["void"]["20"]),
+            ("dialog_fg_color", s["ink"]["1"]),
+            ("popover_bg_color", s["void"]["20"]),
+            ("popover_fg_color", s["ink"]["1"]),
+            ("thumbnail_bg_color", s["void"]["20"]),
+            ("thumbnail_fg_color", s["ink"]["1"]),
+            ("shade_color", s["void"]["00"]),
+            ("scrollbar_outline_color", s["edge"]["20"]),
+            # Focus and selection are Ice everywhere in this desktop.
+            ("accent_bg_color", s["ice"]["600"]),
+            ("accent_fg_color", s["ink"]["0"]),
+            ("accent_color", s["ice"]["300"]),
+            ("destructive_bg_color", a["critical"]["bg"]),
+            ("destructive_fg_color", a["critical"]["fg"]),
+            ("destructive_color", a["critical"]["fg"]),
+            ("success_bg_color", a["good"]["bg"]),
+            ("success_fg_color", a["good"]["fg"]),
+            ("success_color", a["good"]["fg"]),
+            ("warning_bg_color", a["caution"]["bg"]),
+            ("warning_fg_color", a["caution"]["fg"]),
+            ("warning_color", a["caution"]["fg"]),
+            ("error_bg_color", a["critical"]["bg"]),
+            ("error_fg_color", a["critical"]["fg"]),
+            ("error_color", a["critical"]["fg"]),
+            ("borders", s["edge"]["20"]),
+        ]
+    else:
+        pairs = [
+            ("theme_bg_color", s["void"]["10"]),
+            ("theme_fg_color", s["ink"]["1"]),
+            ("theme_base_color", s["void"]["00"]),
+            ("theme_text_color", s["ink"]["1"]),
+            ("theme_selected_bg_color", s["ice"]["600"]),
+            ("theme_selected_fg_color", s["ink"]["0"]),
+            ("theme_unfocused_bg_color", s["void"]["10"]),
+            ("theme_unfocused_fg_color", s["ink"]["2"]),
+            ("theme_unfocused_base_color", s["void"]["00"]),
+            ("theme_unfocused_text_color", s["ink"]["2"]),
+            ("theme_unfocused_selected_bg_color", s["ice"]["700"]),
+            ("theme_unfocused_selected_fg_color", s["ink"]["1"]),
+            ("insensitive_bg_color", s["void"]["20"]),
+            ("insensitive_fg_color", s["ink"]["4"]),
+            ("insensitive_base_color", s["void"]["10"]),
+            ("borders", s["edge"]["20"]),
+            ("unfocused_borders", s["edge"]["10"]),
+            ("warning_color", a["caution"]["fg"]),
+            ("error_color", a["critical"]["fg"]),
+            ("success_color", a["good"]["fg"]),
+            ("link_color", s["ice"]["300"]),
+            ("visited_link_color", s["ash"]["300"]),
+        ]
+
+    for name, hexval in pairs:
+        out += f"@define-color {name} {hexval};\n"
+
+    if toolkit == "gtk4":
+        # GTK 4.16 moved this stylesheet onto CSS custom properties, and on
+        # 4.22 the accent responds only to those: with @define-color
+        # accent_bg_color set to one colour and --accent-bg-color to another in
+        # the same file, the custom property is what renders. Surfaces still
+        # honour @define-color, so both forms are emitted rather than guessing
+        # which of the two any given GTK version reads.
+        out += "\n:root {\n"
+        for name, hexval in pairs:
+            out += f"    --{name.replace('_', '-')}: {hexval};\n"
+        out += "}\n"
+
+    # Popovers, dialogs and menus float over other content, so they take the
+    # floating radius; see RICE-GUIDE.md, "Form".
+    r = g["radius_floating"]
+    out += f"""
+popover,
+popover > contents,
+menu,
+.menu,
+.context-menu,
+tooltip,
+tooltip.background,
+messagedialog,
+dialog {{
+    border-radius: {r}px;
+}}
+
+/* Widgets that sit inside a surface stay square, matching the shell. */
+button,
+entry,
+textview,
+scrollbar,
+notebook,
+headerbar,
+checkbutton check,
+radiobutton radio {{
+    border-radius: 0;
+}}
+"""
+    return out
+
+
 def main() -> None:
     p = load_palette()
     print("Generating Voidashi theme files from palette.json:")
@@ -191,6 +324,8 @@ def main() -> None:
     gtk_css = gen_gtk_css(p)
     write(CONFIG / "theme" / "voidashi-colors.css", gtk_css)
     inline_block(CONFIG / "wofi" / "style.css", gtk_css)
+    write(CONFIG / "gtk-3.0" / "voidashi.css", gen_gtk_app_css(p, "gtk3"))
+    write(CONFIG / "gtk-4.0" / "voidashi.css", gen_gtk_app_css(p, "gtk4"))
     print("Done. Diff the results before committing.")
 
 

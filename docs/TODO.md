@@ -3,15 +3,16 @@
 Open work, carried across sessions. Check this before assuming the rice or the repo is
 finished.
 
-Each item carries a **difficulty** and a **priority**. Difficulty is about how much work
-and how much can go wrong; priority is about how much it costs to leave undone. They are
-independent: the two broken keybinds are trivial and urgent, the elegance pass is neither.
+Each item carries a **difficulty** and a **priority**. Difficulty is about how much work and
+how much can go wrong; priority is about how much it costs to leave undone. They are
+independent: deleting the legacy configs was trivial and worth doing, the elegance pass is
+neither trivial nor urgent.
 
 Decisions already made, and state that is merely being tracked, do not live here. Those
 belong in `CLAUDE.md` (rules and gotchas), `docs/design/THEME-STATUS.md` (what is themed)
 and `docs/SESSION-HISTORY.md` (what happened).
 
-## Now: things that are broken
+## Parked: diagnosed, not solved
 
 - **Workspaces are not clickable in waybar, and it is not our config.** A full bisect ruled
   out everything on our side, so this is parked rather than solved. What is established:
@@ -39,15 +40,6 @@ and `docs/SESSION-HISTORY.md` (what happened).
 
 ## Next: the largest visual gap
 
-- **GTK3 and GTK4 applications are unthemed.** Everything themed so far is a shell surface
-  (bar, launcher, notifications, power menu). Ordinary applications still render in their
-  stock theme, and GTK4/libadwaita is the worst of it: its default palette fights the
-  desktop around it. Either adapt an established theme to the Voidashi palette or build
-  one. GTK4 does not read `~/.themes` the way GTK3 does, so the two need different
-  mechanisms, and libadwaita applications need their named colours overridden rather than
-  a theme swapped underneath them.
-  *Difficulty: high. Priority: high.*
-
 - **Neovim colorscheme.** Not themed at all. Needs a Voidashi highlight-group mapping: the
   editor role in `RICE-GUIDE.md` gives void-00 for background, ink for text, the identity
   families plus Verdigris for syntax categories, Ice for selection and cursor line, and
@@ -62,10 +54,6 @@ and `docs/SESSION-HISTORY.md` (what happened).
   shared source could hold. Open-ended by nature, so it should produce a list to approve
   before anything is moved.
   *Difficulty: high, and open-ended. Priority: medium.*
-
-- **Delete `conf.d.legacy/` and `hyprland.conf.legacy`.** The Lua config has proven itself
-  in daily use, so the pre-Lua rollback copies can go. Jeff has authorised this.
-  *Difficulty: trivial. Priority: medium.*
 
 - **Wallpaper curation.** Still whatever it was before. Needs real images chosen against
   the Wallpaper section of `RICE-GUIDE.md`: material, desaturated, dark, sitting at or
