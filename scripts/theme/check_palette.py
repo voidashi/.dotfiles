@@ -62,11 +62,6 @@ SKIP_PARTS = (
     "fish_variables",
     "scripts/theme/palette.json",
     "dotfiles_backup",
-    # Clone da documentação da Anthropic, guardado como referência e ignorado
-    # pelo git. São ~3700 arquivos com centenas de hex em exemplos, e nenhum
-    # deles pinta nada aqui: sem esta linha o check acusa setenta arquivos e
-    # deixa de ser lido.
-    "docs/claude-code-docs/",
 )
 SKIP_SUFFIX = (".png", ".jpg", ".jpeg", ".ttf", ".otf", ".woff", ".woff2", ".log", ".pyc")
 
