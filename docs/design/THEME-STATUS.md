@@ -24,9 +24,9 @@ under "Known gaps" at the bottom.
   against kitty and wofi) and now match.
 - **swaylock, fastfetch, bottom, starship, fish**: themed by hand (their colour keys mix
   with structural config, so they aren't generated). Fish's `conf.d/` only autoloads one
-  colorscheme at a time. O `voidashi-colorscheme.fish` define todas as variáveis de cor do
-  fish, não só as visíveis: doze ficaram no padrão de fábrica durante todo o retheme porque
-  um arquivo que o próprio fish gerou numa migração definia mais variáveis que o nosso.
+  colorscheme at a time. `voidashi-colorscheme.fish` sets every colour variable fish has,
+  not only the visible ones: twelve sat on factory defaults through the whole retheme
+  because a file fish itself generated during a migration defined more variables than ours.
 - A full audit against the guide's non-negotiables and anti-patterns caught three real bugs
   no earlier pass had touched: Hyprland's window rounding was still at the inherited
   Kanagawa 10px, one animation curve had a mathematical overshoot, which is forbidden
@@ -34,47 +34,46 @@ under "Known gaps" at the bottom.
   Every hex in every themed file was checked against the palette, and nothing was invented.
   The rounding later became the deliberate 4px recorded under "Key decisions".
 
-## Como cada app recebe a paleta
+## How each app receives the palette
 
-Cinco mecanismos, porque cinco toolkits diferentes não aceitam o mesmo tratamento.
-Antes de mexer em qualquer app, veja por qual linha ele entra:
+Five mechanisms, because five different toolkits do not accept the same treatment.
+Before touching any app, check which line it comes in on:
 
-| Mecanismo | Como funciona | Apps |
+| Mechanism | How it works | Apps |
 |---|---|---|
-| **Partial gerado + include** | O gerador escreve um arquivo só de cor, no formato nativo do app, e a config o inclui | kitty, foot, ghostty, alacritty, Hyprland (`conf/palette.lua`) |
-| **Bloco gerado inline** | Mesmo conteúdo, mas colado dentro da folha entre marcadores, porque o app não consegue importar | wofi |
-| **Cores nomeadas geradas** | O gerador mapeia a paleta nos nomes que o toolkit já pinta, e o app segue sem saber | GTK3, GTK4/libadwaita |
-| **INI mesclado** | O gerador substitui só as seções de cor de um arquivo que outro programa também escreve | KDE (`kdeglobals`) |
-| **Escrito à mão** | Cor se mistura com config estrutural, então gerar arriscaria corromper o que não é cor | swaylock, bottom, starship, fastfetch, fish, yazi, `nvim/theme/roles.lua`, Sway |
+| **Generated partial + include** | The generator writes a colour-only file in the app's native format, and the config includes it | kitty, foot, ghostty, alacritty, Hyprland (`conf/palette.lua`) |
+| **Generated block inlined** | Same content, pasted into the stylesheet between markers, because the app cannot import | wofi |
+| **Generated named colours** | The generator maps the palette onto the names the toolkit already paints from, and the app carries on unaware | GTK3, GTK4/libadwaita |
+| **Merged INI** | The generator replaces only the colour sections of a file another program also writes | KDE (`kdeglobals`) |
+| **Hand-written** | Colour mixes with structural config, so generating would risk corrupting what is not colour | swaylock, bottom, starship, fastfetch, fish, yazi, `nvim/theme/roles.lua`, Sway |
 
-Os escritos à mão são os que envelhecem em silêncio quando a paleta muda, e por isso
-existe `scripts/theme/check_palette.py`: ele acusa hex fora da paleta, nome de cor de
-terminal em config de fish ou starship, e arquivo `GENERATED` editado à mão. Rode depois de
-mexer em cor. A verificação por nome existe porque doze variáveis do fish passaram o
-retheme inteiro em `green`, `red` e `brgreen` enquanto a verificação por hex passava
-limpa.
+The hand-written ones are what age in silence when the palette changes, which is why
+`scripts/theme/check_palette.py` exists: it flags a hex outside the palette, a named
+terminal colour in fish or starship config, and a `GENERATED` file edited by hand. Run it
+after touching colour. The name check exists because twelve fish variables spent the whole
+retheme on `green`, `red` and `brgreen` while the hex check passed clean.
 
 ## Architecture
 
 - **Single source of truth**: `scripts/theme/palette.json`, transcribed from
   `RICE-GUIDE.md`/`DESIGN-SYSTEM.md`. Edit here, never a hex in an app config directly.
 - **Generator**: `scripts/theme/generate_theme.py` (stdlib Python) renders the source into
-  each app's native colour-include format — terminal colour partials, a Hyprland Lua
+  each app's native colour-include format: terminal colour partials, a Hyprland Lua
   palette module, and a shared GTK `@define-color` partial for the CSS-based apps. Rerun it
   after any `palette.json` change; its output files carry a `GENERATED` header and should
   never be hand-edited.
-- **Hand-edited apps**: swaylock, bottom, starship, fastfetch, fish — colour there mixes
+- **Hand-edited apps**: swaylock, bottom, starship, fastfetch, fish. Colour there mixes
   with structural config, so generating into them risked corrupting settings unrelated to
   colour. Values still come straight from the palette, just pasted rather than generated.
-- **O rollback é o git, não o diretório.** Durante o retheme cada arquivo recolorido
-  guardava sua versão anterior ao lado (`*.kanagawa.css`, `*.kanagawa.legacy`, `include`
-  comentado, `conf.d.legacy/`). Com o Voidashi completo e provado em todo o desktop, os 17
-  arquivos foram removidos junto com as referências comentadas que apontavam para eles.
-  Estavam dando a impressão de que havia escolha ativa entre temas onde não havia mais.
+- **Rollback is git, not a directory.** During the retheme every recoloured file kept its
+  previous version beside it (`*.kanagawa.css`, `*.kanagawa.legacy`, a commented `include`,
+  `conf.d.legacy/`). Once Voidashi was complete and proven across the desktop, those 17
+  files were removed along with the commented references pointing at them. They were giving
+  the impression of an active choice between themes where there was no longer one.
 
 ## Key decisions
 
-- **Role model**: focus/active/selected is **Ice**, not Bordeaux — Bordeaux is reserved for
+- **Role model**: focus/active/selected is **Ice**, not Bordeaux; Bordeaux is reserved for
   identity/primary-action (terminal cursor, prompt accent, lockscreen accent). A
   **Verdigris** family fills the ANSI cyan slot the core palette has no family for.
   Terminal cursor is `bordeaux-300`; terminal selection background is `ice-600`.
@@ -83,7 +82,7 @@ limpa.
   except Hyprland windows at 4px". It is now decided by whether a surface floats: floating
   surfaces (windows, launcher, notifications, the power menu) take 4px, docked ones (the
   bar) take 0. Two values, no scale. Alongside it, **weight 500 is the UI font weight** for
-  every GTK app — Regular thins out on surfaces this dark. Both live in `palette.json`
+  every GTK app; Regular thins out on surfaces this dark. Both live in `palette.json`
   under `geometry`; Hyprland and swaync read them, while GTK3 apps (waybar, wofi, wlogout)
   carry the literal because GTK3 has no CSS custom properties.
 - **Neovim has its own colorscheme, borrowed in structure but not in dependency.** The
@@ -141,31 +140,31 @@ limpa.
 - **hyprlauncher is themed through the toolkit, not through itself.** It has no colour
   options: its own config covers behaviour only (`general:grab_focus`, `ui:window_size`,
   `finders:*`). Appearance comes from hyprtoolkit, which reads
-  `.config/hypr/hyprtoolkit.conf` — a new file, top-level keys, no sections. The launcher
+  `.config/hypr/hyprtoolkit.conf`: a new file, top-level keys, no sections. The launcher
   on `mainMod+R` is wofi; the hyprlauncher theme is kept because that file covers any
   hyprtoolkit application and makes switching back a one-line change. Roles follow the launcher entry in the guide: void-20 surface, the
   input one step lighter, Ice for selection, Bordeaux as the identity mark, radius 0.
-- **swaync now has a `config.json`**, which it never had — it had been running entirely on
+- **swaync now has a `config.json`**, which it never had; it had been running entirely on
   `/etc/xdg` defaults, so nothing about it was a deliberate choice. Its stylesheet was also
   rewritten: swaync paints from custom properties on `:root`, and the earlier pass wrote
   its own selectors instead of overriding those, so notifications kept upstream's 12px
   radius and critical ones kept the default surface. Urgency now carries a **shape**
-  signal — a heavy left rule on critical — because swaync exposes no way to inject a glyph
+  signal (a heavy left rule on critical), because swaync exposes no way to inject a glyph
   per urgency, and colour may not carry a state alone.
 - **wlogout was rebuilt, not just recoloured.** It had been listed as fully themed, but its
-  six buttons carried lavender PNGs from `wlogout/icons/` — a colour from no Voidashi
+  six buttons carried lavender PNGs from `wlogout/icons/`: a colour from no Voidashi
   scale, raster so unreachable by the palette, and loaded through absolute `/home/jeff`
   paths that break on any other machine. The glyphs are text in the `layout` file now, so
   they inherit `color` like anything else. The shape changed with them: a centred vertical
   list of six labelled rows instead of a grid of tiles, ordered by escalating consequence,
-  with reboot and shutdown last and turning `alert-critical` on approach — they keep glyph
+  with reboot and shutdown last and turning `alert-critical` on approach; they keep glyph
   and label, so colour reinforces rather than carries. Focus stays Ice, per the role table.
   Geometry lives in `scripts/wm/power-menu.sh` because wlogout accepts it only as CLI
   flags; the wrapper reads the focused output's resolution so the proportions survive a
   different screen.
 - **Waybar is marked, not filled.** The active workspace carries a 3px `bordeaux-400` rule
   beneath it instead of an `ice-800` block, and modules no longer sit on individual
-  `void-20` pills — a row of raised chips is what made the bar read as a default status
+  `void-20` pills; a row of raised chips is what made the bar read as a default status
   bar. Bordeaux stays the identity mark here rather than becoming a second focus colour;
   Ice remains focus everywhere else, including Hyprland's window borders. Workspace labels
   are numerals in both bars, where before Sway showed app glyphs and Hyprland showed
@@ -177,7 +176,7 @@ limpa.
   the two move together. Glyph codepoints need checking before use: Nerd Fonts v3 dropped
   the `nf-mdi-*` range, and four icons inherited from the old config had been rendering as
   boxes because of it.
-- **Terminals: 0.92 opacity and 8px padding, all four.** Both were inconsistent — three
+- **Terminals: 0.92 opacity and 8px padding, all four.** Both were inconsistent: three
   different opacities and no padding set anywhere, so each emulator used its own default.
   The guide's "opaque by default" was rewritten to describe the transparency actually in
   use; foot's `alpha` sits in a second `[colors-dark]` block in `foot.ini`, since the
@@ -191,7 +190,7 @@ limpa.
   leaf. The old values were 600–1000ms, slow enough to be the daily-use complaint that
   started this; the guide's UI-transition numbers read as abrupt on full windows, so the
   motion table was rewritten around a ~400ms ceiling.
-- **wofi's palette is inlined, not imported** — it is the one GTK app whose `@import`
+- **wofi's palette is inlined, not imported**: it is the one GTK app whose `@import`
   resolves against the process cwd. See `CLAUDE.md`.
 - **GTK apps use Instrument Sans, not Iosevka Extended.** waybar, wofi and wlogout (GTK3)
   and swaync (GTK4) fall under the guide's "GTK / Qt application theming" rule, not the
@@ -199,7 +198,7 @@ limpa.
   a toolkit. The guide's typography table now says so explicitly.
 - Iosevka Extended, Instrument Sans and Spectral are symlinked from `fonts/` into
   `~/.local/share/fonts/dotfiles` by `backup-configs.sh install`. `fonts/Iosevka/` itself is
-  `.gitignore`d — its full-family build is ~430MB, too large to version; see the README's
+  `.gitignore`d: its full-family build is ~430MB, too large to version; see the README's
   Fonts section for where to re-download it.
 
 ## Known gaps / deliberately not done
