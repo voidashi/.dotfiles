@@ -8,7 +8,7 @@ and that contract guaranteed two things: unbounded growth, and rot, because
 nobody goes back to prune a diary. It reached 324 lines and had started
 contradicting itself. The git log holds the blow by blow far better, attached to
 the diffs that prove it. Add an entry here only when a decision changes the
-shape of the repo. See `portable/CONVENTIONS.md`.
+shape of the repo.
 
 ## Hyprland moved from hyprlang to Lua
 

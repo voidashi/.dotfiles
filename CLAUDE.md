@@ -2,8 +2,6 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-See @docs/portable/CONVENTIONS.md for how we work in this repo: where each kind of fact lives, what to verify and how, and the session discipline. Rules there are marked **(paid)** when they came from a failure here, with the incident named, or **(borrowed)** when they are general practice that has not yet cost us anything. `docs/portable/` holds the whole set, written to be copied into another project; the rest of it is not loaded.
-
 ## What this repo is
 
 A personal Linux dotfiles repository (Arch Linux + Wayland), themed throughout with **Voidashi**, the design identity documented under `docs/design/`. It replaced Kanagawa Dragon everywhere, including Sway and the Neovim colorscheme. It is not a software project with a build/test pipeline: it is a curated set of config files, three bash scripts that sync them to `$HOME` and install the packages they depend on, and two Python scripts that generate and verify the theme. There is no compiler or test suite; "correctness" means the shell scripts behave safely, the config files are valid for their apps, and `check_palette.py` passes.
