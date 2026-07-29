@@ -12,6 +12,52 @@ Decisions already made, and state that is merely being tracked, do not live here
 belong in `CLAUDE.md` (rules and gotchas), `docs/design/THEME-STATUS.md` (what is themed)
 and `docs/SESSION-HISTORY.md` (what happened).
 
+## Next up: the documentation pass for publication
+
+**This is the task for the next session, and it wants a clean context.** The repo is
+headed for publication and already has stars, so the question every document has to answer
+is no longer "does this help us" but "does this help someone who cloned this". Nothing here
+blocks a publish today; this is about the repo reading like it was written for a reader.
+
+**The agreed method, decided rather than assumed:** survey first, edit nothing. Produce a
+list saying, per document, what it claims today, what only makes sense to us, and what is
+worth reframing as an explanation of *why something is built this way* rather than a record
+of who decided what and when. Jeff approves the list, then it gets worked in approved
+batches, the same shape as the elegance pass. The survey exists because the tempting move
+is to open `SESSION-HISTORY.md` and start rewriting, and the shape of the whole thing is
+not obvious until all of it has been read.
+
+**What is already known, so it does not get re-derived:**
+
+- The inventory is 2,300 lines across eight files. `DESIGN-SYSTEM.md` (840) and
+  `RICE-GUIDE.md` (501) are the large ones, then `AESTHETIC-DIRECTION.md` (276),
+  `THEME-STATUS.md` (220), `CLAUDE.md` (164), `README.md` (137), `TODO.md` (88),
+  `SESSION-HISTORY.md` (75).
+- **Mentions of the agent are far fewer than they look.** Grepping finds them mostly in
+  `THEME-STATUS.md`, and those are all cross-references to `CLAUDE.md`, which is a normal
+  file for an agent-assisted repo and is not personal. The genuine cases are two: the
+  section `RICE-GUIDE.md:395`, "Working rules for Claude Code", which is instruction to an
+  agent sitting inside a design document, and `CLAUDE.md`'s own framing line. So the
+  agent-mention half of this task is small.
+- **`SESSION-HISTORY.md` is the real work.** All 75 lines are about personal working
+  decisions. Some turning points explain something a reader can see in the tree and should
+  survive, reframed; the rest is a record of a collaboration, which is nobody else's
+  business. Decide whether the document keeps its name.
+- The working conventions have already left this repo, so there is nothing of that kind
+  left to remove. `.claude/skills/verify-repo/` stays on purpose: it is about this repo's
+  own validators and is useful to whoever clones it.
+- **Do not add entries to `SESSION-HISTORY.md` before this pass.** Anything written now is
+  written in the voice the pass exists to change, and would be work thrown away.
+
+**Open questions to settle during the survey**, not before: whether flat `docs/` survives
+or becomes a structure or a wiki; whether `DESIGN-SYSTEM.md`, which covers the web/document
+side rather than the desktop, belongs in a published dotfiles repo at all; and whether the
+README carries enough for someone to actually use this, since it has never been read with
+that question in mind.
+
+*Difficulty: medium, and open-ended, but smaller than it first looked. Priority: high now
+that it is the next task, and it rises the moment you push.*
+
 ## Parked: diagnosed, not solved
 
 - **Workspaces are not clickable in waybar, and it is not our config.** A full bisect ruled
@@ -61,19 +107,6 @@ and `docs/SESSION-HISTORY.md` (what happened).
   decision, not a config one.
   *Difficulty: low once a set is chosen. Priority: low.*
 
-## Before publishing
-
-- **The docs are written for us, not for someone who cloned this.** `SESSION-HISTORY.md` is
-  about personal working decisions, and several documents mention the agent that helped
-  write them, which is irrelevant to anyone who just wants the rice: nothing here needs
-  Claude to be installed or understood. Some of those turning points are worth keeping,
-  reframed as explanations of why something is built the way it is, but not as a record of
-  who decided what and when. Worth doing as a deliberate pass rather than file by file,
-  possibly as a proper docs structure or a wiki instead of the current flat `docs/`.
-  Nothing blocks a publish today; this is about the repo reading like it was written for a
-  reader.
-  *Difficulty: medium, and open-ended. Priority: medium, and it rises the moment you push.*
-
 ## Ongoing: how the writing reads
 
 - **Clean the AI writing tells out of the remaining documents.** No em dashes, no saying a
@@ -85,4 +118,7 @@ and `docs/SESSION-HISTORY.md` (what happened).
   clause opening with "If" or "When" needs the comma, so a blanket substitution produces
   comma splices either way and the changed lines have to be read. The tic also appears as a
   double hyphen standing in for the dash, which is what the code carried; those are done.
-  *Difficulty: low per file. Priority: low.*
+  **Fold this into the documentation pass above rather than doing it separately**, since
+  that pass opens all three remaining files anyway and reading a paragraph twice for two
+  different reasons is the waste.
+  *Difficulty: low per file. Priority: low on its own, but free alongside the pass.*
