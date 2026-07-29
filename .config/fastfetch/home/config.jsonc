@@ -1,14 +1,30 @@
-//    ______           __  ______      __
-//   / ____/___ ______/ /_/ ____/___ _/ /_
-//  / /_  / __ `/ ___/ __/ /   / __ `/ __/
-// / __/ / /_/ (__  ) /_/ /___/ /_/ / /_
-///_/    \__,_/____/\__/\____/\__,_/\__/
-//  https://github.com/m3tozz/FastCat
+// Preset structure from FastCat: https://github.com/m3tozz/FastCat
+// The colours are Voidashi, not FastCat's.
+//
+// Dormant preset: nothing runs this. fish runs arch_small as the greeter and
+// bare fastfetch reads ../config.jsonc. Aligned anyway, because the guide asks
+// for consistency within a class.
+//
+// This one was the worst of the four. Every row carried its own inline colour,
+//  through  cycling per line, which is the "every module a different
+// colour" anti-pattern named in both the guide and the aesthetic direction, and
+// six accent families visible at once against a budget of two. The frame, the
+// glyph and the label now all sit at ink-4 and the title carries the only
+// accent, which is Bordeaux.
 {
     "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
     "logo": null,
     "display": {
-        "separator": "  "
+        "separator": "  ",
+        "color": {
+            "keys": "#6c6c6c",      // ink-4, and the box frame with it
+            "title": "#b44955",     // bordeaux-400, the identity mark
+            "output": "#b1b1b1",    // ink-2, body text
+            "separator": "#4f4d4a"  // edge-40
+        },
+        "percent": {
+            "type": ["num"]
+        }
     },
     "modules": [
         {
@@ -16,55 +32,55 @@
             "type": "custom"
         },
         {
-            "key": "│ {#31} user    {#keys}│",
+            "key": "│  user    │",
             "type": "title",
             "format": "{user-name}"
         },
         {
-            "key": "│ {#32}󰇅 hname   {#keys}│",
+            "key": "│ 󰇅 hname   │",
             "type": "title",
             "format": "{host-name}"
         },
         {
-            "key": "│ {#33}󰅐 uptime  {#keys}│",
+            "key": "│ 󰅐 uptime  │",
             "type": "uptime"
         },
         {
-            "key": "│ {#34}{icon} distro  {#keys}│",
+            "key": "│ {icon} distro  │",
             "type": "os"
         },
         {
-            "key": "│ {#35} kernel  {#keys}│",
+            "key": "│  kernel  │",
             "type": "kernel"
         },
         {
-            "key": "│ {#36}󰇄 desktop {#keys}│",
+            "key": "│ 󰇄 desktop │",
             "type": "de"
         },
         {
-            "key": "│ {#31} term    {#keys}│",
+            "key": "│  term    │",
             "type": "terminal"
         },
         {
-            "key": "│ {#32} shell   {#keys}│",
+            "key": "│  shell   │",
             "type": "shell"
         },
         {
-            "key": "│ {#33}󰍛 cpu     {#keys}│",
+            "key": "│ 󰍛 cpu     │",
             "type": "cpu",
             "showPeCoreCount": true
         },
         {
-            "key": "│ {#34}󰉉 disk    {#keys}│",
+            "key": "│ 󰉉 disk    │",
             "type": "disk",
             "folders": "/"
         },
         {
-            "key": "│ {#35} memory  {#keys}│",
+            "key": "│  memory  │",
             "type": "memory"
         },
         {
-            "key": "│ {#36}󰩟 network {#keys}│",
+            "key": "│ 󰩟 network │",
             "type": "localip",
             "format": "{ipv4} ({ifname})"
         },
@@ -73,7 +89,7 @@
             "type": "custom"
         },
         {
-            "key": "│ {#39} colors  {#keys}│",
+            "key": "│  colors  │",
             "type": "colors",
             "symbol": "circle"
         },
