@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**Read `docs/CONVENTIONS.md` first.** It defines how the documents here divide the work, and the working rules this repo holds itself to: where a decision goes once decided, why a rule that nobody checks gets violated, why verification means measuring the result rather than reading the config. Each rule there records the failure that produced it. It is written to be portable to other projects, and it is also what keeps this one from drifting away from its own decisions.
+See @docs/CONVENTIONS.md for how we work in this repo: where each kind of fact lives, what to verify and how, and the session discipline. Rules there are marked **(paid)** when they came from a failure here, with the incident named, or **(borrowed)** when they are general practice that has not yet cost us anything. `docs/ADOPTING-CONVENTIONS.md` covers copying the setup into another project and is not loaded.
 
 ## What this repo is
 
