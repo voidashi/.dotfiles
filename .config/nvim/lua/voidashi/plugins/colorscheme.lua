@@ -1,59 +1,22 @@
--- ~/nvim/lua/voidashi/plugins/colorscheme.lua
-
--- return {
---     "tiagovla/tokyodark.nvim",
---     lazy = false,
---     priority = 1000,
---     config = function()
---         vim.cmd("colorscheme tokyodark")
---     end,
--- }
+-- ~/.config/nvim/lua/voidashi/plugins/colorscheme.lua
+--
+-- O tema é próprio e vive em lua/voidashi/theme/, sem plugin por trás. A
+-- estrutura de três camadas foi copiada do kanagawa, mas nada depende dele em
+-- runtime: um update do plugin não tem como quebrar nossas cores.
+--
+-- Isto substituiu um setup do kanagawa que carregava "kanagawa-dragon" logo
+-- depois de declarar theme = "wave" dentro do próprio setup. O comando
+-- explícito vencia, então aquela chave nunca fez efeito nenhum.
 
 return {
-    {
-        "rebelot/kanagawa.nvim",
-        lazy = false,
-        priority = 1000,
-        -- "transparent" aqui era ignorado: não é uma chave de spec do
-        -- lazy.nvim. O que vale é o transparent dentro do setup() abaixo.
-        config = function()
-            require('kanagawa').setup({
-            compile = false,             -- enable compiling the colorscheme
-            undercurl = true,            -- enable undercurls
-            commentStyle = { italic = true },
-            functionStyle = {},
-            keywordStyle = { italic = true},
-            statementStyle = { bold = true },
-            typeStyle = {},
-            transparent = true,         -- do not set background color Default = false
-            dimInactive = false,         -- dim inactive window `:h hl-NormalNC`
-            terminalColors = true,       -- define vim.g.terminal_color_{0,17}
-            colors = {                   -- add/modify theme and palette colors
-                palette = {},
-                theme = { wave = {}, lotus = {}, dragon = {}, all = {} },
-            },
-            overrides = function(colors) -- add/modify highlights
-                return {}
-            end,
-            theme = "wave",              -- Load "wave" theme when 'background' option is not set
-            background = {               -- map the value of 'background' option to a theme
-                dark = "wave",           -- try "dragon" !
-                light = "lotus"
-            },
-        })
-
-
-            vim.cmd("colorscheme kanagawa-dragon")
-        end,
-    },
-
-    --{
-    --   'kepano/flexoki-neovim',
-    --    name = 'flexoki',
-    --    lazy = false,
-    --    priority = 1000,
-    --    config = function()
-    --        vim.cmd("colorscheme flexoki-dark")
-    --    end,
-    --}
+  -- Rollback num comando: trocar enabled para true e chamar
+  -- vim.cmd("colorscheme kanagawa-dragon") de volta. Fica declarado para o
+  -- caso de aparecer algum grupo que o nosso tema não cubra e que valha mais
+  -- reverter do que consertar na hora.
+  {
+    "rebelot/kanagawa.nvim",
+    enabled = false,
+    lazy = true,
+    priority = 1000,
+  },
 }

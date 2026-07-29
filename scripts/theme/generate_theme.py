@@ -313,6 +313,36 @@ radiobutton radio {{
     return out
 
 
+def gen_nvim_palette(p: dict) -> str:
+    """Raw palette for the Neovim colorscheme, same shape as the Hyprland one.
+
+    Only colours belong here. The semantic layer that turns them into roles
+    lives beside it in roles.lua, hand-written, and the highlight groups read
+    from that rather than from this file. Keeping the two apart is what lets the
+    theme be recoloured without touching three hundred group definitions.
+    """
+    lua_key = lambda shade: shade if shade.isidentifier() else f'["{shade}"]'
+    out = header("--")
+    out += "return {\n"
+    for scale_name, shades in p["scales"].items():
+        out += f"    {scale_name} = {{\n"
+        for shade, hexval in shades.items():
+            out += f'        {lua_key(shade)} = "{hexval}",\n'
+        out += "    },\n"
+    out += "    alert = {\n"
+    for name, entry in p["alert"].items():
+        out += f'        {name} = {{ fg = "{entry["fg"]}", bg = "{entry["bg"]}", border = "{entry["border"]}" }},\n'
+    out += "    },\n"
+    # The ANSI table verbatim, so :terminal matches every other terminal and TUI
+    # on the machine. That equivalence is a non-negotiable in RICE-GUIDE.md.
+    out += "    ansi = {\n"
+    for i, hexval in enumerate(p["ansi16"]):
+        out += f'        [{i}] = "{hexval}",\n'
+    out += "    },\n"
+    out += "}\n"
+    return out
+
+
 def merge_kde_globals(path: Path, scheme: str) -> None:
     """Replace only the colour sections of kdeglobals, leaving the rest alone.
 
@@ -450,6 +480,7 @@ def main() -> None:
     inline_block(CONFIG / "wofi" / "style.css", gtk_css)
     write(CONFIG / "gtk-3.0" / "voidashi.css", gen_gtk_app_css(p, "gtk3"))
     write(CONFIG / "gtk-4.0" / "voidashi.css", gen_gtk_app_css(p, "gtk4"))
+    write(CONFIG / "nvim" / "lua" / "voidashi" / "theme" / "palette.lua", gen_nvim_palette(p))
     kde = gen_kde_colors(p)
     write(REPO_ROOT / ".local" / "share" / "color-schemes" / "Voidashi.colors", kde)
     merge_kde_globals(CONFIG / "kdeglobals", kde)

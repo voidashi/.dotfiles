@@ -60,6 +60,26 @@ under "Known gaps" at the bottom.
   every GTK app — Regular thins out on surfaces this dark. Both live in `palette.json`
   under `geometry`; Hyprland and swaync read them, while GTK3 apps (waybar, wofi, wlogout)
   carry the literal because GTK3 has no CSS custom properties.
+- **Neovim has its own colorscheme, borrowed in structure but not in dependency.** The
+  three-layer split came from reading kanagawa: a raw palette, a semantic layer of roles,
+  and highlight groups that read only from the roles. That separation is what lets the theme
+  be recoloured without touching hundreds of group definitions, and it is the part worth
+  copying. Nothing depends on kanagawa at runtime; it stays declared with `enabled = false`
+  as a rollback.
+
+  Syntax follows the editor entry in the guide: Bordeaux on keywords, since Bordeaux is the
+  identity mark and keyword is the most structural token; Ice on functions, since focus is
+  Ice across the whole desktop; moss for strings, bronze for numbers and operators,
+  Verdigris for types, which is the slot it was added to the palette for; comments at ink-4
+  nominally. Selection is Ice, search is bronze, so the two states never read as the same
+  thing. `:terminal` takes the ANSI table verbatim, so the non-negotiable about ANSI being
+  identical everywhere holds inside the editor too.
+
+  Transparency is deliberate and Jeff's call: `Normal` is unpainted so the editor matches
+  the terminal at 0.92, while popups, menus and floats stay opaque, because text over text
+  cannot be read. The cost of a standalone theme is that nothing covers what you miss: 55
+  groups were found falling through to Neovim defaults by diffing our group names against
+  kanagawa's, and closed.
 - **Qt applications are themed through kdeglobals, which is generated too.** All nine Qt
   applications here are KDE ones, and they read their palette from that file rather than
   from anything GTK. `generate_theme.py` emits a KDE colour scheme, installs it as

@@ -240,14 +240,37 @@ directories. Linking `~/.local/share/color-schemes/Voidashi.colors` failed silen
 machine that had never had a KDE colour scheme, while the script reported success. Both
 fixed.
 
+## The Neovim colorscheme
+
+The first proposal was to override kanagawa's semantic layer through its own `setup()`. Jeff
+pushed back, and was right: even through a public API that is still a dependency, matched by
+key name, so a rename upstream would silently drop half the theme. The same partial, quiet
+failure that had already cost time on the GTK4 accent.
+
+So the theme is ours. What was worth taking from kanagawa was its structure, not its code: a
+raw palette, a semantic layer of roles, and highlight groups that read only from the roles.
+That separation is what makes a theme recolourable without touching hundreds of definitions.
+`palette.lua` is generated from `palette.json` like every other palette in the repo, `roles.lua`
+is hand-written because it holds design decisions, and `groups.lua` holds the groups.
+
+The cost of standing alone is that nothing covers a miss. Diffing our group names against
+kanagawa's found 55 groups falling through to Neovim's defaults, mostly LSP semantic tokens,
+cmp's own floating windows, and neo-tree's git and tab states. All closed, and the diff is
+worth re-running whenever a plugin is added.
+
+Verified by reading the highlight groups back rather than by eye: `Comment` at ink-4,
+`Visual` at ice-800, `Function` at ice-300, `String` at moss-300, `Keyword` at bordeaux-300,
+`Type` at verdigris-300. Transparency stays, so `Normal` is unpainted and the editor matches
+the terminal, while neo-tree and popups sit opaque on their own surfaces.
+
 ## Open items carried forward
 
 - `.config/dunst/` is still orphaned (autostart runs `swaync`, not dunst) — same
   intentional-limbo treatment as `hyprpaper.conf`, no decision made yet either way.
 - `conf.d.legacy/` and `hyprland.conf.legacy` (the pre-Lua Hyprland config) are still
   present for rollback, kept until daily use confirms the Lua config is stable.
-- Neovim colorscheme/highlight-group theming and wallpaper curation are still unthemed —
-  both were explicitly scoped out of the Voidashi retheme so far.
+- Wallpaper curation is the last unthemed piece, and it is blocked on choosing images
+  rather than on config.
 - Waybar's redesign needs a verdict from daily use: glyph sizing, numerals versus app icons
   on the workspace buttons, and whether the right-hand modules want separators.
 - Three stray `kitty` GUI windows (idle fish shells, nothing running in them) were spawned

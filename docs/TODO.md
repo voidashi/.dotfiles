@@ -38,24 +38,6 @@ and `docs/SESSION-HISTORY.md` (what happened).
   *Difficulty: high, now that the cheap explanations are gone. Priority: medium, since
   keyboard switching works and this is a convenience.*
 
-## Next: the largest visual gap
-
-- **Neovim colorscheme, plus the plugins that draw their own interface.** Still on
-  kanagawa-dragon with `transparent = true`, so the editor currently borrows whatever the
-  terminal is showing rather than the void-00 the guide specifies. The colorscheme is the
-  smaller half of this: eleven plugins render chrome that a colorscheme does not reach, and
-  each needs its highlight groups mapped. `lualine` (which sets no theme today and
-  auto-detects kanagawa's), `neotree`, `telescope`, `cmp`, `gitsigns`, `welcome`,
-  `toggleterm`, `colorizer`, and the LSP diagnostic groups. Syntax itself comes from
-  treesitter and follows the colorscheme.
-
-  Roles from the editor entry in `RICE-GUIDE.md`: void-00 background, ink for text, the
-  identity families plus Verdigris for syntax categories, Ice for selection and cursor
-  line, comments at ink-4. Two decisions to make up front: whether to write a Voidashi
-  colorscheme from scratch or override kanagawa's groups, and whether to keep transparency
-  now that the terminals sit at 0.92 with compositor blur behind them.
-  *Difficulty: high. Priority: medium.*
-
 ## Then: quality and housekeeping
 
 - **Elegance pass over structure, organisation and code.** Several things work but are not
