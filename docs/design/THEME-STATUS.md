@@ -58,13 +58,15 @@ retheme on `green`, `red` and `brgreen` while the hex check passed clean.
 - **Single source of truth**: `scripts/theme/palette.json`, transcribed from
   `RICE-GUIDE.md`/`DESIGN-SYSTEM.md`. Edit here, never a hex in an app config directly.
 - **Generator**: `scripts/theme/generate_theme.py` (stdlib Python) renders the source into
-  each app's native colour-include format: terminal colour partials, a Hyprland Lua
-  palette module, and a shared GTK `@define-color` partial for the CSS-based apps. Rerun it
-  after any `palette.json` change; its output files carry a `GENERATED` header and should
-  never be hand-edited.
-- **Hand-edited apps**: swaylock, bottom, starship, fastfetch, fish. Colour there mixes
-  with structural config, so generating into them risked corrupting settings unrelated to
-  colour. Values still come straight from the palette, just pasted rather than generated.
+  ten files, each in the format the application it serves already reads: four terminal
+  colour partials, a Hyprland Lua module, the Neovim palette layer, a shared GTK
+  `@define-color` partial, the GTK3 and GTK4 named-colour files, and wofi's stylesheet with
+  the palette inlined. It also installs a selectable KDE colour scheme and merges colour,
+  font and cursor keys into `kdeglobals` and `kcminputrc`, which KDE writes to as well, key
+  by key rather than section by section so nothing of KDE's own is lost. Rerun it after any
+  `palette.json` change; its output carries a `GENERATED` header and must not be
+  hand-edited. Which application arrives by which route is the table above, which is the
+  one place that answers it.
 - **Rollback is git, not a directory.** During the retheme every recoloured file kept its
   previous version beside it (`*.kanagawa.css`, `*.kanagawa.legacy`, a commented `include`,
   `conf.d.legacy/`). Once Voidashi was complete and proven across the desktop, those 17
@@ -105,9 +107,13 @@ retheme on `green`, `red` and `brgreen` while the hex check passed clean.
   cannot be read. The cost of a standalone theme is that nothing covers what you miss: 55
   groups were found falling through to Neovim defaults by diffing our group names against
   kanagawa's, and closed.
-- **Qt applications are themed through kdeglobals, which is generated too.** All nine Qt
-  applications here are KDE ones, and they read their palette from that file rather than
-  from anything GTK. `generate_theme.py` emits a KDE colour scheme, installs it as
+- **Qt applications are themed through kdeglobals, which is generated too.** Most Qt
+  applications here are KDE ones and read their palette from that file rather than from
+  anything GTK. The ones that are not, VLC among them, reach the same palette through
+  `KDEPlasmaPlatformTheme6.so`, which is what makes `QT_QPA_PLATFORMTHEME=kde` mean
+  anything; it ships in `plasma-integration`, and without that package the variable is set
+  and nothing honours it, with no error. `generate_theme.py` emits a KDE colour scheme,
+  installs it as
   `Voidashi.colors` so it is selectable, and merges its colour sections into kdeglobals,
   which is what applications actually read. Window chrome is void-10, content void-00,
   buttons void-20, tooltips void-30, selection ice-600, matching the GTK mapping so the two
@@ -211,10 +217,13 @@ retheme on `green`, `red` and `brgreen` while the hex check passed clean.
 
 ## Known gaps / deliberately not done
 
-- Neovim colorscheme and wallpaper curation remain untouched. Both are scoped tasks of
-  their own; see `docs/TODO.md`.
+- **Wallpaper curation is the largest remaining visual gap**, and the only one that needs
+  assets rather than config: images chosen against the guide's Wallpaper section, at or
+  below `void-00` in perceived lightness. See `docs/TODO.md`.
+- **Dolphin's icons are still `breeze-dark`**, so folders come out blue against a Voidashi
+  window. The alternatives installed on this machine are no better aligned, so this waits on
+  an icon set being chosen, which is an asset decision and not a config one.
 - Waybar's redesign is in and the sizing was tuned against live feedback, but three things
   are still only settled provisionally: whether numerals beat the old app glyphs on the
   workspace buttons, whether the right-hand modules want separators or should stay spaced
   only, and whether 15px/500 is the right weight once it has been lived with.
-- The Neovim colorscheme is now the largest remaining visual gap.
