@@ -391,44 +391,9 @@ Base-4 scale with hybrid progression (linear early, geometric late).
 of 4 content columns + 3 of breathing room. Creates the editorial tension a symmetric grid
 lacks.
 
-### 6.2 Reference implementation
-
-```css
-:root {
-  --grid-max: 1200px;
-  --grid-gutter: var(--sp-5);
-}
-
-.container {
-  max-width: var(--grid-max);
-  margin-inline: auto;
-  padding-inline: var(--sp-6);
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: var(--grid-gutter);
-}
-
-.grid-editorial {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: var(--grid-gutter);
-}
-
-/* span utilities */
-.col-4  { grid-column: span 4; }
-.col-6  { grid-column: span 6; }
-.col-8  { grid-column: span 8; }
-.col-12 { grid-column: span 12; }
-
-@media (max-width: 767px) {
-  .grid { grid-template-columns: repeat(4, 1fr); gap: var(--sp-4); }
-  .col-4, .col-6, .col-8 { grid-column: span 4; }
-  .container { padding-inline: var(--sp-4); }
-}
-```
+The values above are the specification; implementing them is plain CSS grid with the
+spacing scale as gutters, and nothing about it is particular to this system. The desktop
+has no equivalent, so `RICE-GUIDE.md` drops the grid entirely.
 
 ---
 
@@ -676,120 +641,48 @@ when declared). Spectral and Instrument Sans support both sets.
 
 ## 15 Context matrix
 
-Three macro-contexts, defined by the **nature of the content**: not by platform. A project
-identifies its macro-context and inherits the rules; hybrid cases combine via the proportion
-rules.
+Three macro-contexts, defined by the **nature of the content** rather than by platform. A
+project identifies its context and takes that family as its lead colour:
 
-> **Not applicable to desktop work.** See `RICE-GUIDE.md`, which replaces this matrix with
-> role-based colour assignment.
+| Context | What it covers | Lead colour |
+|---|---|---|
+| **Identity** | Personal branding, portfolio, CV, profiles | **Bordeaux**, with Ice on technical elements and Ash on artistic ones |
+| **Function** | UI, web apps, documentation, dashboards, notes | **Ice**, with Bordeaux only for primary actions, critical warnings and the signature |
+| **Expression** | Art, poetry, music, covers, worldbuilding | **Ash Violet**, with Bordeaux for emotional emphasis. Ice is forbidden here: functional coldness does not belong to expression |
 
-### 15.1 IDENTITY: *who I am*
+The lead family carries roughly three quarters of the coloured surface and the support
+families the rest. Hybrid work leads with the dominant context and admits the other inside
+contained elements, as a portfolio leads Bordeaux and uses Ice only within the cards for
+technical projects.
 
-Personal branding, portfolio, CV, personal presentations, profiles, identity posts.
-
-| Parameter | Rule |
-|---|---|
-| Lead colour | **Bordeaux** (mandatory) |
-| Support | Ice (technical elements), Ash (artistic elements) |
-| Highlight | Bronze, real milestones and achievements, sparse |
-| Progress | Moss, completed projects |
-| Editorial voice | Spectral (italic as signature); Fraunces for punctual impact |
-| Functional voice | Instrument Sans |
-| Proportion | ~80% identity / ~20% support |
-
-### 15.2 FUNCTION: *what I make work*
-
-UI, web apps, documentation, READMEs, terminal, configs, dashboards, second brain
-(Obsidian), technical presentations.
-
-| Parameter | Rule |
-|---|---|
-| Lead colour | **Ice** (mandatory) |
-| Support | Bordeaux, only for primary CTAs, critical warnings and brand signature |
-| States | Semantic tokens with glyphs |
-| Editorial voice | Spectral only in H1–H2 of long documents; in technical docs, Instrument Sans 600 |
-| Functional voice | Instrument Sans / technical voice per platform |
-| Mono | JetBrains (web) · Iosevka Extended (local) · Hack Nerd Font (terminal with glyphs) |
-| Proportion | ~75% function / ~25% identity maximum |
-
-### 15.3 EXPRESSION: *what I create*
-
-Art, poetry, music, covers, creative writing, RPG and worldbuilding material, creative
-projects.
-
-| Parameter | Rule |
-|---|---|
-| Lead colour | **Ash Violet** (mandatory) |
-| Support | Bordeaux, emotional emphasis, drama |
-| Forbidden | Ice, functional coldness does not belong to expression |
-| Editorial voice | Spectral italic; Fraunces for covers and maximum impact |
-| Note | Typographic silence as language, less text, more weight per word |
-
-### 15.4 Hybrid cases
-
-- **Portfolio** (identity + function): lead Bordeaux; Ice only inside cards for technical
-  projects; Ash inside cards for artistic projects; Bronze for the exceptional project; Moss
-  for completed status.
-- **Technical post in a personal voice** (function + identity): lead Ice; signature and
-  authorship highlights in Bordeaux.
-- **RPG material with rules** (expression + function): lead Ash; tables and mechanics in the
-  technical voice with restrained Ice on strictly functional elements, a documented
-  exception to the Ice prohibition in Expression, limited to game mechanics.
+> **Not applicable to desktop work.** A desktop is all three contexts at once, permanently,
+> on one screen, which makes every per-application assignment arbitrary. `RICE-GUIDE.md`
+> replaces this matrix with role-based colour assignment. This section is a summary for that
+> reason, and the git history holds the per-parameter tables it used to carry.
 
 ---
 
 ## 16 WCAG conformance and high contrast
 
-The system's priority is aesthetic. Conformance is achieved through the strategy WCAG itself
-provides: a **conforming alternate version**. The default mode privileges identity and
-admits deliberate AA violations, named below, never accidental. High-contrast mode is the
-alternate version that reaches full AA while preserving identity: **hues never change, only
-lightness rises where needed**.
+The system's priority is aesthetic. Conformance is reached through the strategy WCAG itself
+provides, a **conforming alternate version**: the default mode privileges identity and admits
+deliberate AA violations, named below and never accidental, while a high-contrast mode
+(`data-contrast="high"`, an official mode of the system alongside `data-density` and
+orthogonal to it) resolves all of them. Hues never change in that mode; only lightness rises
+where needed, so the identity survives.
 
-> **Not applicable to desktop work.** In the rice context, aesthetics take precedence and
-> this apparatus is dropped, see `RICE-GUIDE.md`.
+Two violations are on the list, and nothing else joins it without a measurement and a reason:
+`ink-4` as informational text, at 3.8:1 against a required 4.5:1, because recessed metadata
+is the point of a fading hierarchy; and input borders at `edge-30`, at 1.6:1 against a
+required 3:1, because those borders are meant to whisper.
 
-### 16.1 What the default mode already meets
+Three things are never negotiable in any mode: a visible focus ring, honouring
+`prefers-reduced-motion`, and meaning never carried by colour alone.
 
-| Criterion | How |
-|---|---|
-| 1.4.1 Use of colour | Mandatory glyphs on every semantic state |
-| 1.4.3 Contrast (text) | `ink-0`–`ink-3` and 300-level accents pass AA; `ink-2` passes AAA |
-| 1.4.8 Visual presentation (AAA) | Reading measure ≤ 70ch |
-| 1.4.11 Non-text contrast | Focus ring 7.3:1; state glyphs above 3:1 |
-| 2.2.2 Pause, stop, hide | Loops only in loaders |
-| 2.3.3 Animation from interactions | `prefers-reduced-motion` mandatory |
-| 2.4.7 Focus visible | `ice-300` ring, 2px, 2px offset, on every interactive element |
-
-### 16.2 Deliberate violations in the default mode
-
-| Point | Measured | Required (AA) | Aesthetic reason |
-|---|---|---|---|
-| `ink-4` as informational text | 3.8:1 | 4.5:1 (1.4.3) | Recessed metadata, the hierarchy of fading text |
-| Input borders (`edge-30`) | 1.6:1 | 3:1 (1.4.11) | Discretion of surfaces, borders that whisper |
-
-Nothing beyond these. A new violation only enters the system named in this table, with
-measurement and reason.
-
-### 16.3 High-contrast mode (`data-contrast="high"`)
-
-An official mode of the system, following the same pattern as `data-density`. It changes the
-minimum necessary:
-
-```css
-[data-contrast="high"] {
-  --ink-4: #8a8a8a;    /* 5.8:1, resolves 1.4.3 */
-  --edge-30: #6a6864;  /* 3.4:1 on void-10, resolves 1.4.11 */
-  --edge-40: #706e69;
-}
-```
-
-**Mode rules:**
-- Hues untouched, high contrast lightens; it does not recolour. Identity survives.
-- Accents used as text stay at level ≤ 300 (no `-400` as text, not even large).
-- Every project offers a visible toggle **or** activates the mode automatically via
-  `@media (prefers-contrast: more)`. Ideally both.
-- `data-contrast` and `data-density` are orthogonal and combinable.
+> **Not applicable to desktop work.** In the rice, aesthetics take precedence and this
+> apparatus is dropped, as `RICE-GUIDE.md` states outright. This section is a summary for
+> that reason: the conformance tables and the high-contrast overrides it used to carry are
+> web mechanisms with no desktop equivalent. The git history holds the full text.
 
 ---
 
@@ -826,7 +719,7 @@ What the system **does not** do, regardless of context:
 - Meaning conveyed by colour alone, without glyph or text.
 - `outline: none` without a substitute focus ring.
 - A semantic state without its glyph.
-- A WCAG violation not documented in table 16.2, deliberate is named; accidental is a bug.
+- A WCAG violation not named in section 16, deliberate is named; accidental is a bug.
 - A project with no access to high-contrast mode (toggle or `prefers-contrast: more`).
 
 **Image**
