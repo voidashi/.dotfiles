@@ -49,14 +49,73 @@ not obvious until all of it has been read.
 - **Do not add entries to `SESSION-HISTORY.md` before this pass.** Anything written now is
   written in the voice the pass exists to change, and would be work thrown away.
 
-**Open questions to settle during the survey**, not before: whether flat `docs/` survives
-or becomes a structure or a wiki; whether `DESIGN-SYSTEM.md`, which covers the web/document
-side rather than the desktop, belongs in a published dotfiles repo at all; and whether the
-README carries enough for someone to actually use this, since it has never been read with
-that question in mind.
+The survey ran on 2026-07-29 and settled the three questions it was holding. Flat `docs/`
+stays: six markdown files and two images do not need a hierarchy, and a wiki would move the
+prose out of the clone, which is a loss for documents that get read in an editor beside the
+configs. A short `docs/README.md` index is added instead, because the only entry point today
+is a table inside `CLAUDE.md` that no human will find. `DESIGN-SYSTEM.md` stays as well, but
+the three sections it already marks "not applicable to desktop work" (the 12-column grid
+with its CSS, the context matrix, the WCAG apparatus) collapse to a pointer each: 130 lines
+a cloner can never act on, against a file that is the only reason the palette does not look
+arbitrary. And the README does not serve a reader today, which made it the first batch.
+
+Batch order, approved: README, then `THEME-STATUS.md`'s factual errors, then
+`SESSION-HISTORY.md` plus the index, then `RICE-GUIDE.md`'s agent section and `CLAUDE.md`'s
+em dashes, then `DESIGN-SYSTEM.md`, then `AESTHETIC-DIRECTION.md`'s.
+
+**Two things this pass deliberately does not touch.** The agent workflow keeps working as it
+is, so `CLAUDE.md` keeps its framing and the two lines that name Jeff; the plan is to remove
+those files at publication rather than reword them now. Before that happens, the pitfalls in
+`CLAUDE.md` are worth moving into a document under `docs/` instead of being deleted with it:
+they are the most useful prose in the repo for someone who cloned it, and every one of them
+cost a real debugging session to find.
 
 *Difficulty: medium, and open-ended, but smaller than it first looked. Priority: high now
 that it is the next task, and it rises the moment you push.*
+
+- **Retake the screenshots.** `docs/screenshot1.png` and `screenshot2.png` were committed in
+  April 2025, before the retheme, so the two images at the top of the README show the
+  Kanagawa desktop this repo no longer contains. Jeff takes these; the README's rewrite
+  leaves them in place rather than removing them, since a stale screenshot still beats none.
+  *Difficulty: low. Priority: high, because it is the first thing a visitor sees.*
+
+## Features to build
+
+Four gaps found by checking the README's claims against the configs during the documentation
+survey. The README stopped claiming them; these entries are the intent to build them.
+
+- **Clipboard integration.** Nothing exists: no `cliphist`, no `wl-clipboard`, no binding,
+  nothing in `packages.conf`. The usual shape on Wayland is `wl-clipboard` for copy and paste
+  plus `cliphist` for history, with the picker on a keybind through wofi, which is already
+  the launcher on both compositors. Mirror the binding across Hyprland and Sway, since
+  anything shell-adjacent has to exist in both.
+  *Difficulty: low. Priority: medium, it is a daily-use convenience that is simply absent.*
+
+- **Battery-friendly power management.** Also nothing: no `hypridle`, no `swayidle`, no
+  `tlp`, no `power-profiles-daemon`. Two separate pieces sit behind this label. Idle
+  behaviour, meaning dim, lock and suspend after a timeout, which needs `hypridle` on
+  Hyprland and `swayidle` on Sway and should reach the same `swaylock` that is already
+  themed. And power profiles proper, which is a system daemon rather than a compositor
+  concern. Decide whether both belong here or only the idle half.
+  *Difficulty: medium, since it is two mechanisms and touches both compositors. Priority:
+  medium, and higher if this machine runs on battery often.*
+
+- **Context-aware workspace layouts.** Something real exists underneath, so this one is an
+  extension rather than a build: `hypr/conf/window_rules.lua:10-16` already drops gaps and
+  borders when a workspace holds a single window, through Hyprland's `w[tv1]` and `f[1]`
+  selectors. What does not exist is any per-application assignment, which is what the phrase
+  promises. Decide what the rule should actually be before writing it, because a workspace
+  map that fights how you work is worse than none.
+  *Difficulty: low to write, and the design is the real work. Priority: low.*
+
+- **Sway has no notification daemon.** Its only `exec` lines are waybar and swaybg, so
+  swaync runs under Hyprland and nothing catches notifications under Sway. The config and
+  the stylesheet already exist and are themed, so this is one `exec` line plus a check that
+  it does not collide with anything Sway starts on its own. Note also that `dunst` is still
+  declared in `packages.conf` although nothing launches it; `.config/dunst/` is kept
+  deliberately as a reference, but installing the package is a separate question.
+  *Difficulty: low. Priority: medium, since it is a silent failure of exactly the kind this
+  repo keeps producing: configured, looks configured, never runs.*
 
 ## Parked: diagnosed, not solved
 
@@ -111,8 +170,8 @@ that it is the next task, and it rises the moment you push.*
 
 - **Clean the AI writing tells out of the remaining documents.** No em dashes, no saying a
   thing then restating it inverted. `RICE-GUIDE.md`, `DESIGN-SYSTEM.md` and
-  `THEME-STATUS.md` are done; what is left is `CLAUDE.md` (30), `AESTHETIC-DIRECTION.md`
-  (40) and the README (4).
+  `THEME-STATUS.md` are done and verified at zero; what is left is `CLAUDE.md` (31),
+  `AESTHETIC-DIRECTION.md` (42) and the README (4).
   Clean each when something else takes you into it. Note from doing the first three: an em
   dash joining two independent clauses needs a semicolon, not a comma, and a subordinate
   clause opening with "If" or "When" needs the comma, so a blanket substitution produces
