@@ -20,41 +20,13 @@ CONFIG = REPO_ROOT / ".config"
 SOURCE_NOTE = "docs/design/RICE-GUIDE.md"
 
 
+# =====================================================================
+#  Fonte e escrita
+# =====================================================================
+
 def load_palette() -> dict:
     with open(SCRIPT_DIR / "palette.json", encoding="utf-8") as f:
         return json.load(f)
-
-
-def write(path: Path, content: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(content, encoding="utf-8")
-    print(f"  wrote {path.relative_to(REPO_ROOT)}")
-
-
-BLOCK_START = "/* >>> VOIDASHI COLORS (GENERATED) >>> */"
-BLOCK_END = "/* <<< END VOIDASHI COLORS <<< */"
-
-
-def inline_block(path: Path, content: str) -> None:
-    """Replace the marked block inside a hand-written CSS file.
-
-    For apps that cannot @import the shared partial. wofi hands its stylesheet
-    to GTK as a string, so relative @import urls resolve against the process's
-    cwd (usually $HOME) instead of the file's directory -- the colors silently
-    never load. Inlining sidesteps path resolution entirely. Everything outside
-    the markers stays hand-written.
-    """
-    original = path.read_text(encoding="utf-8")
-    start = original.find(BLOCK_START)
-    end = original.find(BLOCK_END)
-    if start == -1 or end == -1:
-        raise SystemExit(
-            f"{path.relative_to(REPO_ROOT)}: missing the "
-            f"{BLOCK_START} / {BLOCK_END} markers the generator writes between."
-        )
-    block = f"{BLOCK_START}\n{content}{BLOCK_END}"
-    path.write_text(original[:start] + block + original[end + len(BLOCK_END):], encoding="utf-8")
-    print(f"  inlined into {path.relative_to(REPO_ROOT)}")
 
 
 def header(comment_start: str, comment_end: str = "") -> str:
@@ -65,6 +37,16 @@ def header(comment_start: str, comment_end: str = "") -> str:
     ]
     return "\n".join(f"{comment_start} {line}{comment_end}" for line in lines) + "\n\n"
 
+
+def write(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
+    print(f"  wrote {path.relative_to(REPO_ROOT)}")
+
+
+# =====================================================================
+#  Terminais
+# =====================================================================
 
 def gen_kitty(p: dict) -> str:
     t, a = p["terminal"], p["ansi16"]
@@ -131,6 +113,10 @@ def gen_alacritty(p: dict) -> str:
     return out
 
 
+# =====================================================================
+#  Lua: Hyprland e Neovim
+# =====================================================================
+
 def gen_hypr_palette(p: dict) -> str:
     # Lua table keys that look like numbers ("00", "400") need bracket-string
     # form; only alpha keys like "deep" can be written bare.
@@ -153,6 +139,66 @@ def gen_hypr_palette(p: dict) -> str:
     out += "    },\n"
     out += "}\n"
     return out
+
+
+def gen_nvim_palette(p: dict) -> str:
+    """Raw palette for the Neovim colorscheme, same shape as the Hyprland one.
+
+    Only colours belong here. The semantic layer that turns them into roles
+    lives beside it in roles.lua, hand-written, and the highlight groups read
+    from that rather than from this file. Keeping the two apart is what lets the
+    theme be recoloured without touching three hundred group definitions.
+    """
+    lua_key = lambda shade: shade if shade.isidentifier() else f'["{shade}"]'
+    out = header("--")
+    out += "return {\n"
+    for scale_name, shades in p["scales"].items():
+        out += f"    {scale_name} = {{\n"
+        for shade, hexval in shades.items():
+            out += f'        {lua_key(shade)} = "{hexval}",\n'
+        out += "    },\n"
+    out += "    alert = {\n"
+    for name, entry in p["alert"].items():
+        out += f'        {name} = {{ fg = "{entry["fg"]}", bg = "{entry["bg"]}", border = "{entry["border"]}" }},\n'
+    out += "    },\n"
+    # The ANSI table verbatim, so :terminal matches every other terminal and TUI
+    # on the machine. That equivalence is a non-negotiable in RICE-GUIDE.md.
+    out += "    ansi = {\n"
+    for i, hexval in enumerate(p["ansi16"]):
+        out += f'        [{i}] = "{hexval}",\n'
+    out += "    },\n"
+    out += "}\n"
+    return out
+
+
+# =====================================================================
+#  GTK
+# =====================================================================
+
+BLOCK_START = "/* >>> VOIDASHI COLORS (GENERATED) >>> */"
+BLOCK_END = "/* <<< END VOIDASHI COLORS <<< */"
+
+
+def inline_block(path: Path, content: str) -> None:
+    """Replace the marked block inside a hand-written CSS file.
+
+    For apps that cannot @import the shared partial. wofi hands its stylesheet
+    to GTK as a string, so relative @import urls resolve against the process's
+    cwd (usually $HOME) instead of the file's directory -- the colors silently
+    never load. Inlining sidesteps path resolution entirely. Everything outside
+    the markers stays hand-written.
+    """
+    original = path.read_text(encoding="utf-8")
+    start = original.find(BLOCK_START)
+    end = original.find(BLOCK_END)
+    if start == -1 or end == -1:
+        raise SystemExit(
+            f"{path.relative_to(REPO_ROOT)}: missing the "
+            f"{BLOCK_START} / {BLOCK_END} markers the generator writes between."
+        )
+    block = f"{BLOCK_START}\n{content}{BLOCK_END}"
+    path.write_text(original[:start] + block + original[end + len(BLOCK_END):], encoding="utf-8")
+    print(f"  inlined into {path.relative_to(REPO_ROOT)}")
 
 
 def gen_gtk_css(p: dict) -> str:
@@ -313,77 +359,9 @@ radiobutton radio {{
     return out
 
 
-def gen_nvim_palette(p: dict) -> str:
-    """Raw palette for the Neovim colorscheme, same shape as the Hyprland one.
-
-    Only colours belong here. The semantic layer that turns them into roles
-    lives beside it in roles.lua, hand-written, and the highlight groups read
-    from that rather than from this file. Keeping the two apart is what lets the
-    theme be recoloured without touching three hundred group definitions.
-    """
-    lua_key = lambda shade: shade if shade.isidentifier() else f'["{shade}"]'
-    out = header("--")
-    out += "return {\n"
-    for scale_name, shades in p["scales"].items():
-        out += f"    {scale_name} = {{\n"
-        for shade, hexval in shades.items():
-            out += f'        {lua_key(shade)} = "{hexval}",\n'
-        out += "    },\n"
-    out += "    alert = {\n"
-    for name, entry in p["alert"].items():
-        out += f'        {name} = {{ fg = "{entry["fg"]}", bg = "{entry["bg"]}", border = "{entry["border"]}" }},\n'
-    out += "    },\n"
-    # The ANSI table verbatim, so :terminal matches every other terminal and TUI
-    # on the machine. That equivalence is a non-negotiable in RICE-GUIDE.md.
-    out += "    ansi = {\n"
-    for i, hexval in enumerate(p["ansi16"]):
-        out += f'        [{i}] = "{hexval}",\n'
-    out += "    },\n"
-    out += "}\n"
-    return out
-
-
-def merge_kde_globals(path: Path, scheme: str) -> None:
-    """Replace only the colour sections of kdeglobals, leaving the rest alone.
-
-    KDE applications read their palette from kdeglobals itself, not from the
-    .colors file, which systemsettings only uses as a source to copy from. But
-    kdeglobals also holds settings that are none of our business (animation
-    factors, recent documents, shortcuts), and KDE tools write to it too. So
-    this replaces the sections we own and copies everything else through
-    untouched.
-    """
-    owned = lambda name: (
-        name.startswith("Colors:") or name == "WM" or name.startswith("ColorEffects:")
-    )
-
-    kept, current, keep_current = [], None, True
-    if path.exists():
-        for line in path.read_text(encoding="utf-8").splitlines():
-            stripped = line.strip()
-            if stripped.startswith("[") and stripped.endswith("]"):
-                current = stripped[1:-1]
-                keep_current = not owned(current)
-            if keep_current:
-                kept.append(line)
-
-    # Drop the scheme's own [General], which would collide with the one already
-    # in kdeglobals; only its colour sections are wanted here.
-    body, current, emit = [], None, False
-    for line in scheme.splitlines():
-        stripped = line.strip()
-        if stripped.startswith("[") and stripped.endswith("]"):
-            current = stripped[1:-1]
-            emit = owned(current)
-        if emit:
-            body.append(line)
-
-    text = "\n".join(l for l in kept if l.strip() or kept).rstrip() + "\n\n"
-    text += "\n".join(body).rstrip() + "\n"
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(text, encoding="utf-8")
-    print(f"  merged colours into {path.relative_to(REPO_ROOT)}")
-
+# =====================================================================
+#  KDE
+# =====================================================================
 
 def gen_kde_colors(p: dict) -> str:
     """KDE colour scheme, for the Qt half of the desktop.
@@ -467,6 +445,52 @@ def gen_kde_colors(p: dict) -> str:
     return out
 
 
+def merge_kde_globals(path: Path, scheme: str) -> None:
+    """Replace only the colour sections of kdeglobals, leaving the rest alone.
+
+    KDE applications read their palette from kdeglobals itself, not from the
+    .colors file, which systemsettings only uses as a source to copy from. But
+    kdeglobals also holds settings that are none of our business (animation
+    factors, recent documents, shortcuts), and KDE tools write to it too. So
+    this replaces the sections we own and copies everything else through
+    untouched.
+    """
+    owned = lambda name: (
+        name.startswith("Colors:") or name == "WM" or name.startswith("ColorEffects:")
+    )
+
+    kept, current, keep_current = [], None, True
+    if path.exists():
+        for line in path.read_text(encoding="utf-8").splitlines():
+            stripped = line.strip()
+            if stripped.startswith("[") and stripped.endswith("]"):
+                current = stripped[1:-1]
+                keep_current = not owned(current)
+            if keep_current:
+                kept.append(line)
+
+    # Drop the scheme's own [General], which would collide with the one already
+    # in kdeglobals; only its colour sections are wanted here.
+    body, current, emit = [], None, False
+    for line in scheme.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("[") and stripped.endswith("]"):
+            current = stripped[1:-1]
+            emit = owned(current)
+        if emit:
+            body.append(line)
+
+    text = "\n".join(l for l in kept if l.strip() or kept).rstrip() + "\n\n"
+    text += "\n".join(body).rstrip() + "\n"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+    print(f"  merged colours into {path.relative_to(REPO_ROOT)}")
+
+
+# =====================================================================
+#  Orquestracao
+# =====================================================================
+
 def generated_files(p: dict) -> dict:
     """Every file written wholesale, as path -> content.
 
@@ -504,6 +528,10 @@ def main() -> None:
     inline_block(CONFIG / "wofi" / "style.css", gen_gtk_css(p))
     merge_kde_globals(CONFIG / "kdeglobals", gen_kde_colors(p))
     print("Done. Diff the results before committing.")
+
+
+if __name__ == "__main__":
+    main()
 
 
 if __name__ == "__main__":
