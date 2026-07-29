@@ -68,10 +68,12 @@ and `docs/SESSION-HISTORY.md` (what happened).
 
 ## Ongoing: how the writing reads
 
-- **Clean the AI writing tells out of the older documents.** The rule itself now lives in
-  `docs/CONVENTIONS.md` and applies to everything written from here on, so what remains
-  here is only the backlog: 279 em dashes across the design docs, `CLAUDE.md` and the
-  README, concentrated in `DESIGN-SYSTEM.md` (128) and `RICE-GUIDE.md` (64). Clean each
-  file when something else takes you into it rather than in one sweep, since a pass that
-  only rewrites punctuation is a large diff nobody can review.
-  *Difficulty: low per file, large in aggregate. Priority: low.*
+- **Clean the AI writing tells out of the remaining documents.** The rule lives in
+  `docs/CONVENTIONS.md`. `RICE-GUIDE.md` and `DESIGN-SYSTEM.md` are done, which were the
+  two large ones; what is left is `CLAUDE.md` (30), `AESTHETIC-DIRECTION.md` (40),
+  `THEME-STATUS.md` (13) and the README (4). Clean each when something else takes you into
+  it. Note from doing the first two: an em dash joining two independent clauses needs a
+  semicolon, not a comma, and a subordinate clause opening with "If" or "When" needs the
+  comma, so a blanket substitution produces comma splices either way and the changed lines
+  have to be read.
+  *Difficulty: low per file. Priority: low.*
