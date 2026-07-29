@@ -234,5 +234,10 @@ exec waybar -c $HOME/.config/waybar/sway.jsonc -s $HOME/.config/waybar/style.css
 # repo's own sample wallpaper (which is what makes a fresh install work).
 exec swaybg -m fill -i "$($HOME/.dotfiles/scripts/wm/select-random-wallpaper.sh $HOME/Pictures/Current_wallpapers $HOME/Pictures/Wallpapers $HOME/.dotfiles/wallpapers)"
 
+# Notifications. Hyprland starts swaync from conf/autostart.lua and this file
+# started nothing, so notifications were dead under Sway while the config and
+# the stylesheet sat themed and in place, with no error anywhere to say so.
+exec swaync
+
 
 include @sysconfdir@/sway/config.d/*
