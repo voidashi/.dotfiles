@@ -37,6 +37,10 @@ set $menu wofi --show drun
     # Start your launcher
     bindsym $mod+d exec $menu
 
+    # Clipboard history. Same key and same script as Hyprland: the pipeline is
+    # identical for both, so it lives in one place instead of two.
+    bindsym $mod+Shift+v exec $HOME/.dotfiles/scripts/wm/clipboard-picker.sh
+
     # Drag floating windows by holding down $mod and left mouse button.
     # Resize them with right mouse button + $mod.
     # Despite the name, also works for non-floating windows.
@@ -238,6 +242,20 @@ exec swaybg -m fill -i "$($HOME/.dotfiles/scripts/wm/select-random-wallpaper.sh 
 # started nothing, so notifications were dead under Sway while the config and
 # the stylesheet sat themed and in place, with no error anywhere to say so.
 exec swaync
+
+# Clipboard history. wl-paste --watch is the only thing that feeds cliphist, so
+# without this line the picker on $mod+Shift+v opens an always-empty menu.
+exec wl-paste --watch cliphist store
+
+# Idle. swayidle has no config file: this schedule is the whole configuration,
+# which is why it is here and not beside hypr/hypridle.conf. The numbers are
+# deliberately the same as that file's, and both hand off to the same swaylock.
+exec swayidle -w \
+    timeout 300 'swaylock -f' \
+    timeout 360 'swaymsg "output * power off"' \
+        resume 'swaymsg "output * power on"' \
+    timeout 1800 'systemctl suspend' \
+    before-sleep 'swaylock -f'
 
 
 include @sysconfdir@/sway/config.d/*

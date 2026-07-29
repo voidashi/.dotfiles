@@ -99,6 +99,12 @@ hl.bind("Print", hl.dsp.exec_cmd("hyprshot -m output"))
 -- Screenshot de uma região
 hl.bind("SHIFT + Print", hl.dsp.exec_cmd("hyprshot -m region"))
 
+-- Clipboard
+-- SUPER + V ja e float, entao o historico fica no SHIFT do mesmo dedo. O
+-- pipeline inteiro esta em scripts/wm/clipboard-picker.sh, e nao aqui, porque o
+-- Sway usa exatamente o mesmo e duas copias divergem.
+hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("$HOME/.dotfiles/scripts/wm/clipboard-picker.sh"))
+
 -- Dispara quando a tampa (lid) é alternada
 -- A aparência da tela de bloqueio vem de ~/.config/swaylock/config, que já é
 -- versionado neste repo. O antigo lock.sh passava as mesmas opções por linha

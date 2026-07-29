@@ -25,4 +25,12 @@ hl.on("hyprland.start", function()
     -- PID e nunca aceitou nome de processo, entao aquilo so gerava erro; e o
     -- mako nem esta instalado nesta maquina, entao nao havia o que matar.
     hl.exec_cmd("swaync")
+
+    -- Historico de clipboard. O wl-paste --watch fica escutando a selecao e
+    -- entregando ao cliphist, que e o unico lugar onde o historico existe: sem
+    -- este processo o bind de SUPER+SHIFT+V abre um menu sempre vazio.
+    hl.exec_cmd("wl-paste --watch cliphist store")
+
+    -- Idle: trava, apaga a tela e suspende, conforme hypr/hypridle.conf.
+    hl.exec_cmd("hypridle")
 end)
