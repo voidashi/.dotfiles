@@ -15,6 +15,83 @@ palette reaches each application is in [`design/THEMING.md`](design/THEMING.md),
 the repository is shaped as it is belongs to
 [`TURNING-POINTS.md`](TURNING-POINTS.md).
 
+## Start here next session
+
+Highest priority, before anything else. All five come from a third review, by someone
+told to be an ordinary Linux user who wants a good-looking desktop without spending a
+weekend on it, and who can google anything obvious. The two earlier reviews were done by
+people who could read code, which is why none of this surfaced then. Every finding below
+was re-verified by hand.
+
+1. **Say how to get into the session.** This is the worst of the five. Nothing anywhere
+   explains how to reach the desktop after installing: no display manager is declared
+   among the 54 packages, and both the README and `SETUP.md` say only "log out and back
+   in". The only mentions of a session are a troubleshooting note about "a compositor
+   started from a bare TTY outside a systemd session", which assumes the reader already
+   knows both launch methods while naming neither. After 54 packages and a symlink pass,
+   the reader lands on a black screen. Decided: declare **`greetd` with `tuigreet`**,
+   which is Wayland-native, minimal, and has configurable colours so it can be themed
+   from the palette later. `sddm` is the graphical alternative and was rejected because it
+   runs as its own user and would not pick up the generated `kdeglobals`, so it would sit
+   outside the theme. Document both launch paths, display manager and bare TTY.
+   *Difficulty: low. Priority: maximum, it is the difference between a working install and
+   a black screen.*
+
+2. **Make `--dry-run` the first install step, and stop asking the reader to audit bash.**
+   The README's warning currently says to read the scripts before pointing them at a home
+   directory. The reviewer stopped there, correctly: they cannot audit 400 lines of bash,
+   so the instruction leaves only "ignore the author" or "give up". `--dry-run` is the
+   answer and appears once in the README and **zero times** in `SETUP.md`'s numbered
+   steps, which is the guide they would actually follow. Make it step 0, and reword the
+   warning to offer the way out rather than to demand the reading.
+   *Difficulty: trivial. Priority: maximum.*
+
+3. **Write the recipe for changing the accent colour.** The README's headline promise is
+   "change one hex and everything moves together", and that promise is what makes people
+   want the repo. It is also the one thing no document lets them act on. Measured:
+   `palette.json` has no accent key at all, the identity colour is a ten-value `bordeaux`
+   ramp, and the same values are typed again as literals in `terminal.cursor` (`#c76870`)
+   and `ansi16` slot 1 (`#b44955`). The reviewer spent ten minutes across five files and
+   gave up. Meanwhile `RICE-GUIDE.md`, which the index recommends for changing appearance,
+   answers "never introduce a colour that is not derived from these", which is the
+   opposite of what they wanted.
+
+   So: a short section in `SETUP.md` naming the exact keys to edit, the two places the
+   values are duplicated, and one worked example ending in the two commands that already
+   exist. Fifteen lines. It stays true and gets shorter once the generator gains a roles
+   layer, below.
+   *Difficulty: low. Priority: maximum, since it is the repo's best promise with nothing
+   behind it.*
+
+4. **Restore partial install, and name the Iosevka asset exactly.** The README offers "you
+   can lift the terminal colours, or the bar, or just the palette generator, and ignore
+   the rest", and no document says how; in practice the installer brings 54 packages
+   including both compositors, both notification daemons and both file managers. An older
+   version of `backup-configs.sh` took a path after `install` and linked only that;
+   `install_dotfiles()` takes no argument today and loops the whole list, so the
+   capability is gone rather than undocumented. Restoring it is the honest fix, and then
+   the README's offer becomes three lines instead of a claim. Separately, the Iosevka step
+   is the one place the reader has to pattern-match alone: "the Iosevka SGr TTC build" is
+   not a filename, the releases page is a wall of near-identical archives, and the theme
+   wants "Iosevka Extended", a third name. Give the exact asset or a `curl` line.
+   *Difficulty: low for the font, low for the flag. Priority: maximum.*
+
+5. **Rewrite the README's opening as an introduction that holds the reader.** "Is this for
+   you?" is good and the reviewer said so, but it opens by qualifying rather than by
+   selling, so it does not hold someone who just opened the repo. The page should lead
+   with what this is and why it looks good, then what it contains, and only then filter
+   with "is this for you". Keep the honesty that earned trust: the reviewer named "Known
+   gaps" as the single thing that most made them believe the rest.
+   *Difficulty: low. Priority: maximum.*
+
+Worth keeping from that review, because it is easy to lose: the parts that worked on this
+reader were "Is this for you?", the symptom-first troubleshooting section, `docs/README.md`
+telling them only two documents matter, `MAINTENANCE.md` letting them back out in one line,
+and "Known gaps". Do not lose those while fixing the above. Their verdict was that they
+would install it on a spare machine but not on the laptop they work on, for exactly two
+reasons: being told to read scripts they cannot read, and not knowing how to reach the
+session.
+
 ## Pending actions, not work
 
 - **The clipboard and idle daemons need one login to start.** `cliphist`, `hypridle` and
@@ -127,10 +204,51 @@ the repository is shaped as it is belongs to
   that wants a shared helper or is better left as two independent readable scripts is a
   real question rather than an obvious yes.
 
+  One capability to restore while in there: `install` used to take a path and link only
+  that, and `install_dotfiles()` takes no argument today, so partial installation was lost
+  rather than removed on purpose. It is what makes the README's offer of taking one piece
+  true, and it is also the safest way for a stranger to try this, so it belongs in the
+  correctness pass rather than being bolted on afterwards.
+
   Testing needs a throwaway `$HOME`. `backup-configs.sh --dry-run` already exists and is
   the cheapest start; a temporary `HOME=` or a container is the honest version.
   *Difficulty: medium to read, higher with a test harness. Priority: medium, and it rises
   for anyone else cloning this, since these scripts are the first thing they run.*
+
+- **Rethink how the generator decides colour, and consider a roles layer.** Today
+  `palette.json` holds raw ramps plus a few roles expressed as duplicated literals:
+  `terminal.cursor` and `focus_ring` are semantic keys carrying a hex that also exists in
+  a scale. The idea worth exploring is to make that systematic, so a role points at a
+  token by name rather than repeating its value: `"accent_identity": "bordeaux-400"`,
+  `"surface_panel": "void-10"`, and so on. That is not a new pattern here. The Neovim
+  theme already works exactly this way in three layers, raw palette then semantic roles
+  then highlight groups, and this would lift the same structure up into the source of
+  truth.
+
+  Three things to settle before writing any of it, one of which is a hard boundary.
+
+  **ANSI must not follow the accent.** Slot 1 is red because red means red. If someone
+  swaps the identity family to Ash, ANSI red has to stay red, so `ansi16` remains a
+  canonical table that no role touches. Getting this wrong is the obvious way to break the
+  non-negotiable that ANSI is identical everywhere.
+
+  **The guide still constrains which family suits which role.** Ash is media and never
+  functional UI, so a free accent swap can produce a configuration `RICE-GUIDE.md`
+  forbids. The mechanism becomes one key; the design position does not change. Whoever
+  clones this and wants a different look is entitled to ignore the guide, and saying so
+  explicitly keeps the two documents from appearing to contradict each other.
+
+  **Roles only reach the generated half.** Ten files are generated and would follow a role
+  change automatically. Eight are hand-written because colour mixes with structure there,
+  swaylock among them with `key-hl-color=b44955` spelled out, and those would not. So "one
+  key" would be true of half the system, and any claim in the README has to say which
+  half. The natural complement is a check for orphaned literals: a hex in a hand-written
+  file that no role uses any more.
+
+  This is a generator refactor with ten generated files to re-verify, so it wants its own
+  plan rather than being folded into a documentation pass.
+  *Difficulty: medium, and the design questions are most of it. Priority: medium, and it
+  makes the recipe in item 3 above shorter rather than replacing it.*
 
 - **catnap's tracked config dies on the next upstream bump.** Upstream is at 2.1.1, and
   catnap 2.0 replaced the TOML config with a `.cat` language, saying outright that
