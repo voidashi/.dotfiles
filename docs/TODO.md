@@ -39,11 +39,13 @@ The documentation pass ran on 2026-07-29 and is done; what it left behind is her
 Found by checking the README's claims against the configs during the documentation survey.
 Three of the four are built; what is below is what is left of them.
 
-- **Nothing is installed yet.** The three packages behind the work just done are declared but
-  not on the machine: `cliphist`, `hypridle`, `swayidle`. Run
-  `./scripts/install-packages.sh install`, then log out and back in so both autostarts run.
-  Until then the clipboard keybind reports that cliphist is missing and nothing idles.
-  *Difficulty: trivial. Priority: high, the feature does not exist until this runs.*
+- **Installed, but not running until the next login.** `cliphist`, `hypridle` and `swayidle`
+  are on the machine as of 2026-07-29. What is missing is a fresh compositor session: the
+  running Hyprland started at 19:18, before the autostart lines existed, so `pgrep -x
+  hypridle` and `pgrep -x wl-paste` both return nothing and `cliphist list` answers "please
+  store something first". Log out and back in, then confirm with those three commands rather
+  than by trying the keybind, since an empty menu and a dead daemon look identical.
+  *Difficulty: trivial. Priority: high, the features are configured but inert until then.*
 
 - **Power profiles, the other half of power management.** Idle handling is done; switching a
   CPU governor or a platform profile is not. `power-profiles-daemon` is the usual answer and
