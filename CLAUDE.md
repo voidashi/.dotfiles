@@ -20,8 +20,8 @@ anything; everything it references lives under `docs/`.
   wallpaper. It is the authority for desktop work and it overrides
   `DESIGN-SYSTEM.md` wherever the two differ. Its non-negotiables and its "Working
   rules" section are the rules for this kind of change; do not restate them here.
-- [`docs/design/THEME-STATUS.md`](docs/design/THEME-STATUS.md) to find out how the
-  palette reaches a given application before assuming it needs a new mechanism.
+- [`docs/design/THEMING.md`](docs/design/THEMING.md) to find out how the palette
+  reaches a given application before assuming it needs a new mechanism.
 - [`docs/TODO.md`](docs/TODO.md) and
   [`docs/TURNING-POINTS.md`](docs/TURNING-POINTS.md) before concluding something is
   undone or asking why a structure is the way it is. Several questions in there are

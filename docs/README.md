@@ -9,7 +9,7 @@ document rather than something to work around.
 | [`design/RICE-GUIDE.md`](design/RICE-GUIDE.md) | How the identity becomes a Linux desktop: the palette, the ANSI table, the rules for assigning colour. Read this before changing anything visual. |
 | [`design/AESTHETIC-DIRECTION.md`](design/AESTHETIC-DIRECTION.md) | Why it looks like this, in sensory terms. No values, no tokens. Read it when a judgement call is not covered by the rules. |
 | [`design/DESIGN-SYSTEM.md`](design/DESIGN-SYSTEM.md) | The canonical token reference. Written for web and document work, so the rice guide overrides it wherever the two differ for a desktop. |
-| [`design/THEME-STATUS.md`](design/THEME-STATUS.md) | What has actually been themed, by which of the five mechanisms, and what is still missing. |
+| [`design/THEMING.md`](design/THEMING.md) | Which of the five mechanisms carries colour to each application, what every surface is set to, and which decisions are settled. |
 | [`TURNING-POINTS.md`](TURNING-POINTS.md) | Why the repository is shaped the way it is, for the decisions whose result is visible but whose reason is not. |
 | [`TODO.md`](TODO.md) | What is open, what is parked with the reasons already ruled out, and what has been decided against. |
 

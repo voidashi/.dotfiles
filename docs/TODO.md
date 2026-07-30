@@ -9,8 +9,9 @@ independent: deleting the legacy configs was trivial and worth doing, the elegan
 neither trivial nor urgent.
 
 Decisions already made, and state that is merely being tracked, do not live here. Those
-belong in `docs/MAINTENANCE.md` (pitfalls and validators), `docs/design/THEME-STATUS.md` (what is themed)
-and `docs/TURNING-POINTS.md` (why the repo is shaped this way).
+belong in `docs/MAINTENANCE.md` (pitfalls and validators), `docs/design/THEMING.md` (how the
+palette reaches each application) and `docs/TURNING-POINTS.md` (why the repo is shaped this
+way).
 
 ## Before publishing
 

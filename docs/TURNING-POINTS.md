@@ -43,7 +43,7 @@ what the generator would produce now.
 `scripts/theme/palette.json` holds every colour. `generate_theme.py` renders it
 into the format each application natively reads, which is five different
 mechanisms because five toolkits accept five different things; the table in
-`docs/design/THEME-STATUS.md` maps which application uses which.
+`docs/design/THEMING.md` maps which application uses which.
 
 Applications whose colour keys mix with structural config are hand written
 instead, and those are the ones that drift. `check_palette.py` exists because
@@ -87,6 +87,16 @@ the rest of the file.
 This document was called `SESSION-HISTORY.md` and read as a log of who decided
 what. What survived the rename is the six decisions whose result is visible in
 the tree while the reason is not, which is a smaller and more useful thing.
+
+A second pass split the documents by audience, which is why two of them have
+names that do not match their git history. `CLAUDE.md` had accumulated 88 lines
+of repo knowledge that had nothing to do with an agent and would have been
+deleted along with the file; that is now `docs/MAINTENANCE.md`, and `CLAUDE.md`
+holds only pointers, so removing it costs nothing. And `THEME-STATUS.md` became
+`docs/design/THEMING.md`, because a document that tracks status accumulates a
+changelog, and what a reader needs from it is the reference: which of the five
+mechanisms carries colour to which application. The history it used to carry is
+either a pitfall, in which case `MAINTENANCE.md` has it, or it is in the git log.
 
 ## Some configs are kept deliberately, and are not dead weight
 
