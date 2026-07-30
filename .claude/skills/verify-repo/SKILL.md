@@ -35,7 +35,7 @@ nothing when they are clean, so an empty block is a pass, not a failure to run.
 
 ## catnap
 
-!`cd "$(git rev-parse --show-toplevel)" && err=$(catnap -n -c .config/catnap/config.toml -a .config/catnap/distros.toml 2>&1 >/dev/null | grep -i error | head -3); rc=$?; catnap -n -c .config/catnap/config.toml -a .config/catnap/distros.toml >/dev/null 2>&1; echo "exit: $?"; [ -n "$err" ] && echo "$err"`
+!`cd "$(git rev-parse --show-toplevel)" && err=$(catnap -n -c .config/catnap/config.toml -a .config/catnap/distros.toml 2>&1 >/dev/null | grep -i error | head -3); catnap -n -c .config/catnap/config.toml -a .config/catnap/distros.toml >/dev/null 2>&1; echo "exit: $?"; if [ -n "$err" ]; then echo "$err"; fi; true`
 
 ## Tracked symlinks
 
