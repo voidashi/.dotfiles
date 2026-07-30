@@ -4,9 +4,14 @@ What is not finished, what is parked and why, and what has been decided against.
 here before assuming something is undone: several of the entries below record an
 elimination that is expensive to repeat.
 
-Each item carries a **difficulty** and a **priority**, rated separately. Difficulty is
-how much work it is and how much can go wrong; priority is how much it costs to leave
-alone. They are independent: a one-line fix can be urgent and a rewrite optional.
+The first section is what to do next and is ordered; everything after it is grouped by
+kind and is not.
+
+Each piece of work carries a **difficulty** and a **priority**, rated separately.
+Difficulty is how much work it is and how much can go wrong; priority is how much it costs
+to leave alone. They are independent: a one-line fix can be urgent and a rewrite optional.
+The entries under "Pending actions" are unrated on purpose, being things to do rather than
+work to plan.
 
 What lives here is work, plus the decisions that were made *against* doing something,
 because those are what stop a question being reopened. What does not live here is settled
@@ -63,18 +68,19 @@ was re-verified by hand.
    *Difficulty: low. Priority: maximum, since it is the repo's best promise with nothing
    behind it.*
 
-4. **Restore partial install, and name the Iosevka asset exactly.** The README offers "you
-   can lift the terminal colours, or the bar, or just the palette generator, and ignore
-   the rest", and no document says how; in practice the installer brings 54 packages
-   including both compositors, both notification daemons and both file managers. An older
-   version of `backup-configs.sh` took a path after `install` and linked only that;
-   `install_dotfiles()` takes no argument today and loops the whole list, so the
-   capability is gone rather than undocumented. Restoring it is the honest fix, and then
-   the README's offer becomes three lines instead of a claim. Separately, the Iosevka step
-   is the one place the reader has to pattern-match alone: "the Iosevka SGr TTC build" is
-   not a filename, the releases page is a wall of near-identical archives, and the theme
-   wants "Iosevka Extended", a third name. Give the exact asset or a `curl` line.
-   *Difficulty: low for the font, low for the flag. Priority: maximum.*
+4. **Make the two things a reader has to guess at explicit.** The README offers "you can
+   lift the terminal colours, or the bar, or just the palette generator, and ignore the
+   rest", and no document says how, while the installer brings 54 packages including both
+   compositors, both notification daemons and both file managers. Write the cheap path in
+   three lines, or drop the offer; the `install <path>` flag that would make it one command
+   is a code change and belongs to the script audit under Housekeeping, which owns it.
+
+   Separately, the Iosevka step is the one place the reader has to pattern-match alone:
+   "the Iosevka SGr TTC build" is not a filename, the releases page is a wall of
+   near-identical archives, and the theme wants "Iosevka Extended", a third name. Give the
+   exact asset or a `curl` line. The penalty for guessing wrong is a default-looking
+   terminal, which is the whole point of the repo.
+   *Difficulty: low. Priority: maximum.*
 
 5. **Rewrite the README's opening as an introduction that holds the reader.** "Is this for
    you?" is good and the reviewer said so, but it opens by qualifying rather than by
@@ -303,7 +309,7 @@ Every document here is at zero em dashes, verified rather than assumed. The stan
 not a task: no em dashes, and never state a thing then restate it inverted.
 
 The double hyphens that stood in for a dash are **not** finished. They are out of the
-shell scripts, and about 25 remain in comments across the stylesheets, the terminal
+shell scripts, and 24 remain in comments across the stylesheets, the terminal
 configs and `palette.json`. Clean each when something else takes you into the file;
 `set -- "$@"` in bash is real syntax and stays.
 *Difficulty: trivial per file. Priority: low.*
