@@ -60,8 +60,23 @@ init_dotfiles() {
 backup_file() {
   local target="$1"
   local backup_path="$CURRENT_BACKUP/${target#$HOME/}"
+
+  # This was one line: `$DRY_RUN || rsync ... && log "Backup: ..."`, which parses
+  # as `(A || B) && C`. Under --dry-run the rsync was skipped and the log ran
+  # anyway, so the script announced a backup that did not exist. Report what
+  # actually happened, and create no directories during a simulation.
+  if $DRY_RUN; then
+    log "INFO" "Simulate: backup $target → $backup_path"
+    return 0
+  fi
+
   mkdir -p "$(dirname "$backup_path")"
-  $DRY_RUN || rsync -a "$target" "$backup_path" && log "INFO" "Backup: $target → $backup_path"
+  if rsync -a "$target" "$backup_path"; then
+    log "INFO" "Backup: $target → $backup_path"
+  else
+    log "ERROR" "Backup failed: $target"
+    return 1
+  fi
 }
 
 add_dotfile() {
@@ -109,8 +124,16 @@ install_dotfiles() {
 
     if [ -e "$target" ] && ! [ -L "$target" ]; then
       if $FORCE; then
-        backup_file "$target"
-        rm -rf "$target"
+        # Both of these destroy the original, so a simulation must not reach
+        # them. Before this guard, `install --dry-run --force` ran the rm for
+        # real while backup_file skipped its rsync: the file was removed, no
+        # backup was written, and the log claimed both had happened.
+        if $DRY_RUN; then
+          log "INFO" "Simulate: back up and replace $target"
+        else
+          backup_file "$target"
+          rm -rf "$target"
+        fi
       else
         log "WARNING" "Skipping existing file: $target (use --force to overwrite)"
         continue
@@ -120,7 +143,10 @@ install_dotfiles() {
     # The -n flag treats a symlink to a directory as a normal file,
     # replacing it instead of creating a link inside it.
     if $DRY_RUN; then
-      log "SUCCESS" "Linked: $dest → $target"
+      # "Simulate:", never "Linked:". This said SUCCESS with the same wording as
+      # the real branch below, so a dry run's output was indistinguishable from
+      # a run that had changed the machine.
+      log "INFO" "Simulate: link $dest → $target"
     else
       # Create the parent first: an entry can live under a directory that does
       # not exist yet, such as ~/.local/share/color-schemes on a machine that
