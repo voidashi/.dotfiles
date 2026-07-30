@@ -1,8 +1,7 @@
 # Voidashi dotfiles
 
-A Wayland desktop for Arch Linux, themed end to end from a single palette file.
-Two compositors (Hyprland and Sway), four terminal emulators, fish, Neovim, and the
-shell surfaces around them: bar, launcher, notifications, lock screen, power menu.
+A dark, warm-charcoal Wayland desktop for Arch Linux, themed end to end from a single
+file.
 
 [![Arch](https://img.shields.io/badge/Distro-Arch_Linux-informational?style=flat&logo=arch-linux&logoColor=white)](https://archlinux.org/)
 [![Wayland](https://img.shields.io/badge/Display-Wayland-informational?style=flat)](https://wayland.freedesktop.org/)
@@ -13,38 +12,51 @@ shell surfaces around them: bar, launcher, notifications, lock screen, power men
 
 *The screenshots predate the current theme and are due to be retaken.*
 
-## What makes this different from most dotfiles
+## Is this for you?
 
-Every colour in every application comes from one file, `scripts/theme/palette.json`,
-and a generator renders it into the format each program natively reads. Change a hex
-there, run the generator, and the terminals, the bar, the launcher, Neovim, GTK
-applications and KDE applications all move together. A checker then proves nothing
-drifted.
+**Probably yes** if you run Arch on Wayland, want a desktop that looks deliberate
+rather than assembled, and would rather change one file than thirty.
 
-That is the whole point of the repository. The design identity behind it is called
-Voidashi and is documented under `docs/design/`.
+**Probably not** if you are on X11, on a distro other than Arch, or looking for a
+framework you can configure without reading anything. This is one person's desktop,
+published because the theming approach is worth copying, not a distribution.
+
+You do not have to take all of it. Every piece is a normal config file in its normal
+place, so you can lift the terminal colours, or the bar, or just the palette
+generator, and ignore the rest.
+
+## The one idea worth stealing
+
+Every colour in every application comes from **one file**:
+`scripts/theme/palette.json`. A generator renders it into the format each program
+natively reads, and a checker proves nothing drifted afterwards.
 
 ```bash
-$EDITOR scripts/theme/palette.json          # change a value
-python3 scripts/theme/generate_theme.py     # render it into every app's own format
-python3 scripts/theme/check_palette.py      # prove nothing drifted
+$EDITOR scripts/theme/palette.json          # change a colour
+python3 scripts/theme/generate_theme.py     # push it into every app's own format
+python3 scripts/theme/check_palette.py      # prove nothing was missed
 ```
 
-The generator is stdlib-only Python, no dependencies. Its output files carry a
-`GENERATED` header and should never be edited by hand; the checker fails if they were.
+Change one hex and the terminals, the bar, the launcher, Neovim, GTK applications and
+KDE applications all move together. The generator is plain Python with no
+dependencies. Its output carries a `GENERATED` header, and the checker fails if you
+edit it by hand.
 
-## What is configured
+The design identity behind the palette is called Voidashi, and it is documented in
+[`docs/design/`](docs/design/).
+
+## What is in it
 
 | Piece | Program | Notes |
 |---|---|---|
 | Compositor | Hyprland | Native Lua config, entry point `.config/hypr/hyprland.lua` |
 | Compositor | Sway | The fallback, themed to match |
-| Bar | Waybar | One config described once, with a thin per-compositor file on top |
-| Launcher | wofi | `hyprlauncher` is configured too, commented out |
-| Notifications | swaync | Started by both compositors |
-| Lock screen | swaylock | Themed entirely from its own config file, no wrapper |
+| Bar | Waybar | One description of the bar, shared by both compositors |
+| Launcher | wofi | hyprlauncher is configured too, commented out |
+| Notifications | swaync | |
+| Lock screen | swaylock | |
 | Power menu | wlogout | Launched through `scripts/wm/power-menu.sh`, never bare |
-| Clipboard | cliphist | History on `SUPER`+`Shift`+`V`, through the same wofi |
+| Clipboard | cliphist | History on `Super`+`Shift`+`V` |
 | Idle | hypridle, swayidle | Lock at 5 min, screen off at 6, suspend at 30 |
 | Terminals | Kitty, Ghostty, Alacritty, Foot | Identical palette, font and padding in all four |
 | Shell | fish + starship | |
@@ -52,168 +64,103 @@ The generator is stdlib-only Python, no dependencies. Its output files carry a
 | File managers | Dolphin, yazi | Graphical and terminal |
 | System monitor | bottom | |
 | Fetch | fastfetch, catnap | |
-| Wallpaper | swaybg | Set from a random image, see Wallpapers |
-| Application theming | GTK 3, GTK 4, Qt/KDE | Generated named colours and a generated `kdeglobals` |
+| Wallpaper | swaybg | A random image from your own directory |
+| Applications | GTK 3, GTK 4, Qt and KDE | Themed by overriding the colours each toolkit already paints from |
 
-## Installation
+## Install
 
 ```bash
 git clone https://github.com/voidashi/.dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 
-./scripts/install-packages.sh preview    # see what it would install first
-./scripts/install-packages.sh install
-./scripts/backup-configs.sh install
+./scripts/install-packages.sh preview    # see what it would install
+./scripts/install-packages.sh install    # install it
+./scripts/backup-configs.sh install      # symlink the configs into $HOME
+./scripts/backup-configs.sh check        # confirm every link landed
 ```
 
-`backup-configs.sh install` symlinks the repository's files into `$HOME`. It refuses to
-overwrite a real file that is already there unless you pass `--force`, in which case it
-backs the original up first. Read the configs before running it; a desktop config is
-opinionated by nature and this one is opinionated about a lot.
+Then log out and back in.
 
-The package installer detects pacman, apt or dnf, and falls back to an AUR helper on
-Arch for the handful of packages that need one. The configs themselves assume Arch and
-Wayland.
+> [!WARNING]
+> `backup-configs.sh install` is safe: it refuses to overwrite a real file unless you
+> pass `--force`, and backs up anything it replaces. Its sibling `add` runs the other
+> direction and **moves files out of `$HOME`** into the repo. You want `install`.
 
-To check afterwards that every tracked path really is a symlink into the repository:
+> [!IMPORTANT]
+> Two things need a look before this feels right on your machine: the monitor layout in
+> `.config/hypr/conf/monitors.lua` names specific outputs, and the bar carries
+> laptop-only modules. [`docs/SETUP.md`](docs/SETUP.md) lists everything to change, with
+> the file and line for each.
 
-```bash
-./scripts/backup-configs.sh check
-```
-
-## Layout
-
-```
-.
-├── .config/                  # one directory per application, symlinked into ~/.config
-├── docs/
-│   ├── design/               # the design documents, start with RICE-GUIDE.md
-│   └── TODO.md               # open work, including what is missing
-├── fonts/                    # the four faces the theme uses
-├── scripts/
-│   ├── backup-configs.sh     # link, unlink and audit the tracked dotfiles
-│   ├── install-packages.sh   # cross-distro package installer
-│   ├── unlink-dotfiles.sh    # the inverse of the above, moves files back to $HOME
-│   ├── theme/                # palette.json, the generator and the checker
-│   └── wm/                   # helpers the compositors call while running
-└── wallpapers/               # one sample, so a fresh clone has something to show
-```
-
-## Scripts
-
-Two kinds live here, split by who runs them:
-
-| Path | Who runs it |
-|---|---|
-| `scripts/*.sh` | You, by hand: installing packages, linking and unlinking configs |
-| `scripts/wm/*.sh` | Hyprland and Sway, automatically, while running |
-
-All of them resolve their config files relative to the script's own location, so they
-work from any directory.
+**[Full setup guide](docs/SETUP.md)** covers the long-form install, what to change for
+your hardware, the Iosevka font you have to fetch yourself, and what to do when
+something does not work.
 
 ## Keybindings
 
-The entry points under Hyprland, with `SUPER` as the modifier. The full set is in
+The entry points under Hyprland, with `Super` as the modifier. The full set is in
 `.config/hypr/conf/binds.lua`, which is readable Lua rather than a config dialect.
 
 | Keys | Action |
 |---|---|
-| `SUPER` + `Return` | Terminal |
-| `SUPER` + `R` | Launcher |
-| `SUPER` + `E` | File manager, `SUPER` + `Shift` + `E` for yazi in a terminal |
-| `SUPER` + `Q` | Close window, `SUPER` + `Shift` + `Q` to kill it |
-| `SUPER` + `F` | Fullscreen, `SUPER` + `V` to toggle floating |
-| `SUPER` + `Shift` + `V` | Clipboard history |
-| `SUPER` + `1`…`9` | Switch workspace, add `Shift` to move the window there |
-| `Print` | Screenshot the output, `Shift` for a region, `SUPER` for the window |
-| `SUPER` + `M` | Exit the compositor |
+| `Super` + `Return` | Terminal |
+| `Super` + `R` | Launcher |
+| `Super` + `E` | File manager, add `Shift` for yazi in a terminal |
+| `Super` + `Q` | Close window, add `Shift` to kill it |
+| `Super` + `F` | Fullscreen, `Super` + `V` to toggle floating |
+| `Super` + `Shift` + `V` | Clipboard history |
+| `Super` + `1`…`9` | Switch workspace, add `Shift` to move the window there |
+| `Print` | Screenshot the output, `Shift` for a region, `Super` for the window |
+| `Super` + `M` | Exit the compositor |
 
-The power menu opens from the bar's power button rather than a keybinding. Closing the
-lid locks the screen.
+The power menu opens from the bar's power button. Closing the lid locks the screen.
 
-Sway's bindings live in `.config/sway/config` and are close to these but not identical:
-its launcher is on `$mod` + `D`, for instance.
+Sway's bindings are in `.config/sway/config` and are close but not identical: its
+launcher is on `$mod` + `D`.
 
-## Wallpapers
+## Repository layout
 
-`scripts/wm/select-random-wallpaper.sh` takes a list of directories and picks a random
-image from the first one that actually contains images. Both compositors call it with
-the same three-tier chain:
-
-| Directory | Purpose |
-|---|---|
-| `~/Pictures/Current_wallpapers` | The set currently in rotation |
-| `~/Pictures/Wallpapers` | Full personal collection |
-| `~/.dotfiles/wallpapers` | Sample shipped with the repository |
-
-The last entry is the fallback, so a fresh clone shows a wallpaper immediately. The two
-personal directories are deliberately not tracked, because GitHub is a poor place to
-store an image library. Copy the sample out of `wallpapers/` into one of the first two
-once you have cloned.
-
-What the theme asks of a wallpaper is in `docs/design/RICE-GUIDE.md`: at or below the
-darkest UI surface in perceived lightness, warm-neutral or neutral, heavily desaturated.
-A solid dark fill is always a legitimate choice.
-
-## Fonts
-
-`fonts/` bundles the faces the theme uses, one per voice in the typography table of
-`docs/design/RICE-GUIDE.md`:
-
-| Face | Voice | Where |
-|---|---|---|
-| Iosevka Extended | mono, primary | Terminals, editor, TUIs |
-| Hack Nerd Font | mono, glyphs | Icons Iosevka does not cover |
-| Instrument Sans | sans, secondary | GTK and Qt application UI |
-| Spectral | serif, exceptional | Lock screen, fetch banners |
-
-`backup-configs.sh install` symlinks the directory to `~/.local/share/fonts/dotfiles`
-and refreshes the font cache, so a fresh clone gets them with no separate step.
-
-**Iosevka is the exception.** Its full-family build is around 430MB, too large to
-version, so `fonts/Iosevka/` is gitignored. Download the Iosevka SGr TTC build from
-[the releases page](https://github.com/be5invis/Iosevka/releases), drop it into
-`fonts/Iosevka/`, then rerun `backup-configs.sh install`; the symlink and cache refresh
-pick it up the same way as the tracked fonts.
-
-## Customising
-
-- `scripts/config_files.conf` is the list of paths `backup-configs.sh` manages. Add a
-  path here before running `add`.
-- `scripts/packages.conf` is the package list, with per-distro name overrides.
-- `scripts/theme/palette.json` is every colour, and the fonts and geometry that Qt and
-  GTK read. Rerun the generator after editing it.
+```
+.config/                  one directory per application, symlinked into ~/.config
+docs/                     everything written down, see docs/README.md
+fonts/                    the four faces the theme uses
+scripts/
+  backup-configs.sh       link, unlink and audit the tracked dotfiles
+  install-packages.sh     cross-distro package installer
+  unlink-dotfiles.sh      the inverse: move everything back to $HOME
+  theme/                  palette.json, the generator and the checker
+  wm/                     helpers the compositors call while running
+wallpapers/               one sample, so a fresh clone has something to show
+```
 
 ## Documentation
 
-[`docs/README.md`](docs/README.md) indexes all six documents and says which
-question each one owns. The two worth knowing about up front:
+[`docs/README.md`](docs/README.md) indexes everything and says who each document is
+for. The three that matter most:
 
-- [`docs/design/RICE-GUIDE.md`](docs/design/RICE-GUIDE.md) is the authority on
-  anything visual. The palette, the ANSI mapping, and the rules for how colour
-  gets assigned all live there.
-- [`docs/TODO.md`](docs/TODO.md) is what is open, what is parked with the
-  explanations already ruled out, and what has been decided against.
+- **[`docs/SETUP.md`](docs/SETUP.md)** to install it and make it yours.
+- **[`docs/design/RICE-GUIDE.md`](docs/design/RICE-GUIDE.md)** for the palette, the
+  ANSI table, and the rules about how colour gets used.
+- **[`docs/TODO.md`](docs/TODO.md)** for what is open, what is parked and why, and what
+  has been decided against.
 
 ## Known gaps
 
-Named here rather than left for you to discover:
+Named here rather than left for you to find:
 
 - **Workspace buttons in the bar are not clickable.** Traced to the Waybar build rather
-  than to this configuration; the full elimination is written down in `docs/TODO.md`.
-  Keyboard switching works.
+  than this configuration; the full elimination is written down in
+  [`docs/TODO.md`](docs/TODO.md). Keyboard switching works.
 - **Workspace layouts are geometric, not per-application.** A workspace holding a single
   window drops its gaps and borders, but no application is assigned to a workspace.
-- **No power profiles.** Idle handling exists, but switching a CPU governor or a platform
-  profile does not, since that is a system service rather than a dotfile.
-
-`docs/TODO.md` carries these with the shape of the work each one needs.
+- **No power profiles.** Idle handling exists; switching a CPU governor does not, since
+  that is a system service rather than a dotfile.
 
 ## Contributing
 
 Issues and pull requests are welcome. This is a personal configuration rather than a
-framework, so the useful contributions are usually bug reports, portability fixes, and
-telling me something is wrong on a machine that is not mine.
+framework, so the most useful contributions are bug reports, portability fixes, and
+telling me something is broken on a machine that is not mine.
 
 ## License
 
