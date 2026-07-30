@@ -96,6 +96,38 @@ Three of the four are built; what is below is what is left of them.
 
 ## Then: quality and housekeeping
 
+- **Audit the two management scripts properly.** `install-packages.sh` and
+  `backup-configs.sh` are the only code here that can damage a real `$HOME`, and neither has
+  ever been read end to end looking for defects. The one found by accident is the shape of the
+  problem: `&& ((success++)) || ((failures++))` counted a phantom failure on every run and made
+  the script exit 1 on a completely successful install, for as long as that line existed, and
+  it surfaced because a summary line looked wrong rather than because anything checked it.
+  Nothing proves the rest of either script is in better condition.
+
+  Three passes, in this order:
+
+  1. **Correctness.** Read both for real defects, arithmetic and exit-code handling first
+     since that is where the known one lived: `set -e` interactions, unquoted expansions, exit
+     codes that do not propagate, the `rsync --remove-source-files` paths that could move the
+     wrong tree, and the `--force` branch that removes an existing real file after backing it
+     up. Write down what was checked and found clean, not only what was wrong, because a
+     checked-and-clean list is what stops the next audit repeating this one.
+  2. **Best practice.** `shellcheck` on both, then judge its output rather than obey it.
+     Neither has ever been linted, so expect volume; the useful half is quoting and the
+     `local` versus global boundary.
+  3. **Structure and organisation.** The two share concerns and partly duplicate them: both
+     resolve their `.conf` from `SCRIPT_DIR`, both log, both colour output, both parse an
+     INI-ish file. Decide whether that wants a shared helper or whether two independent
+     scripts is the better answer for code a stranger reads before trusting it with their home
+     directory. Say which and why, because "extract a library" is the reflex and is not
+     obviously right at this size.
+
+  Testing this needs a throwaway `$HOME`. `backup-configs.sh --dry-run` already exists and is
+  the cheapest start; a temp `HOME=` or a container is the honest version, and whether that is
+  worth building is part of the question rather than assumed.
+  *Difficulty: medium to read, higher if a harness gets built. Priority: medium, and it rises
+  the moment anyone else clones this, since these scripts are the first thing they run.*
+
 - **Elegance pass over structure, organisation and code.** Several things work but are not
   elegant. Worth a deliberate sweep for duplicated structure, files that exist for no
   current reason, inconsistent naming across the scripts, and configs that repeat what a
