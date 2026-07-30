@@ -82,15 +82,24 @@ cd ~/.dotfiles
 Then log out and back in.
 
 > [!WARNING]
-> `backup-configs.sh install` is safe: it refuses to overwrite a real file unless you
-> pass `--force`, and backs up anything it replaces. Its sibling `add` runs the other
-> direction and **moves files out of `$HOME`** into the repo. You want `install`.
+> `backup-configs.sh install` is the safe direction: it refuses to overwrite a real file
+> unless you pass `--force`, and backs up anything it replaces. Its sibling `add` runs the
+> other direction and **moves files out of `$HOME`** into the repo. You want `install`.
+>
+> Being straight about the limits of that: these scripts have not been audited line by
+> line, and one defect has already been found and fixed. Read them before pointing them
+> at a home directory you care about, and use `--dry-run` first if you would rather see
+> what happens than trust the description. The open audit is in
+> [`docs/TODO.md`](docs/TODO.md).
 
 > [!IMPORTANT]
-> Two things need a look before this feels right on your machine: the monitor layout in
-> `.config/hypr/conf/monitors.lua` names specific outputs, and the bar carries
-> laptop-only modules. [`docs/SETUP.md`](docs/SETUP.md) lists everything to change, with
-> the file and line for each.
+> **Clone to `~/.dotfiles` exactly.** Five tracked files reference that path absolutely,
+> so another location silently breaks the wallpaper, the clipboard picker and the bar's
+> power button. Two more things need a look before this feels right on your machine: the
+> monitor layout in `.config/hypr/conf/monitors.lua` names specific outputs, and the bar
+> carries laptop-only modules. And if you want the themed prompt, fish has to become your
+> login shell; nothing does that for you.
+> [`docs/SETUP.md`](docs/SETUP.md) covers all four, with the file and line for each.
 
 **[Full setup guide](docs/SETUP.md)** covers the long-form install, what to change for
 your hardware, the Iosevka font you have to fetch yourself, and what to do when

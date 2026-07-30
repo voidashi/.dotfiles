@@ -71,6 +71,14 @@ the repository is shaped as it is belongs to
   why it went unnoticed. Pick one and make both agree.
   *Difficulty: trivial. Priority: low.*
 
+- **hyprlauncher's radius contradicts the floating rule.**
+  `.config/hypr/hyprtoolkit.conf:32-33` sets `rounding_large` and `rounding_small` to 0,
+  but a launcher floats, and the guide's Form rule gives a floating surface 4px. It went
+  unnoticed because hyprlauncher is commented out in `conf/programs.lua` in favour of
+  wofi, so nothing renders it. Fix it before switching back, or the launcher arrives with
+  the one geometry the design does not allow.
+  *Difficulty: trivial. Priority: low while hyprlauncher stays off.*
+
 - **The bar carries laptop-only modules with no guard.** `battery` and `backlight` are
   in `modules-right` unconditionally, so on a desktop they are empty or absent.
   `SETUP.md` tells a reader to remove them, which is a workaround rather than a fix.

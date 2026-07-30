@@ -27,6 +27,16 @@ git clone https://github.com/voidashi/.dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 ```
 
+**The path matters.** Clone to `~/.dotfiles` exactly. Seven lines across five tracked
+files reference `$HOME/.dotfiles` absolutely: the wallpaper picker and the clipboard picker in both
+compositors' configs, the bar's power button, and Neovim's dashboard. Clone anywhere else
+and those four things stop working with no error at all. If you must use another path,
+grep for it first and change every hit:
+
+```bash
+grep -rn '\$HOME/\.dotfiles' .config/
+```
+
 **1. See what would be installed, before installing it.**
 
 ```bash
@@ -59,9 +69,22 @@ the original up into `~/.dotfiles_backup/<timestamp>/` before removing it.
 
 Every tracked path should report as a symlink into the repo.
 
-**5. Log out and back in**, so the compositor picks up the new config and starts the
+**5. Make fish your login shell**, if you want the prompt this repo themes.
+
+```bash
+chsh -s /usr/bin/fish
+```
+
+Nothing does this for you, and without it you get bash with its default prompt while
+everything else looks themed. The tracked `.bashrc` is deliberately a stock one, so
+there is no clue that anything is missing. Starship and the fish colour scheme both live
+under `.config/fish/`, so they only apply once fish is actually the shell you land in.
+
+**6. Log out and back in**, so the compositor picks up the new config and starts the
 background pieces: the bar, the wallpaper, notifications, the clipboard watcher and the
-idle daemon.
+idle daemon. This step is also what loads
+`~/.config/environment.d/50-voidashi.conf`, which is the only thing that sets
+`QT_QPA_PLATFORMTHEME` under Sway.
 
 ### The one command that can lose your files
 
@@ -204,10 +227,28 @@ application starts. Look at the file first, then re-link:
 ./scripts/backup-configs.sh install --force
 ```
 
-**Qt applications come up light while everything else is dark.** `plasma-integration`
-provides the platform theme that makes `QT_QPA_PLATFORMTHEME=kde` mean anything. Without
-it the variable is set and nothing honours it, silently. It is declared in
-`packages.conf`, so a full install covers it.
+**Qt applications come up light while everything else is dark.** Two separate causes,
+so check both.
+
+First, is the variable set at all?
+
+```bash
+echo "$QT_QPA_PLATFORMTHEME"      # expect: kde
+```
+
+If it is empty, the session did not pick up
+`~/.config/environment.d/50-voidashi.conf`. That file is the only thing that sets it
+under Sway, because Sway has no way to set an environment variable from its own config.
+It is read by `systemd --user` at login, so a compositor started from a bare TTY outside
+a systemd session will not see it; put the variable in your shell profile in that case.
+
+Second, is anything honouring it? `plasma-integration` provides the platform theme the
+variable actually loads. Without that package the variable is set and nothing reads it,
+silently. It is declared in `packages.conf`, so a full install covers it:
+
+```bash
+pacman -Q plasma-integration
+```
 
 **Terminal colours look wrong in one emulator only.** Its generated palette include is
 probably stale or was edited by hand:

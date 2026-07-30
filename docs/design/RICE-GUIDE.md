@@ -35,7 +35,7 @@ things legible because illegible is ugly, not because a criterion says so.
 |---|---|
 | Colour palette (all families, all hex values) | **Carries over unchanged**: this is the anchor |
 | Warm-neutral darkness (charcoal, not blue-black) | **Carries over**: the single most important rule |
-| Sharp geometry, no rounded corners | **Carries over** |
+| Sharp geometry | **Adapts**: 4px on a floating surface, 0 when docked. See "Form" |
 | Restraint: no neon, no glow, no vibrant gradients | **Carries over** |
 | Mono type stack | **Carries over**: and becomes dominant |
 | Motion: short, no bounce, no overshoot | **Carries over**, with tighter numbers |
@@ -448,9 +448,9 @@ it short; restraint applies to text as much as to pixels.
 `ink-3` at rest; colour only on state change, always with a glyph. Separators from
 `edge-10`, or none at all.
 
-**Launchers and menus.** `void-20` or `void-30` surface, `edge-20` border, sharp corners,
-standard density. Selected entry in Ice, prompt in Bordeaux, input field one step lighter
-than the list.
+**Launchers and menus.** `void-20` or `void-30` surface, `edge-20` border, the 4px
+floating radius from "Form", standard density. Selected entry in Ice, prompt in Bordeaux,
+input field one step lighter than the list.
 
 **Notifications.** `void-20`, bordered, standard density. Urgency maps to the alert tones
 plus a glyph: low is inert ink, normal gets a subtle accent, critical gets

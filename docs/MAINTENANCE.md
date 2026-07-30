@@ -62,6 +62,12 @@ previously made the README's own `./scripts/install-packages.sh install` abort w
 - `check` verifies every tracked path is a symlink pointing into the repo.
 - `restore <timestamp>` rsyncs a prior backup back into `$HOME` with
   `--ignore-existing`, so it never clobbers.
+- `init` runs `git init` in the repo and creates the directory skeleton. It is for
+  starting a dotfiles repo from nothing, not for using this one, which is why the
+  install path never mentions it.
+- `--verbose` also exists and is undocumented in the usage line; it prints each
+  decision as it is made, which is the thing to reach for when `check` disagrees with
+  what you see on disk.
 - New dotfile: add the path to `config_files.conf`, then run `add`.
 
 ### `install-packages.sh [preview|install|check|repos] [--yes] [--no-color] [--log FILE]`
@@ -117,6 +123,17 @@ The inverse of `backup-configs.sh`: removes the symlinks and moves the files bac
   layer, with either `persistent-workspaces` form, and explicit `on-click` probes
   never fire while hover works. The full elimination is in [`TODO.md`](TODO.md). Do
   not re-derive it.
+- **The session environment exists twice and has to be changed twice.** Sway has no
+  `env` directive: `man 5 sway` has none, and an `exec` line cannot change its parent's
+  environment. So the variables live in `.config/environment.d/50-voidashi.conf`, which
+  `systemd --user` reads at login and Sway therefore inherits. Hyprland sets the same
+  values in `conf/env_vars.lua` and propagates them into the systemd and D-Bus
+  environment itself, so under Hyprland they arrive twice, harmlessly. Change one file
+  and you must change the other. The variable that matters most is
+  `QT_QPA_PLATFORMTHEME=kde`; without it Qt applications come up light against a dark
+  desktop, which is what happened under Sway for as long as only Hyprland set it. Note
+  the caveat in that file's header: a compositor started from a bare TTY in a session
+  systemd does not manage gets nothing from it.
 - **The idle schedule exists twice and has to be changed twice.** `hypridle` reads
   `.config/hypr/hypridle.conf`; `swayidle` has no config file at all and takes its
   whole schedule as CLI arguments in `.config/sway/config`. Both use the same numbers,
@@ -344,7 +361,7 @@ catnap -n -c .config/catnap/config.toml -a .config/catnap/distros.toml >/dev/nul
 ./scripts/backup-configs.sh check
 ```
 
-The count is the number of paths in `scripts/config_files.conf`, which is 30, **plus
+The count is the number of paths in `scripts/config_files.conf`, currently 31, **plus
 one**: `backup-configs.sh:193` also checks the font symlink at
 `~/.local/share/fonts/dotfiles`, which is not listed in that file. So 31 is the
 expected total, and a mismatch means counting the paths before assuming a fault.

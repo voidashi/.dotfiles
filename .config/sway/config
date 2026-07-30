@@ -239,6 +239,12 @@ exec waybar -c $HOME/.config/waybar/sway.jsonc -s $HOME/.config/waybar/style.css
 # repo's own sample wallpaper (which is what makes a fresh install work).
 exec swaybg -m fill -i "$($HOME/.dotfiles/scripts/wm/select-random-wallpaper.sh $HOME/Pictures/Current_wallpapers $HOME/Pictures/Wallpapers $HOME/.dotfiles/wallpapers)"
 
+# Environment. Sway has no `env` directive, and an `exec` cannot change its own
+# parent's environment, so the session variables this desktop needs live in
+# ~/.config/environment.d/50-voidashi.conf, which systemd --user reads at login.
+# That is where QT_QPA_PLATFORMTHEME=kde comes from; without it Qt applications
+# come up light against a dark desktop. See docs/MAINTENANCE.md.
+
 # Notifications. Hyprland starts swaync from conf/autostart.lua and this file
 # started nothing, so notifications were dead under Sway while the config and
 # the stylesheet sat themed and in place, with no error anywhere to say so.
