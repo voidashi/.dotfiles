@@ -9,7 +9,7 @@ hl.config({
 })
 
 -- Voidashi: "No bounce, spring, or overshoot animation" is a non-negotiable
--- (CLAUDE.md). The old curve's y=1.1 control point overshot past its endpoint
+-- (RICE-GUIDE.md). The old curve's y=1.1 control point overshot past its endpoint
 -- (a literal bounce); this is RICE-GUIDE.md's documented standard curve
 -- (cubic-bezier(.4,0,.2,1)) instead.
 hl.curve("myBezier", { type = "bezier", points = { { 0.4, 0 }, { 0.2, 1 } } })

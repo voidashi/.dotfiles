@@ -1,7 +1,7 @@
 {
   "_meta": {
     "source": "docs/design/RICE-GUIDE.md (desktop-authoritative) + docs/design/DESIGN-SYSTEM.md §2 (full ramps, unchanged bg/border companions for alert tones)",
-    "note": "Single source of truth for rice colour. Edit here and rerun generate_theme.py -- never hand-edit a hex in an app config (RICE-GUIDE.md, 'Working rules for Claude Code'). Where RICE-GUIDE.md and DESIGN-SYSTEM.md differ for desktop use, RICE-GUIDE.md wins -- see cursor/selection/ANSI-cyan below."
+    "note": "Single source of truth for rice colour. Edit here and rerun generate_theme.py; never hand-edit a hex in an app config (RICE-GUIDE.md, 'Working rules'). Where RICE-GUIDE.md and DESIGN-SYSTEM.md differ for desktop use, RICE-GUIDE.md wins: see cursor/selection/ANSI-cyan below."
   },
   "scales": {
     "void": {

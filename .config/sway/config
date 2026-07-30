@@ -1,8 +1,9 @@
 # =====================================================================
 #  SWAY
 # =====================================================================
-# The alternative compositor to Hyprland, kept in parallel. CLAUDE.md requires
-# the theme to be mirrored between the two: same colour, terminal and launcher.
+# The alternative compositor to Hyprland, kept in parallel. The design guide's
+# "consistency within a class" rule requires the theme to be mirrored between the
+# two: same colour, terminal and launcher. See docs/design/RICE-GUIDE.md.
 #
 # The commented example blocks sway ships by default (output, idle, input) were
 # removed. None held real config, together they ran to over forty lines, and it
@@ -201,9 +202,9 @@ gaps inner 10
 # Theme
 #
 
-# Colours. These mirror .config/hypr/conf/appearance.lua, because CLAUDE.md asks
+# Colours. These mirror .config/hypr/conf/appearance.lua, because the guide asks
 # for the theme to be mirrored across both compositors: focus in Ice, inactive in
-# edge-30, surfaces on the void scale.
+# edge-30, surfaces on the void scale. See docs/design/THEMING.md.
 #
 # The block that used to sit here carried Kanagawa's 41 colours as variables and
 # used none of them: there was not a single client.* directive in the file, so

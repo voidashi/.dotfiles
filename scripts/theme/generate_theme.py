@@ -4,7 +4,7 @@
 Reads palette.json (the single source of truth, transcribed from
 docs/design/RICE-GUIDE.md and docs/design/DESIGN-SYSTEM.md) and writes the
 color-only config partials each app natively includes. See RICE-GUIDE.md,
-"Working rules for Claude Code".
+"Working rules".
 
 Never hand-edit the files this script writes; they carry a GENERATED
 header. Edit palette.json and rerun this script instead.
@@ -71,8 +71,9 @@ def gen_foot(p: dict) -> str:
     out += f"foreground={strip(t['foreground'])}\n"
     out += f"selection-foreground={strip(t['selection_foreground'])}\n"
     out += f"selection-background={strip(t['selection_background'])}\n"
-    # [cursor].color was removed by foot; the replacement lives here as
-    # "cursor = <text> <bg>" (see CLAUDE.md's foot/flexoki.ini note).
+    # [cursor].color was removed by foot. The replacement is a single "cursor"
+    # key taking two colours, text first then background, which is why this is
+    # written here rather than in a [cursor] section.
     out += f"cursor={strip(t['cursor_text'])} {strip(t['cursor'])}\n\n"
     for i in range(8):
         out += f"regular{i}={strip(a[i])}\n"
@@ -531,7 +532,7 @@ def merge_kde_globals(path: Path, scheme: str, p: dict) -> None:
     alongside keys we must not touch, so they are set key by key instead of by
     replacing the section. They matter beyond Qt: KDE's gtkconfig daemon reads
     them here and writes them into both GTK settings.ini files, which is why
-    those two files stopped being worth hand-editing. See CLAUDE.md.
+    those two files stopped being worth hand-editing. See docs/MAINTENANCE.md.
     """
     owned = lambda name: (
         name.startswith("Colors:") or name == "WM" or name.startswith("ColorEffects:")

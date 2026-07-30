@@ -89,14 +89,15 @@ what. What survived the rename is only the decisions whose result is visible in
 the tree while the reason is not, which is a smaller and more useful thing.
 
 A second pass split the documents by audience, which is why two of them have
-names that do not match their git history. `CLAUDE.md` had accumulated 88 lines
-of repo knowledge that had nothing to do with an agent and would have been
-deleted along with the file; that is now `docs/MAINTENANCE.md`, and `CLAUDE.md`
-holds only pointers, so removing it costs nothing. And `THEME-STATUS.md` became
-`docs/design/THEMING.md`, because a document that tracks status accumulates a
-changelog, and what a reader needs from it is the reference: which mechanism
-carries colour to which application. The history it used to carry is
-either a pitfall, in which case `MAINTENANCE.md` has it, or it is in the git log.
+names that do not match their git history. `docs/MAINTENANCE.md` is new, and most
+of it was written elsewhere: the repository's pitfalls had accumulated in a file
+meant for an AI coding agent, where they were unreachable by anyone who cloned
+this and would have gone in the bin the day that file did. And
+`docs/design/THEMING.md` was `THEME-STATUS.md`, because a document that tracks
+status accumulates a changelog, while what a reader wants from it is the
+reference: which mechanism carries colour to which application. The history it
+used to carry is either a pitfall, in which case `MAINTENANCE.md` has it, or it
+is in the git log.
 
 ## Some configs are kept deliberately, and are not dead weight
 

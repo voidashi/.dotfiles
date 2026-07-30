@@ -1,22 +1,23 @@
 #!/usr/bin/env python3
-"""Verifica que o rice não saiu da paleta.
+"""Prove the rice has not drifted off the palette.
 
-O RICE-GUIDE.md tem um não-negociável, "never invent a colour", que até agora
-era regra de honra. Sete arquivos carregam hex colados à mão porque cor se
-mistura com estrutura neles (swaylock, bottom, starship, fastfetch, fish, yazi,
-e os papéis do Neovim), e nada avisava quando um deles envelhecia em relação ao
-palette.json.
+RICE-GUIDE.md has a non-negotiable, "never invent a colour", which used to be
+an honour-system rule. Several files carry hand-pasted hex because colour mixes
+with structural config in them (swaylock, bottom, starship, fastfetch, catnap,
+fish, yazi, Sway and Neovim's roles layer), and nothing said so when one of them
+aged out of step with palette.json.
 
-Duas verificações:
+Two checks:
 
-  drift    hex em config versionada que não existe no palette.json
-  sync     arquivo GENERATED que difere do que o gerador produziria agora,
-           o que acontece quando alguém edita a saída em vez da fonte
+  drift    a colour in a tracked config that palette.json does not contain
+  sync     a GENERATED file that differs from what the generator would write
+           now, which is what happens when someone edits the output instead of
+           the source
 
-Uso:
+Usage:
     python3 scripts/theme/check_palette.py
 
-Sai com código 1 se qualquer uma falhar, para poder entrar num hook depois.
+Exits 1 if either fails, so it can be wired into a hook.
 """
 import json
 import re
@@ -31,9 +32,9 @@ REPO_ROOT = SCRIPT_DIR.parent.parent
 
 HEX = re.compile(r"#[0-9a-fA-F]{6}\b")
 
-# Nomes de cor de terminal. Doze variaveis do fish ficaram em green, red,
-# brgreen e cyan sem ninguem notar, porque a verificacao so olhava hex. Nome de
-# cor nunca vem da paleta: e sempre o que o programa herdou de fabrica.
+# Terminal colour names. Twelve fish variables sat on green, red, brgreen and
+# cyan with nobody noticing, because the check only looked at hex. A colour name
+# never comes from the palette: it is always what the program inherited.
 NAMED = (
     "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white",
     "brblack", "brred", "brgreen", "bryellow", "brblue", "brmagenta",
@@ -44,23 +45,22 @@ NAMED_RE = re.compile(
     re.MULTILINE,
 )
 
-# Onde procurar nome de cor. Restrito de proposito: "red" e "white" aparecem em
-# prosa e em nome de variavel o tempo todo, entao varrer o repo inteiro daria
-# falso positivo sem parar. Estes sao os formatos onde um nome desses e
-# inequivocamente uma cor aplicada.
+# Where to look for colour names. Deliberately narrow: "red" and "white" turn up
+# in prose and in variable names constantly, so scanning the whole repo would
+# produce endless false positives. These are the formats where such a name is
+# unambiguously an applied colour.
 NAMED_SCOPE = (".config/fish/", ".config/starship.toml")
 
-# Hex sem "#". O swaylock escreve "ring-color=393835", entao a regex de cima nao
-# ve nenhuma das 28 cores dele: ficaram sem conferencia desde sempre, e por sorte
-# estavam certas. Restrito a este arquivo de proposito, porque seis digitos hex
-# sem "#" casam com qualquer coisa (um hash de commit, um id) em qualquer outro
-# lugar do repo.
+# Hex with no "#". swaylock writes "ring-color=393835", so the regex above sees
+# none of its 28 colours: they went unchecked from the start and happened to be
+# right. Scoped to this one file on purpose, because six hex digits without a "#"
+# match anything at all elsewhere, a commit hash included.
 BARE_HEX_SCOPE = (".config/swaylock/config",)
 BARE_HEX = re.compile(r"^[a-z-]*color=([0-9a-fA-F]{6})$", re.MULTILINE)
 
-# Caminhos que não fazem parte do tema vivo. Os .legacy e os arquivos de tema
-# antigo guardam de propósito as cores de antes; a paleta em si é a fonte, não
-# um consumidor; e binários não têm cor para conferir.
+# Paths that are not part of the live theme. The .legacy and old-theme files keep
+# the previous colours on purpose; the palette itself is the source rather than a
+# consumer; and binaries have no colour to check.
 SKIP_PARTS = (
     ".git/",
     ".legacy",
@@ -73,11 +73,12 @@ SKIP_PARTS = (
 )
 SKIP_SUFFIX = (".png", ".jpg", ".jpeg", ".ttf", ".otf", ".woff", ".woff2", ".log", ".pyc")
 
-# Exceções decididas, não esquecidas. O DESIGN-SYSTEM.md é o documento da
-# vertente web, com escala própria, e não descreve o desktop. O dunstrc está
-# órfão de propósito, guardado caso Jeff volte do swaync, e a decisão de não
-# temizá-lo está registrada no CLAUDE.md. Um check que falha sempre deixa de
-# ser lido, então exceção decidida sai da lista em vez de virar ruído.
+# Decided exceptions, not forgotten ones. DESIGN-SYSTEM.md is the web-side
+# document with its own scale and does not describe the desktop. The dunstrc is
+# orphaned on purpose, kept as a reference in case of a switch back from swaync,
+# and the decision not to theme it is recorded in docs/MAINTENANCE.md. A check
+# that always fails stops being read, so a decided exception leaves the list
+# rather than becoming permanent noise.
 SKIP_FILES = (
     "docs/design/DESIGN-SYSTEM.md",
     ".config/dunst/dunstrc",
@@ -85,12 +86,12 @@ SKIP_FILES = (
 
 
 def strip_comments(text: str) -> str:
-    """Remove comentarios, preservando hex.
+    """Strip comments while preserving hex values.
 
-    Necessario para a busca por nome: uma cor citada em prosa nao e uma cor
-    aplicada, e sem isto o proprio comentario que explica quais eram os valores
-    antigos vira um achado. O cuidado e que hex tambem comeca com '#', entao o
-    corte so acontece num '#' que nao inicia um hex de seis digitos.
+    Needed for the name search: a colour mentioned in prose is not a colour
+    applied, and without this the very comment explaining what the old values
+    were becomes a finding. The catch is that hex also starts with '#', so the
+    cut only happens at a '#' that does not begin a six-digit hex.
     """
     out = []
     for line in text.splitlines():
@@ -136,7 +137,7 @@ def check_drift(known: set) -> list:
             text = path.read_text(encoding="utf-8")
         except (UnicodeDecodeError, OSError):
             continue
-        # Arquivos gerados são conferidos pela verificação de sync, não aqui.
+        # Generated files are covered by the sync check, not by this one.
         if "GENERATED by scripts/theme" in text[:300]:
             continue
         stray = sorted({m.group(0).lower() for m in HEX.finditer(text)} - known)
@@ -156,9 +157,9 @@ def check_sync(p: dict) -> list:
     for path, expected in gen.generated_files(p).items():
         rel = path.relative_to(REPO_ROOT).as_posix()
         if not path.exists():
-            stale.append((rel, "não existe"))
+            stale.append((rel, "does not exist"))
         elif path.read_text(encoding="utf-8") != expected:
-            stale.append((rel, "difere do que o gerador produziria"))
+            stale.append((rel, "differs from what the generator would write"))
     return stale
 
 
@@ -170,23 +171,23 @@ def main() -> int:
     drift = check_drift(known)
     if drift:
         failed = True
-        print("Cores fora da paleta:\n")
+        print("Colours outside the palette:\n")
         for rel, stray in drift:
             print(f"  {rel}")
             print(f"      {' '.join(stray)}")
         print()
     else:
-        print(f"drift: nenhuma cor fora das {len(known)} da paleta")
+        print(f"drift: no colour outside the palette's {len(known)}")
 
     stale = check_sync(p)
     if stale:
         failed = True
-        print("Arquivos gerados fora de sincronia (rode generate_theme.py):\n")
+        print("Generated files out of sync (run generate_theme.py):\n")
         for rel, why in stale:
             print(f"  {rel}: {why}")
         print()
     else:
-        print(f"sync:  {len(gen.generated_files(p))} arquivos gerados conferem com palette.json")
+        print(f"sync:  {len(gen.generated_files(p))} generated files match palette.json")
 
     return 1 if failed else 0
 

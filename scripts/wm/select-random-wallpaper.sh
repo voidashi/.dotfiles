@@ -1,33 +1,33 @@
 #!/bin/bash
-# Seleciona um wallpaper aleatório e imprime o caminho dele em stdout.
+# Pick a random wallpaper and print its path on stdout.
 #
-# Uso: select-random-wallpaper.sh DIR [DIR_FALLBACK...]
+# Usage: select-random-wallpaper.sh DIR [FALLBACK_DIR...]
 #
-# Percorre os diretórios na ordem em que foram passados e usa o primeiro que
-# contenha imagens. Isso reflete a convenção deste repositório:
+# Walks the directories in the order given and uses the first one that contains
+# images. That order is this repo's convention:
 #
-#   ~/Pictures/Current_wallpapers  ->  os que estão em rotação agora
-#   ~/Pictures/Wallpapers          ->  a coleção completa
-#   ~/.dotfiles/wallpapers         ->  o wallpaper de exemplo do repo
+#   ~/Pictures/Current_wallpapers  ->  the set in rotation right now
+#   ~/Pictures/Wallpapers          ->  the full collection
+#   ~/.dotfiles/wallpapers         ->  the sample shipped with the repo
 #
-# Assim uma instalação nova funciona sem nenhum setup: se as duas primeiras
-# pastas ainda não existem, cai no wallpaper que vem junto do repositório.
+# So a fresh install works with no setup: if the first two directories do not
+# exist yet, it falls back to the wallpaper the repo ships.
 #
-# IMPORTANTE: mensagens de erro vão para stderr. Indo para stdout, o $(...)
-# de quem chama capturaria a mensagem e a passaria como nome de arquivo:
-# era exatamente esse o bug que deixava o swaybg sem wallpaper no Sway.
+# IMPORTANT: error messages go to stderr. On stdout, the caller's $(...) would
+# capture the message and pass it along as a filename, which is exactly the bug
+# that left swaybg with no wallpaper under Sway.
 
 set -uo pipefail
 
 if [ "$#" -eq 0 ]; then
-    echo "uso: $(basename "$0") DIR [DIR_FALLBACK...]" >&2
+    echo "usage: $(basename "$0") DIR [FALLBACK_DIR...]" >&2
     exit 1
 fi
 
 for dir in "$@"; do
     [ -d "$dir" ] || continue
 
-    # -print0 com shuf -z lida com nomes de arquivo que contenham espaços.
+    # -print0 with shuf -z handles filenames containing spaces.
     file="$(find -L "$dir" -maxdepth 1 -type f \
         \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \
            -o -iname '*.webp' -o -iname '*.bmp' \) -print0 2>/dev/null \
@@ -39,5 +39,5 @@ for dir in "$@"; do
     fi
 done
 
-echo "Nenhuma imagem encontrada em: $*" >&2
+echo "No images found in: $*" >&2
 exit 1
