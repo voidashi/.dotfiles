@@ -41,8 +41,8 @@ what the generator would produce now.
 ## The palette became a single source of truth, then an enforced one
 
 `scripts/theme/palette.json` holds every colour. `generate_theme.py` renders it
-into the format each application natively reads, which is five different
-mechanisms because five toolkits accept five different things; the table in
+into the format each application natively reads, which takes six different
+mechanisms because toolkits do not accept the same treatment; the table in
 `docs/design/THEMING.md` maps which application uses which.
 
 Applications whose colour keys mix with structural config are hand written
@@ -68,8 +68,8 @@ upstream renames a key.
 
 ## The documents were rewritten for a reader who did not write them
 
-They had been written for the two people making the thing, which is a different
-document from the one someone who cloned it needs. The rewrite happened in one
+They had been written for whoever was already inside the work, which is a
+different document from the one someone who cloned it needs. The rewrite happened in one
 pass and left three marks worth knowing about.
 
 The README had been claiming four features that did not exist, found by checking
@@ -85,7 +85,7 @@ decision and dropping the tables, which is why those sections read thinner than
 the rest of the file.
 
 This document was called `SESSION-HISTORY.md` and read as a log of who decided
-what. What survived the rename is the six decisions whose result is visible in
+what. What survived the rename is only the decisions whose result is visible in
 the tree while the reason is not, which is a smaller and more useful thing.
 
 A second pass split the documents by audience, which is why two of them have
@@ -94,8 +94,8 @@ of repo knowledge that had nothing to do with an agent and would have been
 deleted along with the file; that is now `docs/MAINTENANCE.md`, and `CLAUDE.md`
 holds only pointers, so removing it costs nothing. And `THEME-STATUS.md` became
 `docs/design/THEMING.md`, because a document that tracks status accumulates a
-changelog, and what a reader needs from it is the reference: which of the five
-mechanisms carries colour to which application. The history it used to carry is
+changelog, and what a reader needs from it is the reference: which mechanism
+carries colour to which application. The history it used to carry is
 either a pitfall, in which case `MAINTENANCE.md` has it, or it is in the git log.
 
 ## Some configs are kept deliberately, and are not dead weight

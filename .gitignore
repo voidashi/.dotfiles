@@ -4,7 +4,7 @@ package_install.log
 
 # Iosevka's full-family .ttc build is ~431MB (9 files bundling every width/weight).
 # Too large to version; install locally and symlink into ~/.local/share/fonts instead.
-# See README.md's Fonts section.
+# See the Fonts section of docs/SETUP.md.
 fonts/Iosevka/
 
 # Python bytecode from scripts/theme/. Interpreter and machine specific, and it

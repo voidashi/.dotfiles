@@ -19,6 +19,9 @@ doing nothing, with no error message anywhere.
   `$HOME`. Covers `hypr`, `sway`, `waybar`, `fish`, `nvim`, `alacritty`, `kitty`,
   `foot`, `ghostty`, `bottom`, `dunst`, `wofi`, `fastfetch`, `catnap`, `wlogout`,
   `swaylock`, `swaync`, `yazi`, `starship.toml`, the GTK and KDE files.
+- `.config/theme/`: one generated file, `voidashi-colors.css`, which the waybar, wofi,
+  wlogout and swaync stylesheets all `@import`. It belongs to no single application,
+  which is why it has a directory of its own.
 - `.bashrc`: the one tracked dotfile outside `.config`.
 - `scripts/backup-configs.sh`, `install-packages.sh`, `unlink-dotfiles.sh`: run by
   hand. See below.
@@ -74,7 +77,10 @@ previously made the README's own `./scripts/install-packages.sh install` abort w
 - `install` needs sudo. It prompts unless `--yes`, in which case it errors out rather
   than hanging on a password prompt.
 - On pacman, anything missing from the official repos falls back to an AUR helper
-  (`paru`, `yay`, `pikaur`). `catnap`, `pfetch-rs` and `pipes.sh` are AUR-only.
+  (`paru`, `yay`, `pikaur`). `catnap` and `pipes.sh` have no official-repo version.
+  `pfetch-rs` usually needs the AUR too, though a repo that rebuilds AUR packages, as
+  CachyOS does, may carry it. Note also that `pfetch-rs` *provides* `pfetch`, so
+  declaring the bare name would let the helper pick either package.
 - Logs to `scripts/package_install.log`, overwritten each run and gitignored.
 - Section headers are skipped by a `next` in the awk block. Remove it and the literal
   lines `[common]` and `[pacman]` get parsed as package names.
@@ -93,9 +99,10 @@ The inverse of `backup-configs.sh`: removes the symlinks and moves the files bac
   `programs` loads first because it defines globals that `binds` reads. Hyprland
   prefers `hyprland.lua` over `hyprland.conf` when both exist, which is why the old
   entry point sat inert for months while looking entirely alive.
-- **`.config/hypr/hypridle.conf` is the exception and is hyprlang.** Only Hyprland
+- **Only `hyprland.lua` is Lua. The other three files in `.config/hypr/` are
+  hyprlang**: `hypridle.conf`, `hyprpaper.conf` and `hyprtoolkit.conf`. Only Hyprland
   itself gained a Lua config in 0.55; hypridle, hyprlock and hyprtoolkit still read
-  hyprlang. Do not port it to the syntax the rest of the directory uses.
+  hyprlang. Do not port any of them to the syntax `conf/*.lua` uses.
 - **Waybar is one config split three ways, not three configs.** `common.jsonc` holds
   the bar geometry and every module definition; `hyprland.jsonc` and `sway.jsonc`
   each `include` it and add only their own compositor's `modules-left`; `style.css`
@@ -112,9 +119,11 @@ The inverse of `backup-configs.sh`: removes the symlinks and moves the files bac
   not re-derive it.
 - **The idle schedule exists twice and has to be changed twice.** `hypridle` reads
   `.config/hypr/hypridle.conf`; `swayidle` has no config file at all and takes its
-  whole schedule as CLI arguments in `.config/sway/config`. Both use the same numbers
-  and both hand off to `swaylock` through `loginctl lock-session`, so every path to a
-  locked screen goes through one place.
+  whole schedule as CLI arguments in `.config/sway/config`. Both use the same numbers,
+  300, 360 and 1800 seconds, but they reach the locker differently: hypridle fires
+  `loginctl lock-session`, which routes every request through its own `lock_cmd`, while
+  swayidle calls `swaylock -f` directly. Changing how the screen locks therefore means
+  editing both.
 
 ### Neovim
 
@@ -141,9 +150,25 @@ The inverse of `backup-configs.sh`: removes the symlinks and moves the files bac
 - **The colorscheme is ours, not a plugin**, in three layers under
   `lua/voidashi/theme/`: `palette.lua` (generated), `roles.lua` (the semantic layer,
   hand-written, where the design decisions live) and `groups.lua` (the highlight
-  groups, which read only from roles). A standalone theme has no fallback underneath
+  groups, which read only from roles). Two entry points make it discoverable and
+  neither is obvious: `colors/voidashi.lua` is what `:colorscheme voidashi` finds, and
+  `lua/lualine/themes/voidashi.lua` is how lualine finds its matching theme, because
+  lualine looks up that path on the runtimepath. kanagawa stays in the plugin list with
+  `enabled = false`, purely as a rollback. A standalone theme has no fallback underneath
   it, so when adding a plugin, check for groups falling through to Neovim's defaults;
   the gap is found by diffing group names against another theme's coverage.
+
+### Fish
+
+- `config.fish` is the entry point, and `conf.d/*.fish` autoload, which is where the
+  colorscheme, theme and keybinding files are split out. `conf.d` loads
+  **alphabetically**, and that has bitten this repo: a file fish generated during a
+  version upgrade defined more colour variables than ours did and won, leaving twelve
+  on factory values for an entire retheme.
+- `fish_variables` is fish's own generated state file. Do not hand-edit it. It is
+  tracked, so it will show up in `git diff` after fish writes to it.
+- The greeter is a `fish_greeting` function in `config.fish` that runs fastfetch with
+  an explicit `--config`. Two other fetches sit commented out beside it.
 
 ### GTK and Qt
 
@@ -319,7 +344,10 @@ catnap -n -c .config/catnap/config.toml -a .config/catnap/distros.toml >/dev/nul
 ./scripts/backup-configs.sh check
 ```
 
-The symlink count should equal the number of paths in `scripts/config_files.conf`.
-A broken one usually means an external program replaced the link with a real file,
+The count is the number of paths in `scripts/config_files.conf`, which is 30, **plus
+one**: `backup-configs.sh:193` also checks the font symlink at
+`~/.local/share/fonts/dotfiles`, which is not listed in that file. So 31 is the
+expected total, and a mismatch means counting the paths before assuming a fault.
+A broken link usually means an external program replaced it with a real file,
 which `kded6` has done to `gtk.css` before; re-link with `install --force`, but look
 at the content first, because the same event has also overwritten what the repo held.

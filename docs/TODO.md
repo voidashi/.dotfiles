@@ -8,10 +8,12 @@ Each item carries a **difficulty** and a **priority**, rated separately. Difficu
 how much work it is and how much can go wrong; priority is how much it costs to leave
 alone. They are independent: a one-line fix can be urgent and a rewrite optional.
 
-Decisions already made do not live here. Those are in
-[`MAINTENANCE.md`](MAINTENANCE.md) for pitfalls and validators,
-[`design/THEMING.md`](design/THEMING.md) for how the palette reaches each application,
-and [`TURNING-POINTS.md`](TURNING-POINTS.md) for why the repository is shaped as it is.
+What lives here is work, plus the decisions that were made *against* doing something,
+because those are what stop a question being reopened. What does not live here is settled
+knowledge: pitfalls and validators are in [`MAINTENANCE.md`](MAINTENANCE.md), how the
+palette reaches each application is in [`design/THEMING.md`](design/THEMING.md), and why
+the repository is shaped as it is belongs to
+[`TURNING-POINTS.md`](TURNING-POINTS.md).
 
 ## Pending actions, not work
 
@@ -20,11 +22,19 @@ and [`TURNING-POINTS.md`](TURNING-POINTS.md) for why the repository is shaped as
   autostart lines existed will not be running them. Confirm with the commands rather than
   by pressing the keybind, because a dead daemon and an empty history look identical:
   `pgrep -x hypridle`, `pgrep -x wl-paste`, `cliphist list | wc -l`.
-- **`CLAUDE.md` and `.claude/` are deleted at publication.** Settled, and safe: every
-  pitfall they carried is in [`MAINTENANCE.md`](MAINTENANCE.md), which is a superset of
-  both that file and the validator skill, and no document links to either path. Before
-  deleting, re-run the check that keeps it true, which must return 0:
-  `grep -icE "kded6|8-digit hex|process cwd|swaylock-effects" CLAUDE.md`.
+- **`CLAUDE.md` and `.claude/` are deleted at publication.** The content moved to
+  [`MAINTENANCE.md`](MAINTENANCE.md). Before deleting, run both checks, because the first
+  one alone was trusted once and was not enough:
+
+  ```bash
+  # 1. no repo knowledge left in the file itself
+  grep -icE "kded6|8-digit hex|process cwd|swaylock-effects" CLAUDE.md   # expect 0
+  # 2. nothing anywhere points at either path. Code counts, not just docs.
+  grep -rn "CLAUDE\.md\|\.claude/" --exclude-dir=.git .               # expect only CLAUDE.md's own title
+  ```
+
+  The second check exists because the first was run with `--include="*.md"` and reported
+  clean while eight references sat in six config and script files.
 
 ## Known defects
 
@@ -163,9 +173,14 @@ the right text size.
 
 ## Writing standard
 
-Every document here is at zero em dashes, verified rather than assumed, and the double
-hyphens that stood in for them are out of the code too. The standard, not a task: no em
-dashes, and never state a thing then restate it inverted.
+Every document here is at zero em dashes, verified rather than assumed. The standard,
+not a task: no em dashes, and never state a thing then restate it inverted.
+
+The double hyphens that stood in for a dash are **not** finished. They are out of the
+shell scripts, and about 25 remain in comments across the stylesheets, the terminal
+configs and `palette.json`. Clean each when something else takes you into the file;
+`set -- "$@"` in bash is real syntax and stays.
+*Difficulty: trivial per file. Priority: low.*
 
 Worth keeping from having done it three times, because a blanket substitution does not
 work. An em dash between two independent clauses wants a semicolon, one introducing an

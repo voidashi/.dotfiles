@@ -12,7 +12,7 @@ or for anyone curious about why it looks the way it does.
 |---|---|---|
 | [`SETUP.md`](SETUP.md) | How to install it, what to change for your own hardware, and what to do when something does not work. | Using it |
 | [`design/RICE-GUIDE.md`](design/RICE-GUIDE.md) | The palette, the ANSI table, and the rules for how colour gets assigned. The authority on anything visual. | Changing how it looks |
-| [`design/THEMING.md`](design/THEMING.md) | Which of the five mechanisms carries colour to each application, what every surface is set to, and which decisions are settled. | Changing how it looks |
+| [`design/THEMING.md`](design/THEMING.md) | Which mechanism carries colour to each application, what every surface is set to, and which decisions are settled. | Changing how it looks |
 | [`MAINTENANCE.md`](MAINTENANCE.md) | What the management scripts really do, every architecture pitfall this repo has paid for, and how to validate a change. | Editing the repo |
 | [`TODO.md`](TODO.md) | What is open, what is parked with the explanations already ruled out, and what has been decided against. | Anyone |
 | [`TURNING-POINTS.md`](TURNING-POINTS.md) | Why the repository is shaped the way it is, for decisions whose result is visible but whose reason is not. | Curious |

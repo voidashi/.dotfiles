@@ -61,9 +61,10 @@ How to read these:
   failure: catnap 2.0 replaced the TOML config format entirely and the AUR package
   is still on 1.x, so the day it updates, both tracked files stop being valid at
   once. This is what will say so.
-- **Tracked symlinks** should equal the number of paths in
-  `scripts/config_files.conf`, which is 31 as of this writing, with no `Broken`
-  lines. If the count differs, check that file before assuming a fault. A broken one
+- **Tracked symlinks** should report 31 valid with no `Broken` lines. That is the 30
+  paths in `scripts/config_files.conf` plus one: `backup-configs.sh:193` also checks
+  the font symlink at `~/.local/share/fonts/dotfiles`, which is not listed in that
+  file. Count the paths before assuming a mismatch is a fault. A broken one
   usually means an external program replaced the symlink with a real file, which
   `kded6` has done to `gtk.css` before; the repair is to re-link, but check the
   content first, because the same event has also overwritten what the repo held.

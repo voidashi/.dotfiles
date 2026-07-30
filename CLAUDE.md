@@ -18,8 +18,8 @@ anything; everything it references lives under `docs/`.
 - [`docs/design/RICE-GUIDE.md`](docs/design/RICE-GUIDE.md) before changing anything
   that affects how something *looks*: colours, fonts, spacing, borders, animation,
   wallpaper. It is the authority for desktop work and it overrides
-  `DESIGN-SYSTEM.md` wherever the two differ. Its non-negotiables and its "Working
-  rules" section are the rules for this kind of change; do not restate them here.
+  `DESIGN-SYSTEM.md` wherever the two differ. Its "Working rules" and "Anti-patterns"
+  sections are the rules for this kind of change; do not restate them here.
 - [`docs/design/THEMING.md`](docs/design/THEMING.md) to find out how the palette
   reaches a given application before assuming it needs a new mechanism.
 - [`docs/TODO.md`](docs/TODO.md) and

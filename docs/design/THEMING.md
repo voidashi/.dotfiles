@@ -9,13 +9,16 @@ what each surface is set to, and which design decisions are settled. Open work l
 Read the mechanism table before theming anything new. Picking the wrong route is how a
 change ends up looking applied and doing nothing.
 
-## The five mechanisms
+## The six mechanisms
 
-Five, because five toolkits do not accept the same treatment.
+Six, because different toolkits do not accept the same treatment. The first two differ
+only in how the file is pulled in, but the distinction is the one that matters when a
+colour fails to arrive.
 
 | Mechanism | How it works | Applications |
 |---|---|---|
 | **Generated partial, included** | The generator writes a colour-only file in the application's native format and its config includes it | kitty, foot, ghostty, alacritty, Hyprland (`conf/palette.lua`), Neovim (`theme/palette.lua`) |
+| **Generated partial, `@import`ed** | The same idea through CSS: one shared file at `.config/theme/voidashi-colors.css`, imported by path on the stylesheet's first line | waybar, swaync, wlogout |
 | **Generated block, inlined** | The same content pasted into the stylesheet between markers, because the application cannot import | wofi |
 | **Generated named colours** | The palette is mapped onto the names the toolkit already paints from, and the application carries on unaware | GTK3, GTK4 and libadwaita |
 | **Merged INI** | Only the colour, font and cursor keys of a file another program also writes | KDE (`kdeglobals`, `kcminputrc`) |
@@ -29,13 +32,18 @@ The hand-written ones are the ones that age in silence, which is why
 `scripts/theme/palette.json` is the single source of truth, transcribed from
 `RICE-GUIDE.md`. Edit it there, never a hex in an application config.
 
-`scripts/theme/generate_theme.py` renders it into ten files, each in the format its
-consumer already reads: four terminal partials, the Hyprland Lua module, the Neovim
-palette layer, a shared GTK `@define-color` partial, the GTK3 and GTK4 named-colour
-files, and wofi's stylesheet with the palette inlined. It also installs a selectable
-KDE colour scheme as `Voidashi.colors` and merges colour, font and cursor keys into
-`kdeglobals` and `kcminputrc` key by key, so nothing of KDE's own is lost. Output
-carries a `GENERATED` header and must not be hand-edited.
+`scripts/theme/generate_theme.py` **writes** ten files whole, each in the format its
+consumer already reads: the four terminal partials, the Hyprland Lua module, the Neovim
+palette layer, the shared CSS partial at `.config/theme/voidashi-colors.css`, the GTK3
+and GTK4 named-colour files, and the selectable KDE colour scheme
+`Voidashi.colors`. Those ten are what `check_palette.py` counts.
+
+It also **edits** two files it does not own rather than writing them: wofi's stylesheet,
+where the palette is spliced between markers because wofi cannot import, and
+`kdeglobals` plus `kcminputrc`, where colour, font and cursor keys are merged in one by
+one so nothing of KDE's own is lost. The distinction matters when reading the generator:
+its `generated_files()` covers the ten it writes, and the merges are separate functions.
+Output written whole carries a `GENERATED` header and must not be hand-edited.
 
 `check_palette.py` proves it held: no hex outside the palette, no named terminal colour
 in fish or starship, no bare hex outside the palette in swaylock, and no generated file
@@ -119,8 +127,9 @@ are styled directly.
 matching the GTK mapping so the two toolkits agree. Applications that are not KDE ones
 reach the same palette through the KDE platform theme.
 
-**Fonts.** Iosevka Extended, Instrument Sans and Spectral are symlinked from `fonts/`
-into `~/.local/share/fonts/dotfiles`. GTK and Qt application UI uses Instrument Sans at
+**Fonts.** All four faces in `fonts/` are symlinked into
+`~/.local/share/fonts/dotfiles` as a directory, so Hack Nerd Font arrives with Iosevka
+Extended, Instrument Sans and Spectral. Hack is what the bar's glyphs come from. GTK and Qt application UI uses Instrument Sans at
 weight 500, not Iosevka: they fall under the guide's GTK and Qt rule, not the typography
 table's mono-primary row, which is for bars that render their own text outside a toolkit.
 
@@ -142,7 +151,7 @@ table's mono-primary row, which is for bars that render their own text outside a
   fetch has nothing focused, which is what frees Ice to carry its other meaning,
   function.
 - **Rollback is git, not a directory.** During the retheme every recoloured file kept its
-  previous version beside it. Once the theme was proven, all 17 were deleted along with
+  previous version beside it. Once the theme was proven, all 14 were deleted along with
   the commented references pointing at them, because they gave the impression of an
   active choice between themes where there was none. Do not reintroduce a legacy
   directory.

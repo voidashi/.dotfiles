@@ -88,8 +88,8 @@ hardware layout.
 specific modes:
 
 ```lua
-hl.monitor({ output = "eDP-1", mode = "1920x1080@60",  position = "0x0",    scale = 1 })
-hl.monitor({ output = "DP-1",  mode = "1920x1080@144", position = "1920x0", scale = 1 })
+hl.monitor({ output = "eDP-1", mode = "1920x1080@60", position = "0x0", scale = 1 })
+hl.monitor({ output = "DP-1", mode = "1920x1080@144", position = "1920x0", scale = 1 })
 ```
 
 Line 12 is a catch-all that gives any other output its preferred mode, so if your
@@ -113,10 +113,10 @@ ls /sys/class/backlight/       # backlight
 **Your programs.** `.config/hypr/conf/programs.lua` sets what the keybindings launch:
 
 ```lua
-terminal            = "kitty"     -- line 10
-fileManager         = "dolphin"   -- line 15
-terminalFileManager = "yazi"      -- line 16
-menu                = "wofi --show drun"
+terminal = "kitty"   -- line 10
+fileManager = "dolphin"   -- line 15
+terminalFileManager = "yazi"   -- line 16
+menu = "wofi --show drun"   -- line 22
 ```
 
 All four terminals are configured and themed identically, so switching `terminal` to

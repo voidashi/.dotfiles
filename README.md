@@ -109,7 +109,7 @@ The entry points under Hyprland, with `Super` as the modifier. The full set is i
 | `Super` + `Q` | Close window, add `Shift` to kill it |
 | `Super` + `F` | Fullscreen, `Super` + `V` to toggle floating |
 | `Super` + `Shift` + `V` | Clipboard history |
-| `Super` + `1`…`9` | Switch workspace, add `Shift` to move the window there |
+| `Super` + `1`…`9`, `0` | Switch workspace, ten of them, add `Shift` to move the window there |
 | `Print` | Screenshot the output, `Shift` for a region, `Super` for the window |
 | `Super` + `M` | Exit the compositor |
 
@@ -130,7 +130,7 @@ scripts/
   unlink-dotfiles.sh      the inverse: move everything back to $HOME
   theme/                  palette.json, the generator and the checker
   wm/                     helpers the compositors call while running
-wallpapers/               one sample, so a fresh clone has something to show
+wallpapers/               one sample image, so a fresh clone has something to show
 ```
 
 ## Documentation
@@ -155,6 +155,10 @@ Named here rather than left for you to find:
   window drops its gaps and borders, but no application is assigned to a workspace.
 - **No power profiles.** Idle handling exists; switching a CPU governor does not, since
   that is a system service rather than a dotfile.
+- **The launcher and `Super`+`Return` open different terminals.** wofi is set to
+  alacritty and the keybinding to kitty. All four emulators are themed identically, so
+  nothing looks wrong, but a terminal application started from the launcher lands
+  somewhere you did not choose.
 
 ## Contributing
 
