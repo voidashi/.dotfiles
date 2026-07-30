@@ -1,19 +1,29 @@
 # Documentation
 
-Six documents, each owning one question. When two of them seem to disagree, each
-is authoritative only on the question it owns, and the mismatch is a bug in the
-document rather than something to work around.
+Eight documents. Each owns one question, and each says who it is for, because most of
+them you will never need.
 
-| Document | Answers |
-|---|---|
-| [`design/RICE-GUIDE.md`](design/RICE-GUIDE.md) | How the identity becomes a Linux desktop: the palette, the ANSI table, the rules for assigning colour. Read this before changing anything visual. |
-| [`design/AESTHETIC-DIRECTION.md`](design/AESTHETIC-DIRECTION.md) | Why it looks like this, in sensory terms. No values, no tokens. Read it when a judgement call is not covered by the rules. |
-| [`design/DESIGN-SYSTEM.md`](design/DESIGN-SYSTEM.md) | The canonical token reference. Written for web and document work, so the rice guide overrides it wherever the two differ for a desktop. |
-| [`design/THEMING.md`](design/THEMING.md) | Which of the five mechanisms carries colour to each application, what every surface is set to, and which decisions are settled. |
-| [`TURNING-POINTS.md`](TURNING-POINTS.md) | Why the repository is shaped the way it is, for the decisions whose result is visible but whose reason is not. |
-| [`TODO.md`](TODO.md) | What is open, what is parked with the reasons already ruled out, and what has been decided against. |
+**If you just want to use these dotfiles, you need two:** [`SETUP.md`](SETUP.md) to
+install and adapt them, and [`design/RICE-GUIDE.md`](design/RICE-GUIDE.md) if you want
+to change how they look. Everything else is here for whoever maintains the repository,
+or for anyone curious about why it looks the way it does.
+
+| Document | Answers | For |
+|---|---|---|
+| [`SETUP.md`](SETUP.md) | How to install it, what to change for your own hardware, and what to do when something does not work. | Using it |
+| [`design/RICE-GUIDE.md`](design/RICE-GUIDE.md) | The palette, the ANSI table, and the rules for how colour gets assigned. The authority on anything visual. | Changing how it looks |
+| [`design/THEMING.md`](design/THEMING.md) | Which of the five mechanisms carries colour to each application, what every surface is set to, and which decisions are settled. | Changing how it looks |
+| [`MAINTENANCE.md`](MAINTENANCE.md) | What the management scripts really do, every architecture pitfall this repo has paid for, and how to validate a change. | Editing the repo |
+| [`TODO.md`](TODO.md) | What is open, what is parked with the explanations already ruled out, and what has been decided against. | Anyone |
+| [`TURNING-POINTS.md`](TURNING-POINTS.md) | Why the repository is shaped the way it is, for decisions whose result is visible but whose reason is not. | Curious |
+| [`design/AESTHETIC-DIRECTION.md`](design/AESTHETIC-DIRECTION.md) | Why it looks like this, in sensory terms. No values, no tokens. | Curious |
+| [`design/DESIGN-SYSTEM.md`](design/DESIGN-SYSTEM.md) | The canonical token reference, written for web and document work rather than for a desktop. **Not required reading** to use or change these dotfiles. | Curious |
+
+When two documents seem to disagree, each is authoritative only on the question it
+owns, and the mismatch is a bug in the document rather than something to work around.
+For desktop work specifically, `RICE-GUIDE.md` overrides `DESIGN-SYSTEM.md` wherever
+they differ.
 
 The palette itself is not a document. It is `scripts/theme/palette.json`, which
-`generate_theme.py` renders into every application's own format and
-`check_palette.py` verifies. The rice guide is where the values come from; that
-file is where they live.
+`generate_theme.py` renders into every application's own format and `check_palette.py`
+verifies. The rice guide is where the values come from; that file is where they live.
