@@ -1,0 +1,104 @@
+// Voidashi, restrained variant: one accent family, Bordeaux, and nothing else.
+//
+// These are frozen snapshots of the presets one level up as they were before the
+// semantic mapping went in. Keep them if the reading of a fetch as "the desktop's
+// cover page" wins: a cover page wants a single focal point, which here is the
+// logo and the name, with the whole table in ink.
+//
+// The versions one level up take the other reading, that a family may appear on
+// the rows that mean it: Bordeaux identity, Ice function, Moss duration, Ash
+// media. Both are legitimate under the guide and this is a matter of taste.
+//
+// Use one with: fastfetch -c ~/.config/fastfetch/minimal/<file>
+// For the fish greeter, edit the fastfetch line in .config/fish/config.fish.
+//
+// These are snapshots and are NOT kept in sync with the ones above. If a module
+// is added there, it will not appear here.
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": {
+    	"source": "$HOME/.config/fastfetch/crow/ascii.txt",
+    	"color": { "1": "#b44955" }, // bordeaux-400
+    	"padding": {
+    		"top": 1,
+        "right": 2
+    	},
+    },
+    "display": {
+        "separator": " ",
+        "color": {
+            "keys": "#6c6c6c",      // ink-4, metadata
+            "title": "#b44955",     // bordeaux-400, the identity mark
+            "output": "#b1b1b1",    // ink-2, body text
+            "separator": "#4f4d4a"  // edge-40
+        },
+        // A percentage coloured green, yellow or red by threshold is an accent
+        // spent at rest on nothing. The digits carry the information.
+        "percent": {
+            "type": ["num"]
+        }
+    },
+    "modules": [
+	"break",
+        "break",
+        "break",
+	      {
+            "type": "title",
+            "keyWidth": 10
+        },
+        "break",
+        {
+            "type": "os",
+            "key": " ",
+        },
+        {
+            "type": "kernel",
+            "key": " ",
+        },
+        {
+            "type": "packages",
+            "key": " ",
+        },
+        {
+            "type": "shell",
+            "key": " ",
+        },
+        {
+            "type": "terminal",
+            "key": " ",
+        },
+        {
+            "type": "wm",
+            "key": " ",
+        },
+        {
+            "type": "cursor",
+            "key": " ",
+        },
+        {
+            "type": "terminalfont",
+            "key": " ",
+        },
+        {
+            "type": "uptime",
+            "key": " ",
+        },
+        {
+            "type": "datetime",
+            "format": "{1}-{3}-{11}",
+            "key": " ",
+        },
+        {
+            "type": "media",
+            "key": "󰝚 ",
+        },
+        {
+            "type": "player",
+            "key": " ",
+        },
+        "break",
+        "colors",
+        "break",
+        "break",
+    ]
+}

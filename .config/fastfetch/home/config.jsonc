@@ -1,16 +1,36 @@
-// Preset structure from FastCat: https://github.com/m3tozz/FastCat
-// The colours are Voidashi, not FastCat's.
+// Voidashi fastfetch preset, dormant: nothing runs this.
 //
-// Dormant preset: nothing runs this. fish runs arch_small as the greeter and
-// bare fastfetch reads ../config.jsonc. Aligned anyway, because the guide asks
-// for consistency within a class.
+// This one was the worst of the five. Every row carried its own inline colour,
+// {#31} through {#36} cycling per line, which is "every module a different colour"
+// named as an anti-pattern in both the guide and the aesthetic direction, and six
+// families at once. The box frame is drawn by the key strings, so it takes the key
+// colour of its row; frame rows with no meaning group stay ink-4.
 //
-// This one was the worst of the four. Every row carried its own inline colour,
-//  through  cycling per line, which is the "every module a different
-// colour" anti-pattern named in both the guide and the aesthetic direction, and
-// six accent families visible at once against a budget of two. The frame, the
-// glyph and the label now all sit at ink-4 and the title carries the only
-// accent, which is Bordeaux.
+// Colour is assigned by what a row means, not by rotation. Each family appears
+// only on the rows it stands for, and the key carries the family while the value
+// stays ink-2 so the content column reads uniformly:
+//
+//   Bordeaux  identity      the logo and the title. "The colour that says I am here."
+//   Ice       function      os, kernel, host, cpu, gpu, wm, shell, terminal, fonts,
+//                           cursor, theme: "anything that says this is how it works".
+//   Moss      duration      uptime and datetime. Moss "carries duration, the solidity
+//                           of something that was done and stayed".
+//   Ash       media         the media and player rows, which the role table names
+//                           for "music player accents", and the one place the
+//                           expression family appears on this desktop.
+//   ink       everything    counts and quantities. A number is not a role.
+//
+// Deliberately absent: Bronze, because rarity of use is part of its meaning and
+// nothing in a routine fetch is exceptional; Verdigris, which the guide restricts
+// to ANSI slots 6 and 14 and to syntax highlighting.
+//
+// Ice means focus on interactive surfaces. A fetch has no focus, which is what
+// frees Ice to mean function here without ambiguity.
+//
+// Values are hex, never the ANSI codes fastfetch also accepts: 38;2;73;139;178 is
+// the same colour as #498bb2 and is invisible to check_palette.py.
+//
+// A one-accent variant of every preset here is kept in minimal/.
 {
     "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
     "logo": null,
@@ -43,31 +63,38 @@
         },
         {
             "key": "│ 󰅐 uptime  │",
-            "type": "uptime"
+            "type": "uptime",
+            "keyColor": "#4e9162"  // moss-400, duration
         },
         {
             "key": "│ {icon} distro  │",
-            "type": "os"
+            "type": "os",
+            "keyColor": "#498bb2"  // ice-400, function
         },
         {
             "key": "│  kernel  │",
-            "type": "kernel"
+            "type": "kernel",
+            "keyColor": "#498bb2"  // ice-400, function
         },
         {
             "key": "│ 󰇄 desktop │",
-            "type": "de"
+            "type": "de",
+            "keyColor": "#498bb2"  // ice-400, function
         },
         {
             "key": "│  term    │",
-            "type": "terminal"
+            "type": "terminal",
+            "keyColor": "#498bb2"  // ice-400, function
         },
         {
             "key": "│  shell   │",
-            "type": "shell"
+            "type": "shell",
+            "keyColor": "#498bb2"  // ice-400, function
         },
         {
             "key": "│ 󰍛 cpu     │",
             "type": "cpu",
+            "keyColor": "#498bb2",  // ice-400, function
             "showPeCoreCount": true
         },
         {

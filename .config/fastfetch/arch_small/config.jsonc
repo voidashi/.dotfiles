@@ -1,23 +1,39 @@
-// Preset structure from FastCat: https://github.com/m3tozz/FastCat
-// The colours are Voidashi, not FastCat's.
+// Voidashi greeter. This is the live one: fish runs it from config.fish.
 //
-// This is the live one: fish runs it as the greeter, from config.fish.
+// What it did before, measured with `fastfetch --pipe false | cat -v` rather than
+// judged by eye: logo and title came out ESC[36m, cyan, which is Verdigris; keys
+// came out ESC[1m ESC[33m, bold yellow, which resolves to bright yellow, meaning
+// alert-caution used as decoration. The alert family is kept separate precisely so
+// "needs attention" never reads as branding.
 //
-// What it used to do, measured with `fastfetch --pipe false | cat -v`: the logo
-// and title came out ESC[36m, cyan, which in our ANSI table is Verdigris, and
-// the guide says outright that Verdigris exists for ANSI slots 6 and 14 and for
-// syntax highlighting, not as a UI accent. The keys came out ESC[1m ESC[33m,
-// bold yellow, which resolves to bright yellow, which is alert-caution: an alert
-// tone used as decoration, and the alert tones are kept separate precisely so
-// that "needs attention" never reads as branding.
+// arch_small paints from two logo slots. Setting only the first left the bottom
+// third of the logo on its default cyan.
 //
-// A greeter is an identity surface (RICE-GUIDE.md, Application classes), so the
-// identity mark is what belongs: Bordeaux on the logo and the title, ink for
-// everything else, one accent family visible at rest.
+// Colour is assigned by what a row means, not by rotation. Each family appears
+// only on the rows it stands for, and the key carries the family while the value
+// stays ink-2 so the content column reads uniformly:
 //
-// Values are hex rather than the ANSI codes fastfetch also accepts, so that
-// check_palette.py can see them. Written as 38;2;180;73;85 the same colour would
-// be invisible to the checker.
+//   Bordeaux  identity      the logo and the title. "The colour that says I am here."
+//   Ice       function      os, kernel, host, cpu, gpu, wm, shell, terminal, fonts,
+//                           cursor, theme: "anything that says this is how it works".
+//   Moss      duration      uptime and datetime. Moss "carries duration, the solidity
+//                           of something that was done and stayed".
+//   Ash       media         the media and player rows, which the role table names
+//                           for "music player accents", and the one place the
+//                           expression family appears on this desktop.
+//   ink       everything    counts and quantities. A number is not a role.
+//
+// Deliberately absent: Bronze, because rarity of use is part of its meaning and
+// nothing in a routine fetch is exceptional; Verdigris, which the guide restricts
+// to ANSI slots 6 and 14 and to syntax highlighting.
+//
+// Ice means focus on interactive surfaces. A fetch has no focus, which is what
+// frees Ice to mean function here without ambiguity.
+//
+// Values are hex, never the ANSI codes fastfetch also accepts: 38;2;73;139;178 is
+// the same colour as #498bb2 and is invisible to check_palette.py.
+//
+// A one-accent variant of every preset here is kept in minimal/.
 {
     "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
     "logo": {
@@ -54,14 +70,17 @@
         "title",
         {
             "type": "os",
+            "keyColor": "#498bb2",  // ice-400, function
             "key": "os    "
         },
         {
             "type": "kernel",
+            "keyColor": "#498bb2",  // ice-400, function
             "key": "kernel"
         },
         {
             "type": "host",
+            "keyColor": "#498bb2",  // ice-400, function
             "format": "{5} {1}",
             "key": "host  "
         },
@@ -71,6 +90,7 @@
         },
         {
             "type": "uptime",
+            "keyColor": "#4e9162",  // moss-400, duration
             "format": "{2}h {3}m",
             "key": "uptime"
         },

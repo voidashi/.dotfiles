@@ -1,0 +1,79 @@
+// Voidashi, restrained variant: one accent family, Bordeaux, and nothing else.
+//
+// These are frozen snapshots of the presets one level up as they were before the
+// semantic mapping went in. Keep them if the reading of a fetch as "the desktop's
+// cover page" wins: a cover page wants a single focal point, which here is the
+// logo and the name, with the whole table in ink.
+//
+// The versions one level up take the other reading, that a family may appear on
+// the rows that mean it: Bordeaux identity, Ice function, Moss duration, Ash
+// media. Both are legitimate under the guide and this is a matter of taste.
+//
+// Use one with: fastfetch -c ~/.config/fastfetch/minimal/<file>
+// For the fish greeter, edit the fastfetch line in .config/fish/config.fish.
+//
+// These are snapshots and are NOT kept in sync with the ones above. If a module
+// is added there, it will not appear here.
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": {
+        "source": "arch_small", // search for logos: fastfetch --list-logos or --print-logos
+        // arch_small paints from two slots. Setting only the first left the
+        // bottom third of the logo on its default cyan.
+        "color": {
+            "1": "#b44955", // bordeaux-400
+            "2": "#99303f"  // bordeaux-500
+        },
+        "padding": {
+            "top": 1
+        }
+    },
+    "display": {
+        "separator": "  ",
+        "color": {
+            "keys": "#6c6c6c",      // ink-4, metadata
+            "title": "#b44955",     // bordeaux-400, the identity mark
+            "output": "#b1b1b1",    // ink-2, body text
+            "separator": "#4f4d4a"  // edge-40
+        },
+        // fastfetch colours a percentage green, yellow or red by threshold, and
+        // the memory line came out green at 16%. Green is in the palette, but
+        // that is an accent spent at rest on nothing, which is the difference
+        // between a rice and a dashboard. The digits carry the information; the
+        // number stays ink.
+        "percent": {
+            "type": ["num"]
+        }
+    },
+    "modules": [
+        "break",
+        "title",
+        {
+            "type": "os",
+            "key": "os    "
+        },
+        {
+            "type": "kernel",
+            "key": "kernel"
+        },
+        {
+            "type": "host",
+            "format": "{5} {1}",
+            "key": "host  "
+        },
+        {
+            "type": "packages",
+            "key": "pkgs  "
+        },
+        {
+            "type": "uptime",
+            "format": "{2}h {3}m",
+            "key": "uptime"
+        },
+        {
+            "type": "memory",
+            "key": "memory"
+        },
+        "break"
+    ]
+}

@@ -1,0 +1,104 @@
+// Voidashi, restrained variant: one accent family, Bordeaux, and nothing else.
+//
+// These are frozen snapshots of the presets one level up as they were before the
+// semantic mapping went in. Keep them if the reading of a fetch as "the desktop's
+// cover page" wins: a cover page wants a single focal point, which here is the
+// logo and the name, with the whole table in ink.
+//
+// The versions one level up take the other reading, that a family may appear on
+// the rows that mean it: Bordeaux identity, Ice function, Moss duration, Ash
+// media. Both are legitimate under the guide and this is a matter of taste.
+//
+// Use one with: fastfetch -c ~/.config/fastfetch/minimal/<file>
+// For the fish greeter, edit the fastfetch line in .config/fish/config.fish.
+//
+// These are snapshots and are NOT kept in sync with the ones above. If a module
+// is added there, it will not appear here.
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "logo": null,
+    "display": {
+        "separator": "  ",
+        "color": {
+            "keys": "#6c6c6c",      // ink-4, and the box frame with it
+            "title": "#b44955",     // bordeaux-400, the identity mark
+            "output": "#b1b1b1",    // ink-2, body text
+            "separator": "#4f4d4a"  // edge-40
+        },
+        "percent": {
+            "type": ["num"]
+        }
+    },
+    "modules": [
+        {
+            "key": "╭───────────╮",
+            "type": "custom"
+        },
+        {
+            "key": "│  user    │",
+            "type": "title",
+            "format": "{user-name}"
+        },
+        {
+            "key": "│ 󰇅 hname   │",
+            "type": "title",
+            "format": "{host-name}"
+        },
+        {
+            "key": "│ 󰅐 uptime  │",
+            "type": "uptime"
+        },
+        {
+            "key": "│ {icon} distro  │",
+            "type": "os"
+        },
+        {
+            "key": "│  kernel  │",
+            "type": "kernel"
+        },
+        {
+            "key": "│ 󰇄 desktop │",
+            "type": "de"
+        },
+        {
+            "key": "│  term    │",
+            "type": "terminal"
+        },
+        {
+            "key": "│  shell   │",
+            "type": "shell"
+        },
+        {
+            "key": "│ 󰍛 cpu     │",
+            "type": "cpu",
+            "showPeCoreCount": true
+        },
+        {
+            "key": "│ 󰉉 disk    │",
+            "type": "disk",
+            "folders": "/"
+        },
+        {
+            "key": "│  memory  │",
+            "type": "memory"
+        },
+        {
+            "key": "│ 󰩟 network │",
+            "type": "localip",
+            "format": "{ipv4} ({ifname})"
+        },
+        {
+            "key": "├───────────┤",
+            "type": "custom"
+        },
+        {
+            "key": "│  colors  │",
+            "type": "colors",
+            "symbol": "circle"
+        },
+        {
+            "key": "╰───────────╯",
+            "type": "custom"
+        }
+    ]
+}

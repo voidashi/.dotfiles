@@ -29,6 +29,14 @@ nothing when they are clean, so an empty block is a pass, not a failure to run.
 
 !`cd "$(git rev-parse --show-toplevel)" && kitty +runpy "from kitty.config import load_config; bad=[]; load_config('.config/kitty/kitty.conf', accumulate_bad_lines=bad); print(bad)" 2>&1 | tail -3`
 
+## fastfetch, every config
+
+!`cd "$(git rev-parse --show-toplevel)/.config/fastfetch" && for f in config.jsonc */config.jsonc minimal/*.jsonc; do out=$(fastfetch --pipe true -c "$f" 2>&1 >/dev/null); [ -n "$out" ] && echo "$f: $out"; done; echo "checked: $(ls config.jsonc */config.jsonc minimal/*.jsonc 2>/dev/null | wc -l)"`
+
+## catnap
+
+!`cd "$(git rev-parse --show-toplevel)" && err=$(catnap -n -c .config/catnap/config.toml -a .config/catnap/distros.toml 2>&1 >/dev/null | grep -i error | head -3); rc=$?; catnap -n -c .config/catnap/config.toml -a .config/catnap/distros.toml >/dev/null 2>&1; echo "exit: $?"; [ -n "$err" ] && echo "$err"`
+
 ## Tracked symlinks
 
 !`cd "$(git rev-parse --show-toplevel)" && bash scripts/backup-configs.sh check 2>&1 | grep -v SUCCESS; echo "valid: $(cd "$(git rev-parse --show-toplevel)" && bash scripts/backup-configs.sh check 2>&1 | grep -c SUCCESS)"`
@@ -45,6 +53,14 @@ actually returned rather than describing it.
 How to read these:
 
 - **kitty** prints `[]` when clean. Anything else is the list of bad lines.
+- **fastfetch** should list no file and report `checked: 10`. A file named here
+  failed to parse; the message after the colon is fastfetch's own.
+- **catnap** should report `exit: 0` and nothing else. Its render goes to stdout
+  and its errors to stderr, and the exit code is the reliable signal: 1 on an
+  invalid config, 0 on a valid one. This block exists for one specific future
+  failure: catnap 2.0 replaced the TOML config format entirely and the AUR package
+  is still on 1.x, so the day it updates, both tracked files stop being valid at
+  once. This is what will say so.
 - **Tracked symlinks** should equal the number of paths in
   `scripts/config_files.conf`, which is 31 as of this writing, with no `Broken`
   lines. If the count differs, check that file before assuming a fault. A broken one

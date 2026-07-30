@@ -63,6 +63,17 @@ Three of the four are built; what is below is what is left of them.
   `assign` rules.
   *Difficulty: low to write, and the design is the real work. Priority: low.*
 
+- **catnap's tracked config dies on the next upstream bump.** Upstream is at 2.1.1 and
+  catnap 2.0 replaced the TOML config with a `.cat` language, saying outright that
+  `config.toml` and `distros.toml` are not compatible with v2. The AUR package is still
+  1.1.1, so today it works. When it moves, both tracked files have to be rewritten rather
+  than edited, and the payoff is real: v2 takes hex, RGB and theme imports, so the palette
+  would be reachable exactly instead of through seven ANSI tokens with no grey among them.
+  `/verify-repo` runs catnap and reports its exit code, so this surfaces as a failed check
+  rather than as a broken greeter.
+  *Difficulty: low, and it is a rewrite of two files rather than an edit. Priority: low
+  until the AUR moves, then blocking for anyone who uses catnap as the greeter.*
+
 - **`dunst` is still declared in `packages.conf` although nothing launches it.**
   `.config/dunst/` is kept deliberately as a reference and that decision is final, but
   installing the package on every fresh clone is a separate question that was never asked.

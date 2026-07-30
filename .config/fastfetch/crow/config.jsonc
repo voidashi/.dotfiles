@@ -1,15 +1,38 @@
-// Preset structure from FastCat: https://github.com/m3tozz/FastCat
-// The colours are Voidashi, not FastCat's.
+// Voidashi fastfetch preset, dormant: nothing runs this. fish runs arch_small as
+// the greeter and bare fastfetch reads ../config.jsonc. Kept aligned because the
+// guide asks for consistency within a class.
 //
-// Dormant preset: nothing runs this. fish runs arch_small as the greeter and
-// bare fastfetch reads ../config.jsonc. It is aligned anyway, because the guide
-// requires consistency within a class and a preset that has drifted is a preset
-// that comes back wrong the day it is switched on.
+// It used to set "keyColor": "34" on every module, ANSI blue, on every row, which
+// made a correct colour into decoration.
 //
-// It used to set "keyColor": "34" on every module, ANSI blue, which is ice-400.
-// Ice is the focus colour everywhere on this desktop, and a fetch has nothing
-// focused; Bordeaux is the identity mark a fetch is for. Hex rather than ANSI
-// codes so check_palette.py can see the values.
+// ascii.txt is braille block art with no $1..$9 placeholders, so logo.color.1
+// paints all of it. Placeholders would allow two-tone shading of the crow.
+//
+// Colour is assigned by what a row means, not by rotation. Each family appears
+// only on the rows it stands for, and the key carries the family while the value
+// stays ink-2 so the content column reads uniformly:
+//
+//   Bordeaux  identity      the logo and the title. "The colour that says I am here."
+//   Ice       function      os, kernel, host, cpu, gpu, wm, shell, terminal, fonts,
+//                           cursor, theme: "anything that says this is how it works".
+//   Moss      duration      uptime and datetime. Moss "carries duration, the solidity
+//                           of something that was done and stayed".
+//   Ash       media         the media and player rows, which the role table names
+//                           for "music player accents", and the one place the
+//                           expression family appears on this desktop.
+//   ink       everything    counts and quantities. A number is not a role.
+//
+// Deliberately absent: Bronze, because rarity of use is part of its meaning and
+// nothing in a routine fetch is exceptional; Verdigris, which the guide restricts
+// to ANSI slots 6 and 14 and to syntax highlighting.
+//
+// Ice means focus on interactive surfaces. A fetch has no focus, which is what
+// frees Ice to mean function here without ambiguity.
+//
+// Values are hex, never the ANSI codes fastfetch also accepts: 38;2;73;139;178 is
+// the same colour as #498bb2 and is invisible to check_palette.py.
+//
+// A one-accent variant of every preset here is kept in minimal/.
 {
     "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
     "logo": {
@@ -45,10 +68,12 @@
         "break",
         {
             "type": "os",
+            "keyColor": "#498bb2",  // ice-400, function
             "key": " ",
         },
         {
             "type": "kernel",
+            "keyColor": "#498bb2",  // ice-400, function
             "key": " ",
         },
         {
@@ -57,39 +82,48 @@
         },
         {
             "type": "shell",
+            "keyColor": "#498bb2",  // ice-400, function
             "key": " ",
         },
         {
             "type": "terminal",
+            "keyColor": "#498bb2",  // ice-400, function
             "key": " ",
         },
         {
             "type": "wm",
+            "keyColor": "#498bb2",  // ice-400, function
             "key": " ",
         },
         {
             "type": "cursor",
+            "keyColor": "#498bb2",  // ice-400, function
             "key": " ",
         },
         {
             "type": "terminalfont",
+            "keyColor": "#498bb2",  // ice-400, function
             "key": " ",
         },
         {
             "type": "uptime",
+            "keyColor": "#4e9162",  // moss-400, duration
             "key": " ",
         },
         {
             "type": "datetime",
+            "keyColor": "#4e9162",  // moss-400, duration
             "format": "{1}-{3}-{11}",
             "key": " ",
         },
         {
             "type": "media",
+            "keyColor": "#9270a7",  // ash-400, media
             "key": "󰝚 ",
         },
         {
             "type": "player",
+            "keyColor": "#9270a7",  // ash-400, media
             "key": " ",
         },
         "break",

@@ -145,6 +145,30 @@ retheme on `green`, `red` and `brgreen` while the hex check passed clean.
   This is also why `check_palette.py` gained a bare-hex scope. swaylock writes
   `ring-color=393835` with no `#`, so the hex check had never read one of its 28 values.
 
+- **The fetches carry colour by meaning, and the accent budget was relaxed for them
+  deliberately.** The guide's two-family ceiling is written for a screen at rest, and Jeff's
+  call is that a fetch may show more as long as the assignment means something rather than
+  rotates. So each family appears only on the rows it stands for: Bordeaux on identity, Ice
+  on function, Moss on duration, Ash on media, ink on counts, with the key carrying the
+  family and the value staying ink-2 so the content column reads uniformly. Bronze stays out
+  because rarity is part of its meaning, Verdigris because the guide restricts it to ANSI
+  slots 6 and 14.
+
+  Ice needed the argument. The role table assigns it to focus, and an earlier pass had
+  stripped it from these files for that reason. The reason was wrong: a fetch has nothing
+  focused, which is precisely what frees Ice to carry its other meaning, the one
+  `AESTHETIC-DIRECTION.md` gives it, "anything that says *this is how it works*".
+
+  A one-accent variant of every preset is kept in `.config/fastfetch/minimal/`, because the
+  competing reading is also legitimate: the guide calls a fetch "the desktop's cover page",
+  and a cover page wants one focal point. That one is a matter of taste and both are on disk.
+
+- **catnap follows the same mapping with less reach.** It has no hex, measured by writing one
+  and watching the literal string print, and its seven tokens are ANSI slots, so it is on
+  palette by construction but cannot reach a level: its keys sit at ink-2 where fastfetch's
+  sit at ink-4, because the vocabulary contains no grey. Its cachy logo was `{CN}`,
+  Verdigris, and is now Bordeaux.
+
 - **fastfetch is on the palette in all five of its configs, and was on ANSI defaults.**
   Measured rather than eyeballed: the fish greeter rendered its logo and title in `ESC[36m`,
   cyan, which is Verdigris, a family the guide restricts to ANSI slots 6 and 14 and to syntax
