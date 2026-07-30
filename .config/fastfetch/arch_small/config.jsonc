@@ -89,14 +89,14 @@
             "key": "pkgs  "
         },
         {
+            "type": "memory",
+            "key": "memory"
+        },
+        {
             "type": "uptime",
             "keyColor": "#4e9162",  // moss-400, duration
             "format": "{2}h {3}m",
             "key": "uptime"
-        },
-        {
-            "type": "memory",
-            "key": "memory"
         },
         "break"
     ]

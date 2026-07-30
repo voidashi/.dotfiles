@@ -66,13 +66,13 @@
             "key": "pkgs  "
         },
         {
+            "type": "memory",
+            "key": "memory"
+        },
+        {
             "type": "uptime",
             "format": "{2}h {3}m",
             "key": "uptime"
-        },
-        {
-            "type": "memory",
-            "key": "memory"
         },
         "break"
     ]
