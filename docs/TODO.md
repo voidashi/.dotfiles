@@ -22,27 +22,21 @@ the repository is shaped as it is belongs to
 
 ## Start here next session
 
-Highest priority, before anything else. All four come from a third review, by someone
+Highest priority, before anything else. All three come from a third review, by someone
 told to be an ordinary Linux user who wants a good-looking desktop without spending a
 weekend on it, and who can google anything obvious. The two earlier reviews were done by
 people who could read code, which is why none of this surfaced then. Every finding below
 was re-verified by hand.
 
-The fifth, "say how to get into the session", is done: `greetd` and `greetd-tuigreet` are
-declared, `SETUP.md` step 5 covers the display manager and the text console paths, and the
-black-screen symptom is in the troubleshooting list. What it left behind is below, under
-"Pending actions" and "Features not built".
+Two of the five are done. "Say how to get into the session" put `greetd` and
+`greetd-tuigreet` in `packages.conf` and both launch paths in `SETUP.md` step 6, and what
+it left behind is under "Pending actions" and "Features not built". "Make `--dry-run` the
+first install step" is now steps 1 and 3 of the install, with the README's warning
+offering the simulation instead of demanding an audit. That one turned up three defects in
+`backup-configs.sh`, all fixed and recorded under Housekeeping, so it stopped being a
+documentation task halfway through.
 
-1. **Make `--dry-run` the first install step, and stop asking the reader to audit bash.**
-   The README's warning currently says to read the scripts before pointing them at a home
-   directory. The reviewer stopped there, correctly: they cannot audit 400 lines of bash,
-   so the instruction leaves only "ignore the author" or "give up". `--dry-run` is the
-   answer and appears once in the README and **zero times** in `SETUP.md`'s numbered
-   steps, which is the guide they would actually follow. Make it step 0, and reword the
-   warning to offer the way out rather than to demand the reading.
-   *Difficulty: trivial. Priority: maximum.*
-
-2. **Write the recipe for changing the accent colour.** The README's headline promise is
+1. **Write the recipe for changing the accent colour.** The README's headline promise is
    "change one hex and everything moves together", and that promise is what makes people
    want the repo. It is also the one thing no document lets them act on. Measured:
    `palette.json` has no accent key at all, the identity colour is a ten-value `bordeaux`
@@ -59,7 +53,7 @@ black-screen symptom is in the troubleshooting list. What it left behind is belo
    *Difficulty: low. Priority: maximum, since it is the repo's best promise with nothing
    behind it.*
 
-3. **Make the two things a reader has to guess at explicit.** The README offers "you can
+2. **Make the two things a reader has to guess at explicit.** The README offers "you can
    lift the terminal colours, or the bar, or just the palette generator, and ignore the
    rest", and no document says how, while the installer brings 54 packages including both
    compositors, both notification daemons and both file managers. Write the cheap path in
@@ -73,7 +67,7 @@ black-screen symptom is in the troubleshooting list. What it left behind is belo
    terminal, which is the whole point of the repo.
    *Difficulty: low. Priority: maximum.*
 
-4. **Rewrite the README's opening as an introduction that holds the reader.** "Is this for
+3. **Rewrite the README's opening as an introduction that holds the reader.** "Is this for
    you?" is good and the reviewer said so, but it opens by qualifying rather than by
    selling, so it does not hold someone who just opened the repo. The page should lead
    with what this is and why it looks good, then what it contains, and only then filter
@@ -96,7 +90,7 @@ session.
   autostart lines existed will not be running them. Confirm with the commands rather than
   by pressing the keybind, because a dead daemon and an empty history look identical:
   `pgrep -x hypridle`, `pgrep -x wl-paste`, `cliphist list | wc -l`.
-- **The greetd path has never been run.** It is now documented in `SETUP.md` step 5 and
+- **The greetd path has never been run.** It is now documented in `SETUP.md` step 6 and
   declared in `packages.conf`, but this machine reaches its desktop through
   `plasmalogin` and greetd is not installed here, so nothing has exercised the config or
   the unit. What was verified is narrow and worth not re-doing: both packages exist in
@@ -211,6 +205,27 @@ session.
   failure on every run and made the script exit 1 on a completely successful install,
   for as long as that line existed, and it surfaced because a summary line looked wrong
   rather than because anything checked it.
+
+  Part of the correctness pass is now done, on `backup-configs.sh` only, and it found
+  three defects in the simulation paths. `install --dry-run --force` reached
+  `rm -rf "$target"` with no `DRY_RUN` guard and deleted files for real; `backup_file()`
+  was `$DRY_RUN || rsync ... && log`, which parses as `(A || B) && C` and logged a backup
+  it had skipped; and the dry run announced `SUCCESS "Linked:"` in the same words as the
+  real branch, so a simulation was indistinguishable from an execution. All three are
+  fixed and verified in three throwaway `HOME=` sandboxes: `--dry-run --force` leaves the
+  file intact with zero backups written, plain `--dry-run` still skips, and a real
+  `--force` still produces the symlink and one backup file. That harness is worth
+  rebuilding rather than remembering, because it is what turned a suspicion into a
+  measurement.
+
+  What that pass did **not** cover, so nobody reads the above as more than it is: only
+  `install`, `--dry-run` and `--force` were exercised. `add`, `restore`, `init` and
+  `check` were not run at all, `install-packages.sh` was not touched, no unquoted
+  expansion or `rsync --remove-source-files` path was reviewed, and shellcheck is not
+  installed on this machine so the lint pass has not happened. Confirmed clean along the
+  way, and worth not rechecking: there is no `set -e` in `backup-configs.sh`, and the two
+  callers of `backup_file()` ignore its return value, so returning non-zero on a failed
+  copy changes no control flow.
 
   Three passes, in order. **Correctness** first, with arithmetic and exit-code handling
   ahead of everything else since that is where the known defect lived, along with `set

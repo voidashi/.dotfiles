@@ -83,7 +83,7 @@ cd ~/.dotfiles
 That installs and links everything. It does not give you a way to *reach* the desktop:
 nothing here enables a graphical login. If you already run a display manager it will
 list Hyprland and Sway on the next boot and you can log out and back in. If you do not,
-[`docs/SETUP.md`](docs/SETUP.md) step 5 sets up `greetd`, and `Hyprland` typed at a text
+[`docs/SETUP.md`](docs/SETUP.md) step 6 sets up `greetd`, and `Hyprland` typed at a text
 console works too.
 
 > [!WARNING]
@@ -91,11 +91,18 @@ console works too.
 > unless you pass `--force`, and backs up anything it replaces. Its sibling `add` runs the
 > other direction and **moves files out of `$HOME`** into the repo. You want `install`.
 >
-> Being straight about the limits of that: these scripts have not been audited line by
-> line, and one defect has already been found and fixed. Read them before pointing them
-> at a home directory you care about, and use `--dry-run` first if you would rather see
-> what happens than trust the description. The open audit is in
-> [`docs/TODO.md`](docs/TODO.md).
+> You do not have to take that on trust, and you do not have to audit the bash to check
+> it. Add `--dry-run` and the script prints every path it would touch, changing nothing:
+>
+> ```bash
+> ./scripts/backup-configs.sh install --dry-run
+> ```
+>
+> Being straight about why that is worth doing: these scripts have not been audited line
+> by line, and defects have turned up twice. The second was in `--dry-run --force`, which
+> deleted files while logging a backup it had never written. Both are fixed and the fix
+> is tested, but the pattern is the argument for running the simulation yourself rather
+> than believing this paragraph. The open audit is in [`docs/TODO.md`](docs/TODO.md).
 
 > [!IMPORTANT]
 > **Clone to `~/.dotfiles` exactly.** Five tracked files reference that path absolutely,

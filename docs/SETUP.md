@@ -37,6 +37,11 @@ grep for it first and change every hit:
 grep -rn '\$HOME/\.dotfiles' .config/
 ```
 
+Two of the steps below change nothing. Step 1 lists the packages without installing
+them and step 3 walks the whole symlink pass without touching a file, so you can watch
+both scripts describe their own work before you let either of them do it. Neither needs
+you to read any bash.
+
 **1. See what would be installed, before installing it.**
 
 ```bash
@@ -51,17 +56,34 @@ grep -rn '\$HOME/\.dotfiles' .config/
 
 This asks for sudo. It logs to `scripts/package_install.log`, overwritten each run.
 
-**3. Link the configs into your home directory.**
+**3. See what the linking would do, without doing it.**
+
+```bash
+./scripts/backup-configs.sh install --dry-run
+```
+
+It creates, moves and deletes nothing. Work it would do is prefixed `Simulate:`, and a
+path it would leave alone because a real file is already there says `Skipping existing
+file`. Read the list: it is the set of paths the next step will touch, so this is where
+you find out it wants a file you care about, while finding out still costs nothing.
+
+**4. Link the configs into your home directory.**
 
 ```bash
 ./scripts/backup-configs.sh install
 ```
 
 This creates symlinks from `$HOME` into the repo. It **refuses to overwrite** a real
-file that is already there. If you want it to replace one, pass `--force`, and it backs
-the original up into `~/.dotfiles_backup/<timestamp>/` before removing it.
+file that is already there, which is why the dry run above reports some paths as
+`Skipping existing file`. To replace one, pass `--force`, and it copies the original
+into `~/.dotfiles_backup/<timestamp>/` before removing it. `--force` is also worth a dry
+run first, since it is the flag that has something to destroy:
 
-**4. Check that it worked.**
+```bash
+./scripts/backup-configs.sh install --dry-run --force
+```
+
+**5. Check that it worked.**
 
 ```bash
 ./scripts/backup-configs.sh check
@@ -69,7 +91,7 @@ the original up into `~/.dotfiles_backup/<timestamp>/` before removing it.
 
 Every tracked path should report as a symlink into the repo.
 
-**5. Set up a way into the session.**
+**6. Set up a way into the session.**
 
 Nothing so far gives you a graphical login. The packages and the symlinks are only the
 contents of a session; a fresh Arch install has nothing that starts one, so this is the
@@ -136,7 +158,7 @@ you start by typing its name inherits your login shell's environment instead. Sw
 set a variable from its own config, so put `QT_QPA_PLATFORMTHEME=kde` in your shell
 profile if you take this path, or Qt applications come up light.
 
-**6. Make fish your login shell**, if you want the prompt this repo themes.
+**7. Make fish your login shell**, if you want the prompt this repo themes.
 
 ```bash
 chsh -s /usr/bin/fish
@@ -147,7 +169,7 @@ everything else looks themed. The tracked `.bashrc` is deliberately a stock one,
 there is no clue that anything is missing. Starship and the fish colour scheme both live
 under `.config/fish/`, so they only apply once fish is actually the shell you land in.
 
-**7. Log out and back in**, so the compositor picks up the new config and starts the
+**8. Log out and back in**, so the compositor picks up the new config and starts the
 background pieces: the bar, the wallpaper, notifications, the clipboard watcher and the
 idle daemon. This step is also what loads
 `~/.config/environment.d/50-voidashi.conf`, which is the only thing that sets
@@ -263,7 +285,7 @@ Symptom first. The *why* for most of these is in
 [`MAINTENANCE.md`](MAINTENANCE.md).
 
 **You reboot and get a text console, or a black screen, and never a desktop.** Nothing in
-this repo starts a session, so this is step 5 rather than a fault. Check in that order:
+this repo starts a session, so this is step 6 rather than a fault. Check in that order:
 
 ```bash
 ls /usr/share/wayland-sessions/          # the compositors are installed at all
@@ -321,7 +343,7 @@ under Sway, because Sway has no way to set an environment variable from its own 
 It is read by `systemd --user`, so how you started the session decides whether Sway sees
 it: launched from a display manager it does, but typed at a text console it inherits your
 login shell's environment instead, which does not include it. Put the variable in your
-shell profile if you start Sway that way. Step 5 above covers both launch paths. Hyprland
+shell profile if you start Sway that way. Step 6 above covers both launch paths. Hyprland
 is unaffected either way, since `conf/env_vars.lua` sets the variable itself.
 
 Second, is anything honouring it? `plasma-integration` provides the platform theme the

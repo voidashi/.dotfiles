@@ -65,6 +65,16 @@ previously made the README's own `./scripts/install-packages.sh install` abort w
 - `init` runs `git init` in the repo and creates the directory skeleton. It is for
   starting a dotfiles repo from nothing, not for using this one, which is why the
   install path never mentions it.
+- `--dry-run` must reach every destructive line, and once did not. `install --dry-run
+  --force` ran `rm -rf "$target"` for real, because the guard sat around the linking
+  block further down and not around the `$FORCE` branch that removes the original.
+  `backup_file()` made it worse: written as `$DRY_RUN || rsync ... && log "Backup: ..."`
+  it parses as `(A || B) && C`, so the simulation skipped the copy and printed the
+  backup line anyway. The file was destroyed, no backup existed, and the output claimed
+  both. When adding anything that writes or deletes here, guard it and then prove the
+  guard with a throwaway `HOME=`, because this is the failure the flag exists to
+  prevent. Simulated lines say `Simulate:` at INFO; only real ones say `Linked:` at
+  SUCCESS, and keeping those two vocabularies apart is what makes a dry run readable.
 - `--verbose` also exists and is undocumented in the usage line; it prints each
   decision as it is made, which is the thing to reach for when `check` disagrees with
   what you see on disk.
