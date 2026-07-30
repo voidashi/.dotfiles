@@ -73,8 +73,8 @@ Every tracked path should report as a symlink into the repo.
 
 Nothing so far gives you a graphical login. The packages and the symlinks are only the
 contents of a session; a fresh Arch install has nothing that starts one, so this is the
-step between a working install and a black screen. You need one of the two paths below,
-not both.
+step between a working install and a black screen. Three cases follow and you need
+exactly one of them.
 
 Both compositors install their own session entry, so anything that reads them will find
 Hyprland and Sway without help from this repo:
