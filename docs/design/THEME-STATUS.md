@@ -13,7 +13,7 @@ under "Known gaps" at the bottom.
 - **Terminals** (kitty, foot, ghostty, alacritty): full palette + Iosevka Extended at size
   12, matched across all four.
 - **waybar, wofi, wlogout** (GTK3) and **swaync** (GTK4): themed from the shared GTK CSS
-  partial, except wofi, which inlines it for the reason recorded in `CLAUDE.md`. swaync had
+  partial, except wofi, which inlines it for the reason recorded in `../MAINTENANCE.md`. swaync had
   no config anywhere before this, in the repo or on the live system.
 - **Hyprland**: window borders and decoration recolored.
 - **Sway**: focus in Ice, unfocused in edge-30, surfaces on the void scale, mirroring
@@ -131,7 +131,7 @@ retheme on `green`, `red` and `brgreen` while the hex check passed clean.
   both from a `typography` block in `palette.json`. That is also what fixed the GTK
   `settings.ini` files, which KDE's `gtkconfig` daemon had been reverting to its own
   defaults: it copies those same values across, so feeding it the right ones was cheaper
-  than fighting it, and it cannot be turned off. The full account is in `CLAUDE.md`.
+  than fighting it, and it cannot be turned off. The full account is in `../MAINTENANCE.md`.
 - **The lock screen had been grey, not themed, and every colour in it was correct.** The
   config was written for `swaylock-effects` while plain swaylock is what is installed, so
   seven of its options were unknown to the binary. One of those mattered: `screenshots` was
@@ -245,7 +245,7 @@ retheme on `green`, `red` and `brgreen` while the hex check passed clean.
   generated palette include must not be hand-edited.
 - **Hyprland keeps a small blur (`size=5, passes=1`).** The guide had answered this with a
   flat "no"; Jeff's call is that a small amount is right for this desktop, and
-  `RICE-GUIDE.md` and `CLAUDE.md` were amended to say so. The window radius that arrived
+  `RICE-GUIDE.md` was amended to say so. The window radius that arrived
   with it has since been generalised into the floating/docked rule above.
 - **Animation durations sit a notch above the guide's original table** (windows 300ms,
   workspace 350ms, focus 150ms, fade 200ms) with the ease-out curve now applied to every
@@ -253,7 +253,7 @@ retheme on `green`, `red` and `brgreen` while the hex check passed clean.
   started this; the guide's UI-transition numbers read as abrupt on full windows, so the
   motion table was rewritten around a ~400ms ceiling.
 - **wofi's palette is inlined, not imported**: it is the one GTK app whose `@import`
-  resolves against the process cwd. See `CLAUDE.md`.
+  resolves against the process cwd. See `../MAINTENANCE.md`.
 - **GTK apps use Instrument Sans, not Iosevka Extended.** waybar, wofi and wlogout (GTK3)
   and swaync (GTK4) fall under the guide's "GTK / Qt application theming" rule, not the
   typography table's mono-primary row, which is for bars that render their own text outside

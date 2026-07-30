@@ -1,0 +1,325 @@
+# Maintaining these dotfiles
+
+For whoever edits this repository, including its author six months from now. If you
+only want to install and use it, read the [README](../README.md) instead.
+
+This is not a software project with a build and a test suite. It is a curated set of
+config files, three bash scripts that sync them to `$HOME` and install the packages
+they depend on, and two Python scripts that generate and verify the theme. So
+"correct" here means three things: the shell scripts behave safely, each config file
+is valid for the application that reads it, and `check_palette.py` passes.
+
+Almost everything below is here because it cost a debugging session to find. The
+common shape is a silent failure: something configured, looking configured, and
+doing nothing, with no error message anywhere.
+
+## How the repo is laid out
+
+- `.config/<app>/`: the real config files, tracked by symlinking them back into
+  `$HOME`. Covers `hypr`, `sway`, `waybar`, `fish`, `nvim`, `alacritty`, `kitty`,
+  `foot`, `ghostty`, `bottom`, `dunst`, `wofi`, `fastfetch`, `catnap`, `wlogout`,
+  `swaylock`, `swaync`, `yazi`, `starship.toml`, the GTK and KDE files.
+- `.bashrc`: the one tracked dotfile outside `.config`.
+- `scripts/backup-configs.sh`, `install-packages.sh`, `unlink-dotfiles.sh`: run by
+  hand. See below.
+- `scripts/config_files.conf`: every path, relative to `~`, that
+  `backup-configs.sh` manages. A new dotfile goes here before anything else.
+- `scripts/packages.conf`: the package list, INI-style, with `[common]`, `[apt]`,
+  `[pacman]`, `[dnf]` and `[hooks]` sections.
+- `scripts/wm/`: helpers the compositors call *while running*, as opposed to the
+  top-level scripts, which you run yourself.
+- `scripts/theme/`: `palette.json` is the single source of truth for every colour;
+  `generate_theme.py` renders it into each application's own format;
+  `check_palette.py` proves nothing drifted. Rerun the generator after editing the
+  palette, and never hand-edit its output, which carries a `GENERATED` header.
+- `fonts/`, `wallpapers/`, `docs/`: assets and documentation.
+
+**Naming is not a preference.** Shell scripts use hyphens (`backup-configs.sh`),
+matching how Unix names executables, where hyphens outnumber underscores about three
+to one in `/usr/bin`. Python files use underscores because `check_palette.py` does
+`import generate_theme`, and a module name cannot contain a hyphen.
+
+## The management scripts
+
+All three resolve their `.conf` files from the script's own location (`SCRIPT_DIR`),
+so they work from any directory. Do not reintroduce cwd-relative paths: that
+previously made the README's own `./scripts/install-packages.sh install` abort with
+"Configuration file not found" and drop a stray log in the repo root.
+
+### `backup-configs.sh [init|add|install|check|restore] [--dry-run] [--force]`
+
+- `add` moves each path in `config_files.conf` out of `$HOME` into this repo,
+  preserving directory contents via rsync with `--remove-source-files`, backs the
+  original up into `~/.dotfiles_backup/<timestamp>/` first, then symlinks the `$HOME`
+  path at the repo path. **This is destructive to the original location.** Treat it as
+  a one-way move and always confirm before running it against a real `$HOME`.
+- `install` symlinks repo files into `$HOME` with `ln -snf`, skipping any target that
+  already exists as a real file unless `--force` is passed, in which case the
+  existing file is backed up first and then removed.
+- `check` verifies every tracked path is a symlink pointing into the repo.
+- `restore <timestamp>` rsyncs a prior backup back into `$HOME` with
+  `--ignore-existing`, so it never clobbers.
+- New dotfile: add the path to `config_files.conf`, then run `add`.
+
+### `install-packages.sh [preview|install|check|repos] [--yes] [--no-color] [--log FILE]`
+
+- Detects apt, pacman or dnf unless overridden.
+- In `packages.conf`, keys under `[common]` apply to every distro. A same-named key
+  under `[apt]`, `[pacman]` or `[dnf]` overrides the package name passed to that
+  distro's installer (`key=value`; a bare `key` means the name is identical
+  everywhere).
+- `[hooks]`: `<package-key> = <shell command>` runs immediately after that package
+  installs successfully. Matched via awk against the common name, not the
+  distro-specific one.
+- `install` needs sudo. It prompts unless `--yes`, in which case it errors out rather
+  than hanging on a password prompt.
+- On pacman, anything missing from the official repos falls back to an AUR helper
+  (`paru`, `yay`, `pikaur`). `catnap`, `pfetch-rs` and `pipes.sh` are AUR-only.
+- Logs to `scripts/package_install.log`, overwritten each run and gitignored.
+- Section headers are skipped by a `next` in the awk block. Remove it and the literal
+  lines `[common]` and `[pacman]` get parsed as package names.
+
+### `unlink-dotfiles.sh`
+
+The inverse of `backup-configs.sh`: removes the symlinks and moves the files back to
+`$HOME`, leaving the repo essentially empty. Interactive confirmation required.
+
+## Config architecture notes
+
+### Compositors and the bar
+
+- **Hyprland is native Lua config** (Hyprland >= 0.55). The entry point is
+  `hyprland.lua`, which `require()`s `conf/*.lua` in an order that matters:
+  `programs` loads first because it defines globals that `binds` reads. Hyprland
+  prefers `hyprland.lua` over `hyprland.conf` when both exist, which is why the old
+  entry point sat inert for months while looking entirely alive.
+- **`.config/hypr/hypridle.conf` is the exception and is hyprlang.** Only Hyprland
+  itself gained a Lua config in 0.55; hypridle, hyprlock and hyprtoolkit still read
+  hyprlang. Do not port it to the syntax the rest of the directory uses.
+- **Waybar is one config split three ways, not three configs.** `common.jsonc` holds
+  the bar geometry and every module definition; `hyprland.jsonc` and `sway.jsonc`
+  each `include` it and add only their own compositor's `modules-left`; `style.css`
+  is shared. Both compositors launch it with explicit `-c` and `-s`, so there is no
+  default-path config and bare `waybar` will not start. This replaced three drifting
+  copies that had silently diverged, so anything shared belongs in `common.jsonc`.
+- Before trusting a hardcoded battery or backlight name, check
+  `ls /sys/class/power_supply/` and `ls /sys/class/backlight/`. A previous config
+  carried a `battery#bat2` module pointed at a battery this machine does not have.
+- **Waybar's `hyprland/workspaces` buttons do not respond to clicks** in waybar
+  0.15.0, and it is not a config fault: it fails with the stock stylesheet, on either
+  layer, with either `persistent-workspaces` form, and explicit `on-click` probes
+  never fire while hover works. The full elimination is in [`TODO.md`](TODO.md). Do
+  not re-derive it.
+- **The idle schedule exists twice and has to be changed twice.** `hypridle` reads
+  `.config/hypr/hypridle.conf`; `swayidle` has no config file at all and takes its
+  whole schedule as CLI arguments in `.config/sway/config`. Both use the same numbers
+  and both hand off to `swaylock` through `loginctl lock-session`, so every path to a
+  locked screen goes through one place.
+
+### Neovim
+
+- Uses lazy.nvim. `init.lua` -> `lua/voidashi/lazy.lua` bootstraps plugins declared
+  as individual files under `lua/voidashi/plugins/`, each returning a spec table.
+  `lazy-lock.json` pins versions; let lazy.nvim regenerate it rather than editing it.
+- **A subdirectory of `plugins/` is only imported if it contains `init.lua`** (see
+  `lazy/core/util.lua` -> `lsmod`, which scans top-level `*.lua` plus
+  `<dir>/init.lua`). `plugins/lsp/` once held `lspconfig.lua` and `mason.lua` with no
+  `init.lua`, so the entire LSP stack was never installed: no error, just no LSP. If
+  plugins in a subdirectory appear to do nothing, check this first.
+- LSP uses the native `vim.lsp.config()` and `vim.lsp.enable()` API (nvim 0.11+),
+  not `lspconfig[server].setup{}`; `mason-lspconfig`'s `setup_handlers()` was removed
+  in v2. The server list is declared once in `plugins/lsp/init.lua` and shared by
+  mason's `ensure_installed` and `vim.lsp.enable`.
+- **nvim-treesitter tracks the `main` branch**, where
+  `require("nvim-treesitter.configs")` does not exist. Highlighting starts from a
+  `FileType` autocmd calling `vim.treesitter.start()`. Parser names and filetypes are
+  separate lists because they differ (`tsx` -> `typescriptreact`; `markdown_inline`
+  is not a filetype). Building parsers needs the `tree-sitter` CLI, and most servers
+  and formatters need `node` and `npm`; all three are in `packages.conf`.
+- Format on save belongs to conform.nvim only. Adding an LSP format-on-save autocmd
+  as well formats every file twice.
+- **The colorscheme is ours, not a plugin**, in three layers under
+  `lua/voidashi/theme/`: `palette.lua` (generated), `roles.lua` (the semantic layer,
+  hand-written, where the design decisions live) and `groups.lua` (the highlight
+  groups, which read only from roles). A standalone theme has no fallback underneath
+  it, so when adding a plugin, check for groups falling through to Neovim's defaults;
+  the gap is found by diffing group names against another theme's coverage.
+
+### GTK and Qt
+
+- **Qt and KDE theming goes through `.config/kdeglobals`, and
+  `QT_QPA_PLATFORMTHEME` must be `kde`.** Most Qt applications here are KDE ones and
+  read their palette from kdeglobals; the ones that are not, VLC among them, get the
+  same palette through `KDEPlasmaPlatformTheme6.so` from `plasma-integration`, which
+  is the package that makes the variable mean anything. Without it the variable is
+  set and nothing honours it, with no error. `generate_theme.py` merges only the
+  `[Colors:*]`, `[WM]` and `[ColorEffects:*]` sections, and sets the font keys one by
+  one, because they sit in `[General]` beside keys that are none of our business.
+- **The font weight in kdeglobals is Qt's 0-99 scale, not the CSS one.** Writing
+  `500` does not fail; it clamps and renders as Black. `57` is the Medium that 500
+  means.
+- **GTK theming lives in `.config/gtk-3.0/` and `.config/gtk-4.0/`**, and only
+  individual files there are tracked (`gtk.css`, `settings.ini`, `voidashi.css`). The
+  rest is written by `kde-gtk-config` and deliberately untracked; our `gtk.css`
+  imports theirs first and ours last, so ours wins.
+- **On GTK 4.16+ the accent colour only answers to CSS custom properties.** Setting
+  `@define-color accent_bg_color` does nothing on GTK 4.22. Surfaces still honour
+  `@define-color`, which makes this easy to misdiagnose, because half the file
+  appears to work. The generator emits both forms.
+- **GTK3 CSS rejects 8-digit hex colours** (`#RRGGBBAA`) on the `color` property:
+  "Junk at end of value for color" on every launch. Use 6-digit hex or `rgba()`.
+- **The GTK `settings.ini` files are written by KDE, not by hand.** `kded6` is
+  D-Bus activated, so it starts on any KDE application launch, and its `gtkconfig`
+  module copies KDE's font, icon theme, cursor and toolbar settings into both
+  `settings.ini` files. It wins every contest with hand-edited values. Disabling it
+  does not work: `[Module-gtkconfig] autoload=false` in `kdedrc` is read and ignored,
+  because the module is also `load-on-demand`. So the source of truth for GTK's font,
+  icons and cursor is `kdeglobals` and `kcminputrc`, both generated, and `gtkconfig`
+  copies them across. Two consequences: it writes only when a value differs, so the
+  symlinks survive once the values agree, and `gtk-theme-name` is not a key it
+  manages, so `adw-gtk3-dark` is preserved. Comments in those files never survive.
+- **KDE's writes replace symlinks with real files.** `gtkconfig` rewrites `gtk.css`
+  on every start even when the content is unchanged, and the rename-over-target
+  lands a real file where the symlink was. `backup-configs.sh check` catches it and
+  `backup-configs.sh install --force` repairs it, safely, because the content is
+  preserved byte for byte apart from the trailing newline. `kdeglobals` and
+  `kcminputrc` are unaffected, since KConfig writes those through the link.
+- **`nwg-look` rewrites `.config/gtk-3.0/settings.ini` and gsettings.** That file is
+  a symlink into this repo, so its edits land in the working tree; check `git diff`
+  after using it. It does not touch `gtk.css`, so the palette survives.
+
+### Everything else
+
+- **Two terminal emulators too many is the point.** Ghostty, Alacritty, Kitty and
+  Foot are configured in parallel, as are both compositors. When changing shared
+  theming, check whether it needs mirroring rather than assuming one canonical
+  source. This rule went unenforced for an entire retheme: Sway kept its stock
+  colours until `check_palette.py` surfaced it. Run the checker rather than trusting
+  the rule.
+- **wofi cannot `@import` the shared theme partial.** It hands its stylesheet to GTK
+  as a string, so relative import URLs resolve against the *process cwd* (`$HOME`
+  when launched from a keybind) rather than the CSS file's directory. The symptom is
+  `Failed to import: Error opening file /home/theme/voidashi-colors.css` and no
+  colours at all, with every path and symlink correct. `generate_theme.py` therefore
+  inlines the palette into `.config/wofi/style.css` between
+  `/* >>> VOIDASHI COLORS (GENERATED) >>> */` markers. Edit outside them freely,
+  never inside.
+- **The lock screen is plain `swaylock`, not `swaylock-effects`,** and its config was
+  originally written for the latter. Seven options were unknown to the installed
+  binary: `screenshots`, `effect-blur`, `effect-vignette`, `indicator`, `clock`,
+  `timestr`, `datestr`. That mattered because `screenshots` was the only thing
+  setting a background, so with no `color=` line the lock screen came up in
+  swaylock's own default light grey while all 28 of its colours were correct. Diff
+  any new option against `swaylock --help`: the binary ignores what it does not know
+  and says nothing. Also never wrap it in a script passing the same options as CLI
+  flags, because flags override the config file, which is how the committed theme
+  silently stopped applying once before.
+- **wlogout is the opposite case and does need its wrapper.**
+  `scripts/wm/power-menu.sh` is the only place its geometry exists: wlogout reads
+  actions from `.config/wlogout/layout` and colours from `style.css`, but
+  buttons-per-row, spacing and margins are CLI-only. The wrapper derives margins from
+  the focused output's real resolution, so the centred column holds its proportions
+  on any screen. Launch the menu through it, never `wlogout` bare. Note also that
+  wlogout renders each label on a single line: a `\n` in the layout's `text` arrives
+  as a visible control-character box.
+- **Clipboard history is `cliphist` over `wl-clipboard`, and the picker is a
+  script.** `scripts/wm/clipboard-picker.sh` holds the whole pipeline because both
+  compositors need exactly the same one. `wl-paste --watch cliphist store` in both
+  autostarts is the only thing that feeds the history, so without it the keybind
+  opens a permanently empty menu. The leading id in `cliphist list` output is hidden
+  with wofi's `--pre-display-cmd`, which changes only what is drawn and never what is
+  returned, so a badly quoted entry can draw wrong but can never paste the wrong
+  thing.
+- **Wallpapers:** `scripts/wm/select-random-wallpaper.sh` takes a list of directories
+  and uses the first one that contains images. It must print errors to **stderr**,
+  because callers embed it in `$(...)` and pass the result to `swaybg` as a filename.
+- **Nerd Font glyphs: verify a codepoint before trusting it.** Nerd Fonts v3 removed
+  the old `nf-mdi-*` range, so a glyph copied from any pre-v3 config silently falls
+  back to another font and renders as a box. Four had been sitting in the waybar
+  config that way, the battery-charging icon among them. Check with
+  `fc-list ":charset=<hex>" family | grep -i "hack nerd"`, which prints nothing when
+  the glyph is absent. Font Awesome codepoints (`f0xx` to `f2xx`) are the safe range.
+- **fastfetch colours must be hex, never ANSI codes.** It accepts both, and
+  `38;2;180;73;85` is the same colour as `#b44955` and invisible to
+  `check_palette.py`. Ten configs live under `.config/fastfetch/`. Set
+  `display.percent.type` to `["num"]` on the short ones: the default is `9`, a
+  *coloured* number, which tints by threshold and puts an accent on screen at rest.
+- **catnap cannot do hex, and its config format is one upstream release from being
+  deleted.** Writing `#b44955` in `config.toml` prints the literal string. The whole
+  vocabulary is seven tokens and anything unrecognised silently becomes a reset:
+  `(RD)`->31, `(YW)`->33, `(BE)`->34, `(GN)`->32, `(MA)`->35, `(CN)`->36, `(BK)`->30.
+  Those are ANSI slots and the ANSI table is the palette, so catnap cannot drift
+  off-palette; what it cannot reach is a specific level. Separately, catnap 2.0
+  replaced TOML with a `.cat` language and upstream says `config.toml` and
+  `distros.toml` are not compatible with v2. Upstream is 2.1.1 and the AUR package is
+  1.1.1, so both tracked files break the day it moves.
+- **`check_palette.py` could not see any swaylock colour until recently.** swaylock
+  writes `ring-color=393835` with no leading `#`, and the hex regex requires one, so
+  28 values sat unverified from the start. There is now a `BARE_HEX_SCOPE` for that
+  one file, deliberately scoped, because six hex digits with no `#` match a commit
+  hash anywhere else. If another application writes bare hex, add it to that tuple
+  rather than loosening the regex.
+- **Configs kept on purpose, not leftovers.** `.config/dunst/` and
+  `.config/hypr/hyprpaper.conf` configure programs nothing launches, because swaync
+  catches notifications and swaybg draws the wallpaper. Both are kept unthemed as
+  references so switching back means reading a file rather than writing one. Same for
+  `.config/hypr/hyprtoolkit.conf`, which themes hyprlauncher, commented out in
+  `conf/programs.lua` in favour of wofi. These decisions are settled.
+
+## Validating a change
+
+Run this after any colour change:
+
+```bash
+python3 scripts/theme/check_palette.py
+```
+
+It fails on four things: a hex in a tracked config that is not in `palette.json`; a
+**named** terminal colour (`green`, `brwhite`, `cyan`) inside fish or starship
+config; bare hex with no `#` in the swaylock config; and a `GENERATED` file that no
+longer matches what the generator would produce, which is how a hand-edit to
+generated output gets caught. The named-colour check exists because twelve fish
+variables sat on stock names for an entire retheme while the hex-only check passed
+clean. Names are searched only in fish and starship, since words like "red" appear in
+prose everywhere else, and comments are stripped first so a colour discussed is not a
+colour applied. Deliberate exceptions are listed in the script with their reason, so a
+decided exception does not become permanent noise.
+
+Most of the applications here can check their own config, which beats reading them by
+eye:
+
+```bash
+hyprctl configerrors                      # empty means clean
+sway --validate -c .config/sway/config
+foot --check-config -c .config/foot/foot.ini
+ghostty +validate-config --config-file=.config/ghostty/config
+alacritty migrate --dry-run -c <file>     # flags deprecated syntax
+kitty +runpy "from kitty.config import load_config; bad=[]; load_config('.config/kitty/kitty.conf', accumulate_bad_lines=bad); print(bad)"
+waybar -c <config> -s <style>             # warns about unknown modules
+nvim --headless "+checkhealth vim.deprecated" +qa
+```
+
+kitty prints `[]` when clean; anything else is the list of bad lines. Its
+`--debug-config` flag no longer exists, gone by 0.48.1. For Neovim, a lazy-loaded
+plugin does not surface its deprecations until it is actually loaded, so run the
+relevant command first or the all-clear is false.
+
+The fetches and the symlinks need a loop rather than a single command:
+
+```bash
+# every fastfetch config parses
+cd .config/fastfetch && for f in config.jsonc */config.jsonc minimal/*.jsonc; do
+  out=$(fastfetch --pipe true -c "$f" 2>&1 >/dev/null); [ -n "$out" ] && echo "$f: $out"
+done
+
+# catnap: exit 1 on an invalid config, 0 on a valid one. Errors go to stderr.
+catnap -n -c .config/catnap/config.toml -a .config/catnap/distros.toml >/dev/null 2>&1; echo $?
+
+# every tracked path is still a symlink into the repo
+./scripts/backup-configs.sh check
+```
+
+The symlink count should equal the number of paths in `scripts/config_files.conf`.
+A broken one usually means an external program replaced the link with a real file,
+which `kded6` has done to `gtk.css` before; re-link with `install --force`, but look
+at the content first, because the same event has also overwritten what the repo held.

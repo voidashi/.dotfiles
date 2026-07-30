@@ -9,7 +9,7 @@ independent: deleting the legacy configs was trivial and worth doing, the elegan
 neither trivial nor urgent.
 
 Decisions already made, and state that is merely being tracked, do not live here. Those
-belong in `CLAUDE.md` (rules and gotchas), `docs/design/THEME-STATUS.md` (what is themed)
+belong in `docs/MAINTENANCE.md` (pitfalls and validators), `docs/design/THEME-STATUS.md` (what is themed)
 and `docs/TURNING-POINTS.md` (why the repo is shaped this way).
 
 ## Before publishing
@@ -17,16 +17,13 @@ and `docs/TURNING-POINTS.md` (why the repo is shaped this way).
 The documentation pass ran on 2026-07-29 and is done; what it left behind is here. See
 `docs/TURNING-POINTS.md` for what it changed and why.
 
-- **Decide what happens to `CLAUDE.md` and `.claude/`.** The plan is to remove them at
-  publication, since a clone does not need them, and the agent workflow keeps using them
-  until then. But the pitfalls in `CLAUDE.md` are the most useful prose here for anyone who
-  cloned this repo, and each one cost a real debugging session to find: the Nerd Font
-  codepoints that silently fall back to a box, the GTK4 accent that only answers to custom
-  properties, the KDE daemon that rewrites `settings.ini`, the wofi import that resolves
-  against the process cwd. Deleting the file throws that away. Moving it into a document
-  under `docs/` keeps it. `.claude/skills/verify-repo/` is the opposite case and stays either
-  way, since it only runs this repo's own validators.
-  *Difficulty: low to move, and the decision is the work. Priority: high, it gates the push.*
+- **`CLAUDE.md` and `.claude/` get deleted at publication, and that is now safe.** Settled,
+  not open: every pitfall they carried lives in `docs/MAINTENANCE.md`, which is a superset of
+  both the old `CLAUDE.md` and the `verify-repo` skill, and nothing outside them links to
+  them. `CLAUDE.md` is 48 lines of pointers and agent-only rules. Before deleting, re-run the
+  check that keeps it true: `grep -icE "kded6|8-digit hex|process cwd|swaylock-effects"
+  CLAUDE.md` must return 0, and no document may link to either path.
+  *Nothing to decide. The deletion is a one-line action at push time.*
 
 - **Retake the screenshots.** `docs/screenshot1.png` and `screenshot2.png` were committed in
   April 2025, before the retheme, so the two images at the top of the README show the
