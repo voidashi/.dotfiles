@@ -301,6 +301,19 @@ The inverse of `backup-configs.sh`: removes the symlinks and moves the files bac
   one file, deliberately scoped, because six hex digits with no `#` match a commit
   hash anywhere else. If another application writes bare hex, add it to that tuple
   rather than loosening the regex.
+- **The session is declared here but cannot be managed here.** `greetd` and
+  `greetd-tuigreet` are in `packages.conf`, but what makes them do anything is
+  `/etc/greetd/config.toml` plus `systemctl enable greetd.service`, both root-owned and
+  outside `$HOME`. `backup-configs.sh` tracks nothing there and `check` cannot report a
+  file it was never given, so a clone that installs cleanly and passes every validator
+  in this document can still boot to a text console. That is the one gap the validator
+  battery does not cover. Two consequences when editing this: enabling greetd on a
+  machine that already has a display manager conflicts with it over the
+  `display-manager.service` alias, so the packages are declared with a comment saying to
+  drop them in that case; and the greetd path is a recommendation rather than something
+  exercised here, because this machine runs `plasmalogin`. Verified locally is only that
+  both packages exist in `extra` and that `hyprland.desktop` and `sway.desktop` are
+  installed into `/usr/share/wayland-sessions/` by the compositors themselves.
 - **Configs kept on purpose, not leftovers.** `.config/dunst/` and
   `.config/hypr/hyprpaper.conf` configure programs nothing launches, because swaync
   catches notifications and swaybg draws the wallpaper. Both are kept unthemed as

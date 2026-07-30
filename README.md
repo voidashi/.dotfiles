@@ -49,6 +49,7 @@ The design identity behind the palette is called Voidashi, and it is documented 
 
 | Piece | Program | Notes |
 |---|---|---|
+| Login | greetd + tuigreet | Suggested, not required. Any display manager finds both sessions |
 | Compositor | Hyprland | Native Lua config, entry point `.config/hypr/hyprland.lua` |
 | Compositor | Sway | The fallback, themed to match |
 | Bar | Waybar | One description of the bar, shared by both compositors |
@@ -79,7 +80,11 @@ cd ~/.dotfiles
 ./scripts/backup-configs.sh check        # confirm every link landed
 ```
 
-Then log out and back in.
+That installs and links everything. It does not give you a way to *reach* the desktop:
+nothing here enables a graphical login. If you already run a display manager it will
+list Hyprland and Sway on the next boot and you can log out and back in. If you do not,
+[`docs/SETUP.md`](docs/SETUP.md) step 5 sets up `greetd`, and `Hyprland` typed at a text
+console works too.
 
 > [!WARNING]
 > `backup-configs.sh install` is the safe direction: it refuses to overwrite a real file

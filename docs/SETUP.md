@@ -69,7 +69,74 @@ the original up into `~/.dotfiles_backup/<timestamp>/` before removing it.
 
 Every tracked path should report as a symlink into the repo.
 
-**5. Make fish your login shell**, if you want the prompt this repo themes.
+**5. Set up a way into the session.**
+
+Nothing so far gives you a graphical login. The packages and the symlinks are only the
+contents of a session; a fresh Arch install has nothing that starts one, so this is the
+step between a working install and a black screen. You need one of the two paths below,
+not both.
+
+Both compositors install their own session entry, so anything that reads them will find
+Hyprland and Sway without help from this repo:
+
+```bash
+ls /usr/share/wayland-sessions/    # expect hyprland.desktop and sway.desktop
+```
+
+**If you already run a display manager**, SDDM, GDM, plasmalogin, ly or another, you are
+done: it will list both on the next boot. Remove `greetd` and `greetd-tuigreet` from
+`scripts/packages.conf` before installing, or drop them afterwards, since enabling a
+second display manager conflicts with the first over the `display-manager.service` alias.
+
+**If you have no display manager**, this repo suggests `greetd` with `tuigreet`. It is
+Wayland-native, it is two packages, and its colours are settable from the command line,
+so it can be brought onto the palette later. Both are declared in `packages.conf` and
+come from the official repositories. Confirm the unit arrived before you rely on it:
+
+```bash
+systemctl cat greetd.service | head -3   # prints the unit, or "No files found"
+```
+
+Then write `/etc/greetd/config.toml`. This needs root, it is outside `$HOME`, and
+`backup-configs.sh` neither creates nor checks it:
+
+```toml
+[terminal]
+vt = 1
+
+[default_session]
+command = "tuigreet --time --remember --asterisks --sessions /usr/share/wayland-sessions --cmd Hyprland"
+user = "greeter"
+```
+
+`--cmd` is the fallback if you press Enter without choosing; `--sessions` is what puts
+Hyprland and Sway on the menu. Enable it for the *next* boot rather than starting it now:
+
+```bash
+sudo systemctl enable greetd.service
+```
+
+Use `enable` and reboot, not `enable --now`. Starting a display manager on top of a
+session you are already sitting in takes that session down with it, and if the config has
+a typo you want to land at a text console rather than a blank screen.
+
+**Or skip the display manager entirely.** Log in at a text console and type the
+compositor's name:
+
+```bash
+Hyprland     # or: sway
+```
+
+This is a legitimate way to run either one, and it is the fastest way to find out whether
+a login problem is the compositor or the greeter. Under Hyprland it costs you nothing,
+because `.config/hypr/conf/env_vars.lua` sets the environment for everything the
+compositor launches. Under Sway it does cost something:
+`~/.config/environment.d/50-voidashi.conf` is read by `systemd --user`, while a compositor
+you start by typing its name inherits your login shell's environment instead. Sway cannot
+set a variable from its own config, so put `QT_QPA_PLATFORMTHEME=kde` in your shell
+profile if you take this path, or Qt applications come up light.
+
+**6. Make fish your login shell**, if you want the prompt this repo themes.
 
 ```bash
 chsh -s /usr/bin/fish
@@ -80,7 +147,7 @@ everything else looks themed. The tracked `.bashrc` is deliberately a stock one,
 there is no clue that anything is missing. Starship and the fish colour scheme both live
 under `.config/fish/`, so they only apply once fish is actually the shell you land in.
 
-**6. Log out and back in**, so the compositor picks up the new config and starts the
+**7. Log out and back in**, so the compositor picks up the new config and starts the
 background pieces: the bar, the wallpaper, notifications, the clipboard watcher and the
 idle daemon. This step is also what loads
 `~/.config/environment.d/50-voidashi.conf`, which is the only thing that sets
@@ -195,6 +262,18 @@ dark fill is always a legitimate choice.
 Symptom first. The *why* for most of these is in
 [`MAINTENANCE.md`](MAINTENANCE.md).
 
+**You reboot and get a text console, or a black screen, and never a desktop.** Nothing in
+this repo starts a session, so this is step 5 rather than a fault. Check in that order:
+
+```bash
+ls /usr/share/wayland-sessions/          # the compositors are installed at all
+systemctl status display-manager         # something is meant to be greeting you
+```
+
+If the second says the unit does not exist, you have no display manager. Either set one
+up, or log in at a console and type `Hyprland`. If it exists but failed, `journalctl -b
+-u greetd` has the reason, and a text console is still reachable with `Ctrl`+`Alt`+`F2`.
+
 **The bar does not appear.** Bare `waybar` will not start: there is no config at the
 default path, on purpose, because one description of the bar is shared by both
 compositors. Both launch it with explicit `-c` and `-s`. Start it the way the configs
@@ -239,8 +318,11 @@ echo "$QT_QPA_PLATFORMTHEME"      # expect: kde
 If it is empty, the session did not pick up
 `~/.config/environment.d/50-voidashi.conf`. That file is the only thing that sets it
 under Sway, because Sway has no way to set an environment variable from its own config.
-It is read by `systemd --user` at login, so a compositor started from a bare TTY outside
-a systemd session will not see it; put the variable in your shell profile in that case.
+It is read by `systemd --user`, so how you started the session decides whether Sway sees
+it: launched from a display manager it does, but typed at a text console it inherits your
+login shell's environment instead, which does not include it. Put the variable in your
+shell profile if you start Sway that way. Step 5 above covers both launch paths. Hyprland
+is unaffected either way, since `conf/env_vars.lua` sets the variable itself.
 
 Second, is anything honouring it? `plasma-integration` provides the platform theme the
 variable actually loads. Without that package the variable is set and nothing reads it,

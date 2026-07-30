@@ -22,27 +22,18 @@ the repository is shaped as it is belongs to
 
 ## Start here next session
 
-Highest priority, before anything else. All five come from a third review, by someone
+Highest priority, before anything else. All four come from a third review, by someone
 told to be an ordinary Linux user who wants a good-looking desktop without spending a
 weekend on it, and who can google anything obvious. The two earlier reviews were done by
 people who could read code, which is why none of this surfaced then. Every finding below
 was re-verified by hand.
 
-1. **Say how to get into the session.** This is the worst of the five. Nothing anywhere
-   explains how to reach the desktop after installing: no display manager is declared
-   among the 54 packages, and both the README and `SETUP.md` say only "log out and back
-   in". The only mentions of a session are a troubleshooting note about "a compositor
-   started from a bare TTY outside a systemd session", which assumes the reader already
-   knows both launch methods while naming neither. After 54 packages and a symlink pass,
-   the reader lands on a black screen. Decided: declare **`greetd` with `tuigreet`**,
-   which is Wayland-native, minimal, and has configurable colours so it can be themed
-   from the palette later. `sddm` is the graphical alternative and was rejected because it
-   runs as its own user and would not pick up the generated `kdeglobals`, so it would sit
-   outside the theme. Document both launch paths, display manager and bare TTY.
-   *Difficulty: low. Priority: maximum, it is the difference between a working install and
-   a black screen.*
+The fifth, "say how to get into the session", is done: `greetd` and `greetd-tuigreet` are
+declared, `SETUP.md` step 5 covers the display manager and the text console paths, and the
+black-screen symptom is in the troubleshooting list. What it left behind is below, under
+"Pending actions" and "Features not built".
 
-2. **Make `--dry-run` the first install step, and stop asking the reader to audit bash.**
+1. **Make `--dry-run` the first install step, and stop asking the reader to audit bash.**
    The README's warning currently says to read the scripts before pointing them at a home
    directory. The reviewer stopped there, correctly: they cannot audit 400 lines of bash,
    so the instruction leaves only "ignore the author" or "give up". `--dry-run` is the
@@ -51,7 +42,7 @@ was re-verified by hand.
    warning to offer the way out rather than to demand the reading.
    *Difficulty: trivial. Priority: maximum.*
 
-3. **Write the recipe for changing the accent colour.** The README's headline promise is
+2. **Write the recipe for changing the accent colour.** The README's headline promise is
    "change one hex and everything moves together", and that promise is what makes people
    want the repo. It is also the one thing no document lets them act on. Measured:
    `palette.json` has no accent key at all, the identity colour is a ten-value `bordeaux`
@@ -68,7 +59,7 @@ was re-verified by hand.
    *Difficulty: low. Priority: maximum, since it is the repo's best promise with nothing
    behind it.*
 
-4. **Make the two things a reader has to guess at explicit.** The README offers "you can
+3. **Make the two things a reader has to guess at explicit.** The README offers "you can
    lift the terminal colours, or the bar, or just the palette generator, and ignore the
    rest", and no document says how, while the installer brings 54 packages including both
    compositors, both notification daemons and both file managers. Write the cheap path in
@@ -82,7 +73,7 @@ was re-verified by hand.
    terminal, which is the whole point of the repo.
    *Difficulty: low. Priority: maximum.*
 
-5. **Rewrite the README's opening as an introduction that holds the reader.** "Is this for
+4. **Rewrite the README's opening as an introduction that holds the reader.** "Is this for
    you?" is good and the reviewer said so, but it opens by qualifying rather than by
    selling, so it does not hold someone who just opened the repo. The page should lead
    with what this is and why it looks good, then what it contains, and only then filter
@@ -105,6 +96,16 @@ session.
   autostart lines existed will not be running them. Confirm with the commands rather than
   by pressing the keybind, because a dead daemon and an empty history look identical:
   `pgrep -x hypridle`, `pgrep -x wl-paste`, `cliphist list | wc -l`.
+- **The greetd path has never been run.** It is now documented in `SETUP.md` step 5 and
+  declared in `packages.conf`, but this machine reaches its desktop through
+  `plasmalogin` and greetd is not installed here, so nothing has exercised the config or
+  the unit. What was verified is narrow and worth not re-doing: both packages exist in
+  `extra` (`pacman -Si greetd greetd-tuigreet`), the config format and the tuigreet flags
+  come from upstream's own README, and `/usr/share/wayland-sessions/` already holds
+  `hyprland.desktop` and `sway.desktop` from the compositor packages. What is unverified
+  is the whole path end to end: that the unit name is right, that the config parses, and
+  that tuigreet lists both sessions. A spare machine or a VM is the honest test, and
+  until then `SETUP.md` should not gain any sentence claiming it was tried.
 - **`CLAUDE.md` and `.claude/` are deleted at publication.** The content moved to
   [`MAINTENANCE.md`](MAINTENANCE.md). Before deleting, run both checks, because the first
   one alone was trusted once and was not enough:
@@ -170,6 +171,18 @@ session.
   *Difficulty: low. Priority: low.*
 
 ## Features not built
+
+- **Bring the greeter onto the palette.** `tuigreet` takes a `--theme` flag in
+  `component=color` form, which is why it was chosen over the alternatives, and today it
+  is declared and documented unthemed. The obstacle is not the flag: greetd's config is
+  root-owned and outside `$HOME`, so `generate_theme.py` has nowhere to write and
+  `check_palette.py` has nothing to check, and the login screen would be the one surface
+  that drifts off-palette with no validator noticing. Decide first whether generating a
+  file outside `$HOME` is something this repo does at all, because the same question
+  governs power profiles below. Depends on the item under "Pending actions": theming a
+  path nobody has booted is the wrong order.
+  *Difficulty: low once the scope question is answered. Priority: low, and it is the
+  first surface a visitor sees, which argues it up once greetd is actually in use.*
 
 - **Power profiles.** Idle handling exists; switching a CPU governor or a platform
   profile does not. `power-profiles-daemon` is the usual answer and it needs
