@@ -22,9 +22,13 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 [ -t 1 ] || { RED=''; GREEN=''; YELLOW=''; BLUE=''; NC=''; }
 
-# Resolve paths (e.g., ~/.config → /home/user/.config)
+# Resolve paths (e.g., ~/.config to /home/user/.config).
+# Parameter expansion, not sed: this interpolated $HOME into a s### expression
+# and broke on a home directory containing # or &. It is now the same three
+# lines as backup-configs.sh, which is the point of two copies existing.
 resolve_path() {
-  echo "$1" | sed "s#^~#$HOME#"
+  local path="$1"
+  echo "${path/#\~/$HOME}"
 }
 
 # Load valid entries from config file

@@ -188,8 +188,25 @@ idle daemon. This step is also what loads
 into the repo and leaves symlinks behind. It backs up first, but treat it as a one-way
 move and never run it against a home directory you care about without reading it.
 
-To undo everything, `./scripts/unlink-dotfiles.sh` removes the symlinks and moves the
-files back. It asks for confirmation.
+### Undoing it
+
+**To undo an install, run `./scripts/backup-configs.sh uninstall`.** It removes the
+symlinks this repo created and nothing else: your own files stay, the repo stays, and a
+link pointing anywhere other than the repo is left alone. Add `--dry-run` first if you
+want to see the list.
+
+**Your originals are in `~/.dotfiles_backup/<timestamp>/`, and nothing moves them back
+for you.** Anything `install --force` replaced went there. `./scripts/backup-configs.sh
+backups` lists the timestamps with a file count each. Copy what you want out by hand, or
+run `uninstall` first and then `restore <timestamp>`, in that order: `restore` refuses to
+overwrite anything already at the path, and while the symlink is still there it counts
+as already at the path.
+
+**`./scripts/unlink-dotfiles.sh` is a different thing and is not the undo for an
+install.** It moves the *repo's* files out into `$HOME` and leaves your clone empty. It
+is the inverse of `add`, which is the command the repo's author uses to bring a new
+dotfile in. It has `--dry-run` and asks for confirmation, but if you reach for it to
+back out of an install you will lose the clone and still not have your own files back.
 
 ## What you must change for your machine
 

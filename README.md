@@ -98,11 +98,19 @@ console works too.
 > ./scripts/backup-configs.sh install --dry-run
 > ```
 >
-> Being straight about why that is worth doing: these scripts have not been audited line
-> by line, and defects have turned up twice. The second was in `--dry-run --force`, which
-> deleted files while logging a backup it had never written. Both are fixed and the fix
-> is tested, but the pattern is the argument for running the simulation yourself rather
-> than believing this paragraph. The open audit is in [`docs/TODO.md`](docs/TODO.md).
+> Changed your mind afterwards? `./scripts/backup-configs.sh uninstall` removes the
+> symlinks and leaves your own files and the repo alone. Do not use
+> `unlink-dotfiles.sh` for that; it empties the clone. `docs/SETUP.md` has the details,
+> including where `--force` put your originals.
+>
+> Being straight about why the simulation is worth running: these scripts have now been
+> audited, and it found five ways to lose a file, on top of the two found before it.
+> `install --force` deleted the target after a backup that had failed; `add` deleted the
+> original after a copy that had failed; a stray `~/` line in the config reached
+> `rm -rf "$HOME/"`. All of them are fixed, and 24 sandboxed tests in `scripts/tests/`
+> hold them fixed. But the honest reading of a script with that history is that you
+> should run the simulation rather than believe this paragraph. What the audit did not
+> cover is listed in [`docs/TODO.md`](docs/TODO.md).
 
 > [!IMPORTANT]
 > **Clone to `~/.dotfiles` exactly.** Five tracked files reference that path absolutely,
@@ -146,9 +154,10 @@ launcher is on `$mod` + `D`.
 docs/                     everything written down, see docs/README.md
 fonts/                    the four faces the theme uses
 scripts/
-  backup-configs.sh       link, unlink and audit the tracked dotfiles
+  backup-configs.sh       install, uninstall and audit the tracked dotfiles
   install-packages.sh     cross-distro package installer
-  unlink-dotfiles.sh      the inverse: move everything back to $HOME
+  unlink-dotfiles.sh      the inverse of `add`: move the repo's files back to $HOME
+  tests/                  sandboxed tests for the two scripts that can touch $HOME
   theme/                  palette.json, the generator and the checker
   wm/                     helpers the compositors call while running
 wallpapers/               one sample image, so a fresh clone has something to show

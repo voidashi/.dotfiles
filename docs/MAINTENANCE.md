@@ -49,7 +49,7 @@ so they work from any directory. Do not reintroduce cwd-relative paths: that
 previously made the README's own `./scripts/install-packages.sh install` abort with
 "Configuration file not found" and drop a stray log in the repo root.
 
-### `backup-configs.sh [init|add|install|check|restore] [--dry-run] [--force]`
+### `backup-configs.sh [init|add|install|uninstall|check|backups|restore] [--dry-run] [--force] [--verbose]`
 
 - `add` moves each path in `config_files.conf` out of `$HOME` into this repo,
   preserving directory contents via rsync with `--remove-source-files`, backs the
@@ -59,9 +59,24 @@ previously made the README's own `./scripts/install-packages.sh install` abort w
 - `install` symlinks repo files into `$HOME` with `ln -snf`, skipping any target that
   already exists as a real file unless `--force` is passed, in which case the
   existing file is backed up first and then removed.
-- `check` verifies every tracked path is a symlink pointing into the repo.
+- `uninstall` is the inverse of `install`, and until the script audit there was none.
+  It removes only the symlinks that point into this repo. A real file is left alone, a
+  link pointing elsewhere is left alone, the repo is untouched, and the parent
+  directories `install` created are deliberately not pruned, because `~/.config` is
+  shared with every other application on the machine. Do not point anyone at
+  `unlink-dotfiles.sh` to undo an install: that one empties the clone.
+- `check` reports five states, not two: valid, wrong target, dangling, not linked,
+  missing. It resolves the link rather than only comparing its text, so a link into a
+  repo copy that has been deleted is reported rather than called valid. It exits
+  non-zero unless every entry is correctly linked, which is what makes it usable as a
+  gate. The two expected states on a fresh clone are warnings, not errors.
+- `backups` lists the timestamps in `$BACKUP_DIR` with a file count each. `restore`
+  needs one of them and refuses to run without it.
 - `restore <timestamp>` rsyncs a prior backup back into `$HOME` with
-  `--ignore-existing`, so it never clobbers.
+  `--ignore-existing`, so it never clobbers. **That also means it cannot undo an
+  install**: after one, every managed path exists as a symlink, the symlink counts as
+  existing, and every file is skipped. Run `uninstall` first. It reports how many of how
+  many files actually moved and returns non-zero when that is none.
 - `init` runs `git init` in the repo and creates the directory skeleton. It is for
   starting a dotfiles repo from nothing, not for using this one, which is why the
   install path never mentions it.
@@ -75,14 +90,56 @@ previously made the README's own `./scripts/install-packages.sh install` abort w
   guard with a throwaway `HOME=`, because this is the failure the flag exists to
   prevent. Simulated lines say `Simulate:` at INFO; only real ones say `Linked:` at
   SUCCESS, and keeping those two vocabularies apart is what makes a dry run readable.
-- `--verbose` also exists and is undocumented in the usage line; it prints each
-  decision as it is made, which is the thing to reach for when `check` disagrees with
-  what you see on disk.
+  Both guards are proven by `scripts/tests/test-dotfiles.sh`, which is where that
+  proof belongs rather than in this paragraph.
+- `--verbose` prints the entries that are already correct, which are the boring
+  majority: without it `check` on a healthy tree is one summary line instead of 32
+  green ones, and `install` reports `Unchanged: 31` as a count. It was parsed into a
+  variable nothing read for as long as it existed, while this document told you to
+  reach for it.
+- **Every path must be below `$HOME`.** `repo_relative()` enforces it and the four
+  inline copies of the prefix strip are gone. An entry that is not below `$HOME`
+  stripped to nothing, which made the repo destination the repo root itself: a stray
+  `~/` line in `config_files.conf` reached `rm -rf "$HOME/"`.
+- **Check the exit status before the line that destroys the original.** `add` ran
+  `rm -rf` after an unchecked `rsync` and `ln -sf` after an unchecked `mv`, and
+  `install --force` ran `rm -rf` after an unchecked `backup_file`. All three reported
+  SUCCESS. This is the same failure as the `--dry-run` one above wearing a different
+  hat: acting on the result of a step nobody looked at.
 - New dotfile: add the path to `config_files.conf`, then run `add`.
 
-### `install-packages.sh [preview|install|check|repos] [--yes] [--no-color] [--log FILE]`
+### `scripts/tests/test-dotfiles.sh`
 
-- Detects apt, pacman or dnf unless overridden.
+Twenty-four sandboxed cases over `backup-configs.sh` and `unlink-dotfiles.sh`. Run it
+after touching either. Each case gets its own `mktemp -d` with `HOME`, `DOTFILES_DIR`,
+`BACKUP_DIR` and `CONFIG_FILE` pointed inside it, and `guard_sandbox()` aborts the whole
+run with exit 99 if any of the four ever points outside, so it cannot touch a real home
+directory.
+
+Those four environment variables are also how *you* try any of this safely, and they
+were documented nowhere before. They are in the script's `-h` output now.
+
+The harness exists because the instruction to prove a guard with a throwaway `HOME=`
+was prose, and three defects shipped in the simulation paths regardless. When you fix
+something here, add the case first and watch it fail: on the run that introduced it, 10
+of 16 cases failed against the code as it stood, and that is what made the fixes worth
+believing.
+
+### `install-packages.sh [preview|install|check|repos] [PACKAGE...] [--yes] [--no-color] [--log FILE]`
+
+- Detects apt, pacman or dnf, unless `DEFAULT_PACKAGE_MANAGER` is set in the
+  environment. That override was a plain assignment for a long time, so it could not be
+  overridden and this line was untrue; setting it is how you exercise the apt or dnf
+  path from an Arch machine.
+- **A command is required.** A bare invocation used to default to `install` and put 56
+  packages on the machine with sudo and no confirmation.
+- Any command takes package names after it, so three failures out of 56 can be retried
+  without touching the other 53. An unrecognised name exits 1.
+- `install` distinguishes `Already present` from `Installed`. Every installer here
+  exits 0 when there is nothing to do, so a second run used to report all 56 as freshly
+  installed. Hooks fire only on a real install, not on a re-run.
+- Both scripts send `ERROR` and `WARNING` to stderr and blank their colours when stdout
+  is not a terminal.
 - In `packages.conf`, keys under `[common]` apply to every distro. A same-named key
   under `[apt]`, `[pacman]` or `[dnf]` overrides the package name passed to that
   distro's installer (`key=value`; a bare `key` means the name is identical
