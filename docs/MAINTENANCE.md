@@ -63,12 +63,6 @@ previously made the README's own `./scripts/install-packages.sh install` abort w
   link pointing elsewhere is left alone, the repo is untouched, and the parent
   directories `install` created are deliberately not pruned, because `~/.config` is
   shared with every other application on the machine.
-- **Undoing an `add` is manual and there is no command for it.** `uninstall` removes
-  the symlink but the file is in the repo, so you are left with nothing at that path.
-  Run `uninstall`, then `mv` the path back out of the repo yourself. This is deliberate:
-  the script that used to do it in bulk was deleted, because doing all paths at once is
-  never what someone who mis-added one file wants, and a per-path `unadopt` subcommand
-  did not earn its place for an operation the author performs about once.
 - `check` reports five states, not two: valid, wrong target, dangling, not linked,
   missing. It resolves the link rather than only comparing its text, so a link into a
   repo copy that has been deleted is reported rather than called valid. It exits

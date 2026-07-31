@@ -238,10 +238,8 @@ case_install_then_uninstall_round_trips() {
   repo_file ".config/probe.conf"
   repo_file ".bashrc"
   # install creates missing parents with mkdir -p. uninstall deliberately does
-  # not prune them: ~/.config is shared with every other application on the
-  # machine, and an undo that reaches beyond what it created is how the deleted
-  # unlink-dotfiles.sh used to empty a clone. Pre-create it so this case asks
-  # about links, not directories.
+  # not prune them, because ~/.config is shared with every other application on
+  # the machine. Pre-create it so this case asks about links, not directories.
   mkdir -p "$HOME/.config"
   local before; before="$(snapshot "$HOME")"
   run_backup install

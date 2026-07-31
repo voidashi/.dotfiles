@@ -242,19 +242,16 @@ session.
   *Difficulty: low each, medium together with the awk replacement. Priority: low while
   no hooks exist, medium the day one is uncommented.*
 
-- **Decided: `unlink-dotfiles.sh` is deleted, and undoing an `add` stays manual.** It
-  moved the repo's files out into `$HOME` and emptied the clone, which is the inverse of
-  `add` and not of `install`. Once `uninstall` existed, its entire documentary footprint
-  was disclaimers: six places across the README, `SETUP.md`, `MAINTENANCE.md` and a
-  comment in `backup-configs.sh` existed only to tell a reader this was not the script
-  they wanted, and every future edit to those documents paid that tax.
+- **Decided: `unlink-dotfiles.sh` is deleted, and no `unadopt` replaces it.** It moved
+  the repo's files out into `$HOME` and emptied the clone, which is the inverse of `add`
+  and not of `install`. Once `uninstall` existed, its entire documentary footprint was
+  disclaimers: six places existed only to tell a reader this was not the script they
+  wanted, and every future edit to those documents paid that tax.
 
-  The gap it leaves is real and is named in `MAINTENANCE.md`: after a mistaken `add`,
-  `uninstall` removes the link and the file is in the repo, so you `mv` it back out
-  yourself. A per-path `unadopt` subcommand was proposed and rejected as not enough
-  function to justify a command, which is the right call for an operation the author
-  performs about once. Reopen only if that manual step is actually taken often enough
-  to hurt.
+  A per-path `unadopt` subcommand was proposed to replace it and rejected: too little
+  function to justify a command, for an operation the author performs about once and can
+  do with `mv`. Documenting that `mv` was also rejected, on the same grounds. Reopen only
+  if the manual step turns out to be taken often enough to hurt.
 
   This also closes the older question of whether to fold the script into
   `backup-configs.sh`. There is nothing left to fold, and the third copy of the

@@ -327,10 +327,6 @@ install_fonts() {
 # into the repo; this removes exactly those and nothing else. It never touches
 # the repo, and never touches a real file that install skipped, so running it
 # on a machine that was never installed onto changes nothing.
-#
-# Note that this does not undo `add`: the file is in the repo, and removing the
-# link leaves nothing at the path. Undoing an `add` is a manual mv, on purpose.
-# See docs/MAINTENANCE.md.
 uninstall_dotfiles() {
   local removed=0 kept=0 failed=0
 
