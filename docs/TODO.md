@@ -239,12 +239,21 @@ session.
   into `backup-configs.sh` as a subcommand is real and was made well: it is one of four
   verbs in a single state machine, and living apart is how it drifted into having no
   `--dry-run`, no shared safety vocabulary and a fourth copy of the repo-path mapping.
-  Two of those three are now closed. It has `--dry-run` and `--yes`, it reports and
-  exits like the others, and both copies of the mapping validate the same way. Against
-  folding: `backup-configs.sh` is already the larger script, and the trigger everyone
-  agreed would make Python worth reconsidering is capability growth, not line count that
-  arrives by merging a file in. The remaining argument is the duplicated mapping, which
-  is eight lines. Reopen this only if the two copies disagree again.
+  Two of those three symptoms are now gone. It has `--dry-run` and `--yes`, and it
+  refuses to overwrite, reports a failed move instead of announcing `[RESTORED]` over
+  one, exits non-zero and drops its colours off a terminal, which is the safety
+  vocabulary the others use. Both were fixed without merging anything, which is the
+  evidence that separation was not what caused them.
+
+  The third symptom is still here in part. The mapping is still written twice, nine
+  non-comment lines across `resolve_path` and the below-`$HOME` check, so the cost
+  remains. What is gone is the danger: the two copies no longer differ, and both reject
+  the same paths for the same reason.
+
+  Against folding: `backup-configs.sh` is already the larger of the two, and the trigger
+  everyone agreed would make Python worth reconsidering is capability growth, not line
+  count that arrives by merging a file in. Reopen this if the two copies drift apart
+  again, or if a third caller of the mapping appears.
 
 - **Let `install` take paths, so the README's offer is true.** The README says you can
   lift the terminal colours, or the bar, and ignore the rest, and `backup-configs.sh
