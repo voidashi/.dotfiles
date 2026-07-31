@@ -32,5 +32,10 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("wl-paste --watch cliphist store")
 
     -- Idle: trava, apaga a tela e suspende, conforme hypr/hypridle.conf.
-    hl.exec_cmd("hypridle")
+    -- Sob systemd-cat porque o hypridle só escreve em stdout e nada capturava
+    -- isso: uma madrugada inteira de bloqueios teve de ser reconstruída a
+    -- partir de efeitos colaterais no journal, porque não havia registro de um
+    -- único deles. Com a tag, "journalctl -t hypridle" mostra cada timeout com
+    -- hora. Ver docs/MAINTENANCE.md.
+    hl.exec_cmd("systemd-cat -t hypridle hypridle")
 end)

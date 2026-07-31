@@ -97,6 +97,11 @@ session.
   autostart lines existed will not be running them. Confirm with the commands rather than
   by pressing the keybind, because a dead daemon and an empty history look identical:
   `pgrep -x hypridle`, `pgrep -x wl-paste`, `cliphist list | wc -l`.
+- **The running hypridle predates the `systemd-cat` wrapper and the new timeouts.** A
+  session started before this change is still the bare process reading the old 300/360
+  schedule, so it locks at five minutes and logs nothing. One logout fixes it. Check
+  with `journalctl -t hypridle --since "-1h"`, which stays empty until the wrapped one
+  has run.
 - **The greetd path has never been run.** It is now documented in `SETUP.md` step 6 and
   declared in `packages.conf`, but this machine reaches its desktop through
   `plasmalogin` and greetd is not installed here, so nothing has exercised the config or
@@ -126,6 +131,49 @@ session.
   that has to be dealt with before the file goes.
 
 ## Known defects
+
+- **A night of repeated screen locks, 31 July 2026, cause not established.** The screen
+  locked several times over eleven minutes with the machine in use. Parked, because the
+  one hypothesis the evidence points at is one we are deliberately not working on. What
+  the journal holds, and it is the only record that exists:
+
+  ```
+  05:00:49  systemd-logind: Lid closed.   -> Suspending...
+  05:00:51  systemd-logind: Lid opened.        (2 s later)
+  05:00:56  kernel: PM: suspend exit
+  05:01:12  Lid closed.                        (no suspend: inside HoldoffTimeoutSec)
+  05:01:13  Lid opened.
+  05:01:32  Lid closed.                   -> Suspending...
+  05:01:35  Lid opened.
+  05:01:43  PM: suspend exit
+  05:01:48  swaylock: pam_unix(swaylock:auth): authentication failure
+  05:10:41  Lid closed.                   -> Suspending...   (and one more pair at 05:10:57)
+  ```
+
+  Every lock is accounted for: logind suspends on a lid close by default, and hypridle's
+  `before_sleep_cmd` locks before each suspend. Ruled out, so nobody repeats it: idle
+  timeouts, since no other suspend exists in that boot and logind's `IdleAction` is
+  `ignore`; a duplicate daemon, since one `hypridle` ran and its systemd unit is
+  disabled; and this repo as the source of the `Lid closed.` lines, which only
+  `systemd-logind` writes and only on an `SW_LID` event from the kernel input layer.
+  The pair at 05:01:12 that did **not** suspend is the confirmation, being exactly
+  logind's 30 s holdoff after a resume.
+
+  Not established: why the switch reported closed. The lid was open throughout, it has
+  not recurred across a reboot, and Windows on the same machine never showed it. The
+  kernel does print `ACPI: button: The lid device is not compliant to SW_LID.` on this
+  Acer Nitro ANV15-41, but a sensor fault is judged too unlikely to build on and **is
+  not being worked on**. No fix will be attempted from outside this repo either: a
+  dotfiles repository that needs an `/etc` edit to behave does not travel to another
+  machine.
+
+  Two real defects were fixed on the way and neither explains the lines above, so do
+  not read them as the cause: the lid was bound to `swaylock` through a bare `switch:`
+  that fires in both directions, and the lock timeout was five minutes. Both are in
+  [`MAINTENANCE.md`](MAINTENANCE.md). If it recurs, `journalctl -t hypridle` now exists
+  and did not before, which is what made this take a whole session.
+  *Difficulty: unknown, and it does not reproduce. Priority: low while it stays a single
+  episode, high the moment it happens twice.*
 
 - **Workspace buttons in the bar do not respond to clicks**, and it is not this
   configuration. A full bisect ruled out everything on our side, so it is parked rather

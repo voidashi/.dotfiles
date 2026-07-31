@@ -105,11 +105,19 @@ hl.bind("SHIFT + Print", hl.dsp.exec_cmd("hyprshot -m region"))
 -- because Sway needs exactly the same one and two copies drift.
 hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("$HOME/.dotfiles/scripts/wm/clipboard-picker.sh"))
 
--- Fires when the lid is toggled
+-- Lid. Nothing here locks the screen, on purpose. Closing the lid makes logind
+-- suspend, and hypridle's before_sleep_cmd locks on the way down, so a lock
+-- bound here would be the second of two paths to the same screen. The bind that
+-- used to sit here was also wrong in a way that is easy to write again: a bare
+-- "switch:" fires on both transitions, because Hyprland calls onSwitchEvent
+-- unconditionally before dispatching on or off, so it locked the screen when the
+-- lid was opened. Sway has no lid bind at all, for the same reason.
+-- docs/MAINTENANCE.md has the incident this came from.
+--
 -- The lock screen's appearance comes from ~/.config/swaylock/config, which is
 -- tracked in this repo. An older lock.sh passed the same options as CLI flags
 -- and overrode that file with a different theme, so do not reintroduce one.
-hl.bind("switch:Lid Switch", hl.dsp.exec_cmd("swaylock -f"), { locked = true })
+--
 -- Fires while the lid is closing
 hl.bind("switch:on:Lid Switch", hl.dsp.exec_cmd('hyprctl keyword monitor "eDP-1, disable"'), { locked = true })
 -- Fires while the lid is opening

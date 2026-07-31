@@ -196,11 +196,27 @@ believing.
   systemd does not manage gets nothing from it.
 - **The idle schedule exists twice and has to be changed twice.** `hypridle` reads
   `.config/hypr/hypridle.conf`; `swayidle` has no config file at all and takes its
-  whole schedule as CLI arguments in `.config/sway/config`. Both use the same numbers,
-  300, 360 and 1800 seconds, but they reach the locker differently: hypridle fires
-  `loginctl lock-session`, which routes every request through its own `lock_cmd`, while
-  swayidle calls `swaylock -f` directly. Changing how the screen locks therefore means
-  editing both.
+  whole schedule as CLI arguments in `.config/sway/config`. Both carry the same three
+  timeouts, and the middle one is the lock's plus sixty seconds on purpose, so that
+  the screen blanks after the lock rather than with it: move one and the other has to
+  move too. They reach the locker differently: hypridle fires `loginctl lock-session`,
+  which routes every request through its own `lock_cmd`, while swayidle calls
+  `swaylock -f` directly. Changing how the screen locks therefore means editing both.
+- **hypridle runs under `systemd-cat -t hypridle`**, so `journalctl -t hypridle` shows
+  every timeout with a time. It writes only to stdout, and launched bare from
+  `autostart.lua` nothing captured that: a night of unexplained locks had to be
+  reconstructed from suspend and PAM lines in the journal because not one of them had
+  left a record. Do not drop the wrapper to tidy the line.
+- **No lid event locks the screen, and none should.** Closing the lid makes
+  `systemd-logind` suspend, which is its default (`HandleLidSwitch=suspend`) and which
+  this repo neither sets nor may depend on, and hypridle's
+  `before_sleep_cmd = loginctl lock-session` locks on the way down. Sway has no lid
+  bind at all; `binds.lua` keeps only the two that disable and restore `eDP-1`. A
+  `swaylock -f` on `switch:Lid Switch` used to sit beside them and was removed for two
+  reasons. It was the second of two paths to the same locked screen. And a bare
+  `switch:` bind is never one-directional: Hyprland's `InputManager.cpp` calls
+  `onSwitchEvent(NAME)` unconditionally and only then dispatches `onSwitchOnEvent` or
+  `onSwitchOffEvent`, so that bind ran on **opening** the lid as well as on closing it.
 
 ### Neovim
 

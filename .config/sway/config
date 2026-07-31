@@ -258,8 +258,8 @@ exec wl-paste --watch cliphist store
 # which is why it is here and not beside hypr/hypridle.conf. The numbers are
 # deliberately the same as that file's, and both hand off to the same swaylock.
 exec swayidle -w \
-    timeout 300 'swaylock -f' \
-    timeout 360 'swaymsg "output * power off"' \
+    timeout 900 'swaylock -f' \
+    timeout 960 'swaymsg "output * power off"' \
         resume 'swaymsg "output * power on"' \
     timeout 1800 'systemctl suspend' \
     before-sleep 'swaylock -f'
