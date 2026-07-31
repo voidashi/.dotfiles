@@ -101,25 +101,28 @@ is in the git log.
 
 ## Some configs are kept deliberately, and are not dead weight
 
-Four configs here belong to programs nothing launches, and one directory holds
-presets nothing runs. They look like leftovers and are not, which is the only
-reason this entry exists. Keep the list complete: when it named only the first
-two, an audit reported the other two as dead weight and had to be told otherwise.
+Five things here are kept for a program or a variant that is not in use. They look
+like leftovers and are not, which is the only reason this entry exists. Keep the
+list complete: when it named only the first two, an audit reported the rest as
+dead weight and had to be told otherwise.
 
-- `.config/dunst/`: swaync catches notifications. Kept unthemed as a reference.
-- `.config/hypr/hyprpaper.conf`: swaybg draws the wallpaper. Kept as a reference,
-  and note it preloads an image that is not in this repository, so switching back
-  means editing it rather than only reading it.
-- `.config/hypr/hyprtoolkit.conf`: wofi is the launcher; the hyprlauncher line in
-  `conf/programs.lua` is commented out. Kept themed so switching back is swapping
-  two lines.
-- `.config/catnap/`: fastfetch prints the shell greeting; the catnap line in
-  `.config/fish/config.fish` is commented out. Kept themed and tracked on purpose.
-- `.config/fastfetch/` beyond `arch_small/`: the other presets are dormant by
-  choice, kept for the day the greeting changes rather than as history.
+Which of each pair is actually in use is decided in one file, named below, and is
+deliberately not repeated here. Repeat it and this entry goes false the moment
+that line changes, with nothing to catch it.
 
-Switching back is meant to be reading a file rather than writing one, which is why
-these stay themed and tracked instead of living in the git log.
+- `.config/dunst/`, against swaync. Decided in `hypr/conf/autostart.lua` and
+  `sway/config`.
+- `.config/hypr/hyprpaper.conf`, against swaybg. Decided in the same two files. It
+  preloads an image this repository does not carry, so switching back means editing
+  it rather than only reading it.
+- `.config/hypr/hyprtoolkit.conf`, which themes hyprlauncher, against wofi. Decided
+  in `hypr/conf/programs.lua`.
+- `.config/catnap/`, against fastfetch. Decided in `.config/fish/config.fish`.
+- `.config/fastfetch/` beyond the preset that file runs. The other presets are
+  dormant by choice, kept for the day the greeting changes rather than as history.
+
+These stay themed and tracked so that switching is reading a file rather than
+writing one.
 
 Open work of every kind lives in `docs/TODO.md`, including what is diagnosed and
 deliberately parked. It is not repeated here.

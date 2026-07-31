@@ -325,15 +325,18 @@ session.
 - **The noise audit is done, and this is its list.** Four reviewers with different lenses:
   a plain user reading only what the index sends them to, an orphan sweep over the whole
   tree, a document editor, and a software architect. Wording, formatting and bug hunting
-  were out of scope for all four. The list below is what they found, and it is the list
-  the old "elegance pass" entry asked for before anything moves.
+  were out of scope for all four. A fifth then argued against every proposal they made,
+  which is why several entries below record a decision *not* to cut rather than work: the
+  cheapest thing this list can do is stop a bad deletion being proposed twice.
 
   Closed during the audit, so they are not reopened: `.config/catnap/`, the dormant
   fastfetch presets, the unused Hack and Instrument Sans faces and `DESIGN-SYSTEM.md` all
-  stay, and the first two are now named in `TURNING-POINTS.md` as deliberate keeps. Fixed
-  in the same session: four dead `SKIP_PARTS` in `check_palette.py`, two surviving "three
-  scripts", the false `@import` claim in `MAINTENANCE.md`, and a hyprtoolkit header
-  claiming a keybind it does not have.
+  stay, and the first four are now named in `TURNING-POINTS.md` as deliberate keeps.
+
+  Fixed in the same session: four dead `SKIP_PARTS` in `check_palette.py`, two surviving
+  "three scripts", the false `@import` claim in `MAINTENANCE.md`, a hyprtoolkit header
+  claiming a keybind it does not have, a stale test count in the README, and a tracked
+  gitlink that had come back (see below, since that one needs a check rather than a fix).
 
   **Features with no users.**
 
@@ -342,15 +345,27 @@ session.
     repair plan recorded above. Deleting the feature closes those three with it.
     *Difficulty: trivial. Priority: medium, because work is scheduled on something nobody
     uses.*
-  - The apt and dnf branches, the `repos` subcommand and the empty `[apt]` and `[dnf]`
-    sections are about 90 of the 491 lines in `install-packages.sh`, for platforms the
-    README, `SETUP.md` and `MAINTENANCE.md` all say are unsupported. None of it has ever
-    run. On apt it would install a Microsoft repository key and then fail most of the list.
-    *Difficulty: low. Priority: medium, and it is the largest untested surface here.*
-  - `backup-configs.sh init` can never do anything: every documented entry point begins
-    with `git clone`, so it only prints "Repo already exists", and the directory its
-    working path creates is one no other subcommand can fill.
-    *Difficulty: trivial. Priority: low.*
+  - The apt and dnf machinery has never run. The Microsoft repository key at
+    `install-packages.sh:133-137` was reported as serving a VSCode nothing declares, and
+    that is wrong: `code` is declared at `packages.conf:107` under `[common]`. The key is
+    not an orphan, it is apt-only machinery for a package that arrives another way on the
+    one platform this repository supports, so it stands or falls with the apt branch rather
+    than separately. It is smaller than first claimed: 14 non-comment lines mention apt or
+    dnf, in the low thirties
+    counting whole `case` branches and the `repos` dispatch, not 90. Two costs the first
+    pass missed. `SETUP.md:12` and `README.md:157` advertise cross-distro support to a
+    reader, so this is a documentation edit as well. And `install_all()` reaches
+    `update_pkg_db()` only through `add_repos()`, so deleting that function without
+    rewiring first drops `pacman -Syy` from every Arch install, which is the supported
+    path.
+    *Difficulty: low. Priority: medium.*
+  - **Decided, do not repropose: `backup-configs.sh init` is not dead code.** It was called
+    unreachable and is not. `DOTFILES_DIR` is overridable and is not derived from
+    `SCRIPT_DIR`, `add` fills the repository it creates, and
+    `scripts/tests/test-dotfiles.sh` relies on that override for all 20 of its cases. Its
+    body also carries a paid fix, since `--dry-run` once reached neither guard and created
+    the directory for real. The only honest argument against it is that this is not a
+    general-purpose dotfiles tool, which is a scope decision rather than a defect.
   - `config_files.conf` carries "Optional Configurations" and "Template Examples", eight
     commented lines whose content is `~/.EXAMPLE_FILE`, for a format that is one path per
     line.
@@ -358,26 +373,30 @@ session.
 
   **Documentation that outweighs what it documents.**
 
-  - About 150 of `RICE-GUIDE.md`'s 504 lines address a contributor or the agent, inside the
-    document `docs/README.md` sends a *user* to: "What this document is" with the
-    carries-over table (8-59), "Working rules" (395-430), "Application classes" (433-481)
-    and "Anti-patterns" (484-499). "Stop and ask rather than deriving one silently" has no
-    addressee for someone with a fork, ten of twelve anti-pattern bullets negate rules
-    stated earlier in the same file, and seven of nine "Application classes" paragraphs
-    have a counterpart in `THEMING.md:54-134` that additionally names files. The
-    agent-facing rules need a home that is not the reader's document. Whether the
-    contributor-facing ones move with them is the open question.
-    *Difficulty: low. Priority: high, since it is one of the two documents a user is told
-    to read.*
+  - **Decided, do not repropose: `RICE-GUIDE.md`'s rules stay where they are.** About 150
+    of its 504 lines were accused of addressing a contributor or the agent inside a
+    document the index sends a *user* to. That did not survive review. "Working rules"
+    opens by saying each rule is there because breaking it cost something, and two are
+    traceable in the tree. `CLAUDE.md:21-22` points at that section and at "Anti-patterns"
+    by name and says not to restate them here, which is the one point-do-not-restate
+    structure in this repository working correctly; moving the owner leaves the pointer
+    dangling. The index files this document under "Changing how it looks", which is exactly
+    who those rules address. The genuinely agent-facing text is one clause, "stop and ask
+    rather than deriving one silently". Two counts in the accusation were also wrong: 13
+    anti-pattern bullets, not 12, and 10 application-class paragraphs, not 9.
   - `THEMING.md:159-166` carries open work eight lines after its own opening says this file
     owns it, and its three items are verbatim from here. Its first three "Settled
     decisions" bullets (138-146) restate `RICE-GUIDE.md`. Bullets 4 and 5 must survive:
     the relaxed accent budget for fetches, and "Rollback is git, not a directory".
     *Difficulty: trivial. Priority: medium.*
-  - `SETUP.md:342-369`, the Qt entry, is 28 lines that stopped being a symptom index and
-    became a second copy of the cause at `MAINTENANCE.md:186-196`. The same fact is stated
-    a third time at `SETUP.md:152-159`.
-    *Difficulty: trivial. Priority: low.*
+  - **Decided, do not repropose: the Qt entry at `SETUP.md:342-369` keeps its 28 lines.**
+    It was read as a second copy of the cause in `MAINTENANCE.md:186-196`. It is a
+    two-cause diagnostic and only the first cause duplicates. The second, that
+    `plasma-integration` is missing so the variable is set and nothing reads it, is the
+    only copy on a reader's path, carries its own check, and is this repository's signature
+    failure in one sentence. `SETUP.md:152-159` is not a third statement either: it is the
+    setup-time instruction against the troubleshooting entry, which is two reader states
+    rather than one fact twice.
   - `SETUP.md:118-143` explains greetd's stock config, its flags and `systemctl enable`,
     which are greetd's own README and `tuigreet --help`. The "enable, not `enable --now`"
     footgun is the part that earns its place.
@@ -412,8 +431,16 @@ session.
     is duplicated as prose in `MAINTENANCE.md:384-444`, the two have already diverged
     (`MAINTENANCE.md` runs two the skill does not), neither runs
     `scripts/tests/test-dotfiles.sh` despite the skill claiming every validator, and the
-    skill hardcodes "32 valid" and "31 paths". A `scripts/verify.sh` that both call is the
-    obvious answer and is the precondition for deleting `.claude/` without loss.
+    skill hardcodes "32 valid" and "31 paths". Worse than a stale number: that block's
+    `valid:` figure measures nothing. It counts `SUCCESS` lines out of `backup-configs.sh`,
+    which gates them behind `--verbose`, which the block does not pass, so it prints
+    `valid: 0` on a healthy tree beside a summary line reading "Valid: 32". A check that
+    has been reporting zero for as long as that flag has existed, in the repository whose
+    stated signature bug is a thing that looks configured and does nothing. A
+    `scripts/verify.sh` that both call is the obvious answer and is the precondition for
+    deleting `.claude/` without loss. Two checks belong in it that nothing runs today: the
+    test suite, and a guard that `git ls-files -s` holds no gitlink, for the reason in the
+    entry below.
     *Difficulty: low. Priority: medium, high the day publication is real.*
   - `CLAUDE.md` claims it "can be deleted without losing anything". True of four of its five
     rules. "Never write a count that a config file owns" exists nowhere under `docs/`, and
@@ -428,19 +455,23 @@ session.
   **Smaller, one edit each.**
 
   - `generate_theme.py:626-631` has `if __name__ == "__main__": main()` twice, both at top
-    level, so every run generates all ten files twice and runs the two in-place merge
-    functions twice. Invisible only because the writes are idempotent.
-    *Difficulty: trivial. Priority: medium, since those two edit files in place.*
+    level, so every run generates all ten files twice and runs the in-place edits twice.
+    There are three of those, not two: `inline_block`, `merge_kde_globals` and
+    `merge_kcm_input`. The comment at line 618 says "These two" and is where the wrong
+    count came from, so it goes in the same edit. Invisible only because the writes are
+    idempotent.
+    *Difficulty: trivial. Priority: medium, since those three edit files in place.*
   - `wallpapers/Topography.png` and `Topography.jpg` are one image at one size, and both
     match the picker's glob, so a fresh clone randomises between two copies of the same
     wallpaper while `README.md:161` promises one. Only the dimensions were compared, not
     the pixels.
     *Difficulty: trivial. Priority: low.*
-  - `.config/waybar/scripts/mediaplayer.py` is a helper the bar calls while running, which
-    is `MAINTENANCE.md:31`'s own definition of `scripts/wm/`, and it lives elsewhere.
-    Moving it costs the README's offer that the bar can be lifted on its own, which is why
-    this is a question rather than a task.
-    *Difficulty: trivial. Priority: low.*
+  - **Decided, do not repropose: `mediaplayer.py` stays beside the bar.** It was proposed
+    for `scripts/wm/`, which `MAINTENANCE.md` defines as helpers *the compositors* call,
+    and waybar is not a compositor. The script is also bound by a serialisation contract to
+    `common.jsonc`, which its own docstring names, so separating the two is worse than the
+    inconsistency, and moving it would break the README's offer that the bar can be lifted
+    on its own.
   - Comments in about 8 of the 17 files under `.config/hypr/` are in Portuguese while the
     rest of the tree is English, including the note at `autostart.lua:12` on why absolute
     paths are used, which is worth reading. Translate on touch, like the double hyphens.
@@ -448,15 +479,44 @@ session.
   - Declared with no config, no launch and no bind: `ranger` (a third file manager beside
     themed yazi and dolphin), `supergfxctl`, `cava`, `zathura`, `cmatrix`, `hyprpicker`.
     *Difficulty: trivial. Priority: low.*
-  - Invoked and not declared: `nm-applet`, `rfkill`, `playerctl`, `wpctl`, `brightnessctl`,
-    `pactl`, `grim`, `swaynag`. Of the screenshot pair only `hyprshot` is in
-    `packages.conf`, so a fresh Sway clone gets a `Print` key that does nothing.
-    *Difficulty: trivial. Priority: medium.*
+  - **The brightness keys are dead on this machine right now.** `binds.lua:91-92` and
+    `sway/config:178-179` bind them to `brightnessctl`, which is neither installed nor
+    declared. `nm-applet` is in the same position, autostarted by `autostart.lua:10` and
+    absent. The other six binaries first listed as undeclared (`rfkill`, `playerctl`,
+    `wpctl`, `pactl`, `grim`, `swaynag`) arrive as hard dependencies of packages that are
+    declared, so they are not a problem. `grim` and `slurp` come with `hyprshot`, which
+    means the claim that a fresh Sway clone gets a dead `Print` key was wrong: it came from
+    a grep of `packages.conf` with no dependency resolution behind it.
+    *Difficulty: trivial. Priority: medium, and it is a live defect rather than tidying.*
 
   **Not covered, so nobody assumes it was.** `.config/nvim/`, 22 files and the largest
   unexamined subtree, where an unused plugin spec is exactly the shape being hunted.
   Whether four terminal emulators earn four configs. Nothing was executed except greps,
   `wc`, `find` and `check_palette.py`.
+
+- **A tracked gitlink came back through a merge, and prose did not stop it.**
+  `.claude/worktrees/greetd-session-entry` was swept into the index by `1539f95`, removed
+  on purpose by `5ab0358`, which added the `.gitignore` rule and said "it cannot happen
+  again". That commit sat on a side branch; `a7317e1` updated the gitlink on `main`
+  without it, and the merge `f214f52` kept the other side. `git merge-base --is-ancestor
+  5ab0358 a7317e1` returns false. A fresh clone got a phantom empty directory and a
+  `160000` entry with no `.gitmodules`. It is untracked again as of this branch, but the
+  sentence in `5ab0358` is still false as written, because git ignores `.gitignore` for a
+  path that is already tracked. Prose has now failed at this twice, so what is owed is the
+  check named above: `git ls-files -s | grep '^160000'` must come back empty. It would
+  have caught both occurrences.
+  *Difficulty: trivial. Priority: high, because it survives a merge and nothing notices.*
+
+- **`check_palette.py` should walk `git ls-files` rather than the filesystem.** Its
+  docstring promises "a colour in a tracked config" and it walks `REPO_ROOT.rglob("*")`
+  instead, which is why `SKIP_PARTS` keeps growing entries that patch around what git
+  already knows: `.git/`, and now `.claude/worktrees/`. Walking the index makes both
+  unnecessary, makes the docstring true, and means the next ignored directory needs no
+  edit here at all. Three entries would legitimately remain, since `fish_variables`,
+  `lazy-lock.json` and `palette.json` are tracked and are content exceptions rather than
+  scope ones.
+  *Difficulty: low, about ten lines. Priority: medium, and it removes a class of edit
+  rather than an instance of one.*
 
 - **Decide whether `minimal/` survives its own rule.** `THEMING.md:153-157` settles
   "Rollback is git, not a directory. Do not reintroduce a legacy directory", and

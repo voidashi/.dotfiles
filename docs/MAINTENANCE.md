@@ -376,12 +376,11 @@ believing.
   exercised here, because this machine runs `plasmalogin`. Verified locally is only that
   both packages exist in `extra` and that `hyprland.desktop` and `sway.desktop` are
   installed into `/usr/share/wayland-sessions/` by the compositors themselves.
-- **Configs kept on purpose, not leftovers.** `.config/dunst/` and
-  `.config/hypr/hyprpaper.conf` configure programs nothing launches, because swaync
-  catches notifications and swaybg draws the wallpaper. Both are kept unthemed as
-  references so switching back means reading a file rather than writing one. Same for
-  `.config/hypr/hyprtoolkit.conf`, which themes hyprlauncher, commented out in
-  `conf/programs.lua` in favour of wofi. These decisions are settled.
+- **Configs kept on purpose, not leftovers.** Several configs here belong to programs
+  that are not in use, and treating one as dead weight is a mistake this repository has
+  already watched an audit make. The complete list, and which file decides in each case,
+  is in [`TURNING-POINTS.md`](TURNING-POINTS.md), which owns it. These decisions are
+  settled.
 
 ## Validating a change
 
