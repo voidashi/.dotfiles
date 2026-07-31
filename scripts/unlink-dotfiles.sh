@@ -1,6 +1,7 @@
 #!/bin/bash
 # Purpose: Revert all symlinks and restore files from the dotfiles repo to their original locations.
-# Usage: ./unlink-dotfiles.sh   (run from inside scripts/, like the other scripts here)
+# Usage: ./unlink-dotfiles.sh [--dry-run] [--yes]
+#        (run from inside scripts/, like the other scripts here)
 
 # Configuration (MUST match your original script's settings)
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
@@ -17,8 +18,9 @@ BACKUP_DIR="${BACKUP_DIR:-$HOME/.dotfiles_backup}"
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
-[ -t 1 ] || { RED=''; GREEN=''; YELLOW=''; NC=''; }
+[ -t 1 ] || { RED=''; GREEN=''; YELLOW=''; BLUE=''; NC=''; }
 
 # Resolve paths (e.g., ~/.config → /home/user/.config)
 resolve_path() {
@@ -34,6 +36,8 @@ load_dotfiles() {
 }
 
 FAILURES=0
+DRY_RUN=false
+ASSUME_YES=false
 
 # Main restore logic
 restore() {
@@ -62,7 +66,7 @@ restore() {
     # same path: 62 lines for 31 entries, and the first said nothing the second
     # did not imply.
     if [ -L "$original_path" ] && [ "$(readlink "$original_path")" = "$repo_path" ]; then
-      rm -f "$original_path"
+      $DRY_RUN || rm -f "$original_path"
     fi
 
     # Move the repo copy back, but never onto something that is already there.
@@ -74,6 +78,11 @@ restore() {
     # thing it undoes.
     if [ -e "$original_path" ] || [ -L "$original_path" ]; then
       echo -e "${YELLOW}[SKIPPED]${NC} $original_path already exists, leaving the repo copy at $repo_path"
+      continue
+    fi
+
+    if $DRY_RUN; then
+      echo -e "${BLUE}[SIMULATE]${NC} would move $repo_path → $original_path"
       continue
     fi
 
@@ -94,6 +103,13 @@ restore() {
   # trailing slash is stripped from DOTFILES_DIR at the top of this file, because
   # find normalises the paths it emits but the -path pattern is built by
   # concatenation, and a doubled slash made the .git exclusion match nothing.
+  if $DRY_RUN; then
+    local would
+    would="$(find "$DOTFILES_DIR" -mindepth 1 -type d -empty -not -path "$DOTFILES_DIR/.git/*" 2>/dev/null | wc -l)"
+    echo -e "${BLUE}[SIMULATE]${NC} would prune $would empty director$([ "$would" -eq 1 ] && echo y || echo ies). Nothing above was carried out."
+    return 0
+  fi
+
   local pruned
   pruned="$(find "$DOTFILES_DIR" -mindepth 1 -type d -empty -not -path "$DOTFILES_DIR/.git/*" -print -delete 2>/dev/null | wc -l)"
   # This was the script's last act and it was silent, deleting directories out
@@ -101,19 +117,51 @@ restore() {
   echo -e "${YELLOW}[PRUNED]${NC} $pruned empty director$([ "$pruned" -eq 1 ] && echo y || echo ies) removed from $DOTFILES_DIR"
 }
 
-# Safety confirmation
-echo -e "${YELLOW}WARNING: This will delete all symlinks and restore files from $DOTFILES_DIR to their original locations.${NC}"
-echo -e "${YELLOW}The files are MOVED out of the repo, so the repo is left essentially empty.${NC}"
-read -p "Are you sure you want to continue? (y/N): " response
-case "$response" in
-  [Yy]*) restore ;;
-  *)     echo "Aborted."; exit 0 ;;
-esac
+usage() {
+  echo "Usage: $0 [--dry-run] [--yes]"
+  echo "  Moves the tracked files out of $DOTFILES_DIR back into \$HOME."
+  echo "  This is the inverse of 'backup-configs.sh add'. To undo an install,"
+  echo "  use 'backup-configs.sh uninstall' instead, which leaves the repo intact."
+  echo "Flags:"
+  echo "  --dry-run  Show what would move, change nothing"
+  echo "  --yes      Skip the confirmation prompt"
+}
 
-# Exit non-zero when anything failed to move, so a caller can tell a clean run
-# from one that left files in the repo.
-if [ "$FAILURES" -gt 0 ]; then
-  echo -e "${RED}[ERROR]${NC} $FAILURES entr$([ "$FAILURES" -eq 1 ] && echo y || echo ies) could not be moved and are still in $DOTFILES_DIR" >&2
-  exit 1
-fi
-exit 0
+# The confirmation used to run at the top level, so sourcing this file ran it,
+# there was no way to skip it for a test, and there was nowhere to hang a flag.
+main() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --dry-run) DRY_RUN=true; shift ;;
+      --yes|-y)  ASSUME_YES=true; shift ;;
+      -h|--help) usage; exit 0 ;;
+      *) echo "Unknown argument: $1" >&2; usage >&2; exit 1 ;;
+    esac
+  done
+
+  if $DRY_RUN; then
+    echo -e "${BLUE}Simulating. Nothing will be moved or deleted.${NC}"
+  elif ! $ASSUME_YES; then
+    echo -e "${YELLOW}WARNING: This will delete all symlinks and restore files from $DOTFILES_DIR to their original locations.${NC}"
+    echo -e "${YELLOW}The files are MOVED out of the repo, so the repo is left essentially empty.${NC}"
+    echo -e "${YELLOW}Anything install --force replaced is in $BACKUP_DIR and is NOT restored by this.${NC}"
+    echo -e "${YELLOW}Run with --dry-run first to see exactly what would move.${NC}"
+    read -r -p "Are you sure you want to continue? (y/N): " response
+    case "$response" in
+      [Yy]*) ;;
+      *) echo "Aborted."; exit 0 ;;
+    esac
+  fi
+
+  restore
+
+  # Exit non-zero when anything failed to move, so a caller can tell a clean run
+  # from one that left files in the repo.
+  if [ "$FAILURES" -gt 0 ]; then
+    echo -e "${RED}[ERROR]${NC} $FAILURES entr$([ "$FAILURES" -eq 1 ] && echo y || echo ies) could not be moved and are still in $DOTFILES_DIR" >&2
+    exit 1
+  fi
+  exit 0
+}
+
+main "$@"

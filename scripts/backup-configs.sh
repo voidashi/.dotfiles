@@ -219,7 +219,7 @@ install_dotfiles() {
     # second run announced thirty-one links it had not created. Reporting work
     # that did not happen is how a reader learns to stop reading the output.
     if [ -L "$target" ] && [ "$(readlink "$target")" = "$dest" ]; then
-      log "INFO" "Unchanged: $target"
+      $VERBOSE && log "INFO" "Unchanged: $target"
       unchanged=$((unchanged + 1))
       continue
     fi
@@ -418,7 +418,10 @@ check_one() {
       log "ERROR" "Dangling: $target → $dest (nothing there)"
       return 1
     fi
-    log "SUCCESS" "Valid: $target"
+    # The uninteresting case, and by far the most common: 32 green lines saying
+    # nothing is wrong. --verbose exists for when check disagrees with what you
+    # see on disk, which is exactly when you want them.
+    $VERBOSE && log "SUCCESS" "Valid: $target"
     return 0
   fi
 
@@ -520,6 +523,27 @@ restore_backup() {
   log "SUCCESS" "Restored $moved of $total file(s) from $timestamp"
 }
 
+# One usage text, printed both by -h and by the unknown-command path. They were
+# two different strings in install-packages.sh, each missing what the other had.
+usage() {
+  echo "Usage: $0 COMMAND [--dry-run] [--force] [--verbose]"
+  echo "Commands:"
+  echo "  init       Initialize dotfiles repo"
+  echo "  add        Move files from \$HOME into the repo and symlink them back"
+  echo "  install    Symlink files from the repo into \$HOME"
+  echo "  uninstall  Remove the symlinks install created, leaving the repo and real files alone"
+  echo "  check      Validate the symlinks, non-zero if the tree is not fully installed"
+  echo "  backups    List the backups taken by --force"
+  echo "  restore TIMESTAMP  Restore from a backup (list them with: $0 backups)"
+  echo "Flags:"
+  echo "  --dry-run  Simulate, change nothing"
+  echo "  --force    Replace a real file, backing it up into \$BACKUP_DIR first"
+  echo "  --verbose  Also print the entries that are already correct"
+  echo "Environment:"
+  echo "  DOTFILES_DIR, CONFIG_FILE, BACKUP_DIR override the paths, which is how"
+  echo "  you try any of this against a throwaway \$HOME. See scripts/tests/."
+}
+
 # ---- Main ----
 main() {
   # Preflight checks
@@ -544,18 +568,9 @@ main() {
     "backups") list_backups ;;
     "restore") restore_backup "$2" ;;
     *)
-      echo -e "Usage: $0 COMMAND [--dry-run] [--force]"
-      echo -e "Commands:"
-      echo -e "  init       Initialize dotfiles repo"
-      echo -e "  add        Move files to repo and symlink"
-      echo -e "  install    Symlink files from repo"
-      echo -e "  uninstall  Remove the symlinks install created, leaving the repo alone"
-      echo -e "  check      Validate symlinks"
-      echo -e "  backups    List the backups taken by --force"
-      echo -e "  restore TIMESTAMP  Restore from backup (list them with: $0 backups)"
-      echo -e "Flags:"
-      echo -e "  --dry-run  Simulate changes"
-      echo -e "  --force    Overwrite conflicts"
+      # Only reachable by getting the arguments wrong, so it goes to stderr.
+      # -h is handled in the argument parser and prints the same text to stdout.
+      usage >&2
       exit 1
       ;;
   esac
@@ -568,7 +583,8 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run) DRY_RUN=true; shift ;;
     --force) FORCE=true; shift ;;
-    --verbose) VERBOSE=true; shift ;;
+    --verbose|-v) VERBOSE=true; shift ;;
+    -h|--help) usage; exit 0 ;;
     # Not a flag: store it in the positional argument array and carry on
     *) POSITIONAL_ARGS+=("$1"); shift ;;
   esac

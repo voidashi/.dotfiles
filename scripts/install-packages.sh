@@ -1,7 +1,7 @@
 #!/bin/bash
 # Unified Package Installer (Optimized)
 # Purpose: Reliably install packages across Linux distros with third-party repo support
-# Usage: ./install-packages.sh [preview|install|check|repos] [--yes] [--no-color] [--log FILE]
+# Usage: ./install-packages.sh [preview|install|check|repos] [PACKAGE...] [--yes] [--no-color] [--log FILE]
 
 # ---- Configuration ----
 # Resolved from the script's own location, not the current directory, so it
@@ -18,6 +18,8 @@ AUR_HELPER=""
 UNATTENDED=false
 UPDATED_DB=false
 PROGRESS=""   # set by install_all, prefixed onto the per-package line
+COMMAND=""    # read at the dispatch, was never declared with the other globals
+PACKAGE_FILTER=()
 
 # Colors
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
@@ -279,7 +281,7 @@ run_hooks() {
 # ---- User Commands ----
 preview() {
     # Not "to be installed": most of them usually already are.
-    log "INFO" "${#PACKAGE_MAP[@]} packages configured for $PKG_MANAGER:"
+    log "INFO" "${#PACKAGE_ORDER[@]} packages configured for $PKG_MANAGER:"
     for key in "${PACKAGE_ORDER[@]}"; do
         # The distro name in parentheses was printed for all 56 and differed
         # from the key in none of them, because [apt], [pacman] and [dnf] are
@@ -315,7 +317,7 @@ install_all() {
         esac
     done
 
-    log "SUMMARY" "${#PACKAGE_MAP[@]} configured: $present already present, $installed installed, $failures failed"
+    log "SUMMARY" "${#PACKAGE_ORDER[@]} configured: $present already present, $installed installed, $failures failed"
     # Naming them matters: "Failed: 3" sends you scrolling back through several
     # hundred lines of package-manager output to find out which three.
     if [ "$failures" -gt 0 ]; then
@@ -327,7 +329,7 @@ install_all() {
 verify_installed() {
     local present=0
     local missing_keys=()
-    log "INFO" "Checking ${#PACKAGE_MAP[@]} configured packages against $PKG_MANAGER..."
+    log "INFO" "Checking ${#PACKAGE_ORDER[@]} configured packages against $PKG_MANAGER..."
     for key in "${PACKAGE_ORDER[@]}"; do
         if is_installed "${PACKAGE_MAP[$key]}"; then
             present=$((present + 1))
@@ -340,12 +342,55 @@ verify_installed() {
     # whole job is to answer "what is missing?" made you read 56 lines to find
     # out. The names go on one line instead.
     if [ "${#missing_keys[@]}" -eq 0 ]; then
-        log "SUMMARY" "$present of ${#PACKAGE_MAP[@]} installed, none missing"
+        log "SUMMARY" "$present of ${#PACKAGE_ORDER[@]} installed, none missing"
         exit 0
     fi
     log "WARNING" "Missing: ${missing_keys[*]}"
-    log "SUMMARY" "$present of ${#PACKAGE_MAP[@]} installed, ${#missing_keys[@]} missing"
+    log "SUMMARY" "$present of ${#PACKAGE_ORDER[@]} installed, ${#missing_keys[@]} missing"
     exit 1
+}
+
+# One usage text. There were two, at the -h branch and at the unknown-command
+# branch, and each was missing what the other had: the path where the user
+# explicitly asked for help listed no flags at all, while the path where they
+# made a typo listed every one.
+usage() {
+    echo "Usage: $0 COMMAND [PACKAGE...] [--yes] [--no-color] [--log FILE]"
+    echo "Commands:"
+    echo "  preview    List the configured packages, install nothing"
+    echo "  install    Install them"
+    echo "  check      Report which are missing, non-zero if any are"
+    echo "  repos      Add the extra repositories some packages need"
+    echo "Flags:"
+    echo "  --yes      Fail instead of prompting for sudo"
+    echo "  --no-color Plain output (also automatic when not writing to a terminal)"
+    echo "  --log FILE Write the run log somewhere other than $LOG_FILE"
+    echo "Examples:"
+    echo "  $0 preview"
+    echo "  $0 install --yes"
+    echo "  $0 install waybar cliphist    # just these two"
+    echo "  $0 check"
+    echo "Environment:"
+    echo "  CONFIG_FILE, LOG_FILE and DEFAULT_PACKAGE_MANAGER override the defaults."
+}
+
+# Narrow PACKAGE_ORDER to the names given on the command line, so install,
+# preview and check all take a subset the same way.
+apply_package_filter() {
+    [ "${#PACKAGE_FILTER[@]}" -eq 0 ] && return 0
+    local wanted selected=() missing=()
+    for wanted in "${PACKAGE_FILTER[@]}"; do
+        if [[ -v "PACKAGE_MAP[$wanted]" ]]; then
+            selected+=("$wanted")
+        else
+            missing+=("$wanted")
+        fi
+    done
+    if [ "${#missing[@]}" -gt 0 ]; then
+        log "ERROR" "Not in $CONFIG_FILE: ${missing[*]}"
+        exit 1
+    fi
+    PACKAGE_ORDER=("${selected[@]}")
 }
 
 # ---- Execution Flow ----
@@ -363,14 +408,15 @@ parse_args() {
                     exit 1
                 fi
                 LOG_FILE="$2"; shift 2 ;;
-            -h|--help) # Added help flag
-                echo "Usage: $0 [command] [options]"
-                echo "Commands: install, preview, check, repos"
-                exit 0 ;;
+            -h|--help) usage; exit 0 ;;
             *)
-                # Assume the first non-flag argument is the command
+                # First non-flag argument is the command; the rest name
+                # packages, which is how you retry three failures without
+                # reinstalling all 56.
                 if [[ -z "$COMMAND" ]]; then
                     COMMAND="$1"
+                else
+                    PACKAGE_FILTER+=("$1")
                 fi
                 shift
                 ;;
@@ -413,19 +459,26 @@ main() {
     fi
     
     load_packages
-    
-    case "${COMMAND:-install}" in # Default to 'install' if no command is given
+    apply_package_filter
+
+    # No default. This was `${COMMAND:-install}`, so a bare ./install-packages.sh
+    # performed a full 56-package system install with sudo and no confirmation,
+    # while both usage texts showed the command as required and the other two
+    # scripts print usage when invoked bare.
+    if [ -z "$COMMAND" ]; then
+        usage >&2
+        exit 1
+    fi
+
+    case "$COMMAND" in
         preview) preview ;;
         install) install_all ;;
         repos) check_sudo; add_repos ;;
         check) verify_installed ;;
-        *) 
+        *)
             log "ERROR" "Unknown command: '$COMMAND'"
-            echo -e "Usage: $0 [preview|install|check|repos] [--yes] [--no-color] [--log FILE]"
-            echo -e "Examples:"
-            echo -e "  Install all packages: ./install-packages.sh install --yes"
-            echo -e "  Check installed status: ./install-packages.sh check"
-            exit 1 
+            usage >&2
+            exit 1
             ;;
     esac
 }

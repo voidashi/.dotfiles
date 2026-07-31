@@ -86,9 +86,7 @@ repo_file() { mkdir -p "$(dirname "$DOTFILES_DIR/$1")"; printf '%s\n' "${2:-repo
 home_file() { mkdir -p "$(dirname "$HOME/$1")"; printf '%s\n' "${2:-PRECIOUS USER DATA}" > "$HOME/$1"; }
 
 run_backup() { guard_sandbox; bash "$BACKUP_SCRIPT" "$@" >"$LAST_OUT" 2>&1; LAST_RC=$?; return 0; }
-# unlink-dotfiles.sh takes no arguments today and reads its confirmation from
-# stdin, so the 'y' is fed in rather than passed.
-run_unlink() { guard_sandbox; printf 'y\n' | bash "$UNLINK_SCRIPT" >"$LAST_OUT" 2>&1; LAST_RC=$?; return 0; }
+run_unlink() { guard_sandbox; bash "$UNLINK_SCRIPT" --yes "$@" >"$LAST_OUT" 2>&1; LAST_RC=$?; return 0; }
 
 # ---- Assertions ----
 
@@ -359,6 +357,25 @@ case_unlink_does_not_overwrite_an_unlinked_real_file() {
   assert_content "$HOME/.bashrc" "LOCAL ONLY, NEVER LINKED"
 }
 
+case_unlink_dry_run_changes_nothing() {
+  track '~/.config/probe.conf'
+  repo_file ".config/probe.conf"
+  run_backup install
+  local before; before="$(snapshot "$HOME")"
+  run_unlink --dry-run
+  local after; after="$(snapshot "$HOME")"
+  assert_unchanged "$before" "$after" "the home tree"
+}
+
+case_unlink_moves_the_repo_copy_back() {
+  track '~/.config/probe.conf'
+  repo_file ".config/probe.conf"
+  run_backup install
+  run_unlink
+  assert_not_symlink "$HOME/.config/probe.conf" || return 1
+  assert_content "$HOME/.config/probe.conf" "repo version"
+}
+
 # Defect 16: mv of a directory onto an existing directory nests it one level deep.
 case_unlink_does_not_nest_a_directory_inside_itself() {
   track '~/.config/hypr'
@@ -448,6 +465,8 @@ main() {
   run_case force_keeps_file_when_backup_fails
   run_case add_rejects_entry_that_is_not_below_home
   run_case unlink_does_not_overwrite_an_unlinked_real_file
+  run_case unlink_dry_run_changes_nothing
+  run_case unlink_moves_the_repo_copy_back
   run_case unlink_does_not_nest_a_directory_inside_itself
 
   run_case check_exits_nonzero_on_a_broken_tree
