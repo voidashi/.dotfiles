@@ -12,3 +12,9 @@ fonts/Iosevka/
 # a binary diff beside the real one.
 __pycache__/
 *.pyc
+
+# Agent worktrees live inside the repo, so they are themselves checkouts of it.
+# A broad "git add" from the repo root sweeps one up as a gitlink pointing at a
+# commit that exists only on the machine that made it, and a fresh clone then
+# reports a broken submodule. That happened once and is the reason for this rule.
+.claude/worktrees/

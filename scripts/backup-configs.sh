@@ -327,10 +327,6 @@ install_fonts() {
 # into the repo; this removes exactly those and nothing else. It never touches
 # the repo, and never touches a real file that install skipped, so running it
 # on a machine that was never installed onto changes nothing.
-#
-# unlink-dotfiles.sh is not this. That one moves the repo's files out into
-# $HOME and leaves the repo empty, which is the inverse of `add`. Pointing a
-# stranger at it to undo an install is how they lose their clone.
 uninstall_dotfiles() {
   local removed=0 kept=0 failed=0
 

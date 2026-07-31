@@ -99,9 +99,8 @@ console works too.
 > ```
 >
 > Changed your mind afterwards? `./scripts/backup-configs.sh uninstall` removes the
-> symlinks and leaves your own files and the repo alone. Do not use
-> `unlink-dotfiles.sh` for that; it empties the clone. `docs/SETUP.md` has the details,
-> including where `--force` put your originals.
+> symlinks and leaves your own files and the repo alone. `docs/SETUP.md` has the
+> details, including where `--force` put your originals.
 >
 > Being straight about why the simulation is worth running: these scripts have now been
 > audited, and it found five ways to lose a file, on top of the two found before it.
@@ -156,8 +155,7 @@ fonts/                    the four faces the theme uses
 scripts/
   backup-configs.sh       install, uninstall and audit the tracked dotfiles
   install-packages.sh     cross-distro package installer
-  unlink-dotfiles.sh      the inverse of `add`: move the repo's files back to $HOME
-  tests/                  sandboxed tests for the two scripts that can touch $HOME
+  tests/                  sandboxed tests for the script that can touch $HOME
   theme/                  palette.json, the generator and the checker
   wm/                     helpers the compositors call while running
 wallpapers/               one sample image, so a fresh clone has something to show

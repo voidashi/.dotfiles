@@ -23,8 +23,7 @@ doing nothing, with no error message anywhere.
   wlogout and swaync stylesheets all `@import`. It belongs to no single application,
   which is why it has a directory of its own.
 - `.bashrc`: the one tracked dotfile outside `.config`.
-- `scripts/backup-configs.sh`, `install-packages.sh`, `unlink-dotfiles.sh`: run by
-  hand. See below.
+- `scripts/backup-configs.sh`, `install-packages.sh`: run by hand. See below.
 - `scripts/config_files.conf`: every path, relative to `~`, that
   `backup-configs.sh` manages. A new dotfile goes here before anything else.
 - `scripts/packages.conf`: the package list, INI-style, with `[common]`, `[apt]`,
@@ -63,8 +62,7 @@ previously made the README's own `./scripts/install-packages.sh install` abort w
   It removes only the symlinks that point into this repo. A real file is left alone, a
   link pointing elsewhere is left alone, the repo is untouched, and the parent
   directories `install` created are deliberately not pruned, because `~/.config` is
-  shared with every other application on the machine. Do not point anyone at
-  `unlink-dotfiles.sh` to undo an install: that one empties the clone.
+  shared with every other application on the machine.
 - `check` reports five states, not two: valid, wrong target, dangling, not linked,
   missing. It resolves the link rather than only comparing its text, so a link into a
   repo copy that has been deleted is reported rather than called valid. It exits
@@ -93,10 +91,10 @@ previously made the README's own `./scripts/install-packages.sh install` abort w
   Both guards are proven by `scripts/tests/test-dotfiles.sh`, which is where that
   proof belongs rather than in this paragraph.
 - `--verbose` prints the entries that are already correct, which are the boring
-  majority: without it `check` on a healthy tree is one summary line instead of 32
-  green ones, and `install` reports `Unchanged: 31` as a count. It was parsed into a
-  variable nothing read for as long as it existed, while this document told you to
-  reach for it.
+  majority: without it, `check` on a healthy tree is one summary line instead of one
+  green line per tracked path, and `install` reports the unchanged entries as a count.
+  It was parsed into a variable nothing read for as long as it existed, while this
+  document told you to reach for it.
 - **Every path must be below `$HOME`.** `repo_relative()` enforces it and the four
   inline copies of the prefix strip are gone. An entry that is not below `$HOME`
   stripped to nothing, which made the repo destination the repo root itself: a stray
@@ -110,8 +108,8 @@ previously made the README's own `./scripts/install-packages.sh install` abort w
 
 ### `scripts/tests/test-dotfiles.sh`
 
-Twenty-four sandboxed cases over `backup-configs.sh` and `unlink-dotfiles.sh`. Run it
-after touching either. Each case gets its own `mktemp -d` with `HOME`, `DOTFILES_DIR`,
+Sandboxed cases over `backup-configs.sh`, the one script here that can damage a real
+`$HOME`. Run it after touching that file. Each case gets its own `mktemp -d` with `HOME`, `DOTFILES_DIR`,
 `BACKUP_DIR` and `CONFIG_FILE` pointed inside it, and `guard_sandbox()` aborts the whole
 run with exit 99 if any of the four ever points outside, so it cannot touch a real home
 directory.
@@ -131,13 +129,13 @@ believing.
   environment. That override was a plain assignment for a long time, so it could not be
   overridden and this line was untrue; setting it is how you exercise the apt or dnf
   path from an Arch machine.
-- **A command is required.** A bare invocation used to default to `install` and put 56
-  packages on the machine with sudo and no confirmation.
-- Any command takes package names after it, so three failures out of 56 can be retried
-  without touching the other 53. An unrecognised name exits 1.
+- **A command is required.** A bare invocation used to default to `install` and put
+  every package in `packages.conf` on the machine with sudo and no confirmation.
+- Any command takes package names after it, so a few failures can be retried without
+  reinstalling everything else. An unrecognised name exits 1.
 - `install` distinguishes `Already present` from `Installed`. Every installer here
-  exits 0 when there is nothing to do, so a second run used to report all 56 as freshly
-  installed. Hooks fire only on a real install, not on a re-run.
+  exits 0 when there is nothing to do, so a second run used to report the whole list as
+  freshly installed. Hooks fire only on a real install, not on a re-run.
 - Both scripts send `ERROR` and `WARNING` to stderr and blank their colours when stdout
   is not a terminal.
 - In `packages.conf`, keys under `[common]` apply to every distro. A same-named key
@@ -157,11 +155,6 @@ believing.
 - Logs to `scripts/package_install.log`, overwritten each run and gitignored.
 - Section headers are skipped by a `next` in the awk block. Remove it and the literal
   lines `[common]` and `[pacman]` get parsed as package names.
-
-### `unlink-dotfiles.sh`
-
-The inverse of `backup-configs.sh`: removes the symlinks and moves the files back to
-`$HOME`, leaving the repo essentially empty. Interactive confirmation required.
 
 ## Config architecture notes
 
@@ -441,10 +434,11 @@ catnap -n -c .config/catnap/config.toml -a .config/catnap/distros.toml >/dev/nul
 ./scripts/backup-configs.sh check
 ```
 
-The count is the number of paths in `scripts/config_files.conf`, currently 31, **plus
-one**: `backup-configs.sh:193` also checks the font symlink at
-`~/.local/share/fonts/dotfiles`, which is not listed in that file. So 31 is the
-expected total, and a mismatch means counting the paths before assuming a fault.
+`check` prints its own totals and exits non-zero unless everything is valid, so read
+those rather than counting lines. The one thing worth knowing is that the total is the
+number of paths in `scripts/config_files.conf` **plus one**: `check_dotfiles()` also
+checks the font symlink at `~/.local/share/fonts/dotfiles`, which is not listed in that
+file. If the total looks wrong, that off-by-one is the first thing to rule out.
 A broken link usually means an external program replaced it with a real file,
 which `kded6` has done to `gtk.css` before; re-link with `install --force`, but look
 at the content first, because the same event has also overwritten what the repo held.

@@ -61,10 +61,11 @@ the documents point at.
 
 2. **Make the two things a reader has to guess at explicit.** The README offers "you can
    lift the terminal colours, or the bar, or just the palette generator, and ignore the
-   rest", and no document says how, while the installer brings 54 packages including both
-   compositors, both notification daemons and both file managers. Write the cheap path in
-   three lines, or drop the offer; the `install <path>` flag that would make it one command
-   is a code change and belongs to the script audit under Housekeeping, which owns it.
+   rest", and no document says how, while the installer brings the whole of
+   `packages.conf` including both compositors, both notification daemons and both file
+   managers. Write the cheap path in three lines, or drop the offer. The code change
+   that would make it one command has its own entry under Housekeeping, "Let `install`
+   take paths"; this item is the documentation half and does not wait on it.
 
    Separately, the Iosevka step is the one place the reader has to pattern-match alone:
    "the Iosevka SGr TTC build" is not a filename, the releases page is a wall of
@@ -114,11 +115,15 @@ session.
   # 1. no repo knowledge left in the file itself
   grep -icE "kded6|8-digit hex|process cwd|swaylock-effects" CLAUDE.md   # expect 0
   # 2. nothing anywhere points at either path. Code counts, not just docs.
-  grep -rn "CLAUDE\.md\|\.claude/" --exclude-dir=.git .               # expect only CLAUDE.md's own title
+  grep -rn "CLAUDE\.md\|\.claude/" --exclude-dir=.git .
   ```
 
   The second check exists because the first was run with `--include="*.md"` and reported
-  clean while eight references sat in six config and script files.
+  clean while eight references sat in six config and script files. What it may legitimately
+  return, so the list is checkable rather than a judgement call: this entry's own text,
+  `CLAUDE.md`'s title line, the `.claude/worktrees/` rule in `.gitignore`, and any hit
+  inside the gitignored `scripts/package_install.log`. Anything else is a real reference
+  that has to be dealt with before the file goes.
 
 ## Known defects
 
@@ -205,12 +210,14 @@ session.
 ## Housekeeping
 
 - **The script audit is done, and this is what it did not cover.** `install-packages.sh`
-  and `backup-configs.sh` are the only code here that can damage a real `$HOME`. Three
-  reviewers went over all three scripts with different lenses, `shellcheck` was run for
-  the first time, and the correctness pass reproduced every defect it reported in a
-  throwaway `HOME=` before reporting it. Twenty-six were found; the fixes are in
-  `MAINTENANCE.md` and the git history, and `scripts/tests/test-dotfiles.sh` holds them
-  fixed with 24 cases.
+  and `backup-configs.sh` are the only code here that can damage a real `$HOME`. Four
+  reviewers went over what were then three scripts, with different lenses: correctness,
+  architecture, output and ergonomics, and a non-expert reading them beside the README.
+  `shellcheck` was run for the first time, and the correctness pass reproduced every
+  defect it reported in a throwaway `HOME=` before reporting it. Twenty-six were found;
+  the fixes are in `MAINTENANCE.md` and the git history, and
+  `scripts/tests/test-dotfiles.sh` holds them fixed. The third script,
+  `unlink-dotfiles.sh`, was deleted rather than repaired further; see the decision below.
 
   **Not covered, and this is the part that matters here.** Nothing touching `sudo`,
   `apt`, `pacman -Syy` or `dnf` was ever executed: `add_repos` and `update_pkg_db` are
@@ -235,20 +242,25 @@ session.
   *Difficulty: low each, medium together with the awk replacement. Priority: low while
   no hooks exist, medium the day one is uncommented.*
 
-- **Decided: `unlink-dotfiles.sh` stays a separate script.** The argument for folding it
-  into `backup-configs.sh` as a subcommand is real and was made well: it is one of four
-  verbs in a single state machine, and living apart is how it drifted into having no
-  `--dry-run`, no shared safety vocabulary and a fourth copy of the repo-path mapping.
-  Two of those three are now closed. It has `--dry-run` and `--yes`, it reports and
-  exits like the others, and both copies of the mapping validate the same way. Against
-  folding: `backup-configs.sh` is already the larger script, and the trigger everyone
-  agreed would make Python worth reconsidering is capability growth, not line count that
-  arrives by merging a file in. The remaining argument is the duplicated mapping, which
-  is eight lines. Reopen this only if the two copies disagree again.
+- **Decided: `unlink-dotfiles.sh` is deleted, and no `unadopt` replaces it.** It moved
+  the repo's files out into `$HOME` and emptied the clone, which is the inverse of `add`
+  and not of `install`. Once `uninstall` existed, its entire documentary footprint was
+  disclaimers: six places existed only to tell a reader this was not the script they
+  wanted, and every future edit to those documents paid that tax.
+
+  A per-path `unadopt` subcommand was proposed to replace it and rejected: too little
+  function to justify a command, for an operation the author performs about once and can
+  do with `mv`. Documenting that `mv` was also rejected, on the same grounds. Reopen only
+  if the manual step turns out to be taken often enough to hurt.
+
+  This also closes the older question of whether to fold the script into
+  `backup-configs.sh`. There is nothing left to fold, and the third copy of the
+  repo-path mapping went with it.
+
 
 - **Let `install` take paths, so the README's offer is true.** The README says you can
   lift the terminal colours, or the bar, and ignore the rest, and `backup-configs.sh
-  install` is still all 31 paths or nothing. `install-packages.sh` gained positional
+  install` is still every path in `config_files.conf` or nothing. `install-packages.sh` gained positional
   package names in the audit and this is the same change on the other script:
   `install_dotfiles`, `check_dotfiles` and `uninstall_dotfiles` are each a loop over
   `load_dotfiles`, so filtering that loop by positional arguments is roughly ten lines
@@ -344,9 +356,16 @@ Every document here is at zero em dashes, verified rather than assumed. The stan
 not a task: no em dashes, and never state a thing then restate it inverted.
 
 The double hyphens that stood in for a dash are **not** finished. They are out of the
-shell scripts, and 24 remain in comments across the stylesheets, the terminal
-configs and `palette.json`. Clean each when something else takes you into the file;
-`set -- "$@"` in bash is real syntax and stays.
+shell scripts and remain in comments throughout `.config/`, including the stylesheets,
+the waybar and swaync JSON, `hyprtoolkit.conf`, several Lua comment bodies and
+`palette.json`. Clean each when something else takes you into the file.
+
+No count here on purpose: this one is genuinely hard to grep, which is why the figure
+that used to sit in this paragraph was both stale and scoped too narrowly. `--` is Lua's
+comment marker and the prefix of every long CLI flag, so a naive search returns hundreds
+of legitimate lines. The pattern that actually finds them is two hyphens with a space on
+both sides, `[[:alnum:],)] -- [[:alnum:]]`, and even that needs reading. `set -- "$@"` in
+bash is real syntax and stays.
 *Difficulty: trivial per file. Priority: low.*
 
 Worth keeping from having done it three times, because a blanket substitution does not

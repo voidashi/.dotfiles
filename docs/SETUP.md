@@ -202,12 +202,6 @@ run `uninstall` first and then `restore <timestamp>`, in that order: `restore` r
 overwrite anything already at the path, and while the symlink is still there it counts
 as already at the path.
 
-**`./scripts/unlink-dotfiles.sh` is a different thing and is not the undo for an
-install.** It moves the *repo's* files out into `$HOME` and leaves your clone empty. It
-is the inverse of `add`, which is the command the repo's author uses to bring a new
-dotfile in. It has `--dry-run` and asks for confirmation, but if you reach for it to
-back out of an install you will lose the clone and still not have your own files back.
-
 ## What you must change for your machine
 
 None of this breaks the install, but leaving it alone means running someone else's
