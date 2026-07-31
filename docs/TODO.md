@@ -61,8 +61,9 @@ the documents point at.
 
 2. **Make the two things a reader has to guess at explicit.** The README offers "you can
    lift the terminal colours, or the bar, or just the palette generator, and ignore the
-   rest", and no document says how, while the installer brings 54 packages including both
-   compositors, both notification daemons and both file managers. Write the cheap path in
+   rest", and no document says how, while the installer brings the whole of
+   `packages.conf` including both compositors, both notification daemons and both file
+   managers. Write the cheap path in
    three lines, or drop the offer; the `install <path>` flag that would make it one command
    is a code change and belongs to the script audit under Housekeeping, which owns it.
 
@@ -257,7 +258,7 @@ session.
 
 - **Let `install` take paths, so the README's offer is true.** The README says you can
   lift the terminal colours, or the bar, and ignore the rest, and `backup-configs.sh
-  install` is still all 31 paths or nothing. `install-packages.sh` gained positional
+  install` is still every path in `config_files.conf` or nothing. `install-packages.sh` gained positional
   package names in the audit and this is the same change on the other script:
   `install_dotfiles`, `check_dotfiles` and `uninstall_dotfiles` are each a loop over
   `load_dotfiles`, so filtering that loop by positional arguments is roughly ten lines
