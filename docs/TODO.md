@@ -314,17 +314,167 @@ session.
   *Difficulty: low, and it is a rewrite of two files. Priority: low until the AUR moves,
   then blocking for anyone using catnap as their greeter.*
 
-- **`dunst` is declared in `packages.conf` although nothing launches it.**
-  `.config/dunst/` is kept deliberately as a reference and that decision is settled, but
-  installing the package on every fresh clone is a separate question that was never
-  asked.
+- **Four packages are installed for programs nothing launches.** `dunst`, `hyprpaper`,
+  `hyprlauncher` and `catnap`. All four configs are deliberate keeps and those decisions
+  are settled in [`TURNING-POINTS.md`](TURNING-POINTS.md), but a reference config does not
+  need its program on a stranger's machine, and the question was only ever asked of
+  `dunst`. `pfetch-rs` is the same shape with no config at all: its only invocation is a
+  commented line in `config.fish`, and it carries seven lines of AUR justification.
   *Difficulty: trivial. Priority: low.*
 
-- **Elegance pass over structure and organisation.** Several things work without being
-  elegant: duplicated structure, files that exist for no current reason, inconsistent
-  naming across the scripts, configs that repeat what a shared source could hold.
-  Open-ended by nature, so it should produce a list before anything moves.
-  *Difficulty: high, and open-ended. Priority: medium.*
+- **The noise audit is done, and this is its list.** Four reviewers with different lenses:
+  a plain user reading only what the index sends them to, an orphan sweep over the whole
+  tree, a document editor, and a software architect. Wording, formatting and bug hunting
+  were out of scope for all four. The list below is what they found, and it is the list
+  the old "elegance pass" entry asked for before anything moves.
+
+  Closed during the audit, so they are not reopened: `.config/catnap/`, the dormant
+  fastfetch presets, the unused Hack and Instrument Sans faces and `DESIGN-SYSTEM.md` all
+  stay, and the first two are now named in `TURNING-POINTS.md` as deliberate keeps. Fixed
+  in the same session: four dead `SKIP_PARTS` in `check_palette.py`, two surviving "three
+  scripts", the false `@import` claim in `MAINTENANCE.md`, and a hyprtoolkit header
+  claiming a keybind it does not have.
+
+  **Features with no users.**
+
+  - `[hooks]` in `packages.conf` has zero entries and one commented example, and
+    `run_hooks()` is 15 lines of awk-inside-bash carrying the three open defects and the
+    repair plan recorded above. Deleting the feature closes those three with it.
+    *Difficulty: trivial. Priority: medium, because work is scheduled on something nobody
+    uses.*
+  - The apt and dnf branches, the `repos` subcommand and the empty `[apt]` and `[dnf]`
+    sections are about 90 of the 491 lines in `install-packages.sh`, for platforms the
+    README, `SETUP.md` and `MAINTENANCE.md` all say are unsupported. None of it has ever
+    run. On apt it would install a Microsoft repository key and then fail most of the list.
+    *Difficulty: low. Priority: medium, and it is the largest untested surface here.*
+  - `backup-configs.sh init` can never do anything: every documented entry point begins
+    with `git clone`, so it only prints "Repo already exists", and the directory its
+    working path creates is one no other subcommand can fill.
+    *Difficulty: trivial. Priority: low.*
+  - `config_files.conf` carries "Optional Configurations" and "Template Examples", eight
+    commented lines whose content is `~/.EXAMPLE_FILE`, for a format that is one path per
+    line.
+    *Difficulty: trivial. Priority: low.*
+
+  **Documentation that outweighs what it documents.**
+
+  - About 150 of `RICE-GUIDE.md`'s 504 lines address a contributor or the agent, inside the
+    document `docs/README.md` sends a *user* to: "What this document is" with the
+    carries-over table (8-59), "Working rules" (395-430), "Application classes" (433-481)
+    and "Anti-patterns" (484-499). "Stop and ask rather than deriving one silently" has no
+    addressee for someone with a fork, ten of twelve anti-pattern bullets negate rules
+    stated earlier in the same file, and seven of nine "Application classes" paragraphs
+    have a counterpart in `THEMING.md:54-134` that additionally names files. The
+    agent-facing rules need a home that is not the reader's document. Whether the
+    contributor-facing ones move with them is the open question.
+    *Difficulty: low. Priority: high, since it is one of the two documents a user is told
+    to read.*
+  - `THEMING.md:159-166` carries open work eight lines after its own opening says this file
+    owns it, and its three items are verbatim from here. Its first three "Settled
+    decisions" bullets (138-146) restate `RICE-GUIDE.md`. Bullets 4 and 5 must survive:
+    the relaxed accent budget for fetches, and "Rollback is git, not a directory".
+    *Difficulty: trivial. Priority: medium.*
+  - `SETUP.md:342-369`, the Qt entry, is 28 lines that stopped being a symptom index and
+    became a second copy of the cause at `MAINTENANCE.md:186-196`. The same fact is stated
+    a third time at `SETUP.md:152-159`.
+    *Difficulty: trivial. Priority: low.*
+  - `SETUP.md:118-143` explains greetd's stock config, its flags and `systemctl enable`,
+    which are greetd's own README and `tuigreet --help`. The "enable, not `enable --now`"
+    footgun is the part that earns its place.
+    *Difficulty: trivial. Priority: low.*
+  - `AESTHETIC-DIRECTION.md` prints the temperature map (160-177) a second time against
+    `DESIGN-SYSTEM.md:238-248`, and photography direction sits in three documents for a
+    repository that has no photography. Its irreplaceable content is the material
+    references, "The right temperature of darkness", "What the system is not" and the note
+    on coherence over time.
+    *Difficulty: low. Priority: low.*
+
+  **Duplicated knowledge.**
+
+  - The two compositors describe every runtime service twice and have already diverged.
+    The autostart set at `autostart.lua:15-35` against `sway/config:237-265`; the idle
+    schedule 300/360/1800 in two syntaxes, with a comment asking future editors to keep
+    them in step; three screenshot binds under Hyprland against one bare `grim` under Sway;
+    different launcher keys. Sway also carries nine hand-pasted hex while Hyprland reads a
+    generated `palette.lua`, so the two sit on opposite sides of this repo's most important
+    seam. `TURNING-POINTS.md` records waybar learning exactly this lesson. The cheap half is
+    generating a Sway palette include, about 15 lines in `generate_theme.py`, which moves
+    nine literals off the drift surface. Whether Sway should exist at all depends on
+    whether it is ever booted, which nothing here records.
+    *Difficulty: low for the include, high for the rest. Priority: medium.*
+  - The two management scripts are two CLIs for one job. The rehearsal is `preview`, a
+    subcommand, on one and `--dry-run`, a flag, on the other, and the README prints both in
+    one code block. Four flags exist on one and not the other for no reason arising from
+    its job. Pick one vocabulary; nothing learned from the first script transfers today.
+    *Difficulty: low. Priority: medium.*
+  - `.claude/skills/verify-repo/SKILL.md` is the only artefact that runs all nine checks,
+    and "Pending actions" above commits to deleting `.claude/` at publication. Its content
+    is duplicated as prose in `MAINTENANCE.md:384-444`, the two have already diverged
+    (`MAINTENANCE.md` runs two the skill does not), neither runs
+    `scripts/tests/test-dotfiles.sh` despite the skill claiming every validator, and the
+    skill hardcodes "32 valid" and "31 paths". A `scripts/verify.sh` that both call is the
+    obvious answer and is the precondition for deleting `.claude/` without loss.
+    *Difficulty: low. Priority: medium, high the day publication is real.*
+  - `CLAUDE.md` claims it "can be deleted without losing anything". True of four of its five
+    rules. "Never write a count that a config file owns" exists nowhere under `docs/`, and
+    the pre-deletion greps in "Pending actions" would not catch it, since they look for
+    pitfall strings and for references to the path. Move it to `MAINTENANCE.md` first, and
+    move the general form with it: a file must not restate a fact another file owns, only
+    point at the owner. The count is the narrow case. `hyprtoolkit.conf` carried the wide
+    one twice, first naming a keybind that `conf/programs.lua` owns and then, in the fix
+    for that, naming which launcher was live, which the same file owns.
+    *Difficulty: trivial. Priority: medium, because it is lost silently at deletion.*
+
+  **Smaller, one edit each.**
+
+  - `generate_theme.py:626-631` has `if __name__ == "__main__": main()` twice, both at top
+    level, so every run generates all ten files twice and runs the two in-place merge
+    functions twice. Invisible only because the writes are idempotent.
+    *Difficulty: trivial. Priority: medium, since those two edit files in place.*
+  - `wallpapers/Topography.png` and `Topography.jpg` are one image at one size, and both
+    match the picker's glob, so a fresh clone randomises between two copies of the same
+    wallpaper while `README.md:161` promises one. Only the dimensions were compared, not
+    the pixels.
+    *Difficulty: trivial. Priority: low.*
+  - `.config/waybar/scripts/mediaplayer.py` is a helper the bar calls while running, which
+    is `MAINTENANCE.md:31`'s own definition of `scripts/wm/`, and it lives elsewhere.
+    Moving it costs the README's offer that the bar can be lifted on its own, which is why
+    this is a question rather than a task.
+    *Difficulty: trivial. Priority: low.*
+  - Comments in about 8 of the 17 files under `.config/hypr/` are in Portuguese while the
+    rest of the tree is English, including the note at `autostart.lua:12` on why absolute
+    paths are used, which is worth reading. Translate on touch, like the double hyphens.
+    *Difficulty: trivial per file. Priority: low.*
+  - Declared with no config, no launch and no bind: `ranger` (a third file manager beside
+    themed yazi and dolphin), `supergfxctl`, `cava`, `zathura`, `cmatrix`, `hyprpicker`.
+    *Difficulty: trivial. Priority: low.*
+  - Invoked and not declared: `nm-applet`, `rfkill`, `playerctl`, `wpctl`, `brightnessctl`,
+    `pactl`, `grim`, `swaynag`. Of the screenshot pair only `hyprshot` is in
+    `packages.conf`, so a fresh Sway clone gets a `Print` key that does nothing.
+    *Difficulty: trivial. Priority: medium.*
+
+  **Not covered, so nobody assumes it was.** `.config/nvim/`, 22 files and the largest
+  unexamined subtree, where an unused plugin spec is exactly the shape being hunted.
+  Whether four terminal emulators earn four configs. Nothing was executed except greps,
+  `wc`, `find` and `check_palette.py`.
+
+- **Decide whether `minimal/` survives its own rule.** `THEMING.md:153-157` settles
+  "Rollback is git, not a directory. Do not reintroduce a legacy directory", and
+  `.config/fastfetch/minimal/` is five files whose own header calls them frozen snapshots
+  "NOT kept in sync". The presets are now a recorded keep, so the two statements disagree
+  and one has to move: either `minimal/` is the documented exception to that rule, or it is
+  the thing the rule was written about.
+  *Difficulty: trivial, and it is a decision rather than work. Priority: low.*
+
+- **`DESIGN-SYSTEM.md` leaves when it stops being useful *here*.** It is 733 lines, 22% of
+  the prose in this repository, cited by no config file, and every one of its 76 hexes
+  except pure white already lives in `palette.json`. It is permanent reference for web and
+  print work, so "is it still useful" is the wrong question: it always is. The only
+  question this repository gets to ask is whether it still earns a place in this tree, and
+  it stays while it is consulted from here. The day it is not, it moves to wherever the web
+  work lives rather than being deleted, and `RICE-GUIDE.md:111`, which sends a reader here
+  for the full ramps, points at `palette.json` instead.
+  *Difficulty: trivial when the day comes. Priority: none until then.*
 
 ## Needs assets, not code
 

@@ -101,11 +101,25 @@ is in the git log.
 
 ## Some configs are kept deliberately, and are not dead weight
 
-`.config/dunst/` and `.config/hypr/hyprpaper.conf` configure programs nothing
-launches: swaync catches notifications and swaybg draws the wallpaper. Both are
-kept unthemed as references, so switching back is reading a file rather than
-writing one. They look like leftovers and are not, which is the only reason this
-entry exists.
+Four configs here belong to programs nothing launches, and one directory holds
+presets nothing runs. They look like leftovers and are not, which is the only
+reason this entry exists. Keep the list complete: when it named only the first
+two, an audit reported the other two as dead weight and had to be told otherwise.
+
+- `.config/dunst/`: swaync catches notifications. Kept unthemed as a reference.
+- `.config/hypr/hyprpaper.conf`: swaybg draws the wallpaper. Kept as a reference,
+  and note it preloads an image that is not in this repository, so switching back
+  means editing it rather than only reading it.
+- `.config/hypr/hyprtoolkit.conf`: wofi is the launcher; the hyprlauncher line in
+  `conf/programs.lua` is commented out. Kept themed so switching back is swapping
+  two lines.
+- `.config/catnap/`: fastfetch prints the shell greeting; the catnap line in
+  `.config/fish/config.fish` is commented out. Kept themed and tracked on purpose.
+- `.config/fastfetch/` beyond `arch_small/`: the other presets are dormant by
+  choice, kept for the day the greeting changes rather than as history.
+
+Switching back is meant to be reading a file rather than writing one, which is why
+these stay themed and tracked instead of living in the git log.
 
 Open work of every kind lives in `docs/TODO.md`, including what is diagnosed and
 deliberately parked. It is not repeated here.

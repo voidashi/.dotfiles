@@ -106,7 +106,7 @@ console works too.
 > audited, and it found five ways to lose a file, on top of the two found before it.
 > `install --force` deleted the target after a backup that had failed; `add` deleted the
 > original after a copy that had failed; a stray `~/` line in the config reached
-> `rm -rf "$HOME/"`. All of them are fixed, and 24 sandboxed tests in `scripts/tests/`
+> `rm -rf "$HOME/"`. All of them are fixed, and the sandboxed tests in `scripts/tests/`
 > hold them fixed. But the honest reading of a script with that history is that you
 > should run the simulation rather than believe this paragraph. What the audit did not
 > cover is listed in [`docs/TODO.md`](docs/TODO.md).
