@@ -14,8 +14,11 @@ BACKUP_DIR="${BACKUP_DIR:-$HOME/.dotfiles_backup}"
 TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
 CURRENT_BACKUP="$BACKUP_DIR/$TIMESTAMP"
 
-# Colors
+# Colors. Blanked when stdout is not a terminal, so a redirected run does not
+# fill a file with escape sequences. This script has no --no-color flag and does
+# not need one now.
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
+[ -t 1 ] || { RED=''; GREEN=''; YELLOW=''; BLUE=''; NC=''; }
 
 # Flags
 DRY_RUN=false
@@ -31,8 +34,18 @@ log() {
     "WARNING") color="$YELLOW"; prefix="[WARNING]" ;;
     "ERROR") color="$RED"; prefix="[ERROR]" ;;
     "SUCCESS") color="$GREEN"; prefix="[SUCCESS]" ;;
+    # An unrecognised level used to print an untagged line with no prefix at
+    # all, silently. install-packages.sh's log has always had this arm.
+    *) color="$NC"; prefix="[$level]" ;;
   esac
-  echo -e "${color}${prefix}${NC} $*"
+
+  # Problems go to stderr, so `check 2>&1 >/dev/null` shows only what is wrong
+  # and a redirected run is not silent about failing. Nothing in this script
+  # wrote to fd 2 before, while scripts/wm/ in the same repo does.
+  case "$level" in
+    ERROR|WARNING) echo -e "${color}${prefix}${NC} $*" >&2 ;;
+    *)             echo -e "${color}${prefix}${NC} $*" ;;
+  esac
 }
 
 resolve_path() {

@@ -12,11 +12,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_FILE="${CONFIG_FILE:-$SCRIPT_DIR/config_files.conf}"
 BACKUP_DIR="${BACKUP_DIR:-$HOME/.dotfiles_backup}"
 
-# Colors
+# Colors, blanked when stdout is not a terminal so a redirected run does not
+# fill a file with escape sequences.
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
+[ -t 1 ] || { RED=''; GREEN=''; YELLOW=''; NC=''; }
 
 # Resolve paths (e.g., ~/.config → /home/user/.config)
 resolve_path() {
@@ -55,10 +57,12 @@ restore() {
       continue
     fi
 
-    # Remove symlink if it points to the repo
+    # Remove symlink if it points to the repo. This used to print its own line,
+    # so every entry produced [REMOVED SYMLINK] followed by [RESTORED] for the
+    # same path: 62 lines for 31 entries, and the first said nothing the second
+    # did not imply.
     if [ -L "$original_path" ] && [ "$(readlink "$original_path")" = "$repo_path" ]; then
       rm -f "$original_path"
-      echo -e "${GREEN}[REMOVED SYMLINK]${NC} $original_path"
     fi
 
     # Move the repo copy back, but never onto something that is already there.
@@ -90,7 +94,11 @@ restore() {
   # trailing slash is stripped from DOTFILES_DIR at the top of this file, because
   # find normalises the paths it emits but the -path pattern is built by
   # concatenation, and a doubled slash made the .git exclusion match nothing.
-  find "$DOTFILES_DIR" -mindepth 1 -type d -empty -not -path "$DOTFILES_DIR/.git/*" -delete 2>/dev/null
+  local pruned
+  pruned="$(find "$DOTFILES_DIR" -mindepth 1 -type d -empty -not -path "$DOTFILES_DIR/.git/*" -print -delete 2>/dev/null | wc -l)"
+  # This was the script's last act and it was silent, deleting directories out
+  # of the user's git repository with its errors discarded.
+  echo -e "${YELLOW}[PRUNED]${NC} $pruned empty director$([ "$pruned" -eq 1 ] && echo y || echo ies) removed from $DOTFILES_DIR"
 }
 
 # Safety confirmation

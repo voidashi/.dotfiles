@@ -16,12 +16,23 @@ LOG_FILE="${LOG_FILE:-$SCRIPT_DIR/package_install.log}"
 DEFAULT_PACKAGE_MANAGER="${DEFAULT_PACKAGE_MANAGER:-auto}"
 AUR_HELPER=""
 UNATTENDED=false
-NO_COLOR=false
 UPDATED_DB=false
+PROGRESS=""   # set by install_all, prefixed onto the per-package line
 
 # Colors
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
 BLUE='\033[0;34m'; NC='\033[0m'
+
+# --no-color used to blank only NC, the reset, and leave the four colours in
+# place: the escape codes still went out, the reset did not, so the colour bled
+# through the message and out into the shell prompt after the run, and a
+# redirected log filled with unterminated escapes. It produced strictly worse
+# output than not passing the flag.
+#
+# Called from parse_args, and again here for the no-tty case, so redirected
+# output is clean whether or not anyone remembers the flag.
+disable_colors() { RED=''; GREEN=''; YELLOW=''; BLUE=''; NC=''; }
+[ -t 1 ] || disable_colors
 
 # ---- Initialization ----
 init_logging() {
@@ -34,10 +45,7 @@ log() {
     local timestamp
     timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     local color=""
-    
-    # Disable color if NO_COLOR is true
-    [ "$NO_COLOR" = true ] && NC=""
-    
+
     case "$level" in
         "INFO") color="$BLUE" ;;
         "WARNING") color="$YELLOW" ;;
@@ -45,9 +53,16 @@ log() {
         "SUCCESS") color="$GREEN" ;;
         *) color="$NC" ;; # Default for SUMMARY etc.
     esac
-    
-    # Print to console
-    echo -e "${color}[$level]${NC} $message"
+
+    # Problems go to stderr. Nothing in these three scripts wrote to fd 2, while
+    # scripts/wm/ in the same repo does, so `check 2>&1 >/dev/null` printed
+    # nothing, a redirected install ran silently for minutes with no way to see
+    # it fail, and the [ERROR] line landed in a different stream from the
+    # package manager's own explanation of the same failure.
+    case "$level" in
+        ERROR|WARNING) echo -e "${color}[$level]${NC} $message" >&2 ;;
+        *)             echo -e "${color}[$level]${NC} $message" ;;
+    esac
     # Print to log file
     echo "[$timestamp] [$level] $message" >> "$LOG_FILE"
 }
@@ -152,11 +167,24 @@ update_pkg_db() {
 load_packages() {
     # Use a global associative array to map common names to distro-specific names
     declare -gA PACKAGE_MAP=()
-    
+    # And a parallel list in file order. Bash iterates an associative array in
+    # hash order, so preview, install and check all threw away the grouping that
+    # packages.conf is carefully organised into: the Hyprland packages came out
+    # scattered across 56 lines and a long install gave no sense of position.
+    declare -ga PACKAGE_ORDER=()
+
     # Read from config file using awk to filter relevant sections
     while IFS='=' read -r key value; do
-        # Skip empty lines
+        # Trim surrounding whitespace. The awk filter is anchored at column 0
+        # and trims nothing, so an indented comment, a trailing space or a
+        # whitespace-only line survived into the map and became a phantom
+        # package that failed to install and made the whole run exit 1.
+        key="${key#"${key%%[![:space:]]*}"}"; key="${key%"${key##*[![:space:]]}"}"
+        value="${value#"${value%%[![:space:]]*}"}"; value="${value%"${value##*[![:space:]]}"}"
         [[ -z "$key" ]] && continue
+        [[ "$key" == \#* || "$key" == \;* ]] && continue
+        # A repeated key would otherwise appear twice in the ordered list.
+        [[ -v "PACKAGE_MAP[$key]" ]] || PACKAGE_ORDER+=("$key")
         # Use the key as the value if no specific value is provided
         PACKAGE_MAP["$key"]="${value:-$key}"
     done < <(
@@ -179,7 +207,9 @@ install_package() {
     local key="$1"
     local package_name="$2"
     local status=0
-    log "INFO" "Processing: $key ($package_name)"
+    # A run over 56 packages takes minutes and gave no sense of position.
+    # PROGRESS is set by install_all and empty for any other caller.
+    log "INFO" "${PROGRESS:+$PROGRESS }Processing: $key"
 
     # Asked before the install runs, not instead of it. The install command
     # still runs so an out-of-date package is still upgraded; this only decides
@@ -248,12 +278,18 @@ run_hooks() {
 
 # ---- User Commands ----
 preview() {
-    log "INFO" "Packages to be installed:"
-    for key in "${!PACKAGE_MAP[@]}"; do
-        # Display: ➔ common-name (distro-package-name)
-        echo -e "  ${GREEN}➔${NC} ${key} (${PACKAGE_MAP[$key]})"
+    # Not "to be installed": most of them usually already are.
+    log "INFO" "${#PACKAGE_MAP[@]} packages configured for $PKG_MANAGER:"
+    for key in "${PACKAGE_ORDER[@]}"; do
+        # The distro name in parentheses was printed for all 56 and differed
+        # from the key in none of them, because [apt], [pacman] and [dnf] are
+        # all empty in packages.conf. Show it only when it says something.
+        if [ "${PACKAGE_MAP[$key]}" = "$key" ]; then
+            echo -e "  ${GREEN}➔${NC} ${key}"
+        else
+            echo -e "  ${GREEN}➔${NC} ${key} (${PACKAGE_MAP[$key]})"
+        fi
     done
-    echo -e "\nTotal: ${#PACKAGE_MAP[@]} packages"
 }
 
 install_all() {
@@ -262,7 +298,10 @@ install_all() {
     
     local installed=0 present=0 failures=0 rc
     local failed_keys=()
-    for key in "${!PACKAGE_MAP[@]}"; do
+    local total="${#PACKAGE_ORDER[@]}" index=0
+    for key in "${PACKAGE_ORDER[@]}"; do
+        index=$((index + 1))
+        PROGRESS="[$index/$total]"
         # Not "&& ((success++)) || ((failures++))". Post-increment evaluates to
         # the old value, so on the first success the arithmetic result is 0,
         # (( )) exits 1, the || fires, and one phantom failure is counted on
@@ -289,7 +328,7 @@ verify_installed() {
     local present=0
     local missing_keys=()
     log "INFO" "Checking ${#PACKAGE_MAP[@]} configured packages against $PKG_MANAGER..."
-    for key in "${!PACKAGE_MAP[@]}"; do
+    for key in "${PACKAGE_ORDER[@]}"; do
         if is_installed "${PACKAGE_MAP[$key]}"; then
             present=$((present + 1))
         else
@@ -314,7 +353,7 @@ parse_args() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
             --yes) UNATTENDED=true; shift ;;
-            --no-color) NO_COLOR=true; shift ;;
+            --no-color) disable_colors; shift ;;
             --log)
                 # shift 2 with only one argument left shifts nothing and returns
                 # 1, so the loop rematched --log forever. parse_args runs before
