@@ -63,9 +63,9 @@ the documents point at.
    lift the terminal colours, or the bar, or just the palette generator, and ignore the
    rest", and no document says how, while the installer brings the whole of
    `packages.conf` including both compositors, both notification daemons and both file
-   managers. Write the cheap path in
-   three lines, or drop the offer; the `install <path>` flag that would make it one command
-   is a code change and belongs to the script audit under Housekeeping, which owns it.
+   managers. Write the cheap path in three lines, or drop the offer. The code change
+   that would make it one command has its own entry under Housekeeping, "Let `install`
+   take paths"; this item is the documentation half and does not wait on it.
 
    Separately, the Iosevka step is the one place the reader has to pattern-match alone:
    "the Iosevka SGr TTC build" is not a filename, the releases page is a wall of
@@ -115,11 +115,15 @@ session.
   # 1. no repo knowledge left in the file itself
   grep -icE "kded6|8-digit hex|process cwd|swaylock-effects" CLAUDE.md   # expect 0
   # 2. nothing anywhere points at either path. Code counts, not just docs.
-  grep -rn "CLAUDE\.md\|\.claude/" --exclude-dir=.git .               # expect only CLAUDE.md's own title
+  grep -rn "CLAUDE\.md\|\.claude/" --exclude-dir=.git .
   ```
 
   The second check exists because the first was run with `--include="*.md"` and reported
-  clean while eight references sat in six config and script files.
+  clean while eight references sat in six config and script files. What it may legitimately
+  return, so the list is checkable rather than a judgement call: this entry's own text,
+  `CLAUDE.md`'s title line, the `.claude/worktrees/` rule in `.gitignore`, and any hit
+  inside the gitignored `scripts/package_install.log`. Anything else is a real reference
+  that has to be dealt with before the file goes.
 
 ## Known defects
 
@@ -206,12 +210,14 @@ session.
 ## Housekeeping
 
 - **The script audit is done, and this is what it did not cover.** `install-packages.sh`
-  and `backup-configs.sh` are the only code here that can damage a real `$HOME`. Three
-  reviewers went over all three scripts with different lenses, `shellcheck` was run for
-  the first time, and the correctness pass reproduced every defect it reported in a
-  throwaway `HOME=` before reporting it. Twenty-six were found; the fixes are in
-  `MAINTENANCE.md` and the git history, and `scripts/tests/test-dotfiles.sh` holds them
-  fixed with 24 cases.
+  and `backup-configs.sh` are the only code here that can damage a real `$HOME`. Four
+  reviewers went over what were then three scripts, with different lenses: correctness,
+  architecture, output and ergonomics, and a non-expert reading them beside the README.
+  `shellcheck` was run for the first time, and the correctness pass reproduced every
+  defect it reported in a throwaway `HOME=` before reporting it. Twenty-six were found;
+  the fixes are in `MAINTENANCE.md` and the git history, and
+  `scripts/tests/test-dotfiles.sh` holds them fixed. The third script,
+  `unlink-dotfiles.sh`, was deleted rather than repaired further; see the decision below.
 
   **Not covered, and this is the part that matters here.** Nothing touching `sudo`,
   `apt`, `pacman -Syy` or `dnf` was ever executed: `add_repos` and `update_pkg_db` are
@@ -353,9 +359,16 @@ Every document here is at zero em dashes, verified rather than assumed. The stan
 not a task: no em dashes, and never state a thing then restate it inverted.
 
 The double hyphens that stood in for a dash are **not** finished. They are out of the
-shell scripts, and 24 remain in comments across the stylesheets, the terminal
-configs and `palette.json`. Clean each when something else takes you into the file;
-`set -- "$@"` in bash is real syntax and stays.
+shell scripts and remain in comments throughout `.config/`, including the stylesheets,
+the waybar and swaync JSON, `hyprtoolkit.conf`, several Lua comment bodies and
+`palette.json`. Clean each when something else takes you into the file.
+
+No count here on purpose: this one is genuinely hard to grep, which is why the figure
+that used to sit in this paragraph was both stale and scoped too narrowly. `--` is Lua's
+comment marker and the prefix of every long CLI flag, so a naive search returns hundreds
+of legitimate lines. The pattern that actually finds them is two hyphens with a space on
+both sides, `[[:alnum:],)] -- [[:alnum:]]`, and even that needs reading. `set -- "$@"` in
+bash is real syntax and stays.
 *Difficulty: trivial per file. Priority: low.*
 
 Worth keeping from having done it three times, because a blanket substitution does not
