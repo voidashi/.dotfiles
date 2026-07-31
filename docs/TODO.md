@@ -22,27 +22,27 @@ the repository is shaped as it is belongs to
 
 ## Start here next session
 
-Highest priority, before anything else. All four come from a third review, by someone
+Highest priority, before anything else. All three come from a third review, by someone
 told to be an ordinary Linux user who wants a good-looking desktop without spending a
 weekend on it, and who can google anything obvious. The two earlier reviews were done by
 people who could read code, which is why none of this surfaced then. Every finding below
 was re-verified by hand.
 
-The fifth, "say how to get into the session", is done: `greetd` and `greetd-tuigreet` are
-declared, `SETUP.md` step 5 covers the display manager and the text console paths, and the
-black-screen symptom is in the troubleshooting list. What it left behind is below, under
-"Pending actions" and "Features not built".
+Two of the five are done. "Say how to get into the session" put `greetd` and
+`greetd-tuigreet` in `packages.conf` and both launch paths in `SETUP.md` step 6, and what
+it left behind is under "Pending actions" and "Features not built". "Make `--dry-run` the
+first install step" is now steps 1 and 3 of the install, with the README's warning
+offering the simulation instead of demanding an audit. That one turned up three defects in
+`backup-configs.sh`, all fixed and recorded under Housekeeping, so it stopped being a
+documentation task halfway through.
 
-1. **Make `--dry-run` the first install step, and stop asking the reader to audit bash.**
-   The README's warning currently says to read the scripts before pointing them at a home
-   directory. The reviewer stopped there, correctly: they cannot audit 400 lines of bash,
-   so the instruction leaves only "ignore the author" or "give up". `--dry-run` is the
-   answer and appears once in the README and **zero times** in `SETUP.md`'s numbered
-   steps, which is the guide they would actually follow. Make it step 0, and reword the
-   warning to offer the way out rather than to demand the reading.
-   *Difficulty: trivial. Priority: maximum.*
+The script audit that grew out of it is also done and has moved to Housekeeping, along
+with an explicit list of what it did not cover. It found 26 defects, five of which
+destroyed files, and it closed the reason a reviewer said they would install this on a
+spare machine and not on their laptop: there is an `uninstall` now, and it is the one
+the documents point at.
 
-2. **Write the recipe for changing the accent colour.** The README's headline promise is
+1. **Write the recipe for changing the accent colour.** The README's headline promise is
    "change one hex and everything moves together", and that promise is what makes people
    want the repo. It is also the one thing no document lets them act on. Measured:
    `palette.json` has no accent key at all, the identity colour is a ten-value `bordeaux`
@@ -59,7 +59,7 @@ black-screen symptom is in the troubleshooting list. What it left behind is belo
    *Difficulty: low. Priority: maximum, since it is the repo's best promise with nothing
    behind it.*
 
-3. **Make the two things a reader has to guess at explicit.** The README offers "you can
+2. **Make the two things a reader has to guess at explicit.** The README offers "you can
    lift the terminal colours, or the bar, or just the palette generator, and ignore the
    rest", and no document says how, while the installer brings 54 packages including both
    compositors, both notification daemons and both file managers. Write the cheap path in
@@ -73,7 +73,7 @@ black-screen symptom is in the troubleshooting list. What it left behind is belo
    terminal, which is the whole point of the repo.
    *Difficulty: low. Priority: maximum.*
 
-4. **Rewrite the README's opening as an introduction that holds the reader.** "Is this for
+3. **Rewrite the README's opening as an introduction that holds the reader.** "Is this for
    you?" is good and the reviewer said so, but it opens by qualifying rather than by
    selling, so it does not hold someone who just opened the repo. The page should lead
    with what this is and why it looks good, then what it contains, and only then filter
@@ -96,7 +96,7 @@ session.
   autostart lines existed will not be running them. Confirm with the commands rather than
   by pressing the keybind, because a dead daemon and an empty history look identical:
   `pgrep -x hypridle`, `pgrep -x wl-paste`, `cliphist list | wc -l`.
-- **The greetd path has never been run.** It is now documented in `SETUP.md` step 5 and
+- **The greetd path has never been run.** It is now documented in `SETUP.md` step 6 and
   declared in `packages.conf`, but this machine reaches its desktop through
   `plasmalogin` and greetd is not installed here, so nothing has exercised the config or
   the unit. What was verified is narrow and worth not re-doing: both packages exist in
@@ -204,35 +204,57 @@ session.
 
 ## Housekeeping
 
-- **Audit the two management scripts properly.** `install-packages.sh` and
-  `backup-configs.sh` are the only code here that can damage a real `$HOME`, and neither
-  has been read end to end looking for defects, or linted. The one defect found so far
-  shows the shape of the risk: `&& ((success++)) || ((failures++))` counted a phantom
-  failure on every run and made the script exit 1 on a completely successful install,
-  for as long as that line existed, and it surfaced because a summary line looked wrong
-  rather than because anything checked it.
+- **The script audit is done, and this is what it did not cover.** `install-packages.sh`
+  and `backup-configs.sh` are the only code here that can damage a real `$HOME`. Three
+  reviewers went over all three scripts with different lenses, `shellcheck` was run for
+  the first time, and the correctness pass reproduced every defect it reported in a
+  throwaway `HOME=` before reporting it. Twenty-six were found; the fixes are in
+  `MAINTENANCE.md` and the git history, and `scripts/tests/test-dotfiles.sh` holds them
+  fixed with 24 cases.
 
-  Three passes, in order. **Correctness** first, with arithmetic and exit-code handling
-  ahead of everything else since that is where the known defect lived, along with `set
-  -e` interactions, unquoted expansions, the `rsync --remove-source-files` paths that
-  could move the wrong tree, and the `--force` branch that removes a real file after
-  backing it up. Record what was checked and found clean, not only what was wrong, so
-  the next audit does not repeat this one. Then **shellcheck**, judging its output rather
-  than obeying it. Then **structure**: both scripts resolve their `.conf` from
-  `SCRIPT_DIR`, both log, both colour output, both parse an INI-ish file, and whether
-  that wants a shared helper or is better left as two independent readable scripts is a
-  real question rather than an obvious yes.
+  **Not covered, and this is the part that matters here.** Nothing touching `sudo`,
+  `apt`, `pacman -Syy` or `dnf` was ever executed: `add_repos` and `update_pkg_db` are
+  reasoned from reading only, including the unchecked `wget | gpg | tee` that writes an
+  empty repository key when the download fails and leaves every later `apt-get update`
+  broken. `run_hooks` was analysed by running its awk program standalone; the `system()`
+  call was never allowed to execute anything. Everything ran on one CachyOS machine, so
+  only the pacman branches saw a real package manager. `install_fonts` and
+  `init_dotfiles` were read but not exercised. Concurrency, meaning two runs sharing a
+  `$TIMESTAMP`, and behaviour under an empty `$HOME`, were reasoned about and not
+  reproduced.
 
-  One capability to restore while in there: `install` used to take a path and link only
-  that, and `install_dotfiles()` takes no argument today, so partial installation was lost
-  rather than removed on purpose. It is what makes the README's offer of taking one piece
-  true, and it is also the safest way for a stranger to try this, so it belongs in the
-  correctness pass rather than being bolted on afterwards.
+  **Known and left alone**, with reasons, so nobody re-derives them. Three MEDIUM
+  defects in `install-packages.sh` are still open: a hook command containing an `=` is
+  truncated at the first one, because awk splits the whole line and only `$2` is run; a
+  hook key is interpolated into a regex rather than compared literally, so a key of
+  `pipesXsh` fires for the package `pipes.sh`; and `add_repos` discards
+  `update_pkg_db`'s status, so a failed database refresh is followed straight into the
+  install loop. All three are in the awk-embedded-in-bash section, no hook is
+  uncommented in `packages.conf` today, and the honest fix is to replace that awk with a
+  bash read loop rather than patch it three times.
+  *Difficulty: low each, medium together with the awk replacement. Priority: low while
+  no hooks exist, medium the day one is uncommented.*
 
-  Testing needs a throwaway `$HOME`. `backup-configs.sh --dry-run` already exists and is
-  the cheapest start; a temporary `HOME=` or a container is the honest version.
-  *Difficulty: medium to read, higher with a test harness. Priority: medium, and it rises
-  for anyone else cloning this, since these scripts are the first thing they run.*
+- **Decided: `unlink-dotfiles.sh` stays a separate script.** The argument for folding it
+  into `backup-configs.sh` as a subcommand is real and was made well: it is one of four
+  verbs in a single state machine, and living apart is how it drifted into having no
+  `--dry-run`, no shared safety vocabulary and a fourth copy of the repo-path mapping.
+  Two of those three are now closed. It has `--dry-run` and `--yes`, it reports and
+  exits like the others, and both copies of the mapping validate the same way. Against
+  folding: `backup-configs.sh` is already the larger script, and the trigger everyone
+  agreed would make Python worth reconsidering is capability growth, not line count that
+  arrives by merging a file in. The remaining argument is the duplicated mapping, which
+  is eight lines. Reopen this only if the two copies disagree again.
+
+- **Let `install` take paths, so the README's offer is true.** The README says you can
+  lift the terminal colours, or the bar, and ignore the rest, and `backup-configs.sh
+  install` is still all 31 paths or nothing. `install-packages.sh` gained positional
+  package names in the audit and this is the same change on the other script:
+  `install_dotfiles`, `check_dotfiles` and `uninstall_dotfiles` are each a loop over
+  `load_dotfiles`, so filtering that loop by positional arguments is roughly ten lines
+  and needs no config format change. `add_dotfile` already takes one path.
+  *Difficulty: low. Priority: medium, and it is the cheapest way for a stranger to try
+  this without committing to all of it.*
 
 - **Rethink how the generator decides colour, and consider a roles layer.** Today
   `palette.json` holds raw ramps plus a few roles expressed as duplicated literals:

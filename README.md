@@ -83,7 +83,7 @@ cd ~/.dotfiles
 That installs and links everything. It does not give you a way to *reach* the desktop:
 nothing here enables a graphical login. If you already run a display manager it will
 list Hyprland and Sway on the next boot and you can log out and back in. If you do not,
-[`docs/SETUP.md`](docs/SETUP.md) step 5 sets up `greetd`, and `Hyprland` typed at a text
+[`docs/SETUP.md`](docs/SETUP.md) step 6 sets up `greetd`, and `Hyprland` typed at a text
 console works too.
 
 > [!WARNING]
@@ -91,11 +91,26 @@ console works too.
 > unless you pass `--force`, and backs up anything it replaces. Its sibling `add` runs the
 > other direction and **moves files out of `$HOME`** into the repo. You want `install`.
 >
-> Being straight about the limits of that: these scripts have not been audited line by
-> line, and one defect has already been found and fixed. Read them before pointing them
-> at a home directory you care about, and use `--dry-run` first if you would rather see
-> what happens than trust the description. The open audit is in
-> [`docs/TODO.md`](docs/TODO.md).
+> You do not have to take that on trust, and you do not have to audit the bash to check
+> it. Add `--dry-run` and the script prints every path it would touch, changing nothing:
+>
+> ```bash
+> ./scripts/backup-configs.sh install --dry-run
+> ```
+>
+> Changed your mind afterwards? `./scripts/backup-configs.sh uninstall` removes the
+> symlinks and leaves your own files and the repo alone. Do not use
+> `unlink-dotfiles.sh` for that; it empties the clone. `docs/SETUP.md` has the details,
+> including where `--force` put your originals.
+>
+> Being straight about why the simulation is worth running: these scripts have now been
+> audited, and it found five ways to lose a file, on top of the two found before it.
+> `install --force` deleted the target after a backup that had failed; `add` deleted the
+> original after a copy that had failed; a stray `~/` line in the config reached
+> `rm -rf "$HOME/"`. All of them are fixed, and 24 sandboxed tests in `scripts/tests/`
+> hold them fixed. But the honest reading of a script with that history is that you
+> should run the simulation rather than believe this paragraph. What the audit did not
+> cover is listed in [`docs/TODO.md`](docs/TODO.md).
 
 > [!IMPORTANT]
 > **Clone to `~/.dotfiles` exactly.** Five tracked files reference that path absolutely,
@@ -139,9 +154,10 @@ launcher is on `$mod` + `D`.
 docs/                     everything written down, see docs/README.md
 fonts/                    the four faces the theme uses
 scripts/
-  backup-configs.sh       link, unlink and audit the tracked dotfiles
+  backup-configs.sh       install, uninstall and audit the tracked dotfiles
   install-packages.sh     cross-distro package installer
-  unlink-dotfiles.sh      the inverse: move everything back to $HOME
+  unlink-dotfiles.sh      the inverse of `add`: move the repo's files back to $HOME
+  tests/                  sandboxed tests for the two scripts that can touch $HOME
   theme/                  palette.json, the generator and the checker
   wm/                     helpers the compositors call while running
 wallpapers/               one sample image, so a fresh clone has something to show
