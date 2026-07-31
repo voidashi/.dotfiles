@@ -232,6 +232,77 @@ case_install_force_backs_up_then_links() {
 }
 
 # =====================================================================
+# Group B2: uninstall, the inverse of install
+# =====================================================================
+
+case_install_then_uninstall_round_trips() {
+  track '~/.config/probe.conf'
+  track '~/.bashrc'
+  repo_file ".config/probe.conf"
+  repo_file ".bashrc"
+  # install creates missing parents with mkdir -p. uninstall deliberately does
+  # not prune them: ~/.config is shared with every other application on the
+  # machine, and removing it is the kind of over-reach that made unlink-dotfiles
+  # dangerous. Pre-create it so this case asks about links, not directories.
+  mkdir -p "$HOME/.config"
+  local before; before="$(snapshot "$HOME")"
+  run_backup install
+  run_backup uninstall
+  local after; after="$(snapshot "$HOME")"
+  assert_unchanged "$before" "$after" "the home tree after install then uninstall"
+}
+
+# The other half of the choice above, asserted rather than assumed.
+case_uninstall_leaves_directories_it_did_not_create() {
+  track '~/.config/probe.conf'
+  repo_file ".config/probe.conf"
+  run_backup install
+  run_backup uninstall
+  assert_exists "$HOME/.config" || return 1
+  [ -d "$HOME/.config" ] || { fail "~/.config is no longer a directory"; return 1; }
+}
+
+case_uninstall_leaves_a_real_file_alone() {
+  track '~/.config/probe.conf'
+  repo_file ".config/probe.conf"
+  home_file ".config/probe.conf"
+  run_backup install          # skips it, no --force
+  run_backup uninstall
+  assert_not_symlink "$HOME/.config/probe.conf" || return 1
+  assert_content "$HOME/.config/probe.conf" "PRECIOUS USER DATA"
+}
+
+case_uninstall_leaves_a_link_pointing_elsewhere() {
+  track '~/.config/probe.conf'
+  repo_file ".config/probe.conf"
+  mkdir -p "$HOME/elsewhere" "$HOME/.config"
+  printf 'other\n' > "$HOME/elsewhere/probe.conf"
+  ln -s "$HOME/elsewhere/probe.conf" "$HOME/.config/probe.conf"
+  run_backup uninstall
+  assert_symlink_to "$HOME/.config/probe.conf" "$HOME/elsewhere/probe.conf"
+}
+
+case_uninstall_leaves_the_repo_intact() {
+  track '~/.config/probe.conf'
+  repo_file ".config/probe.conf"
+  local before; before="$(snapshot "$DOTFILES_DIR")"
+  run_backup install
+  run_backup uninstall
+  local after; after="$(snapshot "$DOTFILES_DIR")"
+  assert_unchanged "$before" "$after" "the repo"
+}
+
+case_uninstall_dry_run_changes_nothing() {
+  track '~/.config/probe.conf'
+  repo_file ".config/probe.conf"
+  run_backup install
+  local before; before="$(snapshot "$HOME")"
+  run_backup uninstall --dry-run
+  local after; after="$(snapshot "$HOME")"
+  assert_unchanged "$before" "$after" "the home tree"
+}
+
+# =====================================================================
 # Group C: the destructive paths. A failed step must not destroy the source.
 # =====================================================================
 
@@ -360,6 +431,13 @@ main() {
   run_case install_links_when_target_is_free
   run_case install_skips_real_file_without_force
   run_case install_force_backs_up_then_links
+
+  run_case install_then_uninstall_round_trips
+  run_case uninstall_leaves_directories_it_did_not_create
+  run_case uninstall_leaves_a_real_file_alone
+  run_case uninstall_leaves_a_link_pointing_elsewhere
+  run_case uninstall_leaves_the_repo_intact
+  run_case uninstall_dry_run_changes_nothing
 
   run_case add_keeps_file_when_repo_is_unwritable
   run_case add_keeps_directory_when_repo_is_unwritable

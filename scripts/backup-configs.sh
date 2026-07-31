@@ -1,7 +1,7 @@
 #!/bin/bash
 # Linux Dotfiles Manager
 # Purpose: Backup, version-control, and sync config files across machines.
-# Usage: ./backup-configs.sh [init|add|install|check|restore] [--dry-run] [--force]
+# Usage: ./backup-configs.sh [init|add|install|uninstall|check|backups|restore] [--dry-run] [--force]
 
 # ---- Configuration ----
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
@@ -257,6 +257,96 @@ install_fonts() {
   fi
 }
 
+# The inverse of install, and until now nothing was. install creates symlinks
+# into the repo; this removes exactly those and nothing else. It never touches
+# the repo, and never touches a real file that install skipped, so running it
+# on a machine that was never installed onto changes nothing.
+#
+# unlink-dotfiles.sh is not this. That one moves the repo's files out into
+# $HOME and leaves the repo empty, which is the inverse of `add`. Pointing a
+# stranger at it to undo an install is how they lose their clone.
+uninstall_dotfiles() {
+  local removed=0 kept=0 failed=0
+
+  while IFS= read -r file; do
+    local target
+    target="$(resolve_path "$file")"
+    local rel
+    if ! rel="$(repo_relative "$target")"; then
+      log "ERROR" "Not below \$HOME, skipping: $file"
+      continue
+    fi
+    local dest="$DOTFILES_DIR/$rel"
+
+    if [ ! -L "$target" ]; then
+      # A real file here means install skipped it, or --force replaced it and
+      # the original is in the backup directory. Either way it is not ours.
+      [ -e "$target" ] && { log "INFO" "Kept, not a link: $target"; kept=$((kept + 1)); }
+      continue
+    fi
+
+    if [ "$(readlink "$target")" != "$dest" ]; then
+      log "WARNING" "Kept, links outside the repo: $target → $(readlink "$target")"
+      kept=$((kept + 1))
+      continue
+    fi
+
+    if $DRY_RUN; then
+      log "INFO" "Simulate: remove link $target"
+      removed=$((removed + 1))
+    elif rm -f "$target"; then
+      log "SUCCESS" "Removed link: $target"
+      removed=$((removed + 1))
+    else
+      log "ERROR" "Could not remove link: $target"
+      failed=$((failed + 1))
+    fi
+  done < <(load_dotfiles)
+
+  # fonts/ is linked outside config_files.conf by install_fonts, so it has to
+  # be removed here too or uninstall leaves one link behind.
+  local fonts_dest="$HOME/.local/share/fonts/dotfiles"
+  if [ -L "$fonts_dest" ] && [ "$(readlink "$fonts_dest")" = "$DOTFILES_DIR/fonts" ]; then
+    if $DRY_RUN; then
+      log "INFO" "Simulate: remove link $fonts_dest"
+      removed=$((removed + 1))
+    elif rm -f "$fonts_dest"; then
+      log "SUCCESS" "Removed link: $fonts_dest"
+      removed=$((removed + 1))
+    else
+      log "ERROR" "Could not remove link: $fonts_dest"
+      failed=$((failed + 1))
+    fi
+  fi
+
+  log "INFO" "Links removed: $removed. Left alone: $kept. Failed: $failed."
+
+  # The originals of anything install --force replaced are here and nothing
+  # moves them back automatically, which is the one thing nobody was told.
+  if [ -d "$BACKUP_DIR" ] && [ -n "$(ls -A "$BACKUP_DIR" 2>/dev/null)" ]; then
+    log "INFO" "Files replaced by --force are still in $BACKUP_DIR. List them with: $0 backups"
+  fi
+
+  [ "$failed" -eq 0 ]
+}
+
+# restore TIMESTAMP takes an argument the tool gave you no way to obtain.
+list_backups() {
+  if [ ! -d "$BACKUP_DIR" ] || [ -z "$(ls -A "$BACKUP_DIR" 2>/dev/null)" ]; then
+    log "INFO" "No backups in $BACKUP_DIR"
+    return 0
+  fi
+  log "INFO" "Backups in $BACKUP_DIR:"
+  local dir
+  for dir in "$BACKUP_DIR"/*/; do
+    [ -d "$dir" ] || continue
+    local name n
+    name="$(basename "$dir")"
+    n="$(find "$dir" -type f | wc -l)"
+    printf '  %s  (%s file%s)\n' "$name" "$n" "$([ "$n" -eq 1 ] || echo s)"
+  done
+}
+
 restore_backup() {
   local timestamp="$1"
   local backup="$BACKUP_DIR/$timestamp"
@@ -289,6 +379,8 @@ main() {
       [ -L "$fonts_target" ] && [ "$(readlink "$fonts_target")" = "$DOTFILES_DIR/fonts" ] \
         && log "SUCCESS" "Valid: $fonts_target" || log "ERROR" "Broken: $fonts_target"
       ;;
+    "uninstall") uninstall_dotfiles ;;
+    "backups") list_backups ;;
     "restore") restore_backup "$2" ;;
     *)
       echo -e "Usage: $0 COMMAND [--dry-run] [--force]"
@@ -296,8 +388,10 @@ main() {
       echo -e "  init       Initialize dotfiles repo"
       echo -e "  add        Move files to repo and symlink"
       echo -e "  install    Symlink files from repo"
+      echo -e "  uninstall  Remove the symlinks install created, leaving the repo alone"
       echo -e "  check      Validate symlinks"
-      echo -e "  restore TIMESTAMP  Restore from backup"
+      echo -e "  backups    List the backups taken by --force"
+      echo -e "  restore TIMESTAMP  Restore from backup (list them with: $0 backups)"
       echo -e "Flags:"
       echo -e "  --dry-run  Simulate changes"
       echo -e "  --force    Overwrite conflicts"
