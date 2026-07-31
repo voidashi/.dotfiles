@@ -328,9 +328,9 @@ install_fonts() {
 # the repo, and never touches a real file that install skipped, so running it
 # on a machine that was never installed onto changes nothing.
 #
-# unlink-dotfiles.sh is not this. That one moves the repo's files out into
-# $HOME and leaves the repo empty, which is the inverse of `add`. Pointing a
-# stranger at it to undo an install is how they lose their clone.
+# Note that this does not undo `add`: the file is in the repo, and removing the
+# link leaves nothing at the path. Undoing an `add` is a manual mv, on purpose.
+# See docs/MAINTENANCE.md.
 uninstall_dotfiles() {
   local removed=0 kept=0 failed=0
 

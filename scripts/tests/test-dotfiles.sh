@@ -1,5 +1,6 @@
 #!/bin/bash
-# Sandboxed behaviour tests for the two scripts that can damage a real $HOME.
+# Sandboxed behaviour tests for backup-configs.sh, the one script here that can
+# damage a real $HOME.
 #
 # Why this exists: MAINTENANCE.md tells you to prove a destructive guard with a
 # throwaway HOME=, and that instruction was prose. Three defects in the dry-run
@@ -24,7 +25,6 @@ set -u
 TESTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPTS_DIR="$(cd "$TESTS_DIR/.." && pwd)"
 BACKUP_SCRIPT="$SCRIPTS_DIR/backup-configs.sh"
-UNLINK_SCRIPT="$SCRIPTS_DIR/unlink-dotfiles.sh"
 
 REAL_HOME="$HOME"
 SANDBOX_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/dotfiles-tests.XXXXXX")"
@@ -46,7 +46,7 @@ trap cleanup EXIT
 # ---- Sandbox ----
 
 # The only thing in this file that must never be wrong. Every invocation of a
-# script under test goes through run_backup/run_unlink, and both call this first.
+# script under test goes through run_backup, which calls this first.
 guard_sandbox() {
   case "$HOME" in
     "$SANDBOX_ROOT"/*) ;;
@@ -86,7 +86,6 @@ repo_file() { mkdir -p "$(dirname "$DOTFILES_DIR/$1")"; printf '%s\n' "${2:-repo
 home_file() { mkdir -p "$(dirname "$HOME/$1")"; printf '%s\n' "${2:-PRECIOUS USER DATA}" > "$HOME/$1"; }
 
 run_backup() { guard_sandbox; bash "$BACKUP_SCRIPT" "$@" >"$LAST_OUT" 2>&1; LAST_RC=$?; return 0; }
-run_unlink() { guard_sandbox; bash "$UNLINK_SCRIPT" --yes "$@" >"$LAST_OUT" 2>&1; LAST_RC=$?; return 0; }
 
 # ---- Assertions ----
 
@@ -240,8 +239,9 @@ case_install_then_uninstall_round_trips() {
   repo_file ".bashrc"
   # install creates missing parents with mkdir -p. uninstall deliberately does
   # not prune them: ~/.config is shared with every other application on the
-  # machine, and removing it is the kind of over-reach that made unlink-dotfiles
-  # dangerous. Pre-create it so this case asks about links, not directories.
+  # machine, and an undo that reaches beyond what it created is how the deleted
+  # unlink-dotfiles.sh used to empty a clone. Pre-create it so this case asks
+  # about links, not directories.
   mkdir -p "$HOME/.config"
   local before; before="$(snapshot "$HOME")"
   run_backup install
@@ -348,43 +348,9 @@ case_add_rejects_entry_that_is_not_below_home() {
   assert_content "$HOME/Documents/thesis.txt" "YEARS OF WORK"
 }
 
-# Defect 4: unlink overwrites a real file that was never linked, with no backup.
-case_unlink_does_not_overwrite_an_unlinked_real_file() {
-  track '~/.bashrc'
-  repo_file ".bashrc" "repo version"
-  home_file ".bashrc" "LOCAL ONLY, NEVER LINKED"
-  run_unlink
-  assert_content "$HOME/.bashrc" "LOCAL ONLY, NEVER LINKED"
-}
 
-case_unlink_dry_run_changes_nothing() {
-  track '~/.config/probe.conf'
-  repo_file ".config/probe.conf"
-  run_backup install
-  local before; before="$(snapshot "$HOME")"
-  run_unlink --dry-run
-  local after; after="$(snapshot "$HOME")"
-  assert_unchanged "$before" "$after" "the home tree"
-}
 
-case_unlink_moves_the_repo_copy_back() {
-  track '~/.config/probe.conf'
-  repo_file ".config/probe.conf"
-  run_backup install
-  run_unlink
-  assert_not_symlink "$HOME/.config/probe.conf" || return 1
-  assert_content "$HOME/.config/probe.conf" "repo version"
-}
 
-# Defect 16: mv of a directory onto an existing directory nests it one level deep.
-case_unlink_does_not_nest_a_directory_inside_itself() {
-  track '~/.config/hypr'
-  mkdir -p "$DOTFILES_DIR/.config/hypr" "$HOME/.config/hypr"
-  printf 'from repo\n' > "$DOTFILES_DIR/.config/hypr/hyprland.conf"
-  printf 'mine\n'      > "$HOME/.config/hypr/local.conf"
-  run_unlink
-  [ ! -e "$HOME/.config/hypr/hypr" ] || { fail "the repo directory was nested at ~/.config/hypr/hypr"; return 1; }
-}
 
 # =====================================================================
 # Group D: reporting. An audit that cannot fail is not an audit.
@@ -442,8 +408,7 @@ case_empty_config_is_reported_and_does_not_become_a_path() {
 
 main() {
   printf 'Sandbox root: %s\n' "$SANDBOX_ROOT"
-  printf 'Under test:   %s\n' "$BACKUP_SCRIPT"
-  printf '              %s\n\n' "$UNLINK_SCRIPT"
+  printf 'Under test:   %s\n\n' "$BACKUP_SCRIPT"
 
   run_case dryrun_install_changes_nothing
   run_case dryrun_force_changes_nothing
@@ -464,10 +429,6 @@ main() {
   run_case add_keeps_directory_when_repo_is_unwritable
   run_case force_keeps_file_when_backup_fails
   run_case add_rejects_entry_that_is_not_below_home
-  run_case unlink_does_not_overwrite_an_unlinked_real_file
-  run_case unlink_dry_run_changes_nothing
-  run_case unlink_moves_the_repo_copy_back
-  run_case unlink_does_not_nest_a_directory_inside_itself
 
   run_case check_exits_nonzero_on_a_broken_tree
   run_case check_reports_a_dangling_symlink_as_broken

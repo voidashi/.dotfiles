@@ -23,8 +23,7 @@ doing nothing, with no error message anywhere.
   wlogout and swaync stylesheets all `@import`. It belongs to no single application,
   which is why it has a directory of its own.
 - `.bashrc`: the one tracked dotfile outside `.config`.
-- `scripts/backup-configs.sh`, `install-packages.sh`, `unlink-dotfiles.sh`: run by
-  hand. See below.
+- `scripts/backup-configs.sh`, `install-packages.sh`: run by hand. See below.
 - `scripts/config_files.conf`: every path, relative to `~`, that
   `backup-configs.sh` manages. A new dotfile goes here before anything else.
 - `scripts/packages.conf`: the package list, INI-style, with `[common]`, `[apt]`,
@@ -63,8 +62,13 @@ previously made the README's own `./scripts/install-packages.sh install` abort w
   It removes only the symlinks that point into this repo. A real file is left alone, a
   link pointing elsewhere is left alone, the repo is untouched, and the parent
   directories `install` created are deliberately not pruned, because `~/.config` is
-  shared with every other application on the machine. Do not point anyone at
-  `unlink-dotfiles.sh` to undo an install: that one empties the clone.
+  shared with every other application on the machine.
+- **Undoing an `add` is manual and there is no command for it.** `uninstall` removes
+  the symlink but the file is in the repo, so you are left with nothing at that path.
+  Run `uninstall`, then `mv` the path back out of the repo yourself. This is deliberate:
+  the script that used to do it in bulk was deleted, because doing all paths at once is
+  never what someone who mis-added one file wants, and a per-path `unadopt` subcommand
+  did not earn its place for an operation the author performs about once.
 - `check` reports five states, not two: valid, wrong target, dangling, not linked,
   missing. It resolves the link rather than only comparing its text, so a link into a
   repo copy that has been deleted is reported rather than called valid. It exits
@@ -110,8 +114,8 @@ previously made the README's own `./scripts/install-packages.sh install` abort w
 
 ### `scripts/tests/test-dotfiles.sh`
 
-Twenty-four sandboxed cases over `backup-configs.sh` and `unlink-dotfiles.sh`. Run it
-after touching either. Each case gets its own `mktemp -d` with `HOME`, `DOTFILES_DIR`,
+Sandboxed cases over `backup-configs.sh`, the one script here that can damage a real
+`$HOME`. Run it after touching that file. Each case gets its own `mktemp -d` with `HOME`, `DOTFILES_DIR`,
 `BACKUP_DIR` and `CONFIG_FILE` pointed inside it, and `guard_sandbox()` aborts the whole
 run with exit 99 if any of the four ever points outside, so it cannot touch a real home
 directory.
@@ -157,11 +161,6 @@ believing.
 - Logs to `scripts/package_install.log`, overwritten each run and gitignored.
 - Section headers are skipped by a `next` in the awk block. Remove it and the literal
   lines `[common]` and `[pacman]` get parsed as package names.
-
-### `unlink-dotfiles.sh`
-
-The inverse of `backup-configs.sh`: removes the symlinks and moves the files back to
-`$HOME`, leaving the repo essentially empty. Interactive confirmation required.
 
 ## Config architecture notes
 
