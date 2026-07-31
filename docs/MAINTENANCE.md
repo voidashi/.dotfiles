@@ -4,7 +4,7 @@ For whoever edits this repository, including its author six months from now. If 
 only want to install and use it, read the [README](../README.md) instead.
 
 This is not a software project with a build and a test suite. It is a curated set of
-config files, three bash scripts that sync them to `$HOME` and install the packages
+config files, two bash scripts that sync them to `$HOME` and install the packages
 they depend on, and two Python scripts that generate and verify the theme. So
 "correct" here means three things: the shell scripts behave safely, each config file
 is valid for the application that reads it, and `check_palette.py` passes.
@@ -19,9 +19,11 @@ doing nothing, with no error message anywhere.
   `$HOME`. Covers `hypr`, `sway`, `waybar`, `fish`, `nvim`, `alacritty`, `kitty`,
   `foot`, `ghostty`, `bottom`, `dunst`, `wofi`, `fastfetch`, `catnap`, `wlogout`,
   `swaylock`, `swaync`, `yazi`, `starship.toml`, the GTK and KDE files.
-- `.config/theme/`: one generated file, `voidashi-colors.css`, which the waybar, wofi,
-  wlogout and swaync stylesheets all `@import`. It belongs to no single application,
-  which is why it has a directory of its own.
+- `.config/theme/`: one generated file, `voidashi-colors.css`, which the waybar,
+  wlogout and swaync stylesheets `@import`. wofi is the exception: the generator
+  inlines the palette into its stylesheet instead, for the reason written at the top
+  of `.config/wofi/style.css`. It belongs to no single application, which is why it
+  has a directory of its own.
 - `.bashrc`: the one tracked dotfile outside `.config`.
 - `scripts/backup-configs.sh`, `install-packages.sh`: run by hand. See below.
 - `scripts/config_files.conf`: every path, relative to `~`, that
@@ -390,12 +392,11 @@ believing.
   exercised here, because this machine runs `plasmalogin`. Verified locally is only that
   both packages exist in `extra` and that `hyprland.desktop` and `sway.desktop` are
   installed into `/usr/share/wayland-sessions/` by the compositors themselves.
-- **Configs kept on purpose, not leftovers.** `.config/dunst/` and
-  `.config/hypr/hyprpaper.conf` configure programs nothing launches, because swaync
-  catches notifications and swaybg draws the wallpaper. Both are kept unthemed as
-  references so switching back means reading a file rather than writing one. Same for
-  `.config/hypr/hyprtoolkit.conf`, which themes hyprlauncher, commented out in
-  `conf/programs.lua` in favour of wofi. These decisions are settled.
+- **Configs kept on purpose, not leftovers.** Several configs here belong to programs
+  that are not in use, and treating one as dead weight is a mistake this repository has
+  already watched an audit make. The complete list, and which file decides in each case,
+  is in [`TURNING-POINTS.md`](TURNING-POINTS.md), which owns it. These decisions are
+  settled.
 
 ## Validating a change
 

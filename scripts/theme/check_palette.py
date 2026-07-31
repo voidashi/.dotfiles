@@ -58,18 +58,17 @@ NAMED_SCOPE = (".config/fish/", ".config/starship.toml")
 BARE_HEX_SCOPE = (".config/swaylock/config",)
 BARE_HEX = re.compile(r"^[a-z-]*color=([0-9a-fA-F]{6})$", re.MULTILINE)
 
-# Paths that are not part of the live theme. The .legacy and old-theme files keep
-# the previous colours on purpose; the palette itself is the source rather than a
-# consumer; and binaries have no colour to check.
+# Paths that are not part of the live theme: the palette itself is the source rather
+# than a consumer, lock files and shell state carry colours nobody chose, and an agent
+# worktree is a second copy of the whole repository. That last one matters more than it
+# looks: SKIP_FILES below matches an exact relative path, so a decided exception like
+# .config/dunst/dunstrc is not skipped in a worktree copy and gets reported as drift.
 SKIP_PARTS = (
     ".git/",
-    ".legacy",
-    "kanagawa",
-    "flexoki",
+    ".claude/worktrees/",
     "lazy-lock.json",
     "fish_variables",
     "scripts/theme/palette.json",
-    "dotfiles_backup",
 )
 SKIP_SUFFIX = (".png", ".jpg", ".jpeg", ".ttf", ".otf", ".woff", ".woff2", ".log", ".pyc")
 

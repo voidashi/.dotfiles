@@ -56,7 +56,7 @@ log() {
         *) color="$NC" ;; # Default for SUMMARY etc.
     esac
 
-    # Problems go to stderr. Nothing in these three scripts wrote to fd 2, while
+    # Problems go to stderr. Nothing in these two scripts wrote to fd 2, while
     # scripts/wm/ in the same repo does, so `check 2>&1 >/dev/null` printed
     # nothing, a redirected install ran silently for minutes with no way to see
     # it fail, and the [ERROR] line landed in a different stream from the
