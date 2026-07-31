@@ -40,6 +40,24 @@ resolve_path() {
   echo "${path/#\~/$HOME}"
 }
 
+# The repo mirrors $HOME by construction, so a managed path maps to its place
+# in the repo by stripping the $HOME prefix. That strip was written inline in
+# four places and validated in none, and an entry that is not below $HOME
+# strips to nothing: a stray "~/" line in config_files.conf made $dest the repo
+# root, left [ -d "$target" ] true, and reached rm -rf "$HOME/".
+#
+# Returns the relative path on stdout, or 1 with nothing printed. It must not
+# log its own failure, because callers read it through a command substitution
+# and log() writes to stdout, so an error message would be captured and used as
+# a path. The caller reports it instead.
+repo_relative() {
+  local path="${1%/}"
+  case "$path" in
+    "$HOME"/?*) printf '%s\n' "${path#"$HOME"/}" ;;
+    *) return 1 ;;
+  esac
+}
+
 load_dotfiles() {
   grep -vE '^\s*(#|$)' "$CONFIG_FILE" || {
     log "ERROR" "No valid entries found in $CONFIG_FILE."
@@ -59,7 +77,12 @@ init_dotfiles() {
 
 backup_file() {
   local target="$1"
-  local backup_path="$CURRENT_BACKUP/${target#$HOME/}"
+  local rel
+  if ! rel="$(repo_relative "$target")"; then
+    log "ERROR" "Not below \$HOME, refusing to back up: $target"
+    return 1
+  fi
+  local backup_path="$CURRENT_BACKUP/$rel"
 
   # This was one line: `$DRY_RUN || rsync ... && log "Backup: ..."`, which parses
   # as `(A || B) && C`. Under --dry-run the rsync was skipped and the log ran
@@ -80,8 +103,14 @@ backup_file() {
 }
 
 add_dotfile() {
-  local target="$(resolve_path "$1")"
-  local dest="$DOTFILES_DIR/${target#$HOME/}"
+  local target
+  target="$(resolve_path "$1")"
+  local rel
+  if ! rel="$(repo_relative "$target")"; then
+    log "ERROR" "Not below \$HOME, refusing to add: $1"
+    return 1
+  fi
+  local dest="$DOTFILES_DIR/$rel"
 
   # Validate source
   [ -e "$target" ] || { log "ERROR" "Source not found: $target"; return 1; }
@@ -91,35 +120,68 @@ add_dotfile() {
     log "INFO" "Already linked: $target"; return 0
   }
 
-  # Backup existing file/dir
+  # A symlink pointing somewhere other than the repo is a trap. rsync -a copies
+  # it as a link, so the backup holds a dangling link and no data, while
+  # --remove-source-files reads through it and empties whatever it points at,
+  # which is a path nobody listed in the config.
+  if [ -L "$target" ]; then
+    log "ERROR" "Refusing to add a symlink: $target → $(readlink "$target")"
+    return 1
+  fi
+
+  # Backup existing file/dir. A failed backup means the only copy is still the
+  # one at $target, so moving it into the repo is the one thing not to do next.
   if [ -e "$target" ] && ! $DRY_RUN; then
-    backup_file "$target"
+    if ! backup_file "$target"; then
+      log "ERROR" "Backup failed, refusing to move $target"
+      return 1
+    fi
   fi
 
   # Dry run simulation
   if $DRY_RUN; then
-    log "INFO" "Simulate: Move $target → $dest and symlink"
+    log "INFO" "Simulate: move $target → $dest and symlink"
     return 0
   fi
 
-  # Move to repo and symlink
+  # Move to repo and symlink. Every step below is checked before the next one
+  # runs: an unchecked rsync followed by rm -rf, and an unchecked mv followed
+  # by ln -sf, each deleted the only copy of a file when the first step failed
+  # and then reported SUCCESS.
   mkdir -p "$(dirname "$dest")"
   if [ -d "$target" ]; then
     # For directories: Ensure rsync copies CONTENTS, not the directory itself
     mkdir -p "$dest"  # Explicitly create destination directory
-    rsync -a --remove-source-files "$target/" "$dest/"  # Trailing slashes are critical
+    if ! rsync -a --remove-source-files "$target/" "$dest/"; then  # Trailing slashes are critical
+      log "ERROR" "Copy into the repo failed, leaving $target untouched"
+      return 1
+    fi
     rm -rf "$target"
   else
-    mv "$target" "$dest"
+    if ! mv "$target" "$dest"; then
+      log "ERROR" "Move into the repo failed, leaving $target untouched"
+      return 1
+    fi
   fi
-  ln -sf "$dest" "$target"
-  log "SUCCESS" "Added: $target → $dest"
+
+  if ln -sf "$dest" "$target"; then
+    log "SUCCESS" "Added: $target → $dest"
+  else
+    log "ERROR" "Moved into the repo but could not link it back: $target. The content is at $dest"
+    return 1
+  fi
 }
 
 install_dotfiles() {
   while IFS= read -r file; do
-    local target="$(resolve_path "$file")"
-    local dest="$DOTFILES_DIR/${target#$HOME/}"
+    local target
+    target="$(resolve_path "$file")"
+    local rel
+    if ! rel="$(repo_relative "$target")"; then
+      log "ERROR" "Not below \$HOME, skipping: $file"
+      continue
+    fi
+    local dest="$DOTFILES_DIR/$rel"
     [ -e "$dest" ] || { log "ERROR" "Not in repo: $dest"; continue; }
 
     if [ -e "$target" ] && ! [ -L "$target" ]; then
@@ -131,7 +193,14 @@ install_dotfiles() {
         if $DRY_RUN; then
           log "INFO" "Simulate: back up and replace $target"
         else
-          backup_file "$target"
+          # backup_file returns 1 when the copy failed, and that return was
+          # ignored, so the rm ran against a backup that did not exist and the
+          # content survived nowhere. Same shape as the dry-run bug above:
+          # acting on the result of a step nobody checked.
+          if ! backup_file "$target"; then
+            log "ERROR" "Backup failed, refusing to replace $target"
+            continue
+          fi
           rm -rf "$target"
         fi
       else
@@ -213,7 +282,7 @@ main() {
     "check")
       while IFS= read -r file; do
         target="$(resolve_path "$file")"
-        [ -L "$target" ] && [ "$(readlink "$target")" = "$DOTFILES_DIR/${target#$HOME/}" ] \
+        [ -L "$target" ] && [ "$(readlink "$target")" = "$DOTFILES_DIR/${target#"$HOME"/}" ] \
           && log "SUCCESS" "Valid: $target" || log "ERROR" "Broken: $target"
       done < <(load_dotfiles)
       fonts_target="$HOME/.local/share/fonts/dotfiles"
