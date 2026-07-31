@@ -388,10 +388,14 @@ case_check_reports_a_dangling_symlink_as_broken() {
   run_backup install
   rm -f "$DOTFILES_DIR/.config/probe.conf"   # the link now resolves to nothing
   run_backup check
-  if grep -q "Valid:" "$LAST_OUT"; then
+  # Match the per-entry line, not the summary, which also contains "Valid:".
+  if grep -q "Valid: $HOME/.config/probe.conf" "$LAST_OUT"; then
     fail "check called a dangling symlink Valid"
     return 1
   fi
+  grep -q "Dangling: $HOME/.config/probe.conf" "$LAST_OUT" || {
+    fail "check did not report the dangling link"; return 1
+  }
   assert_rc_nonzero
 }
 

@@ -59,20 +59,35 @@ repo_relative() {
 }
 
 load_dotfiles() {
-  grep -vE '^\s*(#|$)' "$CONFIG_FILE" || {
-    log "ERROR" "No valid entries found in $CONFIG_FILE."
+  grep -vE '^\s*(#|$)' "$CONFIG_FILE"
+}
+
+# load_dotfiles() used to raise this itself. It is always called as
+# `< <(load_dotfiles)`, so its exit 1 killed only the process-substitution
+# subshell, and its error text went to the same stdout the loop was reading:
+# the message came back as a bogus filename, every command processed it as a
+# path, and the script exited 0. Check once, in main, before anything runs.
+require_entries() {
+  if [ -z "$(load_dotfiles)" ]; then
+    log "ERROR" "No valid entries in $CONFIG_FILE"
     exit 1
-  }
+  fi
 }
 
 init_dotfiles() {
-  if [ ! -d "$DOTFILES_DIR" ]; then
-    mkdir -p "$DOTFILES_DIR"
-    git init -q "$DOTFILES_DIR"
-    log "SUCCESS" "Initialized repo: $DOTFILES_DIR"
-  else
+  if [ -d "$DOTFILES_DIR" ]; then
     log "INFO" "Repo already exists: $DOTFILES_DIR"
+    return 0
   fi
+  # --dry-run reached neither of these, so `init --dry-run` created the
+  # directory and ran git init for real.
+  if $DRY_RUN; then
+    log "INFO" "Simulate: create and git init $DOTFILES_DIR"
+    return 0
+  fi
+  mkdir -p "$DOTFILES_DIR"
+  git init -q "$DOTFILES_DIR"
+  log "SUCCESS" "Initialized repo: $DOTFILES_DIR"
 }
 
 backup_file() {
@@ -173,16 +188,28 @@ add_dotfile() {
 }
 
 install_dotfiles() {
+  local linked=0 unchanged=0 skipped=0 failed=0
+
   while IFS= read -r file; do
     local target
     target="$(resolve_path "$file")"
     local rel
     if ! rel="$(repo_relative "$target")"; then
       log "ERROR" "Not below \$HOME, skipping: $file"
+      failed=$((failed + 1))
       continue
     fi
     local dest="$DOTFILES_DIR/$rel"
-    [ -e "$dest" ] || { log "ERROR" "Not in repo: $dest"; continue; }
+    [ -e "$dest" ] || { log "ERROR" "Not in repo: $dest"; failed=$((failed + 1)); continue; }
+
+    # add_dotfile has always made this distinction and install never did, so a
+    # second run announced thirty-one links it had not created. Reporting work
+    # that did not happen is how a reader learns to stop reading the output.
+    if [ -L "$target" ] && [ "$(readlink "$target")" = "$dest" ]; then
+      log "INFO" "Unchanged: $target"
+      unchanged=$((unchanged + 1))
+      continue
+    fi
 
     if [ -e "$target" ] && ! [ -L "$target" ]; then
       if $FORCE; then
@@ -199,12 +226,14 @@ install_dotfiles() {
           # acting on the result of a step nobody checked.
           if ! backup_file "$target"; then
             log "ERROR" "Backup failed, refusing to replace $target"
+            failed=$((failed + 1))
             continue
           fi
           rm -rf "$target"
         fi
       else
         log "WARNING" "Skipping existing file: $target (use --force to overwrite)"
+        skipped=$((skipped + 1))
         continue
       fi
     fi
@@ -215,7 +244,7 @@ install_dotfiles() {
       # "Simulate:", never "Linked:". This said SUCCESS with the same wording as
       # the real branch below, so a dry run's output was indistinguishable from
       # a run that had changed the machine.
-      log "INFO" "Simulate: link $dest → $target"
+      log "INFO" "Simulate: link $target"
     else
       # Create the parent first: an entry can live under a directory that does
       # not exist yet, such as ~/.local/share/color-schemes on a machine that
@@ -223,12 +252,36 @@ install_dotfiles() {
       # happened, since announcing success unconditionally is what hid that failure.
       mkdir -p "$(dirname "$target")"
       if ln -snf "$dest" "$target"; then
-        log "SUCCESS" "Linked: $dest → $target"
+        log "SUCCESS" "Linked: $target"
+        linked=$((linked + 1))
       else
         log "ERROR" "Failed to link: $dest → $target"
+        failed=$((failed + 1))
       fi
     fi
   done < <(load_dotfiles)
+
+  if $DRY_RUN; then
+    log "INFO" "Simulated. Nothing above was carried out."
+  else
+    log "INFO" "Linked: $linked. Unchanged: $unchanged. Skipped: $skipped. Failed: $failed."
+  fi
+  [ "$failed" -eq 0 ]
+}
+
+# The loop lived in main while install_dotfiles owned an identical one, which is
+# why add never gained the summary or the exit code that install has.
+add_dotfiles() {
+  local added=0 failed=0
+  while IFS= read -r file; do
+    if add_dotfile "$file"; then
+      added=$((added + 1))
+    else
+      failed=$((failed + 1))
+    fi
+  done < <(load_dotfiles)
+  log "INFO" "Added: $added. Failed: $failed."
+  [ "$failed" -eq 0 ]
 }
 
 # fonts/ lives at the repo root, not mirrored under a $HOME-relative path like
@@ -330,6 +383,76 @@ uninstall_dotfiles() {
   [ "$failed" -eq 0 ]
 }
 
+# One entry, five outcomes. This used to be `[ -L ] && [ readlink = dest ] &&
+# log SUCCESS || log ERROR`, which is two outcomes: it compared the link text
+# and never asked whether the link resolves, so a link into a repo copy that had
+# been deleted was reported Valid. It also called a fresh clone, where nothing
+# is linked yet because nobody has run install, a wall of thirty-two errors.
+#
+# Prints one line and returns: 0 valid, 1 broken, 2 not installed yet.
+check_one() {
+  local target="$1" dest="$2"
+
+  if [ -L "$target" ]; then
+    local actual; actual="$(readlink "$target")"
+    if [ "$actual" != "$dest" ]; then
+      log "ERROR" "Wrong target: $target → $actual"
+      return 1
+    fi
+    # -e follows the link, so this is a link into the repo whose repo copy is
+    # gone. Exactly the case the old text comparison called Valid.
+    if [ ! -e "$target" ]; then
+      log "ERROR" "Dangling: $target → $dest (nothing there)"
+      return 1
+    fi
+    log "SUCCESS" "Valid: $target"
+    return 0
+  fi
+
+  if [ -e "$target" ]; then
+    log "WARNING" "Not linked: $target (a real file is there; install --force replaces it)"
+    return 2
+  fi
+
+  log "WARNING" "Missing: $target (nothing there; run install)"
+  return 2
+}
+
+check_dotfiles() {
+  local valid=0 broken=0 pending=0 rc
+
+  while IFS= read -r file; do
+    local target
+    target="$(resolve_path "$file")"
+    local rel
+    if ! rel="$(repo_relative "$target")"; then
+      log "ERROR" "Not below \$HOME, skipping: $file"
+      broken=$((broken + 1))
+      continue
+    fi
+    check_one "$target" "$DOTFILES_DIR/$rel"; rc=$?
+    case $rc in
+      0) valid=$((valid + 1)) ;;
+      1) broken=$((broken + 1)) ;;
+      *) pending=$((pending + 1)) ;;
+    esac
+  done < <(load_dotfiles)
+
+  check_one "$HOME/.local/share/fonts/dotfiles" "$DOTFILES_DIR/fonts"; rc=$?
+  case $rc in
+    0) valid=$((valid + 1)) ;;
+    1) broken=$((broken + 1)) ;;
+    *) pending=$((pending + 1)) ;;
+  esac
+
+  log "INFO" "Valid: $valid. Broken: $broken. Not installed: $pending."
+
+  # Non-zero whenever the tree is not fully installed, so this can be used as a
+  # gate. install-packages.sh check has always done this; its sibling always
+  # exited 0, which made the symlink audit useless to any automated caller.
+  [ "$broken" -eq 0 ] && [ "$pending" -eq 0 ]
+}
+
 # restore TIMESTAMP takes an argument the tool gave you no way to obtain.
 list_backups() {
   if [ ! -d "$BACKUP_DIR" ] || [ -z "$(ls -A "$BACKUP_DIR" 2>/dev/null)" ]; then
@@ -348,11 +471,40 @@ list_backups() {
 }
 
 restore_backup() {
-  local timestamp="$1"
+  local timestamp="${1:-}"
+
+  # With $1 empty, $backup was "$BACKUP_DIR/", which is a directory, so the
+  # guard below passed and rsync emptied every timestamped directory into $HOME.
+  if [ -z "$timestamp" ]; then
+    log "ERROR" "restore needs a timestamp. List them with: $0 backups"
+    exit 1
+  fi
+
   local backup="$BACKUP_DIR/$timestamp"
   [ -d "$backup" ] || { log "ERROR" "Backup not found: $backup"; exit 1; }
-  rsync -a --ignore-existing "$backup/" "$HOME/"
-  log "SUCCESS" "Restored backup: $timestamp"
+
+  local total; total="$(find "$backup" -type f | wc -l)"
+
+  if $DRY_RUN; then
+    log "INFO" "Simulate: restore $total file(s) from $timestamp into \$HOME"
+    rsync -a --ignore-existing --dry-run --out-format='  would restore: %n' "$backup/" "$HOME/" \
+      | grep -v '/$'
+    return 0
+  fi
+
+  local moved
+  moved="$(rsync -a --ignore-existing --out-format='%n' "$backup/" "$HOME/" | grep -cv '/$')"
+
+  if [ "$moved" -eq 0 ]; then
+    # --ignore-existing never overwrites, and after an install every managed
+    # path exists as a symlink, so restore skips all of them and used to report
+    # SUCCESS for having done nothing. It is the undo for add, not for install.
+    log "WARNING" "Restored nothing: all $total file(s) already exist in \$HOME."
+    log "INFO" "--ignore-existing never overwrites, and after an install the symlink counts as existing. Run '$0 uninstall' first."
+    return 1
+  fi
+
+  log "SUCCESS" "Restored $moved of $total file(s) from $timestamp"
 }
 
 # ---- Main ----
@@ -364,22 +516,18 @@ main() {
   case "$1" in
     "init") init_dotfiles ;;
     "add")
-      while IFS= read -r file; do
-        add_dotfile "$file"
-      done < <(load_dotfiles)
+      require_entries
+      add_dotfiles
       ;;
-    "install") install_dotfiles; install_fonts ;;
-    "check")
-      while IFS= read -r file; do
-        target="$(resolve_path "$file")"
-        [ -L "$target" ] && [ "$(readlink "$target")" = "$DOTFILES_DIR/${target#"$HOME"/}" ] \
-          && log "SUCCESS" "Valid: $target" || log "ERROR" "Broken: $target"
-      done < <(load_dotfiles)
-      fonts_target="$HOME/.local/share/fonts/dotfiles"
-      [ -L "$fonts_target" ] && [ "$(readlink "$fonts_target")" = "$DOTFILES_DIR/fonts" ] \
-        && log "SUCCESS" "Valid: $fonts_target" || log "ERROR" "Broken: $fonts_target"
+    "install")
+      require_entries
+      local rc=0
+      install_dotfiles || rc=1
+      install_fonts || rc=1
+      return $rc
       ;;
-    "uninstall") uninstall_dotfiles ;;
+    "check") require_entries; check_dotfiles ;;
+    "uninstall") require_entries; uninstall_dotfiles ;;
     "backups") list_backups ;;
     "restore") restore_backup "$2" ;;
     *)
@@ -413,7 +561,8 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# Restaura os argumentos posicionais (ex: "install", "restore 2023...")
+# Restore the positional arguments (for example "install", "restore 2023...")
 set -- "${POSITIONAL_ARGS[@]}"
 
 main "$@"
+exit $?
