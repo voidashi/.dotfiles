@@ -374,12 +374,37 @@ step.
 | Instrument Sans | GTK and Qt application interfaces |
 | Spectral | Lock screen and fetch banners |
 
-**Iosevka is the exception and you have to fetch it yourself.** Its full-family build is
-around 430MB, too large to keep in git, so `fonts/Iosevka/` is gitignored. Download the
-Iosevka SGr TTC build from [the releases
-page](https://github.com/be5invis/Iosevka/releases), unpack it into `fonts/Iosevka/`,
-then rerun `backup-configs.sh install`. Until you do, terminals fall back to whatever
-monospace font fontconfig picks, which still works but is not the design.
+**Iosevka is the exception and you have to fetch it yourself.** It unpacks to around
+430MB, too large to keep in git, so `fonts/Iosevka/` is gitignored.
+
+Three names have to line up and none of them is spelled like the others. The configs ask
+for the face **Iosevka Extended**, which is a width of the family **Iosevka**, which
+arrives in the release asset **`PkgTTC-SGr-Iosevka-<version>.zip`**. A release carries
+several hundred archives whose names differ by a few characters, so take that one by
+name rather than by eye:
+
+```bash
+curl -sL https://api.github.com/repos/be5invis/Iosevka/releases/latest \
+  | grep -oE 'https://[A-Za-z0-9._/-]+/PkgTTC-SGr-Iosevka-[0-9][A-Za-z0-9._-]*\.zip' \
+  | sort -u | xargs curl -L -o /tmp/iosevka.zip
+unzip -o /tmp/iosevka.zip -d fonts/Iosevka/
+./scripts/backup-configs.sh install
+```
+
+That drops nine `SGr-Iosevka-<weight>.ttc` files straight into `fonts/Iosevka/`, and only
+two of them are used here: `Regular` carries Iosevka Extended and its oblique, `Bold`
+carries the bold pair, and nothing in these configs asks for the other seven weights.
+Deleting those takes the directory to around 100MB. To see which file actually answered
+for a face, run `fc-match "Iosevka Extended" -v`.
+
+The near misses are what catch people. `Term`, `Fixed`, `Curly`, `Slab` and `SS01`
+through `SS18` are different designs; `SuperTTC-` packs every weight into one file
+instead of nine; and `PkgTTC-Iosevka-` without the `SGr-` is a separate package that
+unpacks to `Iosevka-<weight>.ttc` rather than the `SGr-` names these configs were built
+against. The command above rejects all of them.
+
+Until Iosevka is in place, terminals fall back to whatever monospace font fontconfig
+picks, which still works but is not the design.
 
 ## Wallpapers
 
