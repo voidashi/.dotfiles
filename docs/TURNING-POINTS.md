@@ -124,5 +124,82 @@ that line changes, with nothing to catch it.
 These stay themed and tracked so that switching is reading a file rather than
 writing one.
 
+## The repository stops at `$HOME`
+
+Nothing here writes outside a user's home directory and nothing here manages a
+system service. That is a decision rather than an omission, and it is what lets a
+clone behave the same on a second machine: a dotfiles repository that needs an
+`/etc` edit to work does not travel.
+
+It answers three questions that would otherwise sit open. Theming the greeter would
+mean generating into root-owned `/etc/greetd/`. Power profiles would mean
+`systemctl enable` on a system unit, which `backup-configs.sh` has no business
+doing. And a lid switch that misreports its own state would be corrected in logind's
+configuration, which is why one such episode was closed rather than chased.
+
+The line is the write, not the read. Declaring a package that owns a system file is
+fine, and `SETUP.md` may tell a reader to run `systemctl enable` themselves. What
+the scripts must not do is make that change on someone's behalf.
+
+So this closes the question for the repository and not for its owner. Theming the
+greeter and setting a power profile stay in `docs/TODO.md` as things done by hand,
+with `SETUP.md` as the place a reader is told to do the same.
+
+## Two scripts, and no inverse of `add`
+
+`unlink-dotfiles.sh` moved the repository's files back out into `$HOME` and emptied
+the clone, which is the inverse of `add` and not of `install`. Once `uninstall`
+existed, its whole remaining footprint in the documents was disclaimers: six places
+existed only to tell a reader this was not the script they wanted, and every edit to
+those documents paid that tax. It was deleted.
+
+A per-path `unadopt` was proposed to replace it and rejected, as was documenting the
+`mv` that does the same thing: too little function for a command, for an operation
+performed about once. Reopen only if the manual step turns out to be taken often
+enough to hurt.
+
+## `DESIGN-SYSTEM.md` is a guest, and the terms are written down
+
+It is the largest file in the repository, no config cites it, its tokens appear
+nowhere else in the tree, and every one of its hexes but pure white is already in
+`palette.json`. Two separate audits have proposed deleting it.
+
+It stays because it is live reference for web and print work outside this
+repository, which is a fact about its author rather than about the repo, and no
+audit of the tree can reach it. So the terms, to stop this being reopened a third
+time: it never stops being useful in general, which makes that the wrong test. The
+only question this repository asks is whether it still earns a place in this tree,
+and the day it does not it moves to where the web work lives rather than being
+deleted.
+
+## Four cuts that were proposed and refused
+
+An audit went looking for what no longer earns its place and a second reviewer
+argued against everything it proposed. These four did not survive, and each still
+looks cuttable from the outside, which is the only reason they are written down.
+
+- **`RICE-GUIDE.md` keeps "Working rules" and "Anti-patterns".** The section opens
+  by saying each rule is there because breaking it cost something, and `CLAUDE.md`
+  points at both by name and says not to restate them here. Moving the owner leaves
+  that pointer dangling.
+- **The Qt entry in `SETUP.md` keeps its length.** It is a two-cause diagnostic and
+  only the first cause duplicates `MAINTENANCE.md`. The second, that
+  `plasma-integration` is missing so the variable is set and nothing reads it, is the
+  only copy on a reader's path and carries its own check.
+- **`backup-configs.sh init` is not dead code.** `DOTFILES_DIR` is overridable and is
+  not derived from `SCRIPT_DIR`, `add` fills the repository it creates, and the test
+  suite relies on that override for every one of its cases.
+- **`mediaplayer.py` stays beside the bar.** `scripts/wm/` holds helpers the
+  compositors call, and waybar is not a compositor. The script is bound to
+  `common.jsonc` by a serialisation contract its own docstring names.
+
+## Three things about the bar are provisional
+
+Settled only until they have been lived with: whether numerals beat application
+glyphs on the workspace buttons, whether the right-hand modules want separators or
+should stay spaced only, and whether 15px at weight 500 is the right text size.
+Nothing is owed on these. They are recorded so that changing one is not mistaken for
+undoing a decision.
+
 Open work of every kind lives in `docs/TODO.md`, including what is diagnosed and
 deliberately parked. It is not repeated here.

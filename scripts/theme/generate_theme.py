@@ -615,16 +615,12 @@ def main() -> None:
     files = generated_files(p)
     for path, content in files.items():
         write(path, content)
-    # These two are merged into files that are partly hand-written, so they go
+    # These three are merged into files that are partly hand-written, so they go
     # through their own paths rather than through write().
     inline_block(CONFIG / "wofi" / "style.css", gen_gtk_css(p))
     merge_kde_globals(CONFIG / "kdeglobals", gen_kde_colors(p), p)
     merge_kcm_input(CONFIG / "kcminputrc", p)
     print("Done. Diff the results before committing.")
-
-
-if __name__ == "__main__":
-    main()
 
 
 if __name__ == "__main__":
