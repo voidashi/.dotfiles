@@ -302,10 +302,9 @@ Sorted by priority. Within a priority, by nothing.
   red, so `ansi16` stays a canonical table no role touches. **The guide still constrains
   which family suits which role**, so a free accent swap can produce a configuration
   `RICE-GUIDE.md` forbids, and whoever clones this is entitled to ignore that. **Roles
-  only reach the generated half**: ten files would follow automatically and eight
-  hand-written ones would not, swaylock among them with `key-hl-color` spelled out, so any
-  README claim has to say which half. The natural complement is a check for orphaned
-  literals.
+  only reach the generated half**, so any README claim has to say which half; which files
+  those are, and which of them could be brought across, is the coverage entry above rather
+  than a second count here. The natural complement is a check for orphaned literals.
   *Difficulty: medium, and the design questions are most of it. Priority: medium, and it
   makes the accent recipe shorter rather than replacing it.*
 
