@@ -158,6 +158,27 @@ believing.
 - Section headers are skipped by a `next` in the awk block. Remove it and the literal
   lines `[common]` and `[pacman]` get parsed as package names.
 
+### How far the audit of these scripts actually went
+
+These two are the only code here that can damage a real `$HOME`, so they were audited
+by four reviewers with different lenses. `shellcheck` was run for the first time, and
+the correctness pass reproduced every defect in a throwaway `HOME=` before reporting
+it. Twenty-six were found; the fixes are above and in the git history, and
+`scripts/tests/test-dotfiles.sh` holds them fixed.
+
+What was never executed, so nobody reads that number as broader than it is:
+
+- Nothing touching `sudo`, `apt`, `pacman -Syy` or `dnf`. `add_repos` and
+  `update_pkg_db` are reasoned from reading alone, including an unchecked
+  `wget | gpg | tee` that writes an empty repository key when the download fails and
+  leaves every later `apt-get update` broken.
+- `run_hooks` was analysed by running its awk program standalone. Its `system()` call
+  was never allowed to execute anything.
+- Everything ran on one CachyOS machine, so only the pacman branches met a real
+  package manager. `install_fonts` and `init_dotfiles` were read and not run.
+- Two runs sharing a `$TIMESTAMP`, and behaviour under an empty `$HOME`, were reasoned
+  about rather than reproduced.
+
 ## Config architecture notes
 
 ### Compositors and the bar
