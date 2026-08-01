@@ -272,7 +272,7 @@ the ramp on its own:
 
 | Key | Today | What to do with it |
 |---|---|---|
-| `terminal.cursor` | `#c76870`, a copy of `bordeaux.300` | Change it with the ramp. It is what moves the four terminals. |
+| `terminal.cursor` | `#c76870`, a copy of `bordeaux.300` | Change it with the ramp. It is what moves the terminals. |
 | `ansi16` slot 1 | `#b44955`, a copy of `bordeaux.400` | Leave it. |
 
 `ansi16` is the sixteen-colour terminal table, and slot 1 is red because a program that
@@ -296,7 +296,7 @@ still matches is a file that did not follow.
 A plum identity instead of a red one. Keep each step's lightness and saturation and move
 only the hue, because the ten steps are tuned for contrast against the void surfaces.
 
-**1.** Replace `scales.bordeaux` in `scripts/theme/palette.json`:
+**Replace the ramp.** `scales.bordeaux` in `scripts/theme/palette.json`:
 
 ```json
 "bordeaux": {
@@ -313,15 +313,16 @@ only the hue, because the ten steps are tuned for contrast against the void surf
 },
 ```
 
-**2.** Set `terminal.cursor` to `#c7689f`, the new `300`. Leave `ansi16` alone.
+**Follow it with the cursor.** Set `terminal.cursor` to `#c7689f`, the new `300`.
+Leave `ansi16` alone.
 
-**3.** Push it into every generated file:
+**Regenerate.**
 
 ```bash
 python3 scripts/theme/generate_theme.py
 ```
 
-**4.** Find what did not follow, searching for the ten values you just replaced:
+**Find what did not follow**, searching for the ten values you just replaced:
 
 ```bash
 git grep -nIiE "e2afb1|d78d91|c76870|b44955|99303f|7f1f2f|621321|490c17|310c11|1c0b0c" -- .config
@@ -332,12 +333,12 @@ in the four terminal colour files and in Neovim's `palette.lua`, which is ANSI s
 and one mention inside a comment in `.config/catnap/config.toml`. Anything else is a file
 you missed.
 
-**5.** Update [`design/RICE-GUIDE.md`](design/RICE-GUIDE.md). It prints the palette and
-`check_palette.py` reads it, so its Bordeaux row and its cursor row have to move with the
-ramp or the check fails on the guide rather than on a config. Its ANSI table keeps
+**Update the guide.** [`design/RICE-GUIDE.md`](design/RICE-GUIDE.md) prints the palette
+and `check_palette.py` reads it, so its Bordeaux row and its cursor row have to move with
+the ramp or the check fails on the guide rather than on a config. Its ANSI table keeps
 `#b44955`, but the note calling that value bordeaux-400 stops being true.
 
-**6.** Prove it:
+**Prove it.**
 
 ```bash
 python3 scripts/theme/check_palette.py
