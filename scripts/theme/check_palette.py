@@ -7,17 +7,22 @@ with structural config in them (swaylock, bottom, starship, fastfetch, catnap,
 fish, yazi, Sway and Neovim's roles layer), and nothing said so when one of them
 aged out of step with palette.json.
 
-Two checks:
+Two checks and a warning:
 
-  drift    a colour in a tracked config that palette.json does not contain
-  sync     a GENERATED file that differs from what the generator would write
-           now, which is what happens when someone edits the output instead of
-           the source
+  drift    a colour in a tracked config that palette.json does not contain, in
+           any of the forms colour is written here rather than only "#rrggbb"
+  sync     a generated file that differs from what the generator would write
+           now, or a merged file whose owned sections a second merge would
+           change, both of which mean someone edited the output not the source
+  roles    a role literal holding a hex no scale or alert tone holds, which is
+           a retired colour still inside the palette and therefore invisible to
+           drift. A warning, since a half-finished hue swap looks like this
 
 Usage:
     python3 scripts/theme/check_palette.py
 
-Exits 1 if either fails, so it can be wired into a hook.
+Exits 1 if either check fails, so it can be wired into a hook. The warning does
+not affect the exit code.
 """
 import json
 import re
@@ -55,6 +60,19 @@ NAMED_RE = re.compile(
 # unambiguously an applied colour.
 NAMED_SCOPE = (".config/fish/", ".config/starship.toml")
 
+KDEGLOBALS = ".config/kdeglobals"
+
+
+def from_hex(m) -> str:
+    # Group 1 is RRGGBB. hyprland's rgba() carries two more digits, which are
+    # opacity rather than colour and are not in the palette.
+    return "#" + m.group(1).lower()
+
+
+def from_decimal(m) -> str:
+    return "#%02x%02x%02x" % tuple(int(g) for g in m.groups())
+
+
 # Colour is not always written "#rrggbb", and every other form it takes here was
 # outside this check until someone measured it. An auditor replaced hyprtoolkit's
 # accent_secondary with rgb(ff00ff), the identity mark of the whole rice, and the
@@ -66,16 +84,6 @@ NAMED_SCOPE = (".config/fish/", ".config/starship.toml")
 # both match plenty of things that are not colours. Documentation sits outside
 # every scope on purpose: docs/TODO.md quotes rgb(ff00ff) as a sentinel and must
 # not be reported for saying so.
-def from_hex(m) -> str:
-    # Group 1 is RRGGBB. hyprland's rgba() carries two more digits, which are
-    # opacity rather than colour and are not in the palette.
-    return "#" + m.group(1).lower()
-
-
-def from_decimal(m) -> str:
-    return "#%02x%02x%02x" % tuple(int(g) for g in m.groups())
-
-
 FORMS = (
     # swaylock writes "ring-color=393835", so the hex regex above sees none of
     # its colours: they went unchecked from the start and happened to be right.
@@ -97,7 +105,7 @@ FORMS = (
      from_decimal),
     # kdeglobals, where a colour is a bare decimal triple and nothing else in
     # the file is shaped like one.
-    ((".config/kdeglobals",),
+    ((KDEGLOBALS,),
      re.compile(r"^[A-Za-z][\w ]*=(\d{1,3}),(\d{1,3}),(\d{1,3})$", re.MULTILINE),
      from_decimal),
 )
@@ -158,7 +166,6 @@ def strip_comments(text: str) -> str:
 
 LUA_COMMENT = re.compile(r"--[^\n]*")
 CSS_COMMENT = re.compile(r"/\*.*?\*/", re.DOTALL)
-KDEGLOBALS = ".config/kdeglobals"
 
 
 def drop_ini_sections(text: str, prefix: str) -> str:
