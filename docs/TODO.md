@@ -210,21 +210,65 @@ Sorted by priority. Within a priority, by nothing.
   *Difficulty: low. Priority: medium, and it is the cheapest way for a stranger to try
   this without committing to all of it.*
 
+- **Bring the hand-written half onto the generator, in the order the survey found.** The
+  generator owns 13 files; 19 more paste a palette colour by hand and follow nothing. A
+  survey established, per application and against its own documentation or binary, whether
+  the palette could reach it. The precedent is `.config/hypr/conf/decoration.lua`, already
+  converted: it read `require("conf/palette")` for its radius while its shadow colour sat
+  pasted, and the fix was one line.
+
+  **The application has its own include, confirmed by running it.** These want a generated
+  partial and one directive in the hand-written file, which is the pattern the four
+  terminals already use.
+
+  | File | Directive | Colours | How it was confirmed |
+  |---|---|---|---|
+  | `.config/sway/config` | `include <path>` | 9 | `sway --validate` rejects a bare `$var` and accepts it after the include |
+  | `.config/hypr/hyprtoolkit.conf` | `source = <path>` | 6 | hyprtoolkit's own `source= globbing error` on a bad path, silent on a good one |
+  | `.config/yazi/theme.toml` | `[flavor]` dark/light | 18 | the yazi binary's embedded default `theme.toml` and its `flavors/<name>.yazi/flavor.toml` path |
+
+  Sway is the cheapest of the three and hyprtoolkit splits cleanest, 6 colour lines out and
+  `rounding_*` and the font keys staying. Yazi is the largest single drift surface in the
+  repository, 18 colours over 69 sites, but it needs a flavor package built, and whether
+  `tmtheme.xml` is required at load is **unconfirmed**: the binary references it, the
+  upstream package layout lists it, and nobody has watched yazi refuse a flavor without it.
+
+  **Named colours in the same file, so a generated block inside it.** `.config/starship.toml`
+  takes `palette = "<name>"` plus a `[palettes.<name>]` table, and `style` fields then name
+  colours instead of repeating hex. Confirmed end to end: with the table in place,
+  `starship prompt` emitted `38;2;177;177;177`, which is `ink-2`. 5 colours, and unlike the
+  three above it rewrites the hand-written side too, since the hex become names.
+
+  **No mechanism, and the reason differs.** `bottom` (18 colours) and `swaylock` (15) have
+  one config file each and no include; their colour keys are contiguous, so a marked block
+  like wofi's would work, but that is a wrapper rather than the application's own mechanism
+  and taking it means saying so where it lives. The eight `fastfetch` presets are 107 sites
+  and have neither route: measured, `fastfetch -c a -c b` answers `only one config file can
+  be loaded`, and `display.constants` does not expand inside a colour field, which emitted
+  the placeholder literally. `.config/waybar/common.jsonc` has one colour, inside pango
+  markup, and waybar's `include` would force the whole module to move; the real answer there
+  is CSS, since `waybar/style.css` already imports the generated stylesheet, but that
+  changes module output and is a functional change rather than a theming one.
+  `.config/catnap/config.toml` needs nothing and should not be counted: it pastes no hex at
+  all, only ANSI tokens, which already resolve through the generated terminal table.
+  *Difficulty: low each for sway, hyprtoolkit and starship; medium for yazi; high for
+  fastfetch. Priority: medium, and it is what would make the README's promise true.*
+
 - **The two compositors describe every runtime service twice, and have diverged.** The
   autostart block in `autostart.lua` against the run of `exec` lines in `sway/config`; the
   idle schedule in two syntaxes with a comment asking future editors to keep them in step;
   three screenshot binds under Hyprland against one bare `grim` under Sway; different
   launcher keys. Sway also carries nine hand-pasted hex while Hyprland reads a generated
-  `palette.lua`, so the two sit on opposite sides of this repo's most important seam. The
-  cheap half is generating a Sway palette include, about fifteen lines in
-  `generate_theme.py`, which moves nine literals off the drift surface. Dropping Sway is
+  `palette.lua`, so the two sit on opposite sides of this repo's most important seam;
+  the palette half of that is the entry above and not this one. Dropping Sway is
   not on the table: `sway/config` carries four findings that could only come from booting
   it, including notifications that were dead under Sway with the config themed and in
   place. The standing cost is that anything mirrored into `sway/config` from a Hyprland
   session is checked by `sway --validate` and never run. The brightness curve and the
   clipboard wipe both went in that way: confirmed working under Hyprland, untried under
   Sway.
-  *Difficulty: low for the include, high for the rest. Priority: medium.*
+  *Difficulty: high, now that the palette half has its own entry and what is left is the
+  divergence. Priority: medium.*
 
 - **Rethink how the generator decides colour, and consider a roles layer.**
   `palette.json` holds raw ramps plus a few roles expressed as duplicated literals:
