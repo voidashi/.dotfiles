@@ -192,6 +192,27 @@ A per-path `unadopt` was proposed to replace it and rejected, as was documenting
 performed about once. Reopen only if the manual step turns out to be taken often
 enough to hurt.
 
+## The checks moved out of `.claude/` so that a clone can run them
+
+The only tracked file under `.claude/` was a skill that ran the whole validator
+battery, and it was the single artefact that ran all of it. Deleting the directory
+at publication, which this repository has always intended, would have taken the
+battery with it and left `MAINTENANCE.md` describing checks with nothing to run
+them. So the checks moved first, into `scripts/verify.sh`, and `.claude/` is now
+untracked and ignored whole.
+
+That ordering is the decision worth recording: a thing that is going to be deleted
+cannot also be the only place a capability lives, and the fix is to move the
+capability rather than to postpone the deletion. `MAINTENANCE.md` keeps the reasoning
+for each check and points at the script for the commands, instead of holding a second
+copy of them, which it did until the two had drifted apart.
+
+Writing the script found three checks that had been reporting success while doing
+nothing, which is this repository's characteristic bug turned on its own validators:
+catnap was passed a flag it has never had, catnap's exit code was read in the
+direction that does not mean anything, and `ghostty +validate-config` truncated the
+file the battery was writing to.
+
 ## `DESIGN-SYSTEM.md` is a guest, and the terms are written down
 
 It is the largest file in the repository, no config cites it, its tokens appear

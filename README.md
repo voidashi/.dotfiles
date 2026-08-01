@@ -174,6 +174,7 @@ fonts/                    three of the four faces; Iosevka you fetch yourself
 scripts/
   backup-configs.sh       install, uninstall and audit the tracked dotfiles
   install-packages.sh     installs the packages listed in packages.conf
+  verify.sh               runs every validator and prints what each returned
   tests/                  sandboxed tests for backup-configs.sh
   theme/                  palette.json, the generator and the checker
   wm/                     helpers the compositors call while running

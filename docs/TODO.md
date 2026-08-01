@@ -73,15 +73,6 @@ Sorted by priority. Within a priority, by nothing.
   *Difficulty: low, blocked on taking new ones. Priority: high, because it is the first
   thing a visitor sees.*
 
-- **A tracked gitlink can come back through a merge, and nothing notices.**
-  `.claude/worktrees/greetd-session-entry` was swept into the index once, removed on
-  purpose by `5ab0358`, and restored by a merge that kept the other side of the history.
-  It is untracked again, but `.gitignore` cannot prevent a recurrence, because git ignores
-  it for a path already tracked. Prose has failed at this twice, so what is owed is a
-  check: `git ls-files -s | grep '^160000'` must come back empty. It would have caught
-  both occurrences.
-  *Difficulty: trivial. Priority: high, because it survives a merge silently.*
-
 - **`check_palette.py` passes on colours it cannot see.** Two holes, both found by
   measurement rather than by reading it. An auditor replaced `rgb(498bb2)` with
   `rgb(ff00ff)` in `.config/hypr/hyprtoolkit.conf` and the checker still returned
@@ -151,17 +142,6 @@ Sorted by priority. Within a priority, by nothing.
   they only have afterwards, which is why it was skipped outright.
   *Difficulty: trivial each. Priority: medium, and they are worth doing in one pass
   rather than one at a time.*
-
-- **One command should run every validator, and it cannot live in `.claude/`.** The
-  verify-repo skill is the only artefact that runs all nine checks, and this file commits
-  to deleting `.claude/` at publication. Its content is duplicated as prose in
-  `MAINTENANCE.md`, the two have already diverged, and neither runs
-  `scripts/tests/test-dotfiles.sh`. A `scripts/verify.sh` that both call is the answer,
-  and it is the precondition for deleting `.claude/` without loss. Two checks belong in it
-  that nothing runs today: the test suite, and the gitlink guard above. The skill's own
-  broken `valid:` counter is already gone, which is what turned this from tidying into a
-  thing worth doing: it read `valid: 0` on a healthy tree for as long as it existed.
-  *Difficulty: low. Priority: high, and higher the day publication is real.*
 
 - **The greetd path has never been run.** It is documented in `SETUP.md` step 6 and
   declared in `packages.conf`, but this machine reaches its desktop through `plasmalogin`,

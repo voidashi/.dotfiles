@@ -499,3 +499,16 @@ file. If the total looks wrong, that off-by-one is the first thing to rule out.
 A broken link usually means an external program replaced it with a real file,
 which `kded6` has done to `gtk.css` before; re-link with `install --force`, but look
 at the content first, because the same event has also overwritten what the repo held.
+
+The gitlink guard is in the battery for a reason worth knowing, because the failure it
+catches is silent and arrives through a merge:
+
+```bash
+git ls-files -s | grep '^160000'   # expect no output
+```
+
+A worktree under `.claude/` was swept into the index once as a gitlink, removed on
+purpose by `5ab0358`, and then restored by a merge that kept the other side of the
+history. `.gitignore` cannot prevent the recurrence, because git ignores nothing for a
+path that is already tracked, which is why this is a check rather than a rule. Prose had
+failed at it twice before the check existed.
