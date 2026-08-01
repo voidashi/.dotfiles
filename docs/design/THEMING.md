@@ -36,18 +36,23 @@ The hand-written ones are the ones that age in silence, which is why
 consumer already reads: the four terminal partials, the Hyprland Lua module, the Neovim
 palette layer, the shared CSS partial at `.config/theme/voidashi-colors.css`, the GTK3
 and GTK4 named-colour files, and the selectable KDE colour scheme
-`Voidashi.colors`. Those ten are what `check_palette.py` counts.
+`Voidashi.colors`.
 
-It also **edits** two files it does not own rather than writing them: wofi's stylesheet,
-where the palette is spliced between markers because wofi cannot import, and
+It also **edits** three files it does not own rather than writing them: wofi's
+stylesheet, where the palette is spliced between markers because wofi cannot import, and
 `kdeglobals` plus `kcminputrc`, where colour, font and cursor keys are merged in one by
 one so nothing of KDE's own is lost. The distinction matters when reading the generator:
-its `generated_files()` covers the ten it writes, and the merges are separate functions.
-Output written whole carries a `GENERATED` header and must not be hand-edited.
+`generated_files()` holds the ones it writes whole and `merged_files()` the ones it
+merges into. Output written whole carries a `GENERATED` header and must not be
+hand-edited.
 
-`check_palette.py` proves it held: no hex outside the palette, no named terminal colour
-in fish or starship, no bare hex outside the palette in swaylock, and no generated file
-that differs from what the generator would produce now.
+`check_palette.py` proves it held: no colour outside the palette, in any of the five
+forms colour is written here; no named terminal colour in fish or starship; no file
+written whole that differs from what the generator would produce now; and no section of a
+merged file that a second merge would change, which is what a hand-edit to one looks
+like. It also warns, without failing, when `ansi16` holds a hex no scale or alert tone
+holds, since a duplicated value keeps a retired colour inside the palette and hides every
+file still carrying it.
 
 ## What each surface is set to
 

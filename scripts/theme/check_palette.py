@@ -269,6 +269,21 @@ def check_sync(p: dict) -> list:
             stale.append((rel, "does not exist"))
         elif path.read_text(encoding="utf-8") != expected:
             stale.append((rel, "differs from what the generator would write"))
+    # The three the generator merges into rather than writes whole. This loop
+    # iterated generated_files() alone, so a hand-edit to wofi's generated block,
+    # to kdeglobals' colour sections or to kcminputrc's cursor keys was reported
+    # by nothing: measured, one edit in each, and the checker returned 0 for all
+    # three. Merging again and comparing asks the question the right way round,
+    # and it borrows the generator's own idea of which sections it owns rather
+    # than restating it here, where the two would drift apart.
+    for path, merge in gen.merged_files(p).items():
+        rel = path.relative_to(REPO_ROOT).as_posix()
+        if not path.exists():
+            stale.append((rel, "does not exist"))
+            continue
+        current = path.read_text(encoding="utf-8")
+        if merge(current) != current:
+            stale.append((rel, "a section the generator owns has been hand-edited"))
     return stale
 
 
@@ -296,7 +311,9 @@ def main() -> int:
             print(f"  {rel}: {why}")
         print()
     else:
-        print(f"sync:  {len(gen.generated_files(p))} generated files match palette.json")
+        written = len(gen.generated_files(p))
+        merged = len(gen.merged_files(p))
+        print(f"sync:  {written} generated and {merged} merged files match palette.json")
 
     orphans = check_orphan_ansi(p)
     if orphans:

@@ -223,7 +223,7 @@ BLOCK_START = "/* >>> VOIDASHI COLORS (GENERATED) >>> */"
 BLOCK_END = "/* <<< END VOIDASHI COLORS <<< */"
 
 
-def inline_block(path: Path, content: str) -> None:
+def inlined_block(original: str, content: str, name: str) -> str:
     """Replace the marked block inside a hand-written CSS file.
 
     For apps that cannot @import the shared partial. wofi hands its stylesheet
@@ -232,12 +232,11 @@ def inline_block(path: Path, content: str) -> None:
     never load. Inlining sidesteps path resolution entirely. Everything outside
     the markers stays hand-written.
     """
-    original = path.read_text(encoding="utf-8")
     start = original.find(BLOCK_START)
     end = original.find(BLOCK_END)
     if start == -1 or end == -1:
         raise SystemExit(
-            f"{path.relative_to(REPO_ROOT)}: missing the "
+            f"{name}: missing the "
             f"{BLOCK_START} / {BLOCK_END} markers the generator writes between."
         )
     if end < start:
@@ -245,12 +244,11 @@ def inline_block(path: Path, content: str) -> None:
         # between the markers, so every run appends another copy of whatever
         # hand-written CSS sits between them, unbounded and without an error.
         raise SystemExit(
-            f"{path.relative_to(REPO_ROOT)}: {BLOCK_END} comes before "
+            f"{name}: {BLOCK_END} comes before "
             f"{BLOCK_START}; put them back in order."
         )
     block = f"{BLOCK_START}\n{content}{BLOCK_END}"
-    path.write_text(original[:start] + block + original[end + len(BLOCK_END):], encoding="utf-8")
-    print(f"  inlined into {path.relative_to(REPO_ROOT)}")
+    return original[:start] + block + original[end + len(BLOCK_END):]
 
 
 def gen_gtk_css(p: dict) -> str:
@@ -556,7 +554,7 @@ def merge_ini_keys(lines: list, keyed: dict) -> list:
     return out
 
 
-def merge_kcm_input(path: Path, p: dict) -> None:
+def kcm_input_merged(current: str, p: dict) -> str:
     """The cursor theme and size, which live in kcminputrc rather than kdeglobals.
 
     KDE's gtkconfig daemon reads them from here and writes them into both GTK
@@ -564,16 +562,12 @@ def merge_kcm_input(path: Path, p: dict) -> None:
     Qt and GTK to agree.
     """
     t = p["typography"]
-    lines = path.read_text(encoding="utf-8").splitlines() if path.exists() else []
     keyed = {"Mouse": {"cursorTheme": t["cursor_theme"],
                        "cursorSize": str(t["cursor_size"])}}
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(merge_ini_keys(lines, keyed)).strip() + "\n",
-                    encoding="utf-8")
-    print(f"  merged cursor into {path.relative_to(REPO_ROOT)}")
+    return "\n".join(merge_ini_keys(current.splitlines(), keyed)).strip() + "\n"
 
 
-def merge_kde_globals(path: Path, scheme: str, p: dict) -> None:
+def kde_globals_merged(current: str, scheme: str, p: dict) -> str:
     """Replace the colour sections of kdeglobals and set the font keys.
 
     KDE applications read their palette from kdeglobals itself, not from the
@@ -605,25 +599,24 @@ def merge_kde_globals(path: Path, scheme: str, p: dict) -> None:
         "Icons": {"Theme": t["icon_theme"]},
     }
 
-    kept, current, keep_current = [], None, True
-    if path.exists():
-        for line in path.read_text(encoding="utf-8").splitlines():
-            stripped = line.strip()
-            if stripped.startswith("[") and stripped.endswith("]"):
-                current = stripped[1:-1]
-                keep_current = not owned(current)
-            if keep_current:
-                kept.append(line)
+    kept, section, keep_current = [], None, True
+    for line in current.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("[") and stripped.endswith("]"):
+            section = stripped[1:-1]
+            keep_current = not owned(section)
+        if keep_current:
+            kept.append(line)
     kept = merge_ini_keys(kept, keyed)
 
     # Drop the scheme's own [General], which would collide with the one already
     # in kdeglobals; only its colour sections are wanted here.
-    body, current, emit = [], None, False
+    body, section, emit = [], None, False
     for line in scheme.splitlines():
         stripped = line.strip()
         if stripped.startswith("[") and stripped.endswith("]"):
-            current = stripped[1:-1]
-            emit = owned(current)
+            section = stripped[1:-1]
+            emit = owned(section)
         if emit:
             body.append(line)
 
@@ -634,9 +627,7 @@ def merge_kde_globals(path: Path, scheme: str, p: dict) -> None:
     # non-empty and so never dropped anything.
     text = "\n".join(kept).strip() + "\n\n"
     text += "\n".join(body).rstrip() + "\n"
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(text, encoding="utf-8")
-    print(f"  merged colours into {path.relative_to(REPO_ROOT)}")
+    return text
 
 
 # =====================================================================
@@ -651,9 +642,8 @@ def generated_files(p: dict) -> dict:
     without duplicating the list, which would drift the first time one of them
     gained an entry.
 
-    The two files that are merged rather than written (wofi's stylesheet and
-    kdeglobals) are not here: their content is partly hand-written, so there is
-    nothing to compare them against.
+    The three files merged into rather than written whole are in merged_files()
+    below, because what they should contain depends on what is already in them.
     """
     return {
         CONFIG / "kitty" / "voidashi-colors.conf": gen_kitty(p),
@@ -669,17 +659,37 @@ def generated_files(p: dict) -> dict:
     }
 
 
+def merged_files(p: dict) -> dict:
+    """The three written by merging, as path -> what to do with what is there.
+
+    Each value takes the file's current text and returns what the generator
+    would leave in it, so everything outside the sections it owns is copied
+    through. That is why these cannot be a mapping of finished content the way
+    generated_files() is.
+
+    Kept here, and shaped this way, so check_palette.py can ask whether merging
+    again would change the file. That question is the only thing that makes a
+    hand-edit to an owned section visible: check_sync used to iterate
+    generated_files() alone, so edits to all three went unreported.
+    """
+    return {
+        CONFIG / "wofi" / "style.css":
+            lambda current: inlined_block(current, gen_gtk_css(p), "wofi/style.css"),
+        CONFIG / "kdeglobals":
+            lambda current: kde_globals_merged(current, gen_kde_colors(p), p),
+        CONFIG / "kcminputrc":
+            lambda current: kcm_input_merged(current, p),
+    }
+
+
 def main() -> None:
     p = load_palette()
     print("Generating Voidashi theme files from palette.json:")
-    files = generated_files(p)
-    for path, content in files.items():
+    for path, content in generated_files(p).items():
         write(path, content)
-    # These three are merged into files that are partly hand-written, so they go
-    # through their own paths rather than through write().
-    inline_block(CONFIG / "wofi" / "style.css", gen_gtk_css(p))
-    merge_kde_globals(CONFIG / "kdeglobals", gen_kde_colors(p), p)
-    merge_kcm_input(CONFIG / "kcminputrc", p)
+    for path, merge in merged_files(p).items():
+        current = path.read_text(encoding="utf-8") if path.exists() else ""
+        write(path, merge(current))
     print("Done. Diff the results before committing.")
 
 

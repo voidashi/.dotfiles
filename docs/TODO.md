@@ -385,7 +385,7 @@ Sorted by priority. Within a priority, by nothing.
   version that was supposed to be the trigger is already installed.*
 
 - **`kdeglobals` never learns the scheme's name, and it is not clear that it should.**
-  `merge_kde_globals` drops the `[General]` of the generated `.colors` file, on the stated
+  `kde_globals_merged` drops the `[General]` of the generated `.colors` file, on the stated
   grounds that it would collide with the `[General]` kdeglobals already has. That section
   carries `ColorScheme=Voidashi`, `Name=Voidashi` and `shadeSortColumn=true`, and the first
   two collide with nothing: kdeglobals holds only a stale KDE-written `ColorSchemeHash` and

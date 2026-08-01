@@ -366,6 +366,14 @@ What was never executed, so nobody reads that number as broader than it is:
   inlines the palette into `.config/wofi/style.css` between
   `/* >>> VOIDASHI COLORS (GENERATED) >>> */` markers. Edit outside them freely,
   never inside.
+- **The three merged files went unchecked because they carry no `GENERATED`
+  header.** `check_sync` compared whole files against the generator's output, so
+  `.config/wofi/style.css`, `kdeglobals` and `kcminputrc` were outside it: an edit
+  was made in each and the checker returned 0 for all three. It now merges again
+  and compares, which reports any difference in a section the generator owns while
+  leaving everything else alone, both measured. Adding a fourth merged file means
+  adding it to `merged_files()` in `generate_theme.py`, which is the one list both
+  the generator and the checker read.
 - **The lock screen is plain `swaylock`, not `swaylock-effects`,** and its config was
   originally written for the latter. Seven options were unknown to the installed
   binary: `screenshots`, `effect-blur`, `effect-vignette`, `indicator`, `clock`,
