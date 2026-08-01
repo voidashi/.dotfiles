@@ -392,8 +392,13 @@ What was never executed, so nobody reads that number as broader than it is:
   Those are ANSI slots and the ANSI table is the palette, so catnap cannot drift
   off-palette; what it cannot reach is a specific level. Separately, catnap 2.0
   replaced TOML with a `.cat` language and upstream says `config.toml` and
-  `distros.toml` are not compatible with v2. Upstream is 2.1.1 and the AUR package is
-  1.1.1, so both tracked files break the day it moves.
+  `distros.toml` are not compatible with v2. **The installed version is already
+  2.1.1**, not the 1.1.1 this note used to claim, and the tracked `config.toml` is
+  still not rejected by it. Whether it is still honoured is unmeasured, and that is
+  the open question in `TODO.md`. Two things about validating it, both learned the
+  hard way: catnap has no flag for `distros.toml`, so that file is checked by
+  nothing, and catnap never exits when its stdout is not a terminal, so its exit
+  code is only readable as a rejection.
 - **`check_palette.py` could not see any swaylock colour until recently.** swaylock
   writes `ring-color=393835` with no leading `#`, and the hex regex requires one, so
   28 values sat unverified from the start. There is now a `BARE_HEX_SCOPE` for that
@@ -421,7 +426,20 @@ What was never executed, so nobody reads that number as broader than it is:
 
 ## Validating a change
 
-Run this after any colour change:
+Run the whole battery before calling anything done:
+
+```bash
+./scripts/verify.sh
+```
+
+It runs every check named in this section plus two nothing else runs, the sandboxed
+tests and the gitlink guard, prints each command with what it returned, and exits
+non-zero if any failed. A check whose tool is not installed is skipped rather than
+failed, since no machine has all four terminals and both compositors. The rest of this
+section is why each check exists and how to read it, which is the part a script cannot
+carry. Run one by hand when you want only that one.
+
+After any colour change, on its own:
 
 ```bash
 python3 scripts/theme/check_palette.py
@@ -465,8 +483,9 @@ cd .config/fastfetch && for f in config.jsonc */config.jsonc minimal/*.jsonc; do
   out=$(fastfetch --pipe true -c "$f" 2>&1 >/dev/null); [ -n "$out" ] && echo "$f: $out"
 done
 
-# catnap: exit 1 on an invalid config, 0 on a valid one. Errors go to stderr.
-catnap -n -c .config/catnap/config.toml -a .config/catnap/distros.toml >/dev/null 2>&1; echo $?
+# catnap: exit 1 means it rejected the config. It never exits when stdout is not a
+# terminal, so the timeout is the pass, and there is no flag for distros.toml.
+timeout 5 catnap -n -c .config/catnap/config.toml >/dev/null 2>&1; echo $?
 
 # every tracked path is still a symlink into the repo
 ./scripts/backup-configs.sh check

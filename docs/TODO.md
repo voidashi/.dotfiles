@@ -263,21 +263,23 @@ Sorted by priority. Within a priority, by nothing.
   `journalctl -t hypridle --since "-1h"`, which stays empty until the wrapped one has run.
   *Difficulty: trivial. Priority: medium.*
 
-- **`.claude/` and `CLAUDE.md` are deleted at publication.** Before deleting, run both
-  checks, because the first alone was trusted once and was not enough:
+- **`CLAUDE.md` is deleted at publication.** `.claude/` is already out: it is untracked and
+  ignored, and the checks it held are in `scripts/verify.sh`, which every clone gets. Only
+  the root file is left. Before deleting it, run both checks, because the first alone was
+  trusted once and was not enough:
 
   ```bash
   # 1. no repo knowledge left in the file itself
   grep -icE "kded6|8-digit hex|process cwd|swaylock-effects" CLAUDE.md   # expect 0
-  # 2. nothing anywhere points at either path. Code counts, not just docs.
-  grep -rn "CLAUDE\.md\|\.claude/" --exclude-dir=.git .
+  # 2. nothing anywhere points at it. Code counts, not just docs.
+  grep -rn "CLAUDE\.md" --exclude-dir=.git --exclude-dir=.claude .
   ```
 
   The second exists because the first was run with `--include="*.md"` and reported clean
   while eight references sat in six config and script files. What it may legitimately
-  return: this entry, `CLAUDE.md`'s title line, the `.claude/worktrees/` rule in
-  `.gitignore`, and hits inside the gitignored `scripts/package_install.log`. Anything else
-  is a real reference to deal with first.
+  return: this entry and `CLAUDE.md`'s own title line. Anything else is a real reference to
+  deal with first. Note the rule at `CLAUDE.md:49` still has no home under `docs/`, which
+  is the entry above.
   *Difficulty: low. Priority: medium, and it blocks nothing until publication.*
 
 - **The apt and dnf machinery has never run, and could not work as configured.** Fourteen
@@ -370,14 +372,27 @@ Sorted by priority. Within a priority, by nothing.
   being chosen, which is an asset decision.
   *Difficulty: low once a set is chosen. Priority: low.*
 
-- **catnap's tracked config dies on the next upstream bump.** catnap 2.0 replaced the TOML
-  config with a `.cat` language and says outright that `config.toml` and `distros.toml`
-  are not compatible. The AUR package is still 1.1.1, so today it works. When it moves,
-  both files need rewriting rather than editing, and the payoff is real: v2 takes hex and
-  theme imports, so the palette becomes reachable exactly instead of through seven ANSI
-  tokens with no grey among them. The validator battery runs catnap and reports its exit
-  code, so this surfaces as a failed check.
-  *Difficulty: low. Priority: low until the AUR moves.*
+- **The upstream bump this entry was waiting for has already happened, and nobody
+  noticed.** It said the AUR package was still on 1.1.1 and that catnap 2.0 would break
+  both tracked files. Measured: `catnap --version` reports `Catnap v2.1.1` and `pacman -Q`
+  says `catnap 2.1.1-2`. What did not happen is the breakage: `catnap -n -c
+  .config/catnap/config.toml` is not rejected under 2.1.1, where a garbage TOML exits 1
+  immediately, so the file still parses. What is unmeasured is whether it is still
+  *honoured*, and that is the question worth answering, because a config that parses and
+  is ignored is this repository's signature failure.
+
+  Two reasons the check said nothing. It passed `-a .config/catnap/distros.toml` and
+  catnap has no `-a`, so every run printed `ERROR: Unknown option '-a'` and `distros.toml`
+  has never been validated by anything. And it read the exit code the wrong way round:
+  catnap does not exit at all when its stdout is not a terminal, so the code only means
+  something in the negative. Both are fixed in `scripts/verify.sh`, which now covers
+  `config.toml` only and says why.
+
+  The payoff for moving to the `.cat` format is unchanged and real: v2 takes hex and theme
+  imports, so the palette becomes reachable exactly instead of through seven ANSI tokens
+  with no grey among them.
+  *Difficulty: low, and it is a rewrite of two files. Priority: medium, because the
+  version that was supposed to be the trigger is already installed.*
 
 - **The bar carries laptop-only modules with no guard.** `battery` and `backlight` sit in
   `modules-right` unconditionally, so on a desktop they are empty or absent, and

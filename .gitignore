@@ -13,8 +13,12 @@ fonts/Iosevka/
 __pycache__/
 *.pyc
 
-# Agent worktrees live inside the repo, so they are themselves checkouts of it.
-# A broad "git add" from the repo root sweeps one up as a gitlink pointing at a
-# commit that exists only on the machine that made it, and a fresh clone then
-# reports a broken submodule. That happened once and is the reason for this rule.
-.claude/worktrees/
+# Everything an AI coding agent keeps lives here and none of it belongs to anyone
+# who clones this. The checks it used to hold are in scripts/verify.sh, which is
+# tracked, so nothing is lost by ignoring the directory.
+#
+# Note this rule cannot un-track what is already tracked: git ignores .gitignore
+# for a path in the index. An agent worktree was committed as a gitlink twice,
+# the second time when a merge kept the side of the history that still had it,
+# and only the guard in scripts/verify.sh catches that.
+.claude/
