@@ -442,12 +442,18 @@ What was never executed, so nobody reads that number as broader than it is:
   hard way: catnap has no flag for `distros.toml`, so that file is checked by
   nothing, and catnap never exits when its stdout is not a terminal, so its exit
   code is only readable as a rejection.
-- **`check_palette.py` could not see any swaylock colour until recently.** swaylock
-  writes `ring-color=393835` with no leading `#`, and the hex regex requires one, so
-  28 values sat unverified from the start. There is now a `BARE_HEX_SCOPE` for that
-  one file, deliberately scoped, because six hex digits with no `#` match a commit
-  hash anywhere else. If another application writes bare hex, add it to that tuple
-  rather than loosening the regex.
+- **A colour is written five ways here, and `check_palette.py` used to see one of
+  them.** Its regex wants `#RRGGBB`, so every application that writes colour some
+  other way was unchecked: swaylock's `ring-color=393835`, fish's bare hex,
+  hyprland's `rgb(498bb2)`, the `rgb(73, 139, 178)` in swaync's and wlogout's
+  stylesheets, and the `73,139,178` triplets in `kdeglobals`. Six files had no
+  colour reachable at all, and an auditor swapped hyprtoolkit's `accent_secondary`,
+  the identity mark, for `rgb(ff00ff)` without the checker noticing. The `FORMS`
+  table now carries one entry per form, each scoped to the paths where that form is
+  unambiguously an applied colour. Two rules when adding to it. Scope it rather than
+  loosening a regex, because six hex digits are a commit hash and a decimal triple
+  is a version number anywhere else. And keep documentation outside every scope, or
+  a sentinel quoted in `TODO.md` gets reported as drift.
 - **The session is declared here but cannot be managed here.** `greetd` and
   `greetd-tuigreet` are in `packages.conf`, but what makes them do anything is
   `/etc/greetd/config.toml` plus `systemctl enable greetd.service`, both root-owned and
