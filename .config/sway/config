@@ -175,8 +175,10 @@ bindsym $mod+r mode "resize"
     bindsym --locked XF86AudioRaiseVolume exec pactl set-sink-volume \@DEFAULT_SINK@ +5%
     bindsym --locked XF86AudioMicMute exec pactl set-source-mute \@DEFAULT_SOURCE@ toggle
     # Special keys to adjust brightness via brightnessctl
-    bindsym --locked XF86MonBrightnessDown exec brightnessctl set 5%-
-    bindsym --locked XF86MonBrightnessUp exec brightnessctl set 5%+
+    # -e3 is load-bearing, not decoration: it makes the percentage a perceptual axis
+    # instead of a raw one. Keep it in step with the same two binds in hypr/conf/binds.lua.
+    bindsym --locked XF86MonBrightnessDown exec brightnessctl -e3 set 5%-
+    bindsym --locked XF86MonBrightnessUp exec brightnessctl -e3 set 5%+
     # Special key to take a screenshot with grim
     bindsym Print exec grim
 

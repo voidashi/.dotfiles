@@ -201,6 +201,27 @@ What was never executed, so nobody reads that number as broader than it is:
 - Before trusting a hardcoded battery or backlight name, check
   `ls /sys/class/power_supply/` and `ls /sys/class/backlight/`. A previous config
   carried a `battery#bat2` module pointed at a battery this machine does not have.
+- **The `-e3` on the brightness keys is load-bearing.** Without it brightnessctl's
+  percentage is a linear fraction of the raw backlight value, and raw value tracks
+  luminance while perceived lightness follows the cube root in CIE L\*. Measured on
+  this machine's `amdgpu_bl2`, whose maximum is 62451, with 5% steps: the press from
+  0 to 5% moves 26.72 L\* and the press from 95 to 100% moves 1.97, so the darkest
+  press is 13.6 times the brightest one. `-e3` makes the percentage the perceptual
+  axis instead, `raw = max * (p/100)^3`, which cancels that cube root exactly and
+  leaves every press worth 5.80 L\*. It applies to the deltas the keys actually use
+  and not only to an absolute `set`: from 62451, `-e3 s 5%-` returns 53544, which is
+  `max * 0.95^3`, against 59328 without the flag. Both compositors carry these binds,
+  so both change together. Two things this rests on. The exponent is a plain power
+  law, so it matches L\* above the toe and not below it, which is why the bottom four
+  presses land under 1% of maximum. And `raw` is assumed proportional to panel
+  luminance, which nothing here has measured with a photometer, so the curve is right
+  for the driver and only probably right for the glass.
+- **`brightnessctl -n` takes a raw value and silently ignores a percent sign.**
+  `-n5%` sets the floor to 5, not to 5% of maximum, and the value has to be attached
+  to the flag: `-n 5` is parsed as a positional and turns the command into `info`,
+  which reports the current state and writes nothing, so a wrong invocation looks
+  like a working one. A raw floor is also specific to one panel's maximum, so it does
+  not belong in a repository that gets cloned onto other machines.
 - **Waybar's `hyprland/workspaces` buttons do not respond to clicks** in waybar
   0.15.0, and it is not a config fault: it fails with the stock stylesheet, on either
   layer, with either `persistent-workspaces` form, and explicit `on-click` probes

@@ -56,17 +56,6 @@ paragraph above.
 
 Sorted by priority. Within a priority, by nothing.
 
-- **The brightness keys are dead on this machine until the new packages are installed.**
-  `brightnessctl` and `network-manager-applet` are now declared, but declaring is not
-  installing: `binds.lua:91-92` and `sway/config:178-179` still call a binary that is not
-  here, and `autostart.lua:10` still starts an applet that is not here. One
-  `install-packages.sh install` fixes it. Confirm with `command -v brightnessctl` rather
-  than by pressing the key, because a missing binary and a driver that ignores the call
-  look identical. The other six binaries once listed as undeclared (`rfkill`, `playerctl`,
-  `wpctl`, `pactl`, `grim`, `swaynag`) arrive as hard dependencies of declared packages,
-  so they were never a problem.
-  *Difficulty: trivial. Priority: high, and it is a live defect until the install runs.*
-
 - **The screenshots in the README predate the current theme.** Committed April 2025, they
   show the Kanagawa desktop this repo no longer contains. They stay until replaced, since
   a stale screenshot beats none.
