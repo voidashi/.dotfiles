@@ -110,10 +110,11 @@ is Wayland-shaped but the palette, the terminals and the editor are not, and
 someone on another distro can read `packages.conf` and translate. A README's
 opening screen is the one that decides whether there is a second screen, and
 spending it on who should leave was the wrong trade. What the section was right
-about survives in two places: the badges and the first line still say Arch and
-Wayland, which is honest because the installer really is Arch, and the
-Contributing section still says this is one person's desktop rather than a
-framework.
+about survives in three places: the badges and the first line still say Arch and
+Wayland, which is honest because the installer really is Arch, the Contributing
+section still says this is one person's desktop rather than a framework, and the
+paragraph about not having to take all of it is in the opening section, reworded
+and intact.
 
 "Known gaps" listed four rough edges, and the reasoning that put it there still
 holds; what changed is where the honesty is paid for. Sixteen lines of defects in

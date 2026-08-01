@@ -33,8 +33,12 @@ paragraph above.
    "change one hex and everything moves together", and it is the one promise no document
    lets a reader act on. Measured: `palette.json` has no accent key, the identity colour
    is a ten-value `bordeaux` ramp, and the same values are typed again as literals in
-   `terminal.cursor` and `ansi16` slot 1. The reviewer spent ten minutes across five files
-   and gave up. `RICE-GUIDE.md`, which the index recommends for changing appearance,
+   `terminal.cursor` and `ansi16` slot 1. What that duplication costs was then measured
+   directly: nudging `bordeaux.400` by one digit and running the
+   generator moved four files, while nineteen tracked files kept the old value, the four
+   terminals among them, because they read `ansi16` and slot 1 is a second copy of the
+   same hex. So the accent recipe cannot be "change one key". The reviewer spent ten
+   minutes across five files and gave up. `RICE-GUIDE.md`, which the index recommends for changing appearance,
    answers "never introduce a colour that is not derived from these", which is the
    opposite of what they wanted. Owed: a short section in `SETUP.md` naming the exact keys,
    the two places the values are duplicated, and one worked example ending in the two
@@ -77,6 +81,76 @@ Sorted by priority. Within a priority, by nothing.
   check: `git ls-files -s | grep '^160000'` must come back empty. It would have caught
   both occurrences.
   *Difficulty: trivial. Priority: high, because it survives a merge silently.*
+
+- **`check_palette.py` passes on colours it cannot see.** Two holes, both found by
+  measurement rather than by reading it. An auditor replaced `rgb(498bb2)` with
+  `rgb(ff00ff)` in `.config/hypr/hyprtoolkit.conf` and the checker still returned
+  `drift: no colour outside the palette's 82` and exit 0, because `check_palette.py:33`
+  matches `#[0-9a-fA-F]{6}` and `BARE_HEX_SCOPE` covers only `.config/swaylock/config`,
+  so hyprtoolkit's six `rgb(...)` colours are outside the check entirely. Separately,
+  `check_sync` iterates `generated_files()`, which is the ten files written whole, while
+  the generator also writes `.config/wofi/style.css`, `.config/kdeglobals` and
+  `.config/kcminputrc` by merging; hand-edits to those three were made and the checker
+  returned 0 for each. The merge cases are deliberate and documented at
+  `generate_theme.py:594-596`, so what is owed there is either a partial comparison of
+  the sections the generator owns, or a sentence saying they are unchecked on purpose.
+  The `rgb(...)` hole is not deliberate and is the repo's characteristic bug in its own
+  validator.
+  *Difficulty: low for the `rgb(...)` form, medium for the merged files. Priority: high,
+  because a checker that passes on an invented colour is worse than no checker.*
+
+- **The clone path is load-bearing in seven lines, and it does not have to be.** Cloning
+  anywhere but `~/.dotfiles` silently breaks the wallpaper, the clipboard picker, the
+  bar's power button and Neovim's dashboard. Ruled out already, with the incident at
+  `.config/hypr/conf/autostart.lua:12`: relative paths, because they depended on the cwd
+  Hyprland was started with and the bar did not come up depending on how you logged in.
+  The seven lines are three different problems. Five are script calls
+  (`clipboard-picker.sh` in both compositors, `power-menu.sh` in the bar,
+  `select-random-wallpaper.sh` in both), one is a data directory
+  (`$HOME/.dotfiles/wallpapers` as the picker's last fallback), and one is Neovim's
+  dashboard opening the repo as a project, which names the repo by definition and should
+  probably stay. Two mechanisms, and the choice is the work. A symlink farm, where
+  `backup-configs.sh install` links the `scripts/wm/` helpers into `~/.local/bin` from
+  whatever root it is actually running in, fixes the five script calls and works whatever
+  starts the session. A session variable in the already-tracked
+  `~/.config/environment.d/50-voidashi.conf` reaches all seven and turns the edit into one
+  line in one file, but `environment.d` is read by the systemd user session, and this
+  repo documents reaching the desktop by typing `Hyprland` at a console, which is exactly
+  where it may not arrive.
+  *Difficulty: low either way, and the decision is most of it. Priority: medium.*
+
+- **KDE theming is not optional, and it lands on a session the reader did not offer.**
+  `config_files.conf` links `~/.config/kdeglobals`, `~/.config/kcminputrc` and
+  `~/.local/share/color-schemes/Voidashi.colors`, which is where Plasma applications read
+  their palette and their cursor, so installing on a machine that already runs KDE
+  rethemes the desktop the reader meant to keep. A reviewer reading only the README
+  named this as the single reason not to install on a working laptop, and they were right
+  before the README warned about it. The warning is now in the install block, which fixes
+  the surprise and not the situation. Options, in rough order of cost: let
+  `backup-configs.sh install` take paths, which is already open above and makes every
+  subset possible rather than this one; a documented "everything except the Qt/KDE
+  paths" invocation; or splitting the Qt/KDE entries into their own section of
+  `config_files.conf` so they can be skipped by name. Isolating it to the Hyprland and
+  Sway sessions is the option that sounds best and does not exist: `kdeglobals` is read
+  per user, not per session.
+  *Difficulty: low once `install` takes paths. Priority: medium, and it is the one
+  finding that changed a reviewer's answer from yes to no.*
+
+- **The README does not answer the reader who is deciding whether to install.** Six gaps
+  from the same review, none of them worth a section on their own and all of them cheap.
+  There is no statement of what the repository assumes beyond Arch and Wayland: nothing
+  about Nvidia, nothing about laptop against desktop, while the install block says the
+  bar carries laptop-only modules, so hardware evidently matters. There is no order of
+  magnitude for what will be installed, so `preview` means reading sixty lines cold. The
+  section on taking only part of it does not say which file inside a terminal's directory
+  carries the colours, so the reader lists the directory to find `voidashi-colors.conf`.
+  It also does not say whether `generate_theme.py` reaches a config that was copied by
+  hand rather than symlinked, which is the first thing that reader wants after copying
+  one. The three badges restate the first sentence and the last section. And the
+  repository layout block sits above the reader's decision while answering a question
+  they only have afterwards, which is why it was skipped outright.
+  *Difficulty: trivial each. Priority: medium, and they are worth doing in one pass
+  rather than one at a time.*
 
 - **One command should run every validator, and it cannot live in `.claude/`.** The
   verify-repo skill is the only artefact that runs all nine checks, and this file commits
@@ -135,8 +209,8 @@ Sorted by priority. Within a priority, by nothing.
 - **Let `install` take paths, the way the package installer already does.**
   `backup-configs.sh install` is still every path in `config_files.conf` or nothing:
   `main()` dispatches on `$1` alone and `install_dotfiles` takes no argument. The
-  asymmetry is the argument for fixing it, since `install-packages.sh` has accepted a
-  `[PACKAGE...]` filter all along, in `apply_package_filter()`, so a reader learns one
+  asymmetry is the argument for fixing it, since `install-packages.sh` gained a
+  `[PACKAGE...]` filter in `4a81c1b`, in `apply_package_filter()`, so a reader learns one
   vocabulary from one script and finds it missing on the other. `install_dotfiles`,
   `check_dotfiles` and `uninstall_dotfiles` are each a loop over `load_dotfiles`, so
   filtering by positional arguments is roughly ten lines and needs no config format
@@ -220,7 +294,7 @@ Sorted by priority. Within a priority, by nothing.
   repository layout. And `install_all()` reaches
   `update_pkg_db()` only through `add_repos()`, so deleting that function without rewiring
   drops `pacman -Syy` from every Arch install. The Microsoft repository key at lines
-  133-137 serves `code`, which is declared at `packages.conf:107`, so it is apt-only
+  133-137 serves `code`, which is declared at `packages.conf:115`, so it is apt-only
   machinery rather than an orphan and stands or falls with the branch.
   *Difficulty: low. Priority: medium.*
 

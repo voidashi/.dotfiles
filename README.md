@@ -38,7 +38,7 @@ ignore the rest.
 | Lock screen | swaylock | |
 | Power menu | wlogout | |
 | Clipboard | cliphist | History on `Super`+`Shift`+`V` |
-| Idle | hypridle, swayidle | Lock at 5 min, screen off at 6, suspend at 30 |
+| Idle | hypridle, swayidle | Lock at 15 min, screen off at 16, suspend at 30 |
 | Terminals | Kitty, Ghostty, Alacritty, Foot | Identical palette, font and padding in all four |
 | Shell | fish + starship | |
 | Editor | Neovim | lazy.nvim, with a colorscheme written for this palette rather than a plugin |
@@ -50,9 +50,9 @@ ignore the rest.
 
 ## The one idea worth stealing
 
-Every colour in every application comes from **one file**:
-`scripts/theme/palette.json`. A generator renders it into the format each program
-natively reads, and a checker proves nothing drifted afterwards.
+Every colour starts in **one file**: `scripts/theme/palette.json`. A generator renders it
+into the format each program natively reads, and a checker proves the generated files
+still match it.
 
 ```bash
 $EDITOR scripts/theme/palette.json          # change a colour
@@ -61,9 +61,14 @@ python3 scripts/theme/check_palette.py      # prove nothing was missed
 ```
 
 Change one hex and the terminals, the bar, the launcher, Neovim, GTK applications and
-KDE applications all move together. The generator is plain Python with no
-dependencies. Its output carries a `GENERATED` header, and the checker fails if you
-edit it by hand.
+KDE applications all move together. The generator is plain Python with no dependencies,
+and the files it writes whole carry a `GENERATED` header, which the checker fails on if
+you edit one by hand.
+
+Where colour mixes with structural config the file is hand-written instead and carries
+its hex directly, swaylock, Sway and the fetches among them, so those do not follow on
+their own. `check_palette.py` lists which, and closing the gap is tracked in
+[`docs/TODO.md`](docs/TODO.md).
 
 The design identity behind the palette is called Voidashi, and it is documented in
 [`docs/design/`](docs/design/).
@@ -74,13 +79,16 @@ The design identity behind the palette is called Voidashi, and it is documented 
 git clone https://github.com/voidashi/.dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 
-./scripts/install-packages.sh preview    # see what it would install
-./scripts/install-packages.sh install    # install it
+./scripts/install-packages.sh preview    # list the configured packages, install nothing
+./scripts/install-packages.sh install    # install them
 ./scripts/backup-configs.sh install      # symlink the configs into $HOME
 ./scripts/backup-configs.sh check        # confirm every link landed
 ```
 
-That installs and links everything. It does not give you a way to *reach* the desktop:
+The install step needs `sudo`, and an AUR helper is recommended: a few of the packages
+are AUR-only, and `paru`, `yay` or `pikaur` is used if one is present.
+
+That installs and links everything, including the fonts in `fonts/`. It does not give you a way to *reach* the desktop:
 nothing here enables a graphical login. If you already run a display manager it will
 list Hyprland and Sway on the next boot and you can log out and back in. If you do not,
 [`docs/SETUP.md`](docs/SETUP.md) step 6 sets up `greetd`, and `Hyprland` typed at a text
@@ -103,12 +111,14 @@ console works too.
 
 > [!IMPORTANT]
 > **Clone to `~/.dotfiles` exactly.** Five tracked files reference that path absolutely,
-> so another location silently breaks the wallpaper, the clipboard picker and the bar's
-> power button. Two more things need a look before this feels right on your machine: the
-> monitor layout in `.config/hypr/conf/monitors.lua` names specific outputs, and the bar
-> carries laptop-only modules. And if you want the themed prompt, fish has to become your
-> login shell; nothing does that for you.
-> [`docs/SETUP.md`](docs/SETUP.md) covers all four, with the file and line for each.
+> so another location silently breaks the wallpaper, the clipboard picker, the bar's power
+> button and Neovim's dashboard. Three more things need a look before this feels right on
+> your machine: the monitor layout in `.config/hypr/conf/monitors.lua` names specific
+> outputs, the bar carries laptop-only modules, and if you already run KDE, the install
+> links `kdeglobals` and `kcminputrc`, which is where Plasma applications read their
+> palette and cursor, so your existing session is rethemed too. And if you want the themed
+> prompt, fish has to become your login shell; nothing does that for you.
+> [`docs/SETUP.md`](docs/SETUP.md) covers each of these.
 
 ### Taking only part of it
 
@@ -118,11 +128,14 @@ The package installer accepts names, so you can bring in only what you want:
 ./scripts/install-packages.sh install kitty fish starship
 ```
 
-`backup-configs.sh install` has no equivalent: it is every path in `config_files.conf`
-or none. For a subset, copy the directories you want out of `.config/` yourself. Copy
-the whole directory rather than a single file, since a config often includes a sibling,
-and expect to edit the Hyprland, Sway, Waybar and Neovim ones, which name `~/.dotfiles`
-by absolute path.
+`backup-configs.sh install` has no equivalent: it is every path in `config_files.conf`,
+plus the fonts, or none. For a subset, copy the directories you want out of `.config/`
+yourself. Copy the whole directory rather than a single file, since a config often
+includes a sibling, and expect to edit the Hyprland, Sway, Waybar and Neovim ones, which
+name `~/.dotfiles` by absolute path.
+
+Copying a terminal that way gets you the colours but not the typeface, since all four
+ask for Iosevka Extended and no package provides it. The setup guide has the font step.
 
 **[Full setup guide](docs/SETUP.md)** covers the long-form install, what to change for
 your hardware, the Iosevka font you have to fetch yourself, and what to do when
@@ -145,7 +158,9 @@ The entry points under Hyprland, with `Super` as the modifier. The full set is i
 | `Print` | Screenshot the output, `Shift` for a region, `Super` for the window |
 | `Super` + `M` | Exit the compositor |
 
-The power menu opens from the bar's power button. Closing the lid locks the screen.
+The power menu opens from the bar's power button. Closing the lid suspends the machine
+and the screen locks on the way down, which comes from logind and `hypridle` rather than
+from a binding here.
 
 Sway's bindings are in `.config/sway/config` and are close but not identical: its
 launcher is on `$mod` + `D`.
@@ -153,9 +168,9 @@ launcher is on `$mod` + `D`.
 ## Repository layout
 
 ```
-.config/                  one directory per application, symlinked into ~/.config
+.config/                  the tracked configs, symlinked into place path by path
 docs/                     everything written down, see docs/README.md
-fonts/                    the four faces the theme uses
+fonts/                    three of the four faces; Iosevka you fetch yourself
 scripts/
   backup-configs.sh       install, uninstall and audit the tracked dotfiles
   install-packages.sh     installs the packages listed in packages.conf
@@ -174,7 +189,9 @@ for. The three that matter most:
 - **[`docs/design/RICE-GUIDE.md`](docs/design/RICE-GUIDE.md)** for the palette, the
   ANSI table, and the rules about how colour gets used.
 - **[`docs/TODO.md`](docs/TODO.md)** for what is open, including the rough edges this
-  desktop still has, what is parked and why, and what has been decided against.
+  desktop still has, and what is parked with the explanations already ruled out.
+  Decisions already taken live in
+  [`docs/TURNING-POINTS.md`](docs/TURNING-POINTS.md) instead.
 
 ## Contributing
 
