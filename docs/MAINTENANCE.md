@@ -451,17 +451,21 @@ What was never executed, so nobody reads that number as broader than it is:
   nothing, and catnap never exits when its stdout is not a terminal, so its exit
   code is only readable as a rejection.
 - **A colour is written five ways here, and `check_palette.py` used to see one of
-  them.** Its regex wants `#RRGGBB`, so every application that writes colour some
-  other way was unchecked: swaylock's `ring-color=393835`, fish's bare hex,
-  hyprland's `rgb(498bb2)`, the `rgb(73, 139, 178)` in swaync's and wlogout's
-  stylesheets, and the `73,139,178` triplets in `kdeglobals`. Six files had no
+  them.** Its regex wants `#RRGGBB`, so the other four went unchecked: bare hex, in
+  swaylock's `ring-color=393835` and in fish, which had one scoped exception for
+  swaylock alone; hyprland's `rgb(498bb2)`; the `rgb(73, 139, 178)` in swaync's and
+  wlogout's stylesheets; and the `73,139,178` triplets in `kdeglobals`. Six files had no
   colour reachable at all, and an auditor swapped hyprtoolkit's `accent_secondary`,
   the identity mark, for `rgb(ff00ff)` without the checker noticing. The `FORMS`
-  table now carries one entry per form, each scoped to the paths where that form is
-  unambiguously an applied colour. Two rules when adding to it. Scope it rather than
-  loosening a regex, because six hex digits are a commit hash and a decimal triple
-  is a version number anywhere else. And keep documentation outside every scope, or
-  a sentinel quoted in `TODO.md` gets reported as drift.
+  table now carries an entry per form and scope, each scoped to the paths where that
+  form is unambiguously an applied colour, and comments are cut before matching so
+  that a retired value recorded in one is not read as applied. Two rules when adding
+  to it. Scope it rather than loosening a regex, because six hex digits are a commit
+  hash and a decimal triple is a version number anywhere else. And keep documentation
+  outside every scope, or a sentinel quoted in `TODO.md` gets reported as drift.
+  The colour *names* have the same failure one level down: `NAMED_RE` wanted
+  whitespace or `=` before the name, so `style = 'red'` passed while `style = 'bold
+  red'` was reported, one space apart. Test a pattern against the quoted form too.
 - **The session is declared here but cannot be managed here.** `greetd` and
   `greetd-tuigreet` are in `packages.conf`, but what makes them do anything is
   `/etc/greetd/config.toml` plus `systemctl enable greetd.service`, both root-owned and
