@@ -157,7 +157,10 @@ Sorted by priority. Within a priority, by nothing.
   that a config file owns" appears nowhere under `docs/`. Move it to `MAINTENANCE.md`
   before the file goes, and move the general form with it: a file must not restate a fact
   another file owns, only point at the owner. The count is the narrow case.
-  `hyprtoolkit.conf` carried the wide one twice.
+  `hyprtoolkit.conf` carried the wide one twice. A line number is a third case worth
+  naming in the same breath, because it is a coordinate rather than a fact: a citation of
+  `README.md:161` went stale twice inside one session as the file grew, and both times
+  nothing failed. Cite the sentence, not where it currently sits.
   *Difficulty: trivial. Priority: medium, because it is lost silently at deletion.*
 
 - **`[hooks]` has no users and a repair plan.** Zero entries, one commented example, and
@@ -320,8 +323,8 @@ Sorted by priority. Within a priority, by nothing.
 - **`wallpapers/` holds two files of one image.** `Topography.png` and `Topography.jpg`
   are the same image at the same size, mean absolute difference 0.78/255, and both match
   the picker's glob, so a fresh clone randomises between two copies of one wallpaper while
-  `README.md:165` promises one. Deleting the 1.1MB PNG makes the sentence true with no
-  edit.
+  the README's repository layout promises "one sample image". Deleting the 1.1MB PNG makes
+  the sentence true with no edit.
   *Difficulty: trivial. Priority: low.*
 
 - **`config_files.conf` carries example blocks.** "Template Examples" is filler for a

@@ -456,6 +456,12 @@ prose everywhere else, and comments are stripped first so a colour discussed is 
 colour applied. Deliberate exceptions are listed in the script with their reason, so a
 decided exception does not become permanent noise.
 
+It walks the whole repository, not just `.config/`, so **a hex written in prose is a hex
+it checks**. Quoting an off-palette colour in a document to illustrate something, an
+example value, a before-and-after, a colour from someone else's theme, fails the drift
+check with the document named as the offender. Describe the change instead of pasting
+the value, or you will fail your own validator with a sentence.
+
 Most of the applications here can check their own config, which beats reading them by
 eye:
 
