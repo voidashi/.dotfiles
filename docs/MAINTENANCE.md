@@ -392,6 +392,28 @@ What was never executed, so nobody reads that number as broader than it is:
   with wofi's `--pre-display-cmd`, which changes only what is drawn and never what is
   returned, so a badly quoted entry can draw wrong but can never paste the wrong
   thing.
+- **The clipboard history does not expire on its own, which is why both autostarts
+  wipe it.** `cliphist`'s store is a plain file at `~/.cache/cliphist/db` and nothing
+  in it is time-based: the only thing that ever removes an entry is `-max-items`,
+  which defaults to 750. Measured before the wipe existed: the db had been created
+  four boots earlier, `journalctl --list-boots` confirmed the reboots, index 1 was
+  still the last line of `cliphist list`, and 40 entries sat well under the cap, so
+  the oldest thing ever copied into that db was still offerable to the picker two
+  days later. The autostarts now run `sh -c 'cliphist wipe; exec wl-paste --watch
+  cliphist store'`, one shell so the wipe cannot land after the watcher. Two things
+  to know before changing it. This clears at **session start, not at boot**, so a
+  logout and back in clears it too, and a machine left logged in for a week keeps a
+  week of history. And `cliphist wipe` does remove the plaintext rather than only
+  unlinking the index: a canary string stored into a throwaway db was findable with
+  `grep -a` and `strings` before the wipe and by neither afterwards, though that says
+  nothing about blocks already freed on the filesystem underneath.
+- **`hyprctl dispatch` takes Lua in Hyprland 0.56, and the old syntax fails loudly
+  enough to be mistaken for something else.** `hyprctl dispatch exec "touch /tmp/x"`
+  returns a Lua parse error and spawns nothing; the working form is
+  `hyprctl dispatch 'hl.dsp.exec_cmd("touch /tmp/x")'`, with the same `hl.` prefix
+  the config files use. Verified in passing that this path goes through a shell and
+  survives nested quoting, which is what makes the `sh -c '...'` autostart line above
+  safe.
 - **Wallpapers:** `scripts/wm/select-random-wallpaper.sh` takes a list of directories
   and uses the first one that contains images. It must print errors to **stderr**,
   because callers embed it in `$(...)` and pass the result to `swaybg` as a filename.

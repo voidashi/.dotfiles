@@ -26,10 +26,13 @@ hl.on("hyprland.start", function()
     -- mako nem esta instalado nesta maquina, entao nao havia o que matar.
     hl.exec_cmd("swaync")
 
-    -- Historico de clipboard. O wl-paste --watch fica escutando a selecao e
-    -- entregando ao cliphist, que e o unico lugar onde o historico existe: sem
-    -- este processo o bind de SUPER+SHIFT+V abre um menu sempre vazio.
-    hl.exec_cmd("wl-paste --watch cliphist store")
+    -- Clipboard history, cleared at every session start. wl-paste --watch is the
+    -- only thing that feeds cliphist, so without this line the SUPER+SHIFT+V bind
+    -- opens a permanently empty menu. The wipe runs first and in the same shell so
+    -- the order cannot invert. Without it the history is kept forever: cliphist's
+    -- db is a plain file under ~/.cache and it had survived four reboots.
+    -- Keep in step with the same line in sway/config.
+    hl.exec_cmd("sh -c 'cliphist wipe; exec wl-paste --watch cliphist store'")
 
     -- Idle: trava, apaga a tela e suspende, conforme hypr/hypridle.conf.
     -- Sob systemd-cat porque o hypridle só escreve em stdout e nada capturava

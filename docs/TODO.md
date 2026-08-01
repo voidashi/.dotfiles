@@ -226,13 +226,15 @@ Sorted by priority. Within a priority, by nothing.
   desaturated, dark, at or below `void-00` in perceived lightness.
   *Difficulty: medium, blocked on sourcing images. Priority: medium.*
 
-- **The clipboard and idle daemons need one login to start.** `cliphist`, `hypridle` and
-  `swayidle` are installed and configured, but a session started before the autostart
-  lines existed is not running them, and the running `hypridle` also predates the
-  `systemd-cat` wrapper and the current timeouts. One logout fixes both. Confirm with
-  commands rather than by pressing a keybind, because a dead daemon and an empty history
-  look identical: `pgrep -x hypridle`, `pgrep -x wl-paste`, `cliphist list | wc -l`, and
-  `journalctl -t hypridle --since "-1h"`, which stays empty until the wrapped one has run.
+- **The clipboard wipe needs one logout to take effect.** The daemons themselves are no
+  longer the problem: `pgrep -x hypridle` and `pgrep -x wl-paste` both return a process,
+  and `journalctl -t hypridle --since "-1h"` is no longer empty, so the `systemd-cat`
+  wrapper is live and that half of this entry is closed. What is left is that the running
+  `wl-paste` was started by the old autostart line, before the `cliphist wipe` was put in
+  front of it, so the history still spans reboots until the next login. Confirm after it
+  with `cliphist list | wc -l` right after logging in, which should be 0 or 1 rather than
+  the 40 measured here. Unverified either way is `swayidle`, since nothing has started
+  Sway; there is no stale process there to correct, only an untested line.
   *Difficulty: trivial. Priority: medium.*
 
 - **`CLAUDE.md` is deleted at publication.** `.claude/` is already out: it is untracked and

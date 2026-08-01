@@ -252,9 +252,11 @@ exec swaybg -m fill -i "$($HOME/.dotfiles/scripts/wm/select-random-wallpaper.sh 
 # the stylesheet sat themed and in place, with no error anywhere to say so.
 exec swaync
 
-# Clipboard history. wl-paste --watch is the only thing that feeds cliphist, so
-# without this line the picker on $mod+Shift+v opens an always-empty menu.
-exec wl-paste --watch cliphist store
+# Clipboard history, cleared at every session start. wl-paste --watch is the only
+# thing that feeds cliphist, so without this line the picker on $mod+Shift+v opens
+# an always-empty menu. The wipe runs first and in the same shell so the order
+# cannot invert. Keep in step with hypr/conf/autostart.lua.
+exec sh -c 'cliphist wipe; exec wl-paste --watch cliphist store'
 
 # Idle. swayidle has no config file: this schedule is the whole configuration,
 # which is why it is here and not beside hypr/hypridle.conf. The numbers are
