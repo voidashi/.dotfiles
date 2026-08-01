@@ -13,78 +13,15 @@ alone. A one-line fix can be urgent and a rewrite optional. "Start here next" is
 
 ## Start here next
 
-One item. The two that stood here, the accent recipe and the Iosevka asset, both shipped
-into `SETUP.md`, and writing the first one is what produced the third hole below.
+Nothing stands here. What did, `check_palette.py` passing on colours it could not see,
+is closed: the four extra colour formats, the quoted colour name, the merged files and
+the duplicated-value warning all shipped, each with a sentinel planted and reverted. What
+survives of it is a rule in `MAINTENANCE.md` about scoping a new colour format rather
+than loosening a regex.
 
-1. **`check_palette.py` passes on colours it cannot see.** Three holes, every one of them
-   found by measurement rather than by reading it, and a checker that passes on a colour
-   nobody chose is worse than no checker. Two neighbouring defects are already fixed and
-   are not part of this: the palette count now reads 78 rather than 82, which is why older
-   notes quote the larger number, and a value that is not `#RRGGBB` is refused at load.
-
-   - **Every colour format except `#RRGGBB` is outside the check.** The `rgb(...)` case
-     was found first: an auditor replaced `rgb(498bb2)` with `rgb(ff00ff)` in
-     `.config/hypr/hyprtoolkit.conf` and the checker returned `no colour outside the
-     palette` and exit 0, because its pattern is `#[0-9a-fA-F]{6}` and `BARE_HEX_SCOPE`
-     covers only `.config/swaylock/config`. Six `rgb(...)` colours live in that file,
-     `accent_secondary` among them, which is the identity mark. Confirmed again while
-     writing the accent recipe: a scratch swap left hyprtoolkit on the old accent and the
-     checker said nothing.
-
-     The hole is wider than that one form. Measured, with a positive control on the same
-     run to prove the checker was not simply inert: `ff00ff` planted in
-     `.config/waybar/style.css` was caught, while every one of these was not.
-     Sentinels are written here without the leading `#`, or the drift check reads this
-     document's examples as applied colour and reports them.
-
-     | Format | Where it is used | Colours unchecked |
-     |---|---|---|
-     | bare hex, no `#` | `.config/fish/conf.d/voidashi-colorscheme.fish` | 15 |
-     | `rgb(hexdigits)` | `hyprtoolkit.conf`, `hypr/conf/appearance.lua`, `decoration.lua` | 10 |
-     | `rgb(decimal)` | `.config/swaync/style.css`, `.config/wlogout/style.css` | 11 |
-     | `R,G,B` decimal | `.config/kdeglobals` | all of them |
-
-     Six files with no colour reachable at all. Two things not to redo: swaylock's bare-hex
-     coverage is complete, 29 colour lines and 29 matched, so the scope is right there and
-     only there. And a quoted colour name is invisible while a decorated one is not, since
-     `NAMED_RE` wants `^`, whitespace or `=` before the name: in `.config/starship.toml`,
-     `style = 'red'` passes and `style = 'bold red'` is reported, separated by one space.
-   - **A value duplicated inside `palette.json` shadows every stale copy of itself.**
-     `ansi16` slot 1 is a second copy of `bordeaux.400`, so while it holds the old hex
-     that hex is still a palette colour and no file carrying it can ever be reported.
-     Measured: changing the `bordeaux` ramp alone and regenerating moved four files and
-     left nineteen tracked files on the old accent, with the checker at exit 0 throughout.
-     This is the general shape rather than one key: any role literal that repeats a scale
-     value does it. There is no cheap complete fix, because drift asks whether a colour is
-     in the palette and the real question is whether it is the right one for the role, so
-     the roles-layer entry below is what removes the shape. What is cheap is a warning
-     when a hex sits in `ansi16` and in no scale or alert tone, which is exactly the state
-     that keeps a retired value alive. Measured before proposing it: that check returns
-     nothing on the palette as it stands, and reports `ansi16` slot 1 the moment the
-     `bordeaux` ramp moves without it. Do not make it fatal, since a deliberate hue swap
-     puts the palette in that state on purpose.
-   - **`check_sync` only sees the files written whole.** It iterates `generated_files()`,
-     the ten files the generator writes, while the generator also writes
-     `.config/wofi/style.css`, `.config/kdeglobals` and `.config/kcminputrc` by merging.
-     Hand-edits to those three were made and the checker returned 0 for each. The merge
-     cases are deliberate and documented in `generate_theme.py` beside the merge itself,
-     so what is owed is either a partial comparison of the sections the generator owns, or
-     a sentence saying they are unchecked on purpose.
-
-     Drift partly compensates, and knowing where it stops decides how much is owed. In
-     wofi's generated block an off-palette value is caught, `6aa3c8` reported at exit 1,
-     while swapping one palette colour for another inside the same block, `ice-300` set to
-     `ice-400`'s hex, passes both checks. The swap is the likelier hand-edit, so wofi is
-     covered for the careless case and open for the plausible one. `kdeglobals` is open
-     either way, since its `R,G,B` triplets match no pattern in the checker.
-
-   `SETUP.md` now warns a reader about the first two in its accent recipe, which limits
-   the damage and does not fix any of them.
-   *Difficulty: low for the `rgb(...)` form and for the duplicate-value check, medium for
-   the merged files. Priority: high.*
-
-The other `high` entry, the stale screenshots, sits below rather than here because it is
-blocked on someone taking new ones.
+The other `high` entry, the stale screenshots, is blocked on someone taking new ones, so
+it stays below rather than moving up here. Promote something from "Open work" when a
+session names it.
 
 ## Open work
 
@@ -304,7 +241,14 @@ Sorted by priority. Within a priority, by nothing.
   `RICE-GUIDE.md` forbids, and whoever clones this is entitled to ignore that. **Roles
   only reach the generated half**, so any README claim has to say which half; which files
   those are, and which of them could be brought across, is the coverage entry above rather
-  than a second count here. The natural complement is a check for orphaned literals.
+  than a second count here. The check for orphaned literals that would complement this
+  now exists, in the weak form: `check_palette.py` warns, without failing, when a role
+  literal holds a hex no scale and no alert tone holds, which is what a half-finished hue
+  swap leaves behind. It reads `colour_keys()`, so it covers `ansi16`, `focus_ring` and
+  every `terminal.*` key. What it cannot see is a role that repeats the *wrong* scale
+  value, since that value is in the palette and the question drift asks is only whether it
+  is there at all. Naming the token is what answers the real question, and it retires the
+  warning with it.
   *Difficulty: medium, and the design questions are most of it. Priority: medium, and it
   makes the accent recipe shorter rather than replacing it.*
 

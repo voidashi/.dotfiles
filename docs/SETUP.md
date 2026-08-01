@@ -354,7 +354,7 @@ measured rather than read off the source:
   colour.** Changing the ramp alone and regenerating moved four files and left nineteen
   tracked files on the old accent, at exit 0 throughout, and the checker's colour count
   went *up* by one rather than staying flat, which is the signal that a retired value is
-  still alive. The checker now says so in as many words, on its `ansi:` line, and the
+  still alive. The checker now says so in as many words, on its `roles:` line, and the
   warning is not a failure because this recipe puts the palette in exactly that state
   between the ramp and the grep. What still ends it is the grep above.
 - **This document is skipped by the checker**, because the example ramp above is

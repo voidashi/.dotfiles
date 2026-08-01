@@ -50,9 +50,9 @@ hand-edited.
 forms colour is written here; no named terminal colour in fish or starship; no file
 written whole that differs from what the generator would produce now; and no section of a
 merged file that a second merge would change, which is what a hand-edit to one looks
-like. It also warns, without failing, when `ansi16` holds a hex no scale or alert tone
-holds, since a duplicated value keeps a retired colour inside the palette and hides every
-file still carrying it.
+like. It also warns, without failing, when a role literal holds a hex no scale or alert
+tone holds, since a duplicated value keeps a retired colour inside the palette and hides
+every file still carrying it.
 
 ## What each surface is set to
 

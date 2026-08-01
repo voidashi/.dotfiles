@@ -243,26 +243,28 @@ def check_drift(known: set) -> list:
     return problems
 
 
-def check_orphan_ansi(p: dict) -> list:
-    """ANSI slots holding a hex that no scale and no alert tone holds.
+def check_orphan_roles(p: dict) -> list:
+    """Role literals holding a hex that no scale and no alert tone holds.
 
     palette_colours() unions every value in the file, so a hex that appears
     twice stays a palette colour while either copy survives, and drift can never
-    report a file carrying it. ansi16 is where that bites, because slot 1 is a
-    second copy of bordeaux.400. Measured: moving the bordeaux ramp alone and
-    regenerating moved four files and left nineteen tracked files on the old
-    accent, with the checker at exit 0 throughout.
+    report a file carrying it. The roles are where that bites, because each one
+    repeats a scale value rather than naming it: ansi16 slot 1 is a second copy
+    of bordeaux.400, focus_ring of ice.300, terminal.cursor of bordeaux.300.
+    Measured: moving the bordeaux ramp alone and regenerating moved four files
+    and left nineteen tracked files on the old accent, at exit 0 throughout.
 
     A warning and not a failure. A deliberate hue swap puts the palette in this
-    state on the way through, and the general fix is a roles layer that stops
-    roles repeating scale values at all, not a rule against it here.
+    state on the way through, and the fix for the shape is a roles layer that
+    has a role name a token instead of repeating its value.
     """
     live = set()
     for shades in p["scales"].values():
         live |= {v.lower() for v in shades.values()}
     for entry in p["alert"].values():
         live |= {entry[key].lower() for key in ("fg", "bg", "border")}
-    return [(i, v) for i, v in enumerate(p["ansi16"]) if v.lower() not in live]
+    return [(name, value) for name, value in gen.colour_keys(p)
+            if not name.startswith(("scales.", "alert.")) and value.lower() not in live]
 
 
 def check_sync(p: dict) -> list:
@@ -319,16 +321,16 @@ def main() -> int:
         merged = len(gen.merged_files(p))
         print(f"sync:  {written} generated and {merged} merged files match palette.json")
 
-    orphans = check_orphan_ansi(p)
+    orphans = check_orphan_roles(p)
     if orphans:
-        print("\nWarning, not a failure: ansi16 holds a colour no scale or alert tone does.")
-        for i, value in orphans:
-            print(f"  ansi16[{i}] = {value}")
+        print("\nWarning, not a failure: a role holds a colour no scale or alert tone does.")
+        for name, value in orphans:
+            print(f"  {name} = {value}")
         print("  While a second copy of a retired hex survives, that hex is still a "
               "palette\n  colour and no file left on it can be reported. Expected "
               "mid-swap; finish it.")
     else:
-        print("ansi:  every slot is also a scale or alert tone")
+        print("roles: every role literal is also a scale or alert tone")
 
     return 1 if failed else 0
 
