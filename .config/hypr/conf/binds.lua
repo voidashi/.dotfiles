@@ -88,8 +88,10 @@ hl.bind("XF86AudioPrev",        hl.dsp.exec_cmd("playerctl previous"),  { locked
 hl.bind("XF86AudioNext",        hl.dsp.exec_cmd("playerctl next"),      { locked = true })
 
 -- Media keys: brightness
-hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightnessctl s 2%+"), { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl s 2%-"), { locked = true, repeating = true })
+-- -e3 is load-bearing, not decoration: it makes the percentage a perceptual axis
+-- instead of a raw one. Keep it in step with the same two binds in sway/config.
+hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightnessctl -e3 s 5%+"), { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -e3 s 5%-"), { locked = true, repeating = true })
 
 -- Screenshots
 -- Screenshot of a window
