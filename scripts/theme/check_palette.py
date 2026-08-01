@@ -239,6 +239,28 @@ def check_drift(known: set) -> list:
     return problems
 
 
+def check_orphan_ansi(p: dict) -> list:
+    """ANSI slots holding a hex that no scale and no alert tone holds.
+
+    palette_colours() unions every value in the file, so a hex that appears
+    twice stays a palette colour while either copy survives, and drift can never
+    report a file carrying it. ansi16 is where that bites, because slot 1 is a
+    second copy of bordeaux.400. Measured: moving the bordeaux ramp alone and
+    regenerating moved four files and left nineteen tracked files on the old
+    accent, with the checker at exit 0 throughout.
+
+    A warning and not a failure. A deliberate hue swap puts the palette in this
+    state on the way through, and the general fix is a roles layer that stops
+    roles repeating scale values at all, not a rule against it here.
+    """
+    live = set()
+    for shades in p["scales"].values():
+        live |= {v.lower() for v in shades.values()}
+    for entry in p["alert"].values():
+        live |= {entry[key].lower() for key in ("fg", "bg", "border")}
+    return [(i, v) for i, v in enumerate(p["ansi16"]) if v.lower() not in live]
+
+
 def check_sync(p: dict) -> list:
     stale = []
     for path, expected in gen.generated_files(p).items():
@@ -275,6 +297,17 @@ def main() -> int:
         print()
     else:
         print(f"sync:  {len(gen.generated_files(p))} generated files match palette.json")
+
+    orphans = check_orphan_ansi(p)
+    if orphans:
+        print("\nWarning, not a failure: ansi16 holds a colour no scale or alert tone does.")
+        for i, value in orphans:
+            print(f"  ansi16[{i}] = {value}")
+        print("  While a second copy of a retired hex survives, that hex is still a "
+              "palette\n  colour and no file left on it can be reported. Expected "
+              "mid-swap; finish it.")
+    else:
+        print("ansi:  every slot is also a scale or alert tone")
 
     return 1 if failed else 0
 
