@@ -392,11 +392,10 @@ unzip -o /tmp/iosevka.zip -d fonts/Iosevka/
 ./scripts/backup-configs.sh install
 ```
 
-That drops nine `SGr-Iosevka-<weight>.ttc` files straight into `fonts/Iosevka/`, and only
-two of them are used here: `Regular` carries Iosevka Extended and its oblique, `Bold`
-carries the bold pair, and nothing in these configs asks for the other seven weights.
-Deleting those takes the directory to around 100MB. To see which file actually answered
-for a face, run `fc-match "Iosevka Extended" -v`.
+That drops nine `SGr-Iosevka-<weight>.ttc` files straight into `fonts/Iosevka/`. Two of
+them carry what is used today, `Regular` for Iosevka Extended and its oblique and `Bold`
+for the bold pair, and all nine are kept so a future weight costs no second download. To
+see which file actually answered for a face, run `fc-match "Iosevka Extended" -v`.
 
 The near misses are what catch people. `Term`, `Fixed`, `Curly`, `Slab` and `SS01`
 through `SS18` are different designs; `SuperTTC-` packs every weight into one file
