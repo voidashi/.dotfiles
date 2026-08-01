@@ -40,8 +40,12 @@ NAMED = (
     "brblack", "brred", "brgreen", "bryellow", "brblue", "brmagenta",
     "brcyan", "brwhite",
 )
+# The optional quote is not decoration. Without it the name had to be preceded
+# by a line start, whitespace or "=", so in starship.toml "style = 'red'" passed
+# and "style = 'bold red'" was reported, separated by one space and by which of
+# them the quote sat against.
 NAMED_RE = re.compile(
-    r"(?:^|\s|=)(?:--background=)?(" + "|".join(NAMED) + r")\b",
+    r"(?:^|\s|=)['\"]?(?:--background=)?(" + "|".join(NAMED) + r")\b",
     re.MULTILINE,
 )
 
