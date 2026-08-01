@@ -57,7 +57,7 @@ still match it.
 ```bash
 $EDITOR scripts/theme/palette.json          # change a colour
 python3 scripts/theme/generate_theme.py     # push it into every app's own format
-python3 scripts/theme/check_palette.py      # prove nothing was missed
+python3 scripts/theme/check_palette.py      # check the generated files for drift
 ```
 
 Change one hex and the terminals, the bar, the launcher, Neovim, GTK applications and
