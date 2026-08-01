@@ -30,9 +30,8 @@ anything; everything it references lives under `docs/`.
 ## Working here
 
 - **Run the checks, do not reason about them.** `python3
-  scripts/theme/check_palette.py` after any colour change, and `/verify-repo` for the
-  whole battery, before calling work done. The commands are in `MAINTENANCE.md` if
-  the skill is unavailable.
+  scripts/theme/check_palette.py` after any colour change, and `./scripts/verify.sh`
+  for the whole battery, before calling work done.
 - **Report the measurement, not the verdict.** Quote what a command returned. This
   repo's characteristic bug is something configured, looking configured, and doing
   nothing, so a config that reads correctly is not evidence that it applies.
