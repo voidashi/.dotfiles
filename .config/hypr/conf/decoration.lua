@@ -1,5 +1,5 @@
 -- =====================================================================
---  DECORAÇÃO (SHADOWS, TRANSPARÊNCIA)
+--  DECORATION (SHADOWS, TRANSPARENCY)
 -- =====================================================================
 -- https://wiki.hypr.land/Configuring/Basics/Variables/
 local palette = require("conf/palette")
@@ -27,8 +27,10 @@ hl.config({
             enabled = true,
             range = 4,
             render_power = 3,
-            -- void-00, not an invented gray (was rgba(1a1a1aee))
-            color = "rgba(0a0908ee)",
+            -- void-00, not an invented gray (was rgba(1a1a1aee)). Read from the
+            -- palette rather than pasted, the way appearance.lua does it, or the
+            -- shadow keeps the old value when the scale moves and no check says so.
+            color = "rgba(" .. palette.void["00"]:gsub("#", "") .. "ee)",
         },
     },
 })
