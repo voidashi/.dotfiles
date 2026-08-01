@@ -7,6 +7,8 @@ work.
 If you want to change how it *looks*, that is a different document:
 [`design/RICE-GUIDE.md`](design/RICE-GUIDE.md) holds the palette and the rules, and
 [`design/THEMING.md`](design/THEMING.md) says how a colour reaches each application.
+The one exception is "Changing the accent colour" below, which is a procedure rather
+than a design decision and lives here with the rest of the procedures.
 
 ## Before you start
 
@@ -247,6 +249,117 @@ All four terminals are configured and themed identically, so switching `terminal
 
 **Sway sets no outputs at all**, so it uses whatever your compositor detects. If you
 need a specific layout there, add `output` lines to `.config/sway/config`.
+
+## Changing the accent colour
+
+The README promises that one hex moves everything. That is true of the generated half of
+the tree and not of the rest, so this is the whole procedure.
+
+**Two colours get called the accent, and they are different keys.** Ice is *focus*: the
+focused window border, the active workspace, the selected launcher entry, GTK and Qt
+selection. Bordeaux is *identity*: the terminal cursor, the shell prompt, the lock
+screen, the fetch banners. Asking to change the accent almost always means Bordeaux, and
+that is what this section does. Ice works the same way, out of `scales.ice` and
+`focus_ring`. The role table is in [`design/RICE-GUIDE.md`](design/RICE-GUIDE.md).
+
+### The keys
+
+Bordeaux is a ten-step ramp in `scripts/theme/palette.json` under `scales.bordeaux`,
+`100` lightest down to `deep`. Every step is used somewhere, so all ten move together.
+
+Two of those values are typed a second time in the same file, and neither copy follows
+the ramp on its own:
+
+| Key | Today | What to do with it |
+|---|---|---|
+| `terminal.cursor` | `#c76870`, a copy of `bordeaux.300` | Change it with the ramp. It is what moves the four terminals. |
+| `ansi16` slot 1 | `#b44955`, a copy of `bordeaux.400` | Leave it. |
+
+`ansi16` is the sixteen-colour terminal table, and slot 1 is red because a program that
+asks for red expects red. It carries the identity colour today only because the identity
+colour is a red. Move Bordeaux to another hue and the two stop being the same value,
+which is correct.
+
+### What follows the generator, and what does not
+
+Rerunning the generator rewrites the four terminals, Hyprland's palette, Neovim's
+palette, the GTK stylesheets, wofi and the KDE colour scheme. It leaves alone every file
+where colour sits inside structural config, and those paste the hex directly: `bottom`,
+the fastfetch presets, `fish`, `hyprtoolkit.conf`, `swaylock` and `yazi`.
+
+Do not work from that list, because it is only true on the day it was written. Change the
+ramp, run the generator, then search `.config` for the values you replaced. Whatever
+still matches is a file that did not follow.
+
+### A worked example
+
+A plum identity instead of a red one. Keep each step's lightness and saturation and move
+only the hue, because the ten steps are tuned for contrast against the void surfaces.
+
+**1.** Replace `scales.bordeaux` in `scripts/theme/palette.json`:
+
+```json
+"bordeaux": {
+  "100": "#e2afcd",
+  "200": "#d78db8",
+  "300": "#c7689f",
+  "400": "#b44987",
+  "500": "#99306d",
+  "600": "#7f1f57",
+  "700": "#621341",
+  "800": "#490c30",
+  "900": "#310c22",
+  "deep": "#1c0b15"
+},
+```
+
+**2.** Set `terminal.cursor` to `#c7689f`, the new `300`. Leave `ansi16` alone.
+
+**3.** Push it into every generated file:
+
+```bash
+python3 scripts/theme/generate_theme.py
+```
+
+**4.** Find what did not follow, searching for the ten values you just replaced:
+
+```bash
+git grep -nIiE "e2afb1|d78d91|c76870|b44955|99303f|7f1f2f|621321|490c17|310c11|1c0b0c" -- .config
+```
+
+Edit each hit to its new value. What legitimately still matches afterwards is `#b44955`
+in the four terminal colour files and in Neovim's `palette.lua`, which is ANSI slot 1,
+and one mention inside a comment in `.config/catnap/config.toml`. Anything else is a file
+you missed.
+
+**5.** Update [`design/RICE-GUIDE.md`](design/RICE-GUIDE.md). It prints the palette and
+`check_palette.py` reads it, so its Bordeaux row and its cursor row have to move with the
+ramp or the check fails on the guide rather than on a config. Its ANSI table keeps
+`#b44955`, but the note calling that value bordeaux-400 stops being true.
+
+**6.** Prove it:
+
+```bash
+python3 scripts/theme/check_palette.py
+```
+
+### What the check will not tell you
+
+`check_palette.py` reports a colour that `palette.json` does not contain, which is not
+the same question as "did the accent move everywhere". Two gaps to know about, both
+measured rather than read off the source:
+
+- **While `ansi16` slot 1 holds the old `bordeaux.400`, that value is still a palette
+  colour.** Changing the ramp alone and regenerating moved four files and left nineteen
+  tracked files on the old accent, and the checker returned `drift: no colour outside the
+  palette's 83` and exit 0. The grep above is the check that catches this; the checker is
+  not.
+- **`hyprtoolkit.conf` writes colour as `rgb(b44955)`**, a form the checker's pattern
+  does not match at all, so its `accent_secondary` is outside the drift check in every
+  state. Edit it by hand and verify it by eye.
+- **This document is skipped by the checker**, because the example ramp above is
+  deliberately not the palette. The current values quoted here are therefore unchecked
+  too, so update them by hand if you swap the accent.
 
 ## Fonts
 

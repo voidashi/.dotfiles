@@ -75,12 +75,16 @@ SKIP_SUFFIX = (".png", ".jpg", ".jpeg", ".ttf", ".otf", ".woff", ".woff2", ".log
 # Decided exceptions, not forgotten ones. DESIGN-SYSTEM.md is the web-side
 # document with its own scale and does not describe the desktop. The dunstrc is
 # orphaned on purpose, kept as a reference in case of a switch back from swaync,
-# and the decision not to theme it is recorded in docs/MAINTENANCE.md. A check
-# that always fails stops being read, so a decided exception leaves the list
-# rather than becoming permanent noise.
+# and the decision not to theme it is recorded in docs/MAINTENANCE.md. SETUP.md's
+# accent recipe prints a worked example of a ramp that is deliberately not this
+# palette, since a recipe with no values in it is what the reader complained
+# about; the cost is that the current values it also quotes are unchecked, which
+# the recipe says about itself. A check that always fails stops being read, so a
+# decided exception leaves the list rather than becoming permanent noise.
 SKIP_FILES = (
     "docs/design/DESIGN-SYSTEM.md",
     ".config/dunst/dunstrc",
+    "docs/SETUP.md",
 )
 
 
