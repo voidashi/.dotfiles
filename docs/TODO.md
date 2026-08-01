@@ -38,8 +38,9 @@ paragraph above.
    generator moved four files, while nineteen tracked files kept the old value, the four
    terminals among them, because they read `ansi16` and slot 1 is a second copy of the
    same hex. So the accent recipe cannot be "change one key". The reviewer spent ten
-   minutes across five files and gave up. `RICE-GUIDE.md`, which the index recommends for changing appearance,
-   answers "never introduce a colour that is not derived from these", which is the
+   minutes across five files and gave up. `RICE-GUIDE.md`, which the index recommends for
+   changing appearance, answers "never introduce a colour that is not derived from these",
+   which is the
    opposite of what they wanted. Owed: a short section in `SETUP.md` naming the exact keys,
    the two places the values are duplicated, and one worked example ending in the two
    commands that already exist. It gets shorter once the generator gains a roles layer.
@@ -65,15 +66,16 @@ Sorted by priority. Within a priority, by nothing.
 - **`check_palette.py` passes on colours it cannot see.** Two holes, both found by
   measurement rather than by reading it. An auditor replaced `rgb(498bb2)` with
   `rgb(ff00ff)` in `.config/hypr/hyprtoolkit.conf` and the checker still returned
-  `drift: no colour outside the palette's 82` and exit 0, because `check_palette.py:33`
+  `drift: no colour outside the palette's 82` and exit 0, because the checker's hex pattern
   matches `#[0-9a-fA-F]{6}` and `BARE_HEX_SCOPE` covers only `.config/swaylock/config`,
   so hyprtoolkit's six `rgb(...)` colours are outside the check entirely. Separately,
   `check_sync` iterates `generated_files()`, which is the ten files written whole, while
   the generator also writes `.config/wofi/style.css`, `.config/kdeglobals` and
   `.config/kcminputrc` by merging; hand-edits to those three were made and the checker
-  returned 0 for each. The merge cases are deliberate and documented at
-  `generate_theme.py:594-596`, so what is owed there is either a partial comparison of
-  the sections the generator owns, or a sentence saying they are unchecked on purpose.
+  returned 0 for each. The merge cases are deliberate and documented in
+  `generate_theme.py` beside the merge itself, so what is owed there is either a partial
+  comparison of the sections the generator owns, or a sentence saying they are unchecked on
+  purpose.
   The `rgb(...)` hole is not deliberate and is the repo's characteristic bug in its own
   validator.
   *Difficulty: low for the `rgb(...)` form, medium for the merged files. Priority: high,
@@ -81,9 +83,10 @@ Sorted by priority. Within a priority, by nothing.
 
 - **The clone path is load-bearing in seven lines, and it does not have to be.** Cloning
   anywhere but `~/.dotfiles` silently breaks the wallpaper, the clipboard picker, the
-  bar's power button and Neovim's dashboard. Ruled out already, with the incident at
-  `.config/hypr/conf/autostart.lua:12`: relative paths, because they depended on the cwd
-  Hyprland was started with and the bar did not come up depending on how you logged in.
+  bar's power button and Neovim's dashboard. Ruled out already, with the incident recorded
+  in the `autostart.lua` comment on absolute paths: relative paths, because they depended
+  on the cwd Hyprland was started with and the bar did not come up depending on how you
+  logged in.
   The seven lines are three different problems. Five are script calls
   (`clipboard-picker.sh` in both compositors, `power-menu.sh` in the bar,
   `select-random-wallpaper.sh` in both), one is a data directory
@@ -107,7 +110,7 @@ Sorted by priority. Within a priority, by nothing.
   named this as the single reason not to install on a working laptop, and they were right
   before the README warned about it. The warning is now in the install block, which fixes
   the surprise and not the situation. Options, in rough order of cost: let
-  `backup-configs.sh install` take paths, which is already open above and makes every
+  `backup-configs.sh install` take paths, which has its own entry below and makes every
   subset possible rather than this one; a documented "everything except the Qt/KDE
   paths" invocation; or splitting the Qt/KDE entries into their own section of
   `config_files.conf` so they can be skipped by name. Isolating it to the Hyprland and
@@ -195,9 +198,8 @@ Sorted by priority. Within a priority, by nothing.
 - **The two compositors describe every runtime service twice, and have diverged.** The
   autostart block in `autostart.lua` against the run of `exec` lines in `sway/config`; the
   idle schedule in two syntaxes with a comment asking future editors to keep them in step;
-  three
-  screenshot binds under Hyprland against one bare `grim` under Sway; different launcher
-  keys. Sway also carries nine hand-pasted hex while Hyprland reads a generated
+  three screenshot binds under Hyprland against one bare `grim` under Sway; different
+  launcher keys. Sway also carries nine hand-pasted hex while Hyprland reads a generated
   `palette.lua`, so the two sit on opposite sides of this repo's most important seam. The
   cheap half is generating a Sway palette include, about fifteen lines in
   `generate_theme.py`, which moves nine literals off the drift surface. Dropping Sway is
@@ -245,8 +247,8 @@ Sorted by priority. Within a priority, by nothing.
   The second exists because the first was run with `--include="*.md"` and reported clean
   while eight references sat in six config and script files. What it may legitimately
   return: this entry and `CLAUDE.md`'s own title line. Anything else is a real reference to
-  deal with first. Note the rule at `CLAUDE.md:49` still has no home under `docs/`, which
-  is the entry above.
+  deal with first. Note the "Never write a count that a config file owns" rule still has no
+  home under `docs/`, which is the entry above.
   *Difficulty: low. Priority: medium, and it blocks nothing until publication.*
 
 - **The apt and dnf machinery has never run, and could not work as configured.** Fourteen
@@ -257,87 +259,25 @@ Sorted by priority. Within a priority, by nothing.
   `[dnf]` in `packages.conf` are empty, so all the names live in `[common]` and are Arch
   names. On Debian this resolves to `apt-get install hyprland`, `apt-get install paru`.
   So the choice is to populate the two sections or to delete the branches, and it is not
-  a question of testing what is there. One cost before touching it: `SETUP.md:12` still
-  advertises cross-distro support to a reader, so this is a documentation edit too. The
+  a question of testing what is there. One cost before touching it: `SETUP.md` still tells
+  a reader "the package installer also handles apt and dnf", so this is a documentation
+  edit too. The
   README no longer does, since "cross-distro package installer" is gone from the
   repository layout. And `install_all()` reaches
   `update_pkg_db()` only through `add_repos()`, so deleting that function without rewiring
-  drops `pacman -Syy` from every Arch install. The Microsoft repository key at lines
-  133-137 serves `code`, which is declared at `packages.conf:115`, so it is apt-only
+  drops `pacman -Syy` from every Arch install. The Microsoft repository key in the apt
+  branch serves `code`, which is declared in `packages.conf`, so it is apt-only
   machinery rather than an orphan and stands or falls with the branch.
   *Difficulty: low. Priority: medium.*
 
-- **`THEMING.md` carries open work eight lines after saying this file owns it.** Delete
-  159-166, whose three items are verbatim from here. Its first three "Settled decisions"
+- **`THEMING.md` carries open work eight lines after saying this file owns it.** Delete its
+  "Not covered yet" section, whose three items are verbatim from here. Its first three
+  "Settled decisions"
   bullets restate `RICE-GUIDE.md` in their opening sentences; cut those sentences and keep
   the mechanism clause after each, which is this document's actual subject and exists only
   here. Bullets 4 and 5 must survive whole: the relaxed accent budget for fetches, and
   "Rollback is git, not a directory".
   *Difficulty: trivial. Priority: medium.*
-
-- **Decide whether `minimal/` survives its own rule.** `THEMING.md:153-157` settles
-  "Rollback is git, not a directory. Do not reintroduce a legacy directory", and
-  `.config/fastfetch/minimal/` is five files whose own header calls them frozen snapshots
-  "NOT kept in sync". The presets are a recorded keep, so the two statements now disagree
-  and one has to move: either `minimal/` is the documented exception, or it is the thing
-  the rule was written about.
-  *Difficulty: trivial, and it is a decision rather than work. Priority: low.*
-
-- **Six packages are declared for programs nothing here launches.** `dunst`, `hyprpaper`,
-  `hyprlauncher` and `catnap` all have configs that are deliberate keeps, but a reference
-  config does not need its program on a stranger's machine, and the question was only ever
-  asked of `dunst`. `pfetch-rs` is the same shape with no config at all. `ranger`,
-  `supergfxctl`, `cava`, `zathura`, `cmatrix` and `hyprpicker` have no config, launch or
-  bind either, though `hyprpicker` is an optional dependency of `hyprshot`. If `pfetch-rs`
-  goes, its comment about declaring a bare AUR name letting the helper pick a different
-  provider applies to every AUR entry here and belongs in `MAINTENANCE.md`.
-  *Difficulty: trivial. Priority: low.*
-
-- **The launcher and the keybinding open different terminals.** `.config/wofi/config` sets
-  `term=alacritty` while `.config/hypr/conf/programs.lua:10` sets `terminal = "kitty"`.
-  All four terminals are themed identically, which is why it went unnoticed. Pick one.
-  *Difficulty: trivial. Priority: low.*
-
-- **hyprlauncher's radius contradicts the floating rule.** `hyprtoolkit.conf:32-33` sets
-  both radii to 0, but a launcher floats and the guide gives a floating surface 4px.
-  Nothing renders it today, so fix it before switching back or the launcher arrives with
-  the one geometry the design does not allow.
-  *Difficulty: trivial. Priority: low while hyprlauncher stays off.*
-
-- **`wallpapers/` holds two files of one image.** `Topography.png` and `Topography.jpg`
-  are the same image at the same size, mean absolute difference 0.78/255, and both match
-  the picker's glob, so a fresh clone randomises between two copies of one wallpaper while
-  the README's repository layout promises "one sample image". Deleting the 1.1MB PNG makes
-  the sentence true with no edit.
-  *Difficulty: trivial. Priority: low.*
-
-- **`config_files.conf` carries example blocks.** "Template Examples" is filler for a
-  format that is one path per line. "Optional Configurations" is not: it names
-  `~/.ssh/config`, `~/.ssh/known_hosts` and `~/.local/share/applications/`, and a
-  commented `~/.ssh` is a visible decision not to track secrets by default.
-  *Difficulty: trivial. Priority: low.*
-
-- **`SETUP.md:118-143` explains greetd's own documentation.** The stock config, the flag
-  meanings and `systemctl enable` are greetd's README and `tuigreet --help`. Three things
-  are not: the `systemctl cat` verification, the `--sessions`/`--cmd` values tuned to this
-  repository, and the "enable, not `enable --now`" footgun. Cut the per-flag prose only,
-  and carefully, since shortening an untested procedure is how a claim of having tried it
-  gets introduced by accident.
-  *Difficulty: trivial. Priority: low.*
-
-- **`AESTHETIC-DIRECTION.md` states photography direction that two other documents also
-  state**, for a repository that has no photography; `RICE-GUIDE.md` already carries the
-  wallpaper rules standalone. Its temperature map overlaps `DESIGN-SYSTEM.md`'s but the
-  two disagree on row count and wording, so reconcile before deleting either, and decide
-  the map's home only once `DESIGN-SYSTEM.md`'s is decided. Untouchable: the material
-  references, "The right temperature of darkness", "What the system is not" and the note
-  on coherence over time.
-  *Difficulty: low. Priority: low.*
-
-- **Dolphin's icons are still `breeze-dark`**, so folders come out blue against a Voidashi
-  window. Every alternative installed here is worse aligned, so this waits on an icon set
-  being chosen, which is an asset decision.
-  *Difficulty: low once a set is chosen. Priority: low.*
 
 - **The upstream bump this entry was waiting for has already happened, and nobody
   noticed.** It said the AUR package was still on 1.1.1 and that catnap 2.0 would break
@@ -360,6 +300,72 @@ Sorted by priority. Within a priority, by nothing.
   with no grey among them.
   *Difficulty: low, and it is a rewrite of two files. Priority: medium, because the
   version that was supposed to be the trigger is already installed.*
+
+- **Decide whether `minimal/` survives its own rule.** `THEMING.md`'s "Rollback is git, not
+  a directory" bullet settles "Do not reintroduce a legacy directory", and
+  `.config/fastfetch/minimal/` is five files whose own header calls them frozen snapshots
+  "NOT kept in sync". The presets are a recorded keep, so the two statements now disagree
+  and one has to move: either `minimal/` is the documented exception, or it is the thing
+  the rule was written about.
+  *Difficulty: trivial, and it is a decision rather than work. Priority: low.*
+
+- **Packages are declared for programs nothing here launches.** `dunst`, `hyprpaper`,
+  `hyprlauncher` and `catnap` all have configs that are deliberate keeps, but a reference
+  config does not need its program on a stranger's machine, and the question was only ever
+  asked of `dunst`. `pfetch-rs` is the same shape with no config at all. `ranger`,
+  `supergfxctl`, `cava`, `zathura`, `cmatrix` and `hyprpicker` have no config, launch or
+  bind either, though `hyprpicker` is an optional dependency of `hyprshot`. If `pfetch-rs`
+  goes, its comment about declaring a bare AUR name letting the helper pick a different
+  provider applies to every AUR entry here and belongs in `MAINTENANCE.md`.
+  *Difficulty: trivial. Priority: low.*
+
+- **The launcher and the keybinding open different terminals.** `.config/wofi/config` sets
+  `term=alacritty` while `.config/hypr/conf/programs.lua` sets `terminal = "kitty"`.
+  All four terminals are themed identically, which is why it went unnoticed. Pick one.
+  *Difficulty: trivial. Priority: low.*
+
+- **hyprlauncher's radius contradicts the floating rule.** `hyprtoolkit.conf` sets both
+  `rounding_large` and `rounding_small` to 0, but a launcher floats and the guide gives a
+  floating surface 4px.
+  Nothing renders it today, so fix it before switching back or the launcher arrives with
+  the one geometry the design does not allow.
+  *Difficulty: trivial. Priority: low while hyprlauncher stays off.*
+
+- **`wallpapers/` holds two files of one image.** `Topography.png` and `Topography.jpg`
+  are the same image at the same size, mean absolute difference 0.78/255, and both match
+  the picker's glob, so a fresh clone randomises between two copies of one wallpaper while
+  the README's repository layout promises "one sample image". Deleting the 1.1MB PNG makes
+  the sentence true with no edit.
+  *Difficulty: trivial. Priority: low.*
+
+- **`config_files.conf` carries example blocks.** "Template Examples" is filler for a
+  format that is one path per line. "Optional Configurations" is not: it names
+  `~/.ssh/config`, `~/.ssh/known_hosts` and `~/.local/share/applications/`, and a
+  commented `~/.ssh` is a visible decision not to track secrets by default.
+  *Difficulty: trivial. Priority: low.*
+
+- **The greetd section of `SETUP.md` explains greetd's own documentation.** The stock
+  config, the flag
+  meanings and `systemctl enable` are greetd's README and `tuigreet --help`. Three things
+  are not: the `systemctl cat` verification, the `--sessions`/`--cmd` values tuned to this
+  repository, and the "enable, not `enable --now`" footgun. Cut the per-flag prose only,
+  and carefully, since shortening an untested procedure is how a claim of having tried it
+  gets introduced by accident.
+  *Difficulty: trivial. Priority: low.*
+
+- **`AESTHETIC-DIRECTION.md` states photography direction that two other documents also
+  state**, for a repository that has no photography; `RICE-GUIDE.md` already carries the
+  wallpaper rules standalone. Its temperature map overlaps `DESIGN-SYSTEM.md`'s but the
+  two disagree on row count and wording, so reconcile before deleting either, and decide
+  the map's home only once `DESIGN-SYSTEM.md`'s is decided. Untouchable: the material
+  references, "The right temperature of darkness", "What the system is not" and the note
+  on coherence over time.
+  *Difficulty: low. Priority: low.*
+
+- **Dolphin's icons are still `breeze-dark`**, so folders come out blue against a Voidashi
+  window. Every alternative installed here is worse aligned, so this waits on an icon set
+  being chosen, which is an asset decision.
+  *Difficulty: low once a set is chosen. Priority: low.*
 
 - **The bar carries laptop-only modules with no guard.** `battery` and `backlight` sit in
   `modules-right` unconditionally, so on a desktop they are empty or absent, and
@@ -391,17 +397,17 @@ Sorted by priority. Within a priority, by nothing.
   once considered.
   *Difficulty: low. Priority: low.*
 
-- **Per-application workspace layouts.** `hypr/conf/window_rules.lua:10-16` already drops
-  gaps and borders when a workspace holds one window, so this is an extension rather than
+- **Per-application workspace layouts.** `hypr/conf/window_rules.lua` already drops gaps
+  and borders when a workspace holds one window, so this is an extension rather than
   a build. What does not exist is any application-to-workspace assignment. Decide the rule
   before writing it, because a workspace map that fights how you work is worse than none,
   and mirror it in the Sway config, which has no equivalent selectors and would need
   explicit `assign` rules.
   *Difficulty: low to write, and the design is the real work. Priority: low.*
 
-- **Comments in about 8 of the 17 files under `.config/hypr/` are in Portuguese** while
-  the rest of the tree is English, including the note at `autostart.lua:12` on why
-  absolute paths are used, which is worth reading. Translate on touch. This is a
+- **Many comments under `.config/hypr/` are in Portuguese** while the rest of the tree is
+  English, including the `autostart.lua` note on why absolute paths are used, which is
+  worth reading. Translate on touch. This is a
   translation and not a deletion, so it should not be batched with cuts.
   *Difficulty: trivial per file. Priority: low.*
 
