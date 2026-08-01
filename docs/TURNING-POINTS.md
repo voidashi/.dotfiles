@@ -248,6 +248,32 @@ looks cuttable from the outside, which is the only reason they are written down.
   compositors call, and waybar is not a compositor. The script is bound to
   `common.jsonc` by a serialisation contract its own docstring names.
 
+## Rewriting the generator was authorised and then ruled out by measurement
+
+The reading that "change one hex and nothing moves" led to the generator being put
+up for a rewrite, with a free hand to replace it entirely. It was measured first
+and kept, so nobody should reopen that on the same evidence.
+
+What the measurement said. Every one of the 103 colour keys in `palette.json`
+reaches at least one generated file and no generated file is unreachable, so there
+is no dead key and no orphaned emitter. The generator is idempotent across repeated
+runs, including the three files it merges into rather than writes. Its output is
+accepted by the applications' own parsers rather than by inspection: `foot
+--check-config`, `ghostty +validate-config`, kitty's own `load_config`, luajit and
+Neovim on both generated `palette.lua` files, and GTK4's `CssProvider` on the
+stylesheets, each with a negative control that failed.
+
+What was actually wrong was two things a rewrite would not have fixed. `palette.json`
+expresses roles as *copies* of scale values rather than references, so moving
+`scales.ice.300` leaves even the generated stylesheet emitting the retired
+`focus-ring`; and most themed files are outside the generator's reach entirely. Both
+are open work in `docs/TODO.md`, and both are additive.
+
+The lasting shape of it: this repository's characteristic bug had reached the tool
+built to prevent it. Dropping the `#` from one value passed the generator, passed
+both checks, and shipped a stylesheet GTK rejects. The generator now refuses a
+malformed value at load, which is the fix a rewrite would have had to include anyway.
+
 ## Three things about the bar are provisional
 
 Settled only until they have been lived with: whether numerals beat application
