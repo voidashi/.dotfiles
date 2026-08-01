@@ -39,7 +39,7 @@ nothing when they are clean, so an empty block is a pass, not a failure to run.
 
 ## Tracked symlinks
 
-!`cd "$(git rev-parse --show-toplevel)" && bash scripts/backup-configs.sh check 2>&1 | grep -v SUCCESS; echo "valid: $(cd "$(git rev-parse --show-toplevel)" && bash scripts/backup-configs.sh check 2>&1 | grep -c SUCCESS)"`
+!`cd "$(git rev-parse --show-toplevel)" && bash scripts/backup-configs.sh check 2>&1 | grep -v SUCCESS`
 
 ## Working tree
 
@@ -61,13 +61,18 @@ How to read these:
   failure: catnap 2.0 replaced the TOML config format entirely and the AUR package
   is still on 1.x, so the day it updates, both tracked files stop being valid at
   once. This is what will say so.
-- **Tracked symlinks** should report 32 valid with no `Broken` lines. That is the 31
-  paths in `scripts/config_files.conf` plus one: `backup-configs.sh:193` also checks
-  the font symlink at `~/.local/share/fonts/dotfiles`, which is not listed in that
-  file. Count the paths before assuming a mismatch is a fault. A broken one
+- **Tracked symlinks** report their own summary line, and the number to expect is
+  one more than the paths in `scripts/config_files.conf`, because
+  `backup-configs.sh` also checks the font symlink at
+  `~/.local/share/fonts/dotfiles`, which is not listed there. Count the paths
+  before assuming a mismatch is a fault. What matters is `Broken: 0`. A broken one
   usually means an external program replaced the symlink with a real file, which
   `kded6` has done to `gtk.css` before; the repair is to re-link, but check the
   content first, because the same event has also overwritten what the repo held.
+
+  This block used to print its own `valid:` count beside that summary. It counted
+  `SUCCESS` lines, which `backup-configs.sh` prints only under `--verbose`, so it
+  read `valid: 0` on a healthy tree for as long as it existed.
 - **Working tree** dirt is worth a second look rather than an automatic commit.
   `kdeglobals` and both GTK `settings.ini` files have a second owner in KDE, so
   changes there may be something else's, not ours.

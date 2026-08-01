@@ -57,14 +57,16 @@ to reach the session. Both of those are now addressed.
 
 Sorted by priority. Within a priority, by nothing.
 
-- **The brightness keys are dead on this machine.** `binds.lua:91-92` and
-  `sway/config:178-179` bind them to `brightnessctl`, which is neither installed nor
-  declared under any name. `nm-applet` is in the same position, autostarted by
-  `autostart.lua:10` and absent. The other six binaries once listed as undeclared
-  (`rfkill`, `playerctl`, `wpctl`, `pactl`, `grim`, `swaynag`) arrive as hard dependencies
-  of declared packages, so they are not a problem: `grim` and `slurp` come with
-  `hyprshot`.
-  *Difficulty: trivial. Priority: high, and it is a live defect.*
+- **The brightness keys are dead on this machine until the new packages are installed.**
+  `brightnessctl` and `network-manager-applet` are now declared, but declaring is not
+  installing: `binds.lua:91-92` and `sway/config:178-179` still call a binary that is not
+  here, and `autostart.lua:10` still starts an applet that is not here. One
+  `install-packages.sh install` fixes it. Confirm with `command -v brightnessctl` rather
+  than by pressing the key, because a missing binary and a driver that ignores the call
+  look identical. The other six binaries once listed as undeclared (`rfkill`, `playerctl`,
+  `wpctl`, `pactl`, `grim`, `swaynag`) arrive as hard dependencies of declared packages,
+  so they were never a problem.
+  *Difficulty: trivial. Priority: high, and it is a live defect until the install runs.*
 
 - **The screenshots in the README predate the current theme.** Committed April 2025, they
   show the Kanagawa desktop this repo no longer contains. They stay until replaced, since
@@ -85,12 +87,11 @@ Sorted by priority. Within a priority, by nothing.
   verify-repo skill is the only artefact that runs all nine checks, and this file commits
   to deleting `.claude/` at publication. Its content is duplicated as prose in
   `MAINTENANCE.md`, the two have already diverged, and neither runs
-  `scripts/tests/test-dotfiles.sh`. Worse, the skill's symlink block measures nothing: it
-  counts `SUCCESS` lines that `backup-configs.sh` gates behind `--verbose`, which the block
-  does not pass, so it prints `valid: 0` on a healthy tree beside a summary reading
-  "Valid: 32". A `scripts/verify.sh` that both call is the answer, and it is the
-  precondition for deleting `.claude/` without loss. Two checks belong in it that nothing
-  runs today: the test suite, and the gitlink guard above.
+  `scripts/tests/test-dotfiles.sh`. A `scripts/verify.sh` that both call is the answer,
+  and it is the precondition for deleting `.claude/` without loss. Two checks belong in it
+  that nothing runs today: the test suite, and the gitlink guard above. The skill's own
+  broken `valid:` counter is already gone, which is what turned this from tidying into a
+  thing worth doing: it read `valid: 0` on a healthy tree for as long as it existed.
   *Difficulty: low. Priority: high, and higher the day publication is real.*
 
 - **The greetd path has never been run.** It is documented in `SETUP.md` step 6 and
@@ -109,20 +110,6 @@ Sorted by priority. Within a priority, by nothing.
   another file owns, only point at the owner. The count is the narrow case.
   `hyprtoolkit.conf` carried the wide one twice.
   *Difficulty: trivial. Priority: medium, because it is lost silently at deletion.*
-
-- **Five stale counts in `install-packages.sh`, and one leftover marker.** Lines 90, 175,
-  212, 219 and 342 say "56 packages" or "56 lines"; `packages.conf` holds 57 names. The
-  rule against this is in `CLAUDE.md`, which uses `"56 packages"` as its example of what
-  not to write. Line 160 also still carries a `### MODIFICATION ###` banner from
-  development.
-  *Difficulty: trivial. Priority: medium.*
-
-- **`generate_theme.py` generates everything twice.** `if __name__ == "__main__": main()`
-  appears at lines 626 and 630, both at top level, so every run repeats all ten files and
-  the three in-place edits. The comment at line 618 says "These two" and there are three:
-  `inline_block`, `merge_kde_globals`, `merge_kcm_input`. Fix the comment in the same
-  edit. Invisible only because the writes are idempotent.
-  *Difficulty: trivial. Priority: medium, since those three edit files in place.*
 
 - **`[hooks]` has no users and a repair plan.** Zero entries, one commented example, and
   `run_hooks()` is fifteen lines of awk-inside-bash carrying three known MEDIUM defects: a

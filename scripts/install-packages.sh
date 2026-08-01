@@ -87,7 +87,7 @@ detect_pkg_manager() {
     # substitution and log() writes to stdout, so the error text was captured
     # into PKG_MANAGER while the exit 1 killed only the subshell. The run then
     # carried on with the package manager set to its own error message, matched
-    # no branch in install_package, and reported all 56 packages installed.
+    # no branch in install_package, and reported the whole list installed.
     return 1
 }
 
@@ -157,7 +157,6 @@ update_pkg_db() {
     log "INFO" "Updating package database..."
     case "$PKG_MANAGER" in
         "apt") sudo apt-get update -qq ;;
-        ### MODIFICATION ###
         # Changed to 'Syy' to force a refresh of databases, which is more
         # robust and helps prevent "could not find database" errors.
         "pacman") sudo pacman -Syy --noconfirm ;;
@@ -172,7 +171,7 @@ load_packages() {
     # And a parallel list in file order. Bash iterates an associative array in
     # hash order, so preview, install and check all threw away the grouping that
     # packages.conf is carefully organised into: the Hyprland packages came out
-    # scattered across 56 lines and a long install gave no sense of position.
+    # scattered through the list and a long install gave no sense of position.
     declare -ga PACKAGE_ORDER=()
 
     # Read from config file using awk to filter relevant sections
@@ -209,14 +208,14 @@ install_package() {
     local key="$1"
     local package_name="$2"
     local status=0
-    # A run over 56 packages takes minutes and gave no sense of position.
+    # A run over the whole list takes minutes and gave no sense of position.
     # PROGRESS is set by install_all and empty for any other caller.
     log "INFO" "${PROGRESS:+$PROGRESS }Processing: $key"
 
     # Asked before the install runs, not instead of it. The install command
     # still runs so an out-of-date package is still upgraded; this only decides
     # what to call the outcome. Every installer here exits 0 when there is
-    # nothing to do, so "Installed" was printed for all 56 packages on a second
+    # nothing to do, so "Installed" was printed for every package on a second
     # run, and every line the script produced was false.
     local was_present=false
     is_installed "$package_name" && was_present=true
@@ -339,7 +338,7 @@ verify_installed() {
     done
 
     # This printed one line per package and no summary, so the command whose
-    # whole job is to answer "what is missing?" made you read 56 lines to find
+    # whole job is to answer "what is missing?" made you read one line per package to find
     # out. The names go on one line instead.
     if [ "${#missing_keys[@]}" -eq 0 ]; then
         log "SUMMARY" "$present of ${#PACKAGE_ORDER[@]} installed, none missing"
