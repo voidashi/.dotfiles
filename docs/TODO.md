@@ -384,6 +384,29 @@ Sorted by priority. Within a priority, by nothing.
   *Difficulty: low, and it is a rewrite of two files. Priority: medium, because the
   version that was supposed to be the trigger is already installed.*
 
+- **`kdeglobals` never learns the scheme's name, and it is not clear that it should.**
+  `merge_kde_globals` drops the `[General]` of the generated `.colors` file, on the stated
+  grounds that it would collide with the `[General]` kdeglobals already has. That section
+  carries `ColorScheme=Voidashi`, `Name=Voidashi` and `shadeSortColumn=true`, and the first
+  two collide with nothing: kdeglobals holds only a stale KDE-written `ColorSchemeHash` and
+  no `ColorScheme` at all. So the justification covers `shadeSortColumn` and not the other
+  two. What is *not* established, and is the whole question, is whether any KDE component
+  reads `ColorScheme` from kdeglobals rather than from the `.colors` file; an audit could
+  not settle it from the installed binaries. Establish that before changing anything, since
+  the colours themselves are demonstrably applied today and this may be a key nobody reads.
+  *Difficulty: low to change, and the work is answering the question. Priority: low.*
+
+- **Alacritty's generated file is the one terminal output nothing validates.** The other
+  three are checked by their own programs in `scripts/verify.sh`, and alacritty is absent
+  from it. Ruled out as the validator: `alacritty migrate --dry-run` accepts a config
+  carrying `[colors.primary] bogus = "ffffff"` and exits 0, so it reports migration
+  needs and not correctness. The file is covered against hand-edits by `check_sync` and
+  against invented colours by drift, so what is unchecked is narrower than it sounds: that
+  the key names and TOML shape are the ones alacritty actually reads, which today rests on
+  inspection alone. A TOML parse plus a comparison against alacritty's documented key names
+  is the likely substitute.
+  *Difficulty: low. Priority: low.*
+
 - **Decide whether `minimal/` survives its own rule.** `THEMING.md`'s "Rollback is git, not
   a directory" bullet settles "Do not reintroduce a legacy directory", and
   `.config/fastfetch/minimal/` is five files whose own header calls them frozen snapshots
