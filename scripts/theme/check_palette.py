@@ -117,7 +117,10 @@ def palette_colours(p: dict) -> set:
     for shades in p["scales"].values():
         known |= {v.lower() for v in shades.values()}
     for entry in p["alert"].values():
-        known |= {v.lower() for v in entry.values()}
+        # fg, bg and border only. Taking every value swept in the four glyph
+        # strings, so the count this script prints claimed four more colours
+        # than the palette has.
+        known |= {v.lower() for v in entry.values() if v.startswith("#")}
     known |= {v.lower() for v in p["ansi16"]}
     known.add(p["focus_ring"].lower())
     for value in p["terminal"].values():

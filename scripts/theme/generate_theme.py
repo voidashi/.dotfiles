@@ -11,6 +11,7 @@ header. Edit palette.json and rerun this script instead.
 """
 
 import json
+import re
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -19,14 +20,56 @@ CONFIG = REPO_ROOT / ".config"
 
 SOURCE_NOTE = "docs/design/RICE-GUIDE.md"
 
+HEX_COLOUR = re.compile(r"#[0-9a-fA-F]{6}\Z")
+
 
 # =====================================================================
 #  Source and writing
 # =====================================================================
 
+def colour_keys(p: dict):
+    """Every place in palette.json that must hold a colour, as (name, value).
+
+    Written out rather than inferred, because the file also holds glyphs,
+    geometry numbers and font names, and a walk that guessed which is which
+    would have to guess again every time a key is added.
+    """
+    for family, shades in p["scales"].items():
+        for step, value in shades.items():
+            yield f"scales.{family}.{step}", value
+    for name, entry in p["alert"].items():
+        for key in ("fg", "bg", "border"):
+            yield f"alert.{name}.{key}", entry[key]
+    for i, value in enumerate(p["ansi16"]):
+        yield f"ansi16[{i}]", value
+    for key, value in p["terminal"].items():
+        yield f"terminal.{key}", value
+    yield "focus_ring", p["focus_ring"]
+
+
+def validate_palette(p: dict) -> None:
+    """Refuse a colour that is not #RRGGBB, here rather than downstream.
+
+    Dropping the '#' from one value is a single keystroke and used to survive
+    every check this repository has. check_sync compares the output against
+    this generator, so a malformed input is "in sync" by construction, and
+    check_drift's pattern needs the '#' to see the value at all. What shipped
+    was a stylesheet GTK rejected with two parse errors, while both checks
+    reported clean and the checker's palette count silently grew by one.
+    """
+    bad = [f"{name} = {value!r}" for name, value in colour_keys(p)
+           if not isinstance(value, str) or not HEX_COLOUR.match(value)]
+    if bad:
+        raise SystemExit(
+            "palette.json: these must be #RRGGBB and are not:\n  " + "\n  ".join(bad)
+        )
+
+
 def load_palette() -> dict:
     with open(SCRIPT_DIR / "palette.json", encoding="utf-8") as f:
-        return json.load(f)
+        p = json.load(f)
+    validate_palette(p)
+    return p
 
 
 def header(comment_start: str, comment_end: str = "") -> str:
@@ -196,6 +239,14 @@ def inline_block(path: Path, content: str) -> None:
         raise SystemExit(
             f"{path.relative_to(REPO_ROOT)}: missing the "
             f"{BLOCK_START} / {BLOCK_END} markers the generator writes between."
+        )
+    if end < start:
+        # Without this the slice either side of the block re-emits the span
+        # between the markers, so every run appends another copy of whatever
+        # hand-written CSS sits between them, unbounded and without an error.
+        raise SystemExit(
+            f"{path.relative_to(REPO_ROOT)}: {BLOCK_END} comes before "
+            f"{BLOCK_START}; put them back in order."
         )
     block = f"{BLOCK_START}\n{content}{BLOCK_END}"
     path.write_text(original[:start] + block + original[end + len(BLOCK_END):], encoding="utf-8")
@@ -492,12 +543,16 @@ def merge_ini_keys(lines: list, keyed: dict) -> list:
         missing = [k for k in pairs if k not in seen[section]]
         if not missing:
             continue
-        try:
-            at = out.index(f"[{section}]") + 1
-            for key in reversed(missing):
-                out.insert(at, f"{key}={pairs[key]}")
-        except ValueError:
+        # Locate the header the same way the loop above recognised it, on the
+        # stripped line. Matching the raw line instead meant a header written
+        # as "[General] " was found when replacing a key and not found here,
+        # so a second [General] was appended to a file that already had one.
+        at = next((i for i, l in enumerate(out) if l.strip() == f"[{section}]"), None)
+        if at is None:
             out += ["", f"[{section}]"] + [f"{k}={pairs[k]}" for k in missing]
+        else:
+            for key in reversed(missing):
+                out.insert(at + 1, f"{key}={pairs[key]}")
     return out
 
 
@@ -572,7 +627,12 @@ def merge_kde_globals(path: Path, scheme: str, p: dict) -> None:
         if emit:
             body.append(line)
 
-    text = "\n".join(l for l in kept if l.strip() or kept).rstrip() + "\n\n"
+    # strip() at both ends, not rstrip(): on a machine with no kdeglobals yet,
+    # merge_ini_keys starts the section it appends with a blank line, so the
+    # file came out beginning with one. The condition that used to stand here,
+    # "if l.strip() or kept", was true for every line whenever kept was
+    # non-empty and so never dropped anything.
+    text = "\n".join(kept).strip() + "\n\n"
     text += "\n".join(body).rstrip() + "\n"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
