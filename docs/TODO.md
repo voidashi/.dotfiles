@@ -193,8 +193,9 @@ Sorted by priority. Within a priority, by nothing.
   this without committing to all of it.*
 
 - **The two compositors describe every runtime service twice, and have diverged.** The
-  autostart set at `autostart.lua:15-35` against `sway/config:237-265`; the idle schedule
-  in two syntaxes with a comment asking future editors to keep them in step; three
+  autostart block in `autostart.lua` against the run of `exec` lines in `sway/config`; the
+  idle schedule in two syntaxes with a comment asking future editors to keep them in step;
+  three
   screenshot binds under Hyprland against one bare `grim` under Sway; different launcher
   keys. Sway also carries nine hand-pasted hex while Hyprland reads a generated
   `palette.lua`, so the two sit on opposite sides of this repo's most important seam. The
@@ -202,7 +203,10 @@ Sorted by priority. Within a priority, by nothing.
   `generate_theme.py`, which moves nine literals off the drift surface. Dropping Sway is
   not on the table: `sway/config` carries four findings that could only come from booting
   it, including notifications that were dead under Sway with the config themed and in
-  place.
+  place. The standing cost is that anything mirrored into `sway/config` from a Hyprland
+  session is checked by `sway --validate` and never run. The brightness curve and the
+  clipboard wipe both went in that way: confirmed working under Hyprland, untried under
+  Sway.
   *Difficulty: low for the include, high for the rest. Priority: medium.*
 
 - **Rethink how the generator decides colour, and consider a roles layer.**
