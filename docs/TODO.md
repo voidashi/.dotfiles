@@ -13,16 +13,21 @@ alone. A one-line fix can be urgent and a rewrite optional. "Start here next" is
 
 ## Start here next
 
-Three items, in this order. All come from a review by someone told to be an ordinary
+Two items, in this order. Both come from a review by someone told to be an ordinary
 Linux user who wants a good-looking desktop without spending a weekend on it. Two earlier
 reviews were done by people who could read code, which is why none of this surfaced then.
 
-What that reader valued, and what must survive these edits: "Is this for you?", the
-symptom-first troubleshooting section, `docs/README.md` telling them only two documents
-matter, `MAINTENANCE.md` letting them back out in one line, and "Known gaps". Their
-verdict was that they would install this on a spare machine but not on their working
-laptop, for two reasons: being told to read scripts they cannot read, and not knowing how
-to reach the session. Both of those are now addressed.
+What that reader valued, and what must survive these edits: the symptom-first
+troubleshooting section, `docs/README.md` telling them only two documents matter, and
+`MAINTENANCE.md` letting them back out in one line. Their verdict was that they would
+install this on a spare machine but not on their working laptop, for two reasons: being
+told to read scripts they cannot read, and not knowing how to reach the session. Both of
+those are now addressed.
+
+They also valued two sections that no longer exist. "Is this for you?" and "Known gaps"
+were removed on purpose, with the reasoning in
+[`TURNING-POINTS.md`](TURNING-POINTS.md); do not restore either on the strength of the
+paragraph above.
 
 1. **Write the recipe for changing the accent colour.** The README's headline promise is
    "change one hex and everything moves together", and it is the one promise no document
@@ -37,20 +42,10 @@ to reach the session. Both of those are now addressed.
    *Difficulty: low. Priority: maximum, since it is the repo's best promise with nothing
    behind it.*
 
-2. **Make the two things a reader has to guess at explicit.** The README offers that you
-   can lift the terminal colours, or the bar, or just the palette generator, and no
-   document says how, while the installer brings all of `packages.conf` including both
-   compositors and both notification daemons. Write the cheap path in three lines or drop
-   the offer; this is the documentation half and does not wait on "Let `install` take
-   paths". Separately, the Iosevka step is the one place a reader must pattern-match
+2. **Name the exact Iosevka asset.** It is the one place a reader must pattern-match
    alone: "the Iosevka SGr TTC build" is not a filename, the releases page is a wall of
    near-identical archives, and the theme wants "Iosevka Extended", a third name. Give the
-   exact asset or a `curl` line.
-   *Difficulty: low. Priority: maximum.*
-
-3. **Rewrite the README's opening so it holds the reader.** "Is this for you?" is good and
-   the reviewer said so, but it opens by qualifying rather than by selling. Lead with what
-   this is and why it looks good, then what it contains, and only then filter.
+   exact asset or a `curl` line, in `SETUP.md`.
    *Difficulty: low. Priority: maximum.*
 
 ## Open work
@@ -137,11 +132,17 @@ Sorted by priority. Within a priority, by nothing.
   `MAINTENANCE.md` all name the old one, so this is four documents as well as two scripts.
   *Difficulty: low. Priority: medium.*
 
-- **Let `install` take paths, so the README's offer is true.** `backup-configs.sh install`
-  is still every path in `config_files.conf` or nothing. `install_dotfiles`,
+- **Let `install` take paths, the way the package installer already does.**
+  `backup-configs.sh install` is still every path in `config_files.conf` or nothing:
+  `main()` dispatches on `$1` alone and `install_dotfiles` takes no argument. The
+  asymmetry is the argument for fixing it, since `install-packages.sh` has accepted a
+  `[PACKAGE...]` filter all along, in `apply_package_filter()`, so a reader learns one
+  vocabulary from one script and finds it missing on the other. `install_dotfiles`,
   `check_dotfiles` and `uninstall_dotfiles` are each a loop over `load_dotfiles`, so
   filtering by positional arguments is roughly ten lines and needs no config format
-  change. `add_dotfile` already takes one path.
+  change. `add_dotfile` already takes one path. The README no longer overpromises here:
+  "Taking only part of it" states the all-or-nothing plainly and sends the reader to
+  copy by hand, so this is now a convenience rather than a correction.
   *Difficulty: low. Priority: medium, and it is the cheapest way for a stranger to try
   this without committing to all of it.*
 
@@ -205,10 +206,18 @@ Sorted by priority. Within a priority, by nothing.
   is a real reference to deal with first.
   *Difficulty: low. Priority: medium, and it blocks nothing until publication.*
 
-- **The apt and dnf machinery has never run.** Fourteen non-comment lines mention apt or
-  dnf, in the low thirties counting whole `case` branches and the `repos` dispatch. Two
-  costs before touching it: `SETUP.md:12` and `README.md:157` advertise cross-distro
-  support to a reader, so this is a documentation edit too; and `install_all()` reaches
+- **The apt and dnf machinery has never run, and could not work as configured.** Fourteen
+  non-comment lines mention apt or dnf, in the low thirties counting whole `case` branches
+  and the `repos` dispatch. The dispatch itself is sound. Measured with
+  `DEFAULT_PACKAGE_MANAGER=apt ./scripts/install-packages.sh preview`, which selects the
+  apt branch and lists every package for it. What is not sound is the data: `[apt]` and
+  `[dnf]` in `packages.conf` are empty, so all the names live in `[common]` and are Arch
+  names. On Debian this resolves to `apt-get install hyprland`, `apt-get install paru`.
+  So the choice is to populate the two sections or to delete the branches, and it is not
+  a question of testing what is there. One cost before touching it: `SETUP.md:12` still
+  advertises cross-distro support to a reader, so this is a documentation edit too. The
+  README no longer does, since "cross-distro package installer" is gone from the
+  repository layout. And `install_all()` reaches
   `update_pkg_db()` only through `add_repos()`, so deleting that function without rewiring
   drops `pacman -Syy` from every Arch install. The Microsoft repository key at lines
   133-137 serves `code`, which is declared at `packages.conf:107`, so it is apt-only
@@ -255,7 +264,7 @@ Sorted by priority. Within a priority, by nothing.
 - **`wallpapers/` holds two files of one image.** `Topography.png` and `Topography.jpg`
   are the same image at the same size, mean absolute difference 0.78/255, and both match
   the picker's glob, so a fresh clone randomises between two copies of one wallpaper while
-  `README.md:161` promises one. Deleting the 1.1MB PNG makes the sentence true with no
+  `README.md:165` promises one. Deleting the 1.1MB PNG makes the sentence true with no
   edit.
   *Difficulty: trivial. Priority: low.*
 

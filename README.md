@@ -12,18 +12,41 @@ file.
 
 *The screenshots predate the current theme and are due to be retaken.*
 
-## Is this for you?
+## What this is
 
-**Probably yes** if you run Arch on Wayland, want a desktop that looks deliberate
-rather than assembled, and would rather change one file than thirty.
+A whole desktop rather than a theme dropped on top of one. Compositor, bar, launcher,
+notifications, lock screen, terminals, shell and editor, built to look like they were
+decided together instead of collected. Hyprland is what it was built on, and Sway is the
+fallback, themed to match.
 
-**Probably not** if you are on X11, on a distro other than Arch, or looking for a
-framework you can configure without reading anything. This is one person's desktop,
-published because the theming approach is worth copying, not a distribution.
+Nothing here is a framework or a wrapper. Every piece is an ordinary config file in its
+ordinary place, written in the format that program itself reads, which is what makes
+this worth reading rather than only installing. It also means you do not have to take
+all of it: lift the terminal colours, or the bar, or just the palette generator, and
+ignore the rest.
 
-You do not have to take all of it. Every piece is a normal config file in its normal
-place, so you can lift the terminal colours, or the bar, or just the palette
-generator, and ignore the rest.
+## What is in it
+
+| Piece | Program | Notes |
+|---|---|---|
+| Login | greetd + tuigreet | Suggested, not required. Any display manager finds both sessions |
+| Compositor | Hyprland | Native Lua config, entry point `.config/hypr/hyprland.lua` |
+| Compositor | Sway | The fallback, themed to match |
+| Bar | Waybar | One description of the bar, shared by both compositors |
+| Launcher | wofi | |
+| Notifications | swaync | |
+| Lock screen | swaylock | |
+| Power menu | wlogout | |
+| Clipboard | cliphist | History on `Super`+`Shift`+`V` |
+| Idle | hypridle, swayidle | Lock at 5 min, screen off at 6, suspend at 30 |
+| Terminals | Kitty, Ghostty, Alacritty, Foot | Identical palette, font and padding in all four |
+| Shell | fish + starship | |
+| Editor | Neovim | lazy.nvim, with a colorscheme written for this palette rather than a plugin |
+| File managers | Dolphin, yazi | Graphical and terminal |
+| System monitor | bottom | |
+| Fetch | fastfetch, catnap | |
+| Wallpaper | swaybg | A random image from your own directory |
+| Applications | GTK 3, GTK 4, Qt and KDE | Themed by overriding the colours each toolkit already paints from |
 
 ## The one idea worth stealing
 
@@ -44,29 +67,6 @@ edit it by hand.
 
 The design identity behind the palette is called Voidashi, and it is documented in
 [`docs/design/`](docs/design/).
-
-## What is in it
-
-| Piece | Program | Notes |
-|---|---|---|
-| Login | greetd + tuigreet | Suggested, not required. Any display manager finds both sessions |
-| Compositor | Hyprland | Native Lua config, entry point `.config/hypr/hyprland.lua` |
-| Compositor | Sway | The fallback, themed to match |
-| Bar | Waybar | One description of the bar, shared by both compositors |
-| Launcher | wofi | hyprlauncher is configured too, commented out |
-| Notifications | swaync | |
-| Lock screen | swaylock | |
-| Power menu | wlogout | Launched through `scripts/wm/power-menu.sh`, never bare |
-| Clipboard | cliphist | History on `Super`+`Shift`+`V` |
-| Idle | hypridle, swayidle | Lock at 5 min, screen off at 6, suspend at 30 |
-| Terminals | Kitty, Ghostty, Alacritty, Foot | Identical palette, font and padding in all four |
-| Shell | fish + starship | |
-| Editor | Neovim | lazy.nvim, with a colorscheme written for this palette rather than a plugin |
-| File managers | Dolphin, yazi | Graphical and terminal |
-| System monitor | bottom | |
-| Fetch | fastfetch, catnap | |
-| Wallpaper | swaybg | A random image from your own directory |
-| Applications | GTK 3, GTK 4, Qt and KDE | Themed by overriding the colours each toolkit already paints from |
 
 ## Install
 
@@ -91,8 +91,7 @@ console works too.
 > unless you pass `--force`, and backs up anything it replaces. Its sibling `add` runs the
 > other direction and **moves files out of `$HOME`** into the repo. You want `install`.
 >
-> You do not have to take that on trust, and you do not have to audit the bash to check
-> it. Add `--dry-run` and the script prints every path it would touch, changing nothing:
+> Add `--dry-run` and the script prints every path it would touch, changing nothing:
 >
 > ```bash
 > ./scripts/backup-configs.sh install --dry-run
@@ -101,15 +100,6 @@ console works too.
 > Changed your mind afterwards? `./scripts/backup-configs.sh uninstall` removes the
 > symlinks and leaves your own files and the repo alone. `docs/SETUP.md` has the
 > details, including where `--force` put your originals.
->
-> Being straight about why the simulation is worth running: these scripts have now been
-> audited, and it found five ways to lose a file, on top of the two found before it.
-> `install --force` deleted the target after a backup that had failed; `add` deleted the
-> original after a copy that had failed; a stray `~/` line in the config reached
-> `rm -rf "$HOME/"`. All of them are fixed, and the sandboxed tests in `scripts/tests/`
-> hold them fixed. But the honest reading of a script with that history is that you
-> should run the simulation rather than believe this paragraph. What the audit did not
-> cover is listed in [`docs/TODO.md`](docs/TODO.md).
 
 > [!IMPORTANT]
 > **Clone to `~/.dotfiles` exactly.** Five tracked files reference that path absolutely,
@@ -119,6 +109,20 @@ console works too.
 > carries laptop-only modules. And if you want the themed prompt, fish has to become your
 > login shell; nothing does that for you.
 > [`docs/SETUP.md`](docs/SETUP.md) covers all four, with the file and line for each.
+
+### Taking only part of it
+
+The package installer accepts names, so you can bring in only what you want:
+
+```bash
+./scripts/install-packages.sh install kitty fish starship
+```
+
+`backup-configs.sh install` has no equivalent: it is every path in `config_files.conf`
+or none. For a subset, copy the directories you want out of `.config/` yourself. Copy
+the whole directory rather than a single file, since a config often includes a sibling,
+and expect to edit the Hyprland, Sway, Waybar and Neovim ones, which name `~/.dotfiles`
+by absolute path.
 
 **[Full setup guide](docs/SETUP.md)** covers the long-form install, what to change for
 your hardware, the Iosevka font you have to fetch yourself, and what to do when
@@ -154,8 +158,8 @@ docs/                     everything written down, see docs/README.md
 fonts/                    the four faces the theme uses
 scripts/
   backup-configs.sh       install, uninstall and audit the tracked dotfiles
-  install-packages.sh     cross-distro package installer
-  tests/                  sandboxed tests for the script that can touch $HOME
+  install-packages.sh     installs the packages listed in packages.conf
+  tests/                  sandboxed tests for backup-configs.sh
   theme/                  palette.json, the generator and the checker
   wm/                     helpers the compositors call while running
 wallpapers/               one sample image, so a fresh clone has something to show
@@ -169,24 +173,8 @@ for. The three that matter most:
 - **[`docs/SETUP.md`](docs/SETUP.md)** to install it and make it yours.
 - **[`docs/design/RICE-GUIDE.md`](docs/design/RICE-GUIDE.md)** for the palette, the
   ANSI table, and the rules about how colour gets used.
-- **[`docs/TODO.md`](docs/TODO.md)** for what is open, what is parked and why, and what
-  has been decided against.
-
-## Known gaps
-
-Named here rather than left for you to find:
-
-- **Workspace buttons in the bar are not clickable.** Traced to the Waybar build rather
-  than this configuration; the full elimination is written down in
-  [`docs/TODO.md`](docs/TODO.md). Keyboard switching works.
-- **Workspace layouts are geometric, not per-application.** A workspace holding a single
-  window drops its gaps and borders, but no application is assigned to a workspace.
-- **No power profiles.** Idle handling exists; switching a CPU governor does not, since
-  that is a system service rather than a dotfile.
-- **The launcher and `Super`+`Return` open different terminals.** wofi is set to
-  alacritty and the keybinding to kitty. All four emulators are themed identically, so
-  nothing looks wrong, but a terminal application started from the launcher lands
-  somewhere you did not choose.
+- **[`docs/TODO.md`](docs/TODO.md)** for what is open, including the rough edges this
+  desktop still has, what is parked and why, and what has been decided against.
 
 ## Contributing
 

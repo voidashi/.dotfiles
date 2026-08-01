@@ -73,8 +73,8 @@ different document from the one someone who cloned it needs. The rewrite happene
 pass and left three marks worth knowing about.
 
 The README had been claiming four features that did not exist, found by checking
-its own feature list against the configs rather than reading it. They are now in
-`docs/TODO.md` as work to do and in the README as a Known gaps section, because a
+its own feature list against the configs rather than reading it. They went into
+`docs/TODO.md` as work to do and into the README as a Known gaps section, because a
 gap you are told about costs a reader nothing and a gap you discover costs trust.
 
 `DESIGN-SYSTEM.md` is the identity system for web and document work, and three of
@@ -98,6 +98,39 @@ status accumulates a changelog, while what a reader wants from it is the
 reference: which mechanism carries colour to which application. The history it
 used to carry is either a pitfall, in which case `MAINTENANCE.md` has it, or it
 is in the git log.
+
+## The README stopped explaining itself
+
+Two sections a reviewer had praised were cut, so the record has to say they were
+cut rather than lost.
+
+"Is this for you?" opened the file by qualifying. It turned away X11 users and
+non-Arch users, and neither is turned away by anything in the tree: the theming
+is Wayland-shaped but the palette, the terminals and the editor are not, and
+someone on another distro can read `packages.conf` and translate. A README's
+opening screen is the one that decides whether there is a second screen, and
+spending it on who should leave was the wrong trade. What the section was right
+about survives in two places: the badges and the first line still say Arch and
+Wayland, which is honest because the installer really is Arch, and the
+Contributing section still says this is one person's desktop rather than a
+framework.
+
+"Known gaps" listed four rough edges, and the reasoning that put it there still
+holds; what changed is where the honesty is paid for. Sixteen lines of defects in
+a file that has one screen to earn a reader's attention cost more than they buy,
+and all four items are in `docs/TODO.md` in more detail than the README carried.
+The pointer to that file now names the rough edges as part of what lives there.
+The rule this leaves behind: a gap may move to the document that owns it, but it
+may not stop being reachable from the README in one hop.
+
+The same pass cut the paragraph in the install warning that explained why the
+`--dry-run` rehearsal is worth running, which recounted the file-losing bugs an
+audit had found and fixed. A reader deciding whether to run a script needs the
+rehearsal command, not the incident history. The audit's findings are in the git
+log and what it did not cover is in `docs/TODO.md`. The general form, and the
+reason this is recorded rather than left as taste: the README is a document that
+sells and instructs, and it is not a place where this repository narrates its own
+mistakes to itself.
 
 ## Some configs are kept deliberately, and are not dead weight
 
