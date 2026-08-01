@@ -141,6 +141,10 @@ The line is the write, not the read. Declaring a package that owns a system file
 fine, and `SETUP.md` may tell a reader to run `systemctl enable` themselves. What
 the scripts must not do is make that change on someone's behalf.
 
+So this closes the question for the repository and not for its owner. Theming the
+greeter and setting a power profile stay in `docs/TODO.md` as things done by hand,
+with `SETUP.md` as the place a reader is told to do the same.
+
 ## Two scripts, and no inverse of `add`
 
 `unlink-dotfiles.sh` moved the repository's files back out into `$HOME` and emptied

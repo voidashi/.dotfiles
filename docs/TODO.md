@@ -303,6 +303,29 @@ Sorted by priority. Within a priority, by nothing.
   per-compositor files or accepting the manual step.
   *Difficulty: low. Priority: low.*
 
+- **Bring the greeter onto the palette, by hand.** `tuigreet` takes a `--theme` flag in
+  `component=color` form, which is why it was chosen over the alternatives, and today it
+  is declared and documented unthemed. This repository will not generate that file:
+  greetd's config is root-owned and outside `$HOME`, so `generate_theme.py` has nowhere to
+  write and `check_palette.py` nothing to check, and that stays true for the reason in
+  [`TURNING-POINTS.md`](TURNING-POINTS.md). What is owed is smaller and is a task for the
+  person, not the scripts: derive the theme string from `palette.json` once, apply it, and
+  put it in `SETUP.md` for a reader to paste. It is the one surface that would then drift
+  off-palette with no validator noticing, so the string wants a comment saying where it
+  came from. Wait until the greetd path has actually been booted; theming a path nobody
+  has reached is the wrong order.
+  *Difficulty: low. Priority: low, and it is the first surface a visitor sees, which
+  argues it up once greetd is in use.*
+
+- **Power profiles, on the machine rather than in the repo.** Idle handling exists;
+  switching a CPU governor or a platform profile does not. `power-profiles-daemon` is the
+  usual answer and it needs `systemctl enable`, a system service that `backup-configs.sh`
+  will not manage, again for the reason in `TURNING-POINTS.md`. So this is a one-off to do
+  by hand, plus a line in `SETUP.md` telling a reader to do the same if it turns out to be
+  worth it. `supergfxctl` is already declared here, which suggests the graphics half was
+  once considered.
+  *Difficulty: low. Priority: low.*
+
 - **Per-application workspace layouts.** `hypr/conf/window_rules.lua:10-16` already drops
   gaps and borders when a workspace holds one window, so this is an extension rather than
   a build. What does not exist is any application-to-workspace assignment. Decide the rule
