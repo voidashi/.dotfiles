@@ -13,45 +13,49 @@ alone. A one-line fix can be urgent and a rewrite optional. "Start here next" is
 
 ## Start here next
 
-Two items, in this order. Both come from a review by someone told to be an ordinary
-Linux user who wants a good-looking desktop without spending a weekend on it. Two earlier
-reviews were done by people who could read code, which is why none of this surfaced then.
+One item. The two that stood here, the accent recipe and the Iosevka asset, both shipped
+into `SETUP.md`, and writing the first one is what produced the third hole below.
 
-What that reader valued, and what must survive these edits: the symptom-first
-troubleshooting section, `docs/README.md` telling them only two documents matter, and
-`MAINTENANCE.md` letting them back out in one line. Their verdict was that they would
-install this on a spare machine but not on their working laptop, for two reasons: being
-told to read scripts they cannot read, and not knowing how to reach the session. Both of
-those are now addressed.
+1. **`check_palette.py` passes on colours it cannot see.** Three holes, every one of them
+   found by measurement rather than by reading it, and a checker that passes on a colour
+   nobody chose is worse than no checker.
 
-They also valued two sections that no longer exist. "Is this for you?" and "Known gaps"
-were removed on purpose, with the reasoning in
-[`TURNING-POINTS.md`](TURNING-POINTS.md); do not restore either on the strength of the
-paragraph above.
+   - **`rgb(...)` is outside the check entirely.** An auditor replaced `rgb(498bb2)` with
+     `rgb(ff00ff)` in `.config/hypr/hyprtoolkit.conf` and the checker returned
+     `drift: no colour outside the palette's 82` and exit 0, because its hex pattern is
+     `#[0-9a-fA-F]{6}` and `BARE_HEX_SCOPE` covers only `.config/swaylock/config`. Six
+     `rgb(...)` colours live in that file, `accent_secondary` among them, which is the
+     identity mark. Confirmed again while writing the accent recipe: a scratch swap left
+     hyprtoolkit on the old accent and the checker said nothing.
+   - **A value duplicated inside `palette.json` shadows every stale copy of itself.**
+     `ansi16` slot 1 is a second copy of `bordeaux.400`, so while it holds the old hex
+     that hex is still a palette colour and no file carrying it can ever be reported.
+     Measured: changing the `bordeaux` ramp alone and regenerating moved four files and
+     left nineteen tracked files on the old accent, with the checker at exit 0 throughout.
+     This is the general shape rather than one key: any role literal that repeats a scale
+     value does it. There is no cheap complete fix, because drift asks whether a colour is
+     in the palette and the real question is whether it is the right one for the role, so
+     the roles-layer entry below is what removes the shape. What is cheap is a warning
+     when a hex sits in `ansi16` and in no scale or alert tone, which is exactly the state
+     that keeps a retired value alive. Measured before proposing it: that check returns
+     nothing on the palette as it stands, and reports `ansi16` slot 1 the moment the
+     `bordeaux` ramp moves without it. Do not make it fatal, since a deliberate hue swap
+     puts the palette in that state on purpose.
+   - **`check_sync` only sees the files written whole.** It iterates `generated_files()`,
+     the ten files the generator writes, while the generator also writes
+     `.config/wofi/style.css`, `.config/kdeglobals` and `.config/kcminputrc` by merging.
+     Hand-edits to those three were made and the checker returned 0 for each. The merge
+     cases are deliberate and documented in `generate_theme.py` beside the merge itself,
+     so what is owed is either a partial comparison of the sections the generator owns, or
+     a sentence saying they are unchecked on purpose.
 
-1. **Write the recipe for changing the accent colour.** The README's headline promise is
-   "change one hex and everything moves together", and it is the one promise no document
-   lets a reader act on. Measured: `palette.json` has no accent key, the identity colour
-   is a ten-value `bordeaux` ramp, and the same values are typed again as literals in
-   `terminal.cursor` and `ansi16` slot 1. What that duplication costs was then measured
-   directly: nudging `bordeaux.400` by one digit and running the
-   generator moved four files, while nineteen tracked files kept the old value, the four
-   terminals among them, because they read `ansi16` and slot 1 is a second copy of the
-   same hex. So the accent recipe cannot be "change one key". The reviewer spent ten
-   minutes across five files and gave up. `RICE-GUIDE.md`, which the index recommends for
-   changing appearance, answers "never introduce a colour that is not derived from these",
-   which is the
-   opposite of what they wanted. Owed: a short section in `SETUP.md` naming the exact keys,
-   the two places the values are duplicated, and one worked example ending in the two
-   commands that already exist. It gets shorter once the generator gains a roles layer.
-   *Difficulty: low. Priority: maximum, since it is the repo's best promise with nothing
-   behind it.*
+   `SETUP.md` now warns a reader about the first two in its accent recipe, which limits
+   the damage and does not fix any of them.
+   *Difficulty: low for the `rgb(...)` form and for the duplicate-value check, medium for
+   the merged files. Priority: high.*
 
-2. **Name the exact Iosevka asset.** It is the one place a reader must pattern-match
-   alone: "the Iosevka SGr TTC build" is not a filename, the releases page is a wall of
-   near-identical archives, and the theme wants "Iosevka Extended", a third name. Give the
-   exact asset or a `curl` line, in `SETUP.md`.
-   *Difficulty: low. Priority: maximum.*
+The other `high` entry, the stale screenshots, sits below rather than here because it is
+blocked on someone taking new ones.
 
 ## Open work
 
@@ -62,24 +66,6 @@ Sorted by priority. Within a priority, by nothing.
   a stale screenshot beats none.
   *Difficulty: low, blocked on taking new ones. Priority: high, because it is the first
   thing a visitor sees.*
-
-- **`check_palette.py` passes on colours it cannot see.** Two holes, both found by
-  measurement rather than by reading it. An auditor replaced `rgb(498bb2)` with
-  `rgb(ff00ff)` in `.config/hypr/hyprtoolkit.conf` and the checker still returned
-  `drift: no colour outside the palette's 82` and exit 0, because the checker's hex pattern
-  matches `#[0-9a-fA-F]{6}` and `BARE_HEX_SCOPE` covers only `.config/swaylock/config`,
-  so hyprtoolkit's six `rgb(...)` colours are outside the check entirely. Separately,
-  `check_sync` iterates `generated_files()`, which is the ten files written whole, while
-  the generator also writes `.config/wofi/style.css`, `.config/kdeglobals` and
-  `.config/kcminputrc` by merging; hand-edits to those three were made and the checker
-  returned 0 for each. The merge cases are deliberate and documented in
-  `generate_theme.py` beside the merge itself, so what is owed there is either a partial
-  comparison of the sections the generator owns, or a sentence saying they are unchecked on
-  purpose.
-  The `rgb(...)` hole is not deliberate and is the repo's characteristic bug in its own
-  validator.
-  *Difficulty: low for the `rgb(...)` form, medium for the merged files. Priority: high,
-  because a checker that passes on an invented colour is worse than no checker.*
 
 - **The clone path is load-bearing in seven lines, and it does not have to be.** Cloning
   anywhere but `~/.dotfiles` silently breaks the wallpaper, the clipboard picker, the
@@ -246,7 +232,9 @@ Sorted by priority. Within a priority, by nothing.
 
   The second exists because the first was run with `--include="*.md"` and reported clean
   while eight references sat in six config and script files. What it may legitimately
-  return: this entry and `CLAUDE.md`'s own title line. Anything else is a real reference to
+  return is prose about the file rather than a use of it: `CLAUDE.md`'s own title line,
+  this entry, the entry above about the rule with no home, and the mention in
+  `TURNING-POINTS.md` of where the rules came from. Anything else is a real reference to
   deal with first. Note the "Never write a count that a config file owns" rule still has no
   home under `docs/`, which is the entry above.
   *Difficulty: low. Priority: medium, and it blocks nothing until publication.*
