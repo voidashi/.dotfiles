@@ -18,15 +18,37 @@ into `SETUP.md`, and writing the first one is what produced the third hole below
 
 1. **`check_palette.py` passes on colours it cannot see.** Three holes, every one of them
    found by measurement rather than by reading it, and a checker that passes on a colour
-   nobody chose is worse than no checker.
+   nobody chose is worse than no checker. Two neighbouring defects are already fixed and
+   are not part of this: the palette count now reads 78 rather than 82, which is why older
+   notes quote the larger number, and a value that is not `#RRGGBB` is refused at load.
 
-   - **`rgb(...)` is outside the check entirely.** An auditor replaced `rgb(498bb2)` with
-     `rgb(ff00ff)` in `.config/hypr/hyprtoolkit.conf` and the checker returned
-     `drift: no colour outside the palette's 82` and exit 0, because its hex pattern is
-     `#[0-9a-fA-F]{6}` and `BARE_HEX_SCOPE` covers only `.config/swaylock/config`. Six
-     `rgb(...)` colours live in that file, `accent_secondary` among them, which is the
-     identity mark. Confirmed again while writing the accent recipe: a scratch swap left
-     hyprtoolkit on the old accent and the checker said nothing.
+   - **Every colour format except `#RRGGBB` is outside the check.** The `rgb(...)` case
+     was found first: an auditor replaced `rgb(498bb2)` with `rgb(ff00ff)` in
+     `.config/hypr/hyprtoolkit.conf` and the checker returned `no colour outside the
+     palette` and exit 0, because its pattern is `#[0-9a-fA-F]{6}` and `BARE_HEX_SCOPE`
+     covers only `.config/swaylock/config`. Six `rgb(...)` colours live in that file,
+     `accent_secondary` among them, which is the identity mark. Confirmed again while
+     writing the accent recipe: a scratch swap left hyprtoolkit on the old accent and the
+     checker said nothing.
+
+     The hole is wider than that one form. Measured, with a positive control on the same
+     run to prove the checker was not simply inert: `ff00ff` planted in
+     `.config/waybar/style.css` was caught, while every one of these was not.
+     Sentinels are written here without the leading `#`, or the drift check reads this
+     document's examples as applied colour and reports them.
+
+     | Format | Where it is used | Colours unchecked |
+     |---|---|---|
+     | bare hex, no `#` | `.config/fish/conf.d/voidashi-colorscheme.fish` | 15 |
+     | `rgb(hexdigits)` | `hyprtoolkit.conf`, `hypr/conf/appearance.lua`, `decoration.lua` | 10 |
+     | `rgb(decimal)` | `.config/swaync/style.css`, `.config/wlogout/style.css` | 11 |
+     | `R,G,B` decimal | `.config/kdeglobals` | all of them |
+
+     Six files with no colour reachable at all. Two things not to redo: swaylock's bare-hex
+     coverage is complete, 29 colour lines and 29 matched, so the scope is right there and
+     only there. And a quoted colour name is invisible while a decorated one is not, since
+     `NAMED_RE` wants `^`, whitespace or `=` before the name: in `.config/starship.toml`,
+     `style = 'red'` passes and `style = 'bold red'` is reported, separated by one space.
    - **A value duplicated inside `palette.json` shadows every stale copy of itself.**
      `ansi16` slot 1 is a second copy of `bordeaux.400`, so while it holds the old hex
      that hex is still a palette colour and no file carrying it can ever be reported.
@@ -48,6 +70,13 @@ into `SETUP.md`, and writing the first one is what produced the third hole below
      cases are deliberate and documented in `generate_theme.py` beside the merge itself,
      so what is owed is either a partial comparison of the sections the generator owns, or
      a sentence saying they are unchecked on purpose.
+
+     Drift partly compensates, and knowing where it stops decides how much is owed. In
+     wofi's generated block an off-palette value is caught, `6aa3c8` reported at exit 1,
+     while swapping one palette colour for another inside the same block, `ice-300` set to
+     `ice-400`'s hex, passes both checks. The swap is the likelier hand-edit, so wofi is
+     covered for the careless case and open for the plausible one. `kdeglobals` is open
+     either way, since its `R,G,B` triplets match no pattern in the checker.
 
    `SETUP.md` now warns a reader about the first two in its accent recipe, which limits
    the damage and does not fix any of them.
@@ -201,8 +230,31 @@ Sorted by priority. Within a priority, by nothing.
   `palette.json` holds raw ramps plus a few roles expressed as duplicated literals:
   `terminal.cursor` and `focus_ring` are semantic keys carrying a hex that also exists in a
   scale. Making that systematic would have a role point at a token by name rather than
-  repeat its value. The Neovim theme already works this way in three layers. Three things
-  to settle first. **ANSI must not follow the accent**: slot 1 is red because red means
+  repeat its value. The Neovim theme already works this way in three layers.
+
+  What an audit of the generator added, and it raises the priority of this rather than the
+  difficulty. **The leak is not confined to the hand-written half.** Moving
+  `scales.ice.300` alone and regenerating leaves the *generated* GTK stylesheet emitting
+  `@define-color focus-ring #6aa3c7`, the retired value, because `gen_gtk_css` reads
+  `focus_ring` as an independent literal; the four terminals keep their old cursor,
+  background and selection for the same reason. So "change one hex and everything moves"
+  is false inside the generator's own output, not only outside it, and that is the
+  sharpest argument for doing this at all.
+
+  Three things that make the work cheaper than it looks. `colour_keys()` in
+  `generate_theme.py` already enumerates every place that must hold a colour in one
+  function, which is the hook a resolver would use. `palette.json` is structurally sound
+  today, so the conversion starts from a consistent state: every role literal still equals
+  the scale value it was copied from, and every ramp is monotonic in relative luminance.
+  And the checker's palette count is a free signal for the failure this fixes, since a
+  value entering while the old one stays makes the count go *up*, which is exactly the
+  retired-value-still-alive state; a real swap leaves it flat or smaller.
+
+  One design inconsistency to settle in passing, since it is a role question: ANSI 9 and
+  11 take `alert.critical.fg` and `alert.caution.fg`, while ANSI 10 takes `moss.300`
+  rather than `alert.good.fg`.
+
+  Three things to settle first. **ANSI must not follow the accent**: slot 1 is red because red means
   red, so `ansi16` stays a canonical table no role touches. **The guide still constrains
   which family suits which role**, so a free accent swap can produce a configuration
   `RICE-GUIDE.md` forbids, and whoever clones this is entitled to ignore that. **Roles
