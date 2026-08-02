@@ -10,7 +10,7 @@ add_newline = true
 palette = 'voidashi'
 
 # Voidashi (RICE-GUIDE.md "Shell and prompt"): ink for the path, moss/alert tones
-# for VCS and exit status. Everything else stays at starship's defaults -- restraint
+# for VCS and exit status. Everything else stays at starship's defaults; restraint
 # applies to text as much as to pixels.
 # The prompt mark is a chevron, not starship's default arrow: ➜ is rounded and
 # decorative where the rest of the desktop is cut and square. Success and error

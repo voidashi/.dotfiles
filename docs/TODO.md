@@ -341,16 +341,15 @@ in "Configs that still paste hex" and not here.
   autostart block in `autostart.lua` against the run of `exec` lines in `sway/config`; the
   idle schedule in two syntaxes with a comment asking future editors to keep them in step;
   three screenshot binds under Hyprland against one bare `grim` under Sway; different
-  launcher keys. Sway also carries nine hand-pasted hex while Hyprland reads a generated
-  `palette.lua`, so the two sit on opposite sides of this repo's most important seam;
-  the palette half of that is "Bring the hand-written half onto the generator" and not
-  this one. Dropping Sway is not on the table: `sway/config` carries four findings that
+  launcher keys. The palette half of this divergence is closed: both compositors now read
+  generated colour, Sway through an included partial and Hyprland through `palette.lua`,
+  so what is left here is behaviour. Dropping Sway is not on the table: `sway/config` carries four findings that
   could only come from booting it, including notifications that were dead under Sway with
   the config themed and in place. The standing cost is that anything mirrored into
   `sway/config` from a Hyprland session is checked by `sway --validate` and never run. The
   brightness curve and the clipboard wipe both went in that way: confirmed working under
   Hyprland, untried under Sway.
-  *Difficulty: high, now that the palette half has its own entry and what is left is the
+  *Difficulty: high, now that the palette half has landed and what is left is the
   divergence. Priority: medium.*
 
 - **The launcher and the keybinding open different terminals.** `.config/wofi/config` sets
