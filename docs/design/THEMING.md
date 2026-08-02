@@ -17,12 +17,12 @@ colour fails to arrive.
 
 | Mechanism | How it works | Applications |
 |---|---|---|
-| **Generated partial, included** | The generator writes a colour-only file in the application's native format and its config includes it | kitty, foot, ghostty, alacritty, Hyprland (`conf/palette.lua`), Neovim (`theme/palette.lua`) |
+| **Generated partial, included** | The generator writes a colour-only file in the application's native format and its config includes it | kitty, foot, ghostty, alacritty, Sway (`sway/voidashi-colors`), Hyprland (`conf/palette.lua`), hyprtoolkit (`hypr/voidashi-toolkit-colors.conf`), Neovim (`theme/palette.lua`) |
 | **Generated partial, `@import`ed** | The same idea through CSS: one shared file at `.config/theme/voidashi-colors.css`, imported by path on the stylesheet's first line | waybar, swaync, wlogout |
-| **Generated block, inlined** | The same content pasted into the stylesheet between markers, because the application cannot import | wofi |
+| **Generated block, inlined** | The palette pasted into the file itself between markers, because the application cannot include anything | wofi, starship |
 | **Generated named colours** | The palette is mapped onto the names the toolkit already paints from, and the application carries on unaware | GTK3, GTK4 and libadwaita |
 | **Merged INI** | Only the colour, font and cursor keys of a file another program also writes | KDE (`kdeglobals`, `kcminputrc`) |
-| **Hand-written** | Colour mixes with structural config, so generating into it would risk corrupting what is not colour | swaylock, bottom, starship, fastfetch, catnap, fish, yazi, Sway, `nvim/theme/roles.lua` |
+| **Hand-written** | Colour mixes with structural config, so generating into it would risk corrupting what is not colour | swaylock, bottom, fastfetch, catnap, fish, yazi, `nvim/theme/roles.lua` |
 
 The hand-written ones are the ones that age in silence, which is why
 `scripts/theme/check_palette.py` exists. Run it after touching colour.
@@ -44,25 +44,32 @@ Two things skip the layer. `ansi16` is consumed raw by the four terminals and by
 because slot 1 is red whatever this desktop's identity colour happens to be, and
 `geometry` and `typography` are values with no decision to add.
 
-`scripts/theme/generate_theme.py` **writes** ten files whole, each in the format its
-consumer already reads: the four terminal partials, the Hyprland Lua module, the Neovim
-palette layer, the shared CSS partial at `.config/theme/voidashi-colors.css`, the GTK3
-and GTK4 named-colour files, and the selectable KDE colour scheme
-`Voidashi.colors`.
+`scripts/theme/generate_theme.py` **writes** twelve files whole, each in the format its
+consumer already reads: the four terminal partials, Sway's variables, the Hyprland Lua
+module, hyprtoolkit's six colour keys, the Neovim palette layer, the shared CSS partial
+at `.config/theme/voidashi-colors.css`, the GTK3 and GTK4 named-colour files, and the
+selectable KDE colour scheme `Voidashi.colors`.
 
-It also **edits** three files it does not own rather than writing them: wofi's
-stylesheet, where the palette is spliced between markers because wofi cannot import, and
-`kdeglobals` plus `kcminputrc`, where colour, font and cursor keys are merged in one by
-one so nothing of KDE's own is lost. The distinction matters when reading the generator:
+Sway's partial holds variables and nothing else: which window state takes which role is
+hand-written beside the `client.*` directives that read them, the same split as
+Hyprland, where `appearance.lua` decides and `palette.lua` is generated. It is also what
+gives the file a check that can fail, since `sway --validate` rejects a `$vd_*` that no
+include defined.
+
+It also **edits** four files it does not own rather than writing them: wofi's
+stylesheet and `starship.toml`, where the palette is spliced between markers because
+neither can include a file, and `kdeglobals` plus `kcminputrc`, where colour, font and
+cursor keys are merged in one by one so nothing of KDE's own is lost. The distinction matters when reading the generator:
 `generated_files()` holds the ones it writes whole and `merged_files()` the ones it
 merges into. Output written whole carries a `GENERATED` header and must not be
 hand-edited.
 
 `check_palette.py` proves it held: no colour outside the palette, in any of the five
 forms colour is written here; no named terminal colour in fish or starship; no file
-written whole that differs from what the generator would produce now; and no section of a
+written whole that differs from what the generator would produce now; no section of a
 merged file that a second merge would change, which is what a hand-edit to one looks
-like. It also warns, without failing, when a role literal holds a hex no scale or alert
+like; and no starship style naming a colour its own palette table does not define, which
+would render that segment uncoloured without a word. It also warns, without failing, when a role literal holds a hex no scale or alert
 tone holds, since a duplicated value keeps a retired colour inside the palette and hides
 every file still carrying it.
 
@@ -90,7 +97,11 @@ relative to the stylesheet size so the two move together.
 **Launcher.** wofi on `void-20`, input one step lighter, Ice on the selected entry,
 Bordeaux on the prompt. Its palette is inlined rather than imported. hyprlauncher is
 configured too and takes its appearance from `.config/hypr/hyprtoolkit.conf`, since its
-own config covers behaviour only.
+own config covers behaviour only; that file's six colour keys are sourced from a
+generated partial and the rest of it, rounding and fonts, stays hand-written. Rendered
+and sampled once: the surface comes out `191817`, against `181818` for the toolkit's
+own default, and the corners are square. The selected entry and the identity mark were
+not on screen in that capture, since the list was empty.
 
 **Notifications.** swaync on `void-20`, painting from custom properties on `:root`
 rather than from our own selectors, which is what makes upstream's radius and surfaces

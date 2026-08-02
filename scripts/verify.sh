@@ -66,6 +66,34 @@ if have hyprctl; then
     fi
 fi
 
+section "hyprtoolkit source path" "sed -n 's/^source *= *//p' .config/hypr/hyprtoolkit.conf"
+# hyprtoolkit validates nothing and hyprlang resolves a relative source against
+# the process cwd, so a path written "./file.conf" loads the toolkit's own
+# defaults from every launcher not started in .config/hypr/, with no error
+# anywhere. Nothing here can prove the colours arrived, which takes a screenshot;
+# this proves only that the path is one hyprlang can still find at runtime.
+htk_bad=0
+while IFS= read -r htk_path; do
+    printf 'source = %s\n' "$htk_path"
+    case "$htk_path" in
+        "~/.config/"*)
+            htk_target=".${htk_path#\~}"
+            if [ ! -f "$htk_target" ]; then
+                printf '[FAIL] no such file: %s\n' "$htk_target"
+                htk_bad=1
+            fi
+            ;;
+        /*)
+            printf 'absolute path outside $HOME, not checkable from the repo\n'
+            ;;
+        *)
+            printf '[FAIL] relative path, which hyprlang resolves against the process cwd\n'
+            htk_bad=1
+            ;;
+    esac
+done < <(sed -n 's/^source *= *//p' .config/hypr/hyprtoolkit.conf)
+verdict "$htk_bad" "hyprtoolkit source"
+
 section "Sway" "sway --validate -c .config/sway/config"
 if have sway; then
     sway --validate -c .config/sway/config 2>&1

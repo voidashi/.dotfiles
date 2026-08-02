@@ -210,25 +210,21 @@ gaps inner 10
 #
 # The block that used to sit here carried Kanagawa's 41 colours as variables and
 # used none of them: there was not a single client.* directive in the file, so
-# Sway ran on its factory colours while the repo appeared to be themed.
-set $void00 #0a0908
-set $void10 #121110
-set $edge20 #2a2927
-set $edge30 #393835
-set $ink0   #e8e8e8
-set $ink2   #b1b1b1
-set $ink4   #6c6c6c
-set $ice300 #6aa3c7
-set $critical #e14b39
+# Sway ran on its factory colours while the repo appeared to be themed. The nine
+# that replaced it were correct and hand-pasted, so they could only follow
+# palette.json by someone remembering to edit both.
+#
+# The path is relative to this file, which is how sway resolves an include.
+include voidashi-colors
 
 # client.<state> <border> <background> <text> <indicator> <child-border>
 # The indicator shows where the next window opens, so it takes Ice too: it is focus.
-client.focused          $ice300 $void10 $ink0 $ice300 $ice300
-client.focused_inactive $edge30 $void10 $ink2 $edge30 $edge30
-client.unfocused        $edge30 $void00 $ink4 $edge30 $edge30
-client.urgent           $critical $void10 $ink0 $critical $critical
-client.placeholder      $edge20 $void00 $ink2 $edge20 $edge20
-client.background       $void00
+client.focused          $vd_focus $vd_bg_window $vd_text_bright $vd_focus $vd_focus
+client.focused_inactive $vd_unfocused $vd_bg_window $vd_text_body $vd_unfocused $vd_unfocused
+client.unfocused        $vd_unfocused $vd_bg_content $vd_text_disabled $vd_unfocused $vd_unfocused
+client.urgent           $vd_urgent $vd_bg_window $vd_text_bright $vd_urgent $vd_urgent
+client.placeholder      $vd_border $vd_bg_content $vd_text_body $vd_border $vd_border
+client.background       $vd_bg_content
 
 
 #

@@ -196,6 +196,27 @@ What was never executed, so nobody reads that number as broader than it is:
   hyprlang**: `hypridle.conf`, `hyprpaper.conf` and `hyprtoolkit.conf`. Only Hyprland
   itself gained a Lua config in 0.55; hypridle, hyprlock and hyprtoolkit still read
   hyprlang. Do not port any of them to the syntax `conf/*.lua` uses.
+- **hyprlang resolves a relative `source =` against the process cwd, not against
+  the file that contains it,** and says nothing at all when the glob then finds no
+  match. `hyprtoolkit.conf` therefore sources
+  `~/.config/hypr/voidashi-toolkit-colors.conf` by absolute path. Measured with
+  hyprlauncher on screen and the pixels sampled: started from any directory but
+  `.config/hypr/`, a `./voidashi-toolkit-colors.conf` renders the toolkit's own
+  default `181818` with an empty stderr, while the absolute form renders `191817`,
+  which is `void-20`. Started *from* that directory the relative form works, which is
+  how a broken path passes a hand test. This is wofi's `@import` failure in a second
+  toolkit; the two are the same bug.
+- **hyprtoolkit validates nothing it reads.** A colour key set to `notacolour` and a
+  key that does not exist are both accepted in silence, inline and in a sourced file
+  alike. So a hyprtoolkit config that loads without error is no evidence that any of
+  it applied: the only thing an error proves is a path that failed to glob. The check
+  is a screenshot. `hyprlauncher` is a layer-shell surface, so its geometry comes
+  from `hyprctl layers` and never from `hyprctl clients`, and it fades in, so a
+  capture taken the moment it appears samples a blend with whatever is behind it.
+- **hyprtoolkit falls back to `$HOME/.config` when `XDG_CONFIG_HOME` holds no config
+  of its own,** which quietly makes a throwaway config tree read the installed one.
+  A control run needs both variables pointed away from `$HOME`, or it measures the
+  real desktop while appearing to measure the copy.
 - **Waybar is one config split three ways, not three configs.** `common.jsonc` holds
   the bar geometry and every module definition; `hyprland.jsonc` and `sway.jsonc`
   each `include` it and add only their own compositor's `modules-left`; `style.css`
@@ -375,9 +396,21 @@ What was never executed, so nobody reads that number as broader than it is:
   `.config/wofi/style.css`, `kdeglobals` and `kcminputrc` were outside it: an edit
   was made in each and the checker returned 0 for all three. It now merges again
   and compares, which reports any difference in a section the generator owns while
-  leaving everything else alone, both measured. Adding a fourth merged file means
-  adding it to `merged_files()` in `generate_theme.py`, which is the one list both
-  the generator and the checker read.
+  leaving everything else alone, both measured. `starship.toml` was the fourth to
+  join them. A merged file means one entry in `merged_files()` in
+  `generate_theme.py`, which is the one list both the generator and the checker
+  read.
+- **starship's generated palette table has to stay at the end of its file.**
+  `[palettes.voidashi]` is a TOML table header, so every key below it belongs to
+  that table until the next header: a module added underneath the markers becomes
+  a palette entry and stops configuring anything. Nothing warns.
+- **A starship style naming a colour that is not in that table renders with no
+  colour and says nothing.** Only a missing table is reported, as `Could not find
+  color palette`, and then the whole prompt loses its colours at once, which is the
+  easy case. Measured with `ink-2` misspelt: the path segment came out with no
+  escape sequence while every other segment kept its own. `check_palette.py` grew
+  its `names` check for exactly this, because moving that file off pasted hex is
+  what created the failure.
 - **The lock screen is plain `swaylock`, not `swaylock-effects`,** and its config was
   originally written for the latter. Seven options were unknown to the installed
   binary: `screenshots`, `effect-blur`, `effect-vignette`, `indicator`, `clock`,

@@ -20,46 +20,44 @@ hardware, images or a decision come last. Inside a group, by priority.
 ## Start here next
 
 One item, chosen for the next session rather than by rating. Everything rated `high` is in
-"Waiting on the world" and cannot start today; this is the other half of a promise whose
-first half just landed.
+"Waiting on the world" and cannot start today; this is the thing that gates the largest
+drift surface left in the repository.
 
-1. **Bring the hand-written half onto the generator, in the order the survey found.** The
-   entry is the first one below, under "Configs that still paste hex". It is worth doing
-   next because `roles.py` now exists: Sway's nine pasted hex, starship's five and
-   hyprtoolkit's six become generated partials reading roles rather than a second
-   transcription of the palette, which is the shape the four terminals already have. Yazi
-   is in the same entry and not in the same session, because its keys have to be brought
-   onto the current schema first.
+1. **Rename the six yazi keys that name a schema yazi renamed.** The entry is the second
+   one below, under "Configs that still paste hex". It is worth doing next because it
+   gates the other half of the same file: yazi's 18 colours cannot move onto a generated
+   flavor until the keys carrying them are the ones the binary reads, and the two are
+   deliberately separate commits, one changing how yazi looks and one changing where its
+   colours come from. Sway, hyprtoolkit and starship, which this entry used to name, have
+   landed.
 
 ## Configs that still paste hex
 
 The seam this repository is built on. A colour is either decided once in
-`palette.json` and read from there, or it is transcribed and drifts. Both entries close a
-transcription.
+`palette.json` and read from there, or it is transcribed and drifts. Each entry here
+closes a transcription.
 
 - **Bring the hand-written half onto the generator, in the order the survey found.** The
-  generator owns 13 files; 19 more paste a palette colour by hand and follow nothing. A
+  generator owns 16 files; 16 more paste a palette colour by hand and follow nothing. A
   survey established, per application and against its own documentation or binary, whether
   the palette could reach it. The precedent is `.config/hypr/conf/decoration.lua`, already
   converted: it read `require("conf/palette")` for its radius while its shadow colour sat
   pasted, and the fix was one line.
 
-  **The application has its own include, confirmed by running it.** These want a generated
+  Three of the survey's rows have landed and are not open work: Sway's nine colours, now a
+  generated partial its config includes; hyprtoolkit's six, now sourced; and starship's
+  five, now names against a generated palette table inside its own file. Which route each
+  takes is in [`design/THEMING.md`](design/THEMING.md) and what breaks when editing them is
+  in [`MAINTENANCE.md`](MAINTENANCE.md). What that leaves here is yazi, which has its own
+  route, and the four with no route at all.
+
+  **The application has its own include, confirmed by running it.** This wants a generated
   partial and one directive in the hand-written file, which is the pattern the four
-  terminals already use.
+  terminals and now Sway and hyprtoolkit use.
 
   | File | Directive | Colours | How it was confirmed |
   |---|---|---|---|
-  | `.config/sway/config` | `include <path>` | 9 | `sway --validate` rejects a bare `$var` and accepts it after the include |
-  | `.config/hypr/hyprtoolkit.conf` | `source = <path>` | 6 | hyprtoolkit's own `source= globbing error` on a bad path, silent on a good one |
   | `.config/yazi/theme.toml` | `[flavor]` dark/light | 18 | the yazi binary's embedded default `theme.toml` and its `flavors/<name>.yazi/flavor.toml` path |
-
-  Sway is the cheapest of the three and hyprtoolkit splits cleanest, 6 colour lines out and
-  `rounding_*` and the font keys staying. Nothing renders `hyprtoolkit.conf` today, since
-  `programs.lua` sets `menu = "wofi --show drun"` and leaves the hyprlauncher line
-  commented, so its check stops at the toolkit accepting the `source` directive and never
-  reaches a screen. That limits the evidence rather than excusing the pasted hex, and the
-  screen half is its own entry under "Waiting on the world".
 
   Yazi is the largest single drift surface in the repository, 18 colours over 69 sites, and
   the `tmtheme.xml` question is answered: it is not required at load. Measured under yazi
@@ -73,12 +71,6 @@ transcription.
   theme and would stay there. It buys that one surface and gates nothing. What yazi does
   need first is the entry below.
 
-  **Named colours in the same file, so a generated block inside it.** `.config/starship.toml`
-  takes `palette = "<name>"` plus a `[palettes.<name>]` table, and `style` fields then name
-  colours instead of repeating hex. Confirmed end to end: with the table in place,
-  `starship prompt` emitted `38;2;177;177;177`, which is `ink-2`. 5 colours, and unlike the
-  three above it rewrites the hand-written side too, since the hex become names.
-
   **No mechanism, and the reason differs.** `bottom` (18 colours) and `swaylock` (15) have
   one config file each and no include; their colour keys are contiguous, so a marked block
   like wofi's would work, but that is a wrapper rather than the application's own mechanism
@@ -91,8 +83,10 @@ transcription.
   changes module output and is a functional change rather than a theming one.
   `.config/catnap/config.toml` needs nothing and should not be counted: it pastes no hex at
   all, only ANSI tokens, which already resolve through the generated terminal table.
-  *Difficulty: low each for sway, hyprtoolkit and starship; medium for yazi; high for
-  fastfetch. Priority: medium, and it is what would make the README's promise true.*
+  The four with no route are worth one decision rather than four, and `starship.toml` is
+  now the worked example of what a marked block costs and buys.
+  *Difficulty: medium for yazi; high for fastfetch. Priority: medium, and it is what would
+  make the README's promise true.*
 
 - **Six keys in `.config/yazi/theme.toml` name a schema yazi renamed, and the colours they
   carry reach nothing.** Found while measuring the flavor question above, by extracting the
@@ -110,9 +104,12 @@ transcription.
   the palette, not whether the key carrying it still exists, and an override matched by name
   fails silently when upstream renames one. A checker that validates our key names against
   the binary's embedded default is the obvious rung up, and it would cover every application
-  whose config we override by name rather than yazi alone. Do this before the flavor
-  conversion, so one commit changes how yazi looks and a separate one changes where its
-  colours come from.
+  whose config we override by name rather than yazi alone. Half of that shape now exists:
+  `check_palette.py`'s `names` check asks whether a starship style names a colour the
+  file's own palette table defines. That is the same question one level in, ours against
+  ours rather than ours against upstream, so it is worth reading before writing the harder
+  one. Do this before the flavor conversion, so one commit changes how yazi looks and a
+  separate one changes where its colours come from.
   *Difficulty: low to rename, and the work is deciding what the `_alt` halves should be,
   since the split gives the mode indicator a second surface this palette never assigned.
   Priority: medium, because two colour decisions that are documented are not on screen.*
@@ -299,9 +296,12 @@ work. Two of them want eyes on a screen rather than a refactor.
   - **Ice is spent at three steps and only two are written down.** `ice-600` is the
     selection surface and `ice-300` the line form for rings, links and active text, both
     in `RICE-GUIDE.md`. `ice-400` is Qt's focus decoration and is documented nowhere: the
-    only justification on record was the name of a local variable, `ice_focus`. Decide
-    whether Qt's focus decoration belongs between the two or should join one of them. It
-    changes what Qt applications look like, so it wants eyes on a screen rather than a
+    only justification on record was the name of a local variable, `ice_focus`. It has a
+    second reader now: hyprtoolkit's `accent` is the same step, which was pasted as
+    `ice-400` before the conversion and reads the role after it. Two toolkits on a step is
+    an argument for the step existing, not for its value. Decide whether that focus
+    decoration belongs between the two or should join one of them. It changes what Qt
+    applications and the launcher look like, so it wants eyes on a screen rather than a
     refactor.
   - **Bright green does not follow the rule that placed bright red and bright yellow.**
     `RICE-GUIDE.md` justifies slots 9 and 11 taking alert tones, because in a terminal
@@ -343,16 +343,15 @@ in "Configs that still paste hex" and not here.
   autostart block in `autostart.lua` against the run of `exec` lines in `sway/config`; the
   idle schedule in two syntaxes with a comment asking future editors to keep them in step;
   three screenshot binds under Hyprland against one bare `grim` under Sway; different
-  launcher keys. Sway also carries nine hand-pasted hex while Hyprland reads a generated
-  `palette.lua`, so the two sit on opposite sides of this repo's most important seam;
-  the palette half of that is "Bring the hand-written half onto the generator" and not
-  this one. Dropping Sway is not on the table: `sway/config` carries four findings that
+  launcher keys. The palette half of this divergence is closed: both compositors now read
+  generated colour, Sway through an included partial and Hyprland through `palette.lua`,
+  so what is left here is behaviour. Dropping Sway is not on the table: `sway/config` carries four findings that
   could only come from booting it, including notifications that were dead under Sway with
   the config themed and in place. The standing cost is that anything mirrored into
   `sway/config` from a Hyprland session is checked by `sway --validate` and never run. The
   brightness curve and the clipboard wipe both went in that way: confirmed working under
   Hyprland, untried under Sway.
-  *Difficulty: high, now that the palette half has its own entry and what is left is the
+  *Difficulty: high, now that the palette half has landed and what is left is the
   divergence. Priority: medium.*
 
 - **The launcher and the keybinding open different terminals.** `.config/wofi/config` sets
@@ -362,9 +361,10 @@ in "Configs that still paste hex" and not here.
 
 - **hyprlauncher's radius contradicts the floating rule.** `hyprtoolkit.conf` sets both
   `rounding_large` and `rounding_small` to 0, but a launcher floats and the guide gives a
-  floating surface 4px.
-  Nothing renders it today, so fix it before switching back or the launcher arrives with
-  the one geometry the design does not allow.
+  floating surface 4px. Confirmed on screen rather than only in the file: a capture of the
+  launcher's layer shows square corners. Nothing renders it in daily use today, so fix it
+  before switching back or the launcher arrives with the one geometry the design does not
+  allow. The two keys are hand-written and stay that way, since neither is colour.
   *Difficulty: trivial. Priority: low while hyprlauncher stays off.*
 
 - **The bar carries laptop-only modules with no guard.** `battery` and `backlight` sit in
@@ -525,17 +525,19 @@ the groups above have stopped changing what the desktop looks like.
   *Difficulty: low. Priority: low, and it is the first surface a visitor sees, which
   argues it up once greetd is in use.*
 
-- **Nobody has seen hyprlauncher on a screen.** `.config/hypr/hyprtoolkit.conf` is themed,
-  and once the first entry of "Configs that still paste hex" lands it is generated, but
-  `programs.lua` runs wofi and the hyprlauncher line stays commented, so every check that
-  file has ever had stops at the toolkit accepting it. Switching the launcher for long
-  enough to look is a person's job rather than a script's: confirm the surface is void-20,
-  the input field one step lighter, the selected entry Ice, the identity mark Bordeaux
-  rather than a second selection colour, and the corners square. The radius entry under
-  "The two compositors" is the one defect already known to be waiting there, so fix it
-  before looking or it is what you will see.
-  *Difficulty: trivial, blocked on someone switching the launcher and looking. Priority:
-  low, since nothing runs it today.*
+- **Half of hyprlauncher has now been seen on a screen, and the other half has not.**
+  `programs.lua` still runs wofi and the hyprlauncher line stays commented, but the
+  launcher was started against this repository's config and its layer captured with `grim`
+  while converting `hyprtoolkit.conf`. Settled by that: the surface is `void-20`, measured
+  at 87.9% of the window against `181818` for the toolkit's own default, and the corners
+  are square, which confirms the radius entry under "The two compositors" is a real defect
+  and not a paper one. Not settled: the input field one step lighter, the selected entry
+  Ice, and the identity mark Bordeaux rather than a second selection colour, because the
+  finder listed nothing under a throwaway `$HOME` and none of the three was on screen.
+  Anyone repeating this wants `hyprctl layers` rather than `hyprctl clients`, and a wait
+  before the capture, both for the reason in `MAINTENANCE.md`.
+  *Difficulty: trivial, blocked on someone switching the launcher and looking at a
+  populated list. Priority: low, since nothing runs it today.*
 
 - **Dolphin's icons are still `breeze-dark`**, so folders come out blue against a Voidashi
   window. Every alternative installed here is worse aligned, so this waits on an icon set
