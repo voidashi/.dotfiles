@@ -350,6 +350,20 @@ Sorted by priority. Within a priority, by nothing.
   provider applies to every AUR entry here and belongs in `MAINTENANCE.md`.
   *Difficulty: trivial. Priority: low.*
 
+- **`focus-ring` is a GTK variable nobody reads.** `gen_gtk_css` emits
+  `@define-color focus-ring` into the shared partial and into wofi's block, and no
+  stylesheet uses `@focus-ring`: measured, the only two hits in the tree are the two
+  definitions. It follows the Ice ramp correctly now that it is a role, so nothing renders
+  wrong; what is open is what it should be. Emit it as `@define-color focus-ring @ice-300`,
+  which is GTK's own named-colour reference, renders identically and puts the dependency in
+  the output where a reader sees it. Delete it, which is cheapest, and means the next
+  stylesheet wanting a focus ring pastes a hex, which is the thing this pipeline exists to
+  prevent. Or leave it as an export for a consumer that does not exist yet. One thing to
+  check before the first option: no stylesheet here uses the `@name` reference form at all
+  today, so it would be the first, and it has to be tried on GTK3 as well as GTK4, since
+  waybar and wlogout are GTK3 while swaync is GTK4.
+  *Difficulty: trivial. Priority: low, since nothing renders wrong either way.*
+
 - **The launcher and the keybinding open different terminals.** `.config/wofi/config` sets
   `term=alacritty` while `.config/hypr/conf/programs.lua` sets `terminal = "kitty"`.
   All four terminals are themed identically, which is why it went unnoticed. Pick one.
