@@ -20,8 +20,8 @@ hardware, images or a decision come last. Inside a group, by priority.
 ## Start here next
 
 One item, chosen for the next session rather than by rating. Everything rated `high` is in
-"Waiting on the world" and cannot start today; this is the other half of a promise whose
-first half just landed.
+"Waiting on the world" and cannot start today; this is the thing that gates the largest
+drift surface left in the repository.
 
 1. **Rename the six yazi keys that name a schema yazi renamed.** The entry is the second
    one below, under "Configs that still paste hex". It is worth doing next because it
@@ -83,9 +83,8 @@ closes a transcription.
   changes module output and is a functional change rather than a theming one.
   `.config/catnap/config.toml` needs nothing and should not be counted: it pastes no hex at
   all, only ANSI tokens, which already resolve through the generated terminal table.
-  The four with no route are worth one decision rather than four: `bottom` and `swaylock`
-  would take a marked block, which is the treatment starship just got, and taking it means
-  saying in each file that it is a wrapper rather than the application's own mechanism.
+  The four with no route are worth one decision rather than four, and `starship.toml` is
+  now the worked example of what a marked block costs and buys.
   *Difficulty: medium for yazi; high for fastfetch. Priority: medium, and it is what would
   make the README's promise true.*
 
@@ -105,9 +104,12 @@ closes a transcription.
   the palette, not whether the key carrying it still exists, and an override matched by name
   fails silently when upstream renames one. A checker that validates our key names against
   the binary's embedded default is the obvious rung up, and it would cover every application
-  whose config we override by name rather than yazi alone. Do this before the flavor
-  conversion, so one commit changes how yazi looks and a separate one changes where its
-  colours come from.
+  whose config we override by name rather than yazi alone. Half of that shape now exists:
+  `check_palette.py`'s `names` check asks whether a starship style names a colour the
+  file's own palette table defines. That is the same question one level in, ours against
+  ours rather than ours against upstream, so it is worth reading before writing the harder
+  one. Do this before the flavor conversion, so one commit changes how yazi looks and a
+  separate one changes where its colours come from.
   *Difficulty: low to rename, and the work is deciding what the `_alt` halves should be,
   since the split gives the mode indicator a second surface this palette never assigned.
   Priority: medium, because two colour decisions that are documented are not on screen.*
