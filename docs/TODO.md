@@ -8,170 +8,32 @@ work, it moves to one of those rather than staying here as a record.
 
 Each entry carries a **difficulty** and a **priority**, rated separately: difficulty is
 how much work it is and how much can go wrong, priority is how much it costs to leave
-alone. A one-line fix can be urgent and a rewrite optional. "Start here next" is ordered;
-"Open work" is sorted by priority and nothing else.
+alone. A one-line fix can be urgent and a rewrite optional.
+
+Entries are grouped by the session that would do them, meaning they open the same files or
+answer the same question. A flat list sorted by priority put two entries about the same
+script two hundred lines apart, and a session that picks up the second one pays for the
+first file all over again. The groups run in the order work can start rather than by
+rating: the ones that can be done at this keyboard today come first, the ones waiting on
+hardware, images or a decision come last. Inside a group, by priority.
 
 ## Start here next
 
-One item, chosen for the next session rather than by rating: the stale screenshots are
-`high` and blocked on someone taking new ones, and this is the other half of a promise
-whose first half just landed.
+One item, chosen for the next session rather than by rating. Everything rated `high` is in
+"Waiting on the world" and cannot start today; this is the other half of a promise whose
+first half just landed.
 
 1. **Bring the hand-written half onto the generator, in the order the survey found.** The
-   entry is below, under Open work. It is worth doing next because `roles.py` now exists:
-   Sway's nine pasted hex and starship's five become a generated partial reading roles
-   rather than a second transcription of the palette, which is the shape the four
-   terminals already have.
+   entry is the first one below, under "Configs that still paste hex". It is worth doing
+   next because `roles.py` now exists: Sway's nine pasted hex and starship's five become a
+   generated partial reading roles rather than a second transcription of the palette,
+   which is the shape the four terminals already have.
 
-## Open work
+## Configs that still paste hex
 
-Sorted by priority. Within a priority, by nothing.
-
-- **The screenshots in the README predate the current theme.** Committed April 2025, they
-  show the Kanagawa desktop this repo no longer contains. They stay until replaced, since
-  a stale screenshot beats none.
-  *Difficulty: low, blocked on taking new ones. Priority: high, because it is the first
-  thing a visitor sees.*
-
-- **The clone path is load-bearing in seven lines, and it does not have to be.** Cloning
-  anywhere but `~/.dotfiles` silently breaks the wallpaper, the clipboard picker, the
-  bar's power button and Neovim's dashboard. Ruled out already, with the incident recorded
-  in the `autostart.lua` comment on absolute paths: relative paths, because they depended
-  on the cwd Hyprland was started with and the bar did not come up depending on how you
-  logged in.
-  The seven lines are three different problems. Five are script calls
-  (`clipboard-picker.sh` in both compositors, `power-menu.sh` in the bar,
-  `select-random-wallpaper.sh` in both), one is a data directory
-  (`$HOME/.dotfiles/wallpapers` as the picker's last fallback), and one is Neovim's
-  dashboard opening the repo as a project, which names the repo by definition and should
-  probably stay. Two mechanisms, and the choice is the work. A symlink farm, where
-  `backup-configs.sh install` links the `scripts/wm/` helpers into `~/.local/bin` from
-  whatever root it is actually running in, fixes the five script calls and works whatever
-  starts the session. A session variable in the already-tracked
-  `~/.config/environment.d/50-voidashi.conf` reaches all seven and turns the edit into one
-  line in one file, but `environment.d` is read by the systemd user session, and this
-  repo documents reaching the desktop by typing `Hyprland` at a console, which is exactly
-  where it may not arrive.
-  *Difficulty: low either way, and the decision is most of it. Priority: medium.*
-
-- **KDE theming is not optional, and it lands on a session the reader did not offer.**
-  `config_files.conf` links `~/.config/kdeglobals`, `~/.config/kcminputrc` and
-  `~/.local/share/color-schemes/Voidashi.colors`, which is where Plasma applications read
-  their palette and their cursor, so installing on a machine that already runs KDE
-  rethemes the desktop the reader meant to keep. A reviewer reading only the README
-  named this as the single reason not to install on a working laptop, and they were right
-  before the README warned about it. The warning is now in the install block, which fixes
-  the surprise and not the situation. Options, in rough order of cost: let
-  `backup-configs.sh install` take paths, which has its own entry below and makes every
-  subset possible rather than this one; a documented "everything except the Qt/KDE
-  paths" invocation; or splitting the Qt/KDE entries into their own section of
-  `config_files.conf` so they can be skipped by name. Isolating it to the Hyprland and
-  Sway sessions is the option that sounds best and does not exist: `kdeglobals` is read
-  per user, not per session.
-  *Difficulty: low once `install` takes paths. Priority: medium, and it is the one
-  finding that changed a reviewer's answer from yes to no.*
-
-- **The README does not answer the reader who is deciding whether to install.** Six gaps
-  from the same review, none of them worth a section on their own and all of them cheap.
-  There is no statement of what the repository assumes beyond Arch and Wayland: nothing
-  about Nvidia, nothing about laptop against desktop, while the install block says the
-  bar carries laptop-only modules, so hardware evidently matters. There is no order of
-  magnitude for what will be installed, so `preview` means reading sixty lines cold. The
-  section on taking only part of it does not say which file inside a terminal's directory
-  carries the colours, so the reader lists the directory to find `voidashi-colors.conf`.
-  It also does not say whether `generate_theme.py` reaches a config that was copied by
-  hand rather than symlinked, which is the first thing that reader wants after copying
-  one. The three badges restate the first sentence and the last section. And the
-  repository layout block sits above the reader's decision while answering a question
-  they only have afterwards, which is why it was skipped outright.
-  *Difficulty: trivial each. Priority: medium, and they are worth doing in one pass
-  rather than one at a time.*
-
-- **The greetd path has never been run.** It is documented in `SETUP.md` step 6 and
-  declared in `packages.conf`, but this machine reaches its desktop through `plasmalogin`,
-  so nothing has exercised the config or the unit. Verified and worth not re-doing: both
-  packages exist in `extra`, the config format and tuigreet flags come from upstream's own
-  README, and `/usr/share/wayland-sessions/` already holds `hyprland.desktop` and
-  `sway.desktop`. Unverified is the whole path end to end. A spare machine or a VM is the
-  honest test, and until then `SETUP.md` must not gain a sentence claiming it was tried.
-  *Difficulty: low, blocked on a second machine. Priority: medium.*
-
-- **`CLAUDE.md` holds one rule that exists nowhere else.** It claims it "can be deleted
-  without losing anything", which is true of four of its five rules. "Never write a count
-  that a config file owns" appears nowhere under `docs/`. Move it to `MAINTENANCE.md`
-  before the file goes, and move the general form with it: a file must not restate a fact
-  another file owns, only point at the owner. The count is the narrow case.
-  `hyprtoolkit.conf` carried the wide one twice. A line number is a third case worth
-  naming in the same breath, because it is a coordinate rather than a fact: a citation of
-  `README.md:161` went stale twice inside one session as the file grew, and both times
-  nothing failed. Cite the sentence, not where it currently sits.
-  *Difficulty: trivial. Priority: medium, because it is lost silently at deletion.*
-
-- **`[hooks]` has no users and a repair plan.** Zero entries, one commented example, and
-  `run_hooks()` is fifteen lines of awk-inside-bash carrying three known MEDIUM defects: a
-  hook command containing `=` is truncated at the first one; a hook key is interpolated
-  into a regex rather than compared literally, so `pipesXsh` fires for `pipes.sh`; and
-  `add_repos` discards `update_pkg_db`'s status. The honest fix was always to replace that
-  awk with a bash read loop. Deleting the feature closes all three instead.
-  *Difficulty: trivial to delete, low to rewrite. Priority: medium, because work is
-  scheduled on something nobody uses.*
-
-- **`check_palette.py` should walk `git ls-files` rather than the filesystem.** Its
-  docstring promises "a colour in a tracked config" and it walks `REPO_ROOT.rglob("*")`,
-  which is why `SKIP_PARTS` keeps growing entries that patch around what git already
-  knows: `.git/`, and now `.claude/worktrees/`. Walking the index makes both unnecessary,
-  makes the docstring true, and means the next ignored directory needs no edit here.
-  Three entries stay, since `fish_variables`, `lazy-lock.json` and `palette.json` are
-  tracked and are content exceptions rather than scope ones.
-  *Difficulty: low, about ten lines. Priority: medium, and it removes a class of edit
-  rather than an instance.*
-
-- **The two management scripts are two CLIs for one job.** The rehearsal is `preview`, a
-  subcommand, on one and `--dry-run`, a flag, on the other, and the README prints both in
-  one code block. Four flags exist on one and not the other for no reason arising from its
-  job. Pick one vocabulary. Whichever loses, `README.md`, `SETUP.md` steps 1 to 5 and
-  `MAINTENANCE.md` all name the old one, so this is four documents as well as two scripts.
-  *Difficulty: low. Priority: medium.*
-
-- **Let `install` take paths, the way the package installer already does.**
-  `backup-configs.sh install` is still every path in `config_files.conf` or nothing:
-  `main()` dispatches on `$1` alone and `install_dotfiles` takes no argument. The
-  asymmetry is the argument for fixing it, since `install-packages.sh` gained a
-  `[PACKAGE...]` filter in `4a81c1b`, in `apply_package_filter()`, so a reader learns one
-  vocabulary from one script and finds it missing on the other. `install_dotfiles`,
-  `check_dotfiles` and `uninstall_dotfiles` are each a loop over `load_dotfiles`, so
-  filtering by positional arguments is roughly ten lines and needs no config format
-  change. `add_dotfile` already takes one path. The README no longer overpromises here:
-  "Taking only part of it" states the all-or-nothing plainly and sends the reader to
-  copy by hand, so this is now a convenience rather than a correction.
-  *Difficulty: low. Priority: medium, and it is the cheapest way for a stranger to try
-  this without committing to all of it.*
-
-- **Three role decisions the layer made visible and did not settle.** `roles.py` names
-  each of them now, so each is legible in one place. None is a bug and none has a check
-  that would catch it, which is why they are here rather than in the code.
-  - **Ice is spent at three steps and only two are written down.** `ice-600` is the
-    selection surface and `ice-300` the line form for rings, links and active text, both
-    in `RICE-GUIDE.md`. `ice-400` is Qt's focus decoration and is documented nowhere: the
-    only justification on record was the name of a local variable, `ice_focus`. Decide
-    whether Qt's focus decoration belongs between the two or should join one of them. It
-    changes what Qt applications look like, so it wants eyes on a screen rather than a
-    refactor.
-  - **Bright green does not follow the rule that placed bright red and bright yellow.**
-    `RICE-GUIDE.md` justifies slots 9 and 11 taking alert tones, because in a terminal
-    bright red means *error* and bright yellow means *warning*. By that argument bright
-    green means *success* and should take `alert.good.fg`; it takes `moss-300` instead,
-    which the guide's own ANSI table states without explaining. Either the argument
-    extends and the slot moves, or it has a boundary and the guide should say where.
-  - **`alert.neutral` is the Ice family without saying so.** Its `bg` and `border` are
-    `ice-deep` and `ice-800` exactly, while its `fg` is a step of nothing; the other three
-    alert families have a `bg` and `border` of their own. Turning the pair into references
-    would *create* a coupling that today may be coincidence, so the question is whether
-    the coincidence was intent. Worth knowing while deciding: the orphan warning cannot
-    see this pair, because it skips everything under `alert.`, and moving `scales.ice.deep`
-    leaves four generated lines behind with nothing reported.
-  *Difficulty: trivial each, and they are decisions rather than work. Priority: medium,
-  and the first is the only one of the three that shows on a screen.*
+The seam this repository is built on. A colour is either decided once in
+`palette.json` and read from there, or it is transcribed and drifts. Both entries close a
+transcription.
 
 - **Bring the hand-written half onto the generator, in the order the survey found.** The
   generator owns 13 files; 19 more paste a palette colour by hand and follow nothing. A
@@ -217,76 +79,6 @@ Sorted by priority. Within a priority, by nothing.
   *Difficulty: low each for sway, hyprtoolkit and starship; medium for yazi; high for
   fastfetch. Priority: medium, and it is what would make the README's promise true.*
 
-- **The two compositors describe every runtime service twice, and have diverged.** The
-  autostart block in `autostart.lua` against the run of `exec` lines in `sway/config`; the
-  idle schedule in two syntaxes with a comment asking future editors to keep them in step;
-  three screenshot binds under Hyprland against one bare `grim` under Sway; different
-  launcher keys. Sway also carries nine hand-pasted hex while Hyprland reads a generated
-  `palette.lua`, so the two sit on opposite sides of this repo's most important seam;
-  the palette half of that is the entry above and not this one. Dropping Sway is
-  not on the table: `sway/config` carries four findings that could only come from booting
-  it, including notifications that were dead under Sway with the config themed and in
-  place. The standing cost is that anything mirrored into `sway/config` from a Hyprland
-  session is checked by `sway --validate` and never run. The brightness curve and the
-  clipboard wipe both went in that way: confirmed working under Hyprland, untried under
-  Sway.
-  *Difficulty: high, now that the palette half has its own entry and what is left is the
-  divergence. Priority: medium.*
-
-- **Wallpaper curation** is the largest remaining visual gap. Images chosen against the
-  Wallpaper section of [`design/RICE-GUIDE.md`](design/RICE-GUIDE.md): material,
-  desaturated, dark, at or below `void-00` in perceived lightness.
-  *Difficulty: medium, blocked on sourcing images. Priority: medium.*
-
-- **`CLAUDE.md` is deleted at publication.** `.claude/` is already out: it is untracked and
-  ignored, and the checks it held are in `scripts/verify.sh`, which every clone gets. Only
-  the root file is left. Before deleting it, run both checks, because the first alone was
-  trusted once and was not enough:
-
-  ```bash
-  # 1. no repo knowledge left in the file itself
-  grep -icE "kded6|8-digit hex|process cwd|swaylock-effects" CLAUDE.md   # expect 0
-  # 2. nothing anywhere points at it. Code counts, not just docs.
-  grep -rn "CLAUDE\.md" --exclude-dir=.git --exclude-dir=.claude .
-  ```
-
-  The second exists because the first was run with `--include="*.md"` and reported clean
-  while eight references sat in six config and script files. What it may legitimately
-  return is prose about the file rather than a use of it: `CLAUDE.md`'s own title line,
-  this entry, the entry above about the rule with no home, and the mention in
-  `TURNING-POINTS.md` of where the rules came from. Anything else is a real reference to
-  deal with first. Note the "Never write a count that a config file owns" rule still has no
-  home under `docs/`, which is the entry above.
-  *Difficulty: low. Priority: medium, and it blocks nothing until publication.*
-
-- **The apt and dnf machinery has never run, and could not work as configured.** Fourteen
-  non-comment lines mention apt or dnf, in the low thirties counting whole `case` branches
-  and the `repos` dispatch. The dispatch itself is sound. Measured with
-  `DEFAULT_PACKAGE_MANAGER=apt ./scripts/install-packages.sh preview`, which selects the
-  apt branch and lists every package for it. What is not sound is the data: `[apt]` and
-  `[dnf]` in `packages.conf` are empty, so all the names live in `[common]` and are Arch
-  names. On Debian this resolves to `apt-get install hyprland`, `apt-get install paru`.
-  So the choice is to populate the two sections or to delete the branches, and it is not
-  a question of testing what is there. One cost before touching it: `SETUP.md` still tells
-  a reader "the package installer also handles apt and dnf", so this is a documentation
-  edit too. The
-  README no longer does, since "cross-distro package installer" is gone from the
-  repository layout. And `install_all()` reaches
-  `update_pkg_db()` only through `add_repos()`, so deleting that function without rewiring
-  drops `pacman -Syy` from every Arch install. The Microsoft repository key in the apt
-  branch serves `code`, which is declared in `packages.conf`, so it is apt-only
-  machinery rather than an orphan and stands or falls with the branch.
-  *Difficulty: low. Priority: medium.*
-
-- **`THEMING.md` carries open work eight lines after saying this file owns it.** Delete its
-  "Not covered yet" section, whose three items are verbatim from here. Its first three
-  "Settled decisions"
-  bullets restate `RICE-GUIDE.md` in their opening sentences; cut those sentences and keep
-  the mechanism clause after each, which is this document's actual subject and exists only
-  here. Bullets 4 and 5 must survive whole: the relaxed accent budget for fetches, and
-  "Rollback is git, not a directory".
-  *Difficulty: trivial. Priority: medium.*
-
 - **The upstream bump this entry was waiting for has already happened, and nobody
   noticed.** It said the AUR package was still on 1.1.1 and that catnap 2.0 would break
   both tracked files. Measured: `catnap --version` reports `Catnap v2.1.1` and `pacman -Q`
@@ -308,6 +100,131 @@ Sorted by priority. Within a priority, by nothing.
   with no grey among them.
   *Difficulty: low, and it is a rewrite of two files. Priority: medium, because the
   version that was supposed to be the trigger is already installed.*
+
+## The two management scripts
+
+`backup-configs.sh` and `install-packages.sh`, the two `.conf` files they read, and
+`README.md`, `SETUP.md` and `MAINTENANCE.md`, which all print their vocabulary. More than
+one session's work, and the order at the top is not arbitrary: the KDE opt-out is cheap
+once `install` takes paths and awkward before.
+
+- **Let `install` take paths, the way the package installer already does.**
+  `backup-configs.sh install` is still every path in `config_files.conf` or nothing:
+  `main()` dispatches on `$1` alone and `install_dotfiles` takes no argument. The
+  asymmetry is the argument for fixing it, since `install-packages.sh` gained a
+  `[PACKAGE...]` filter in `4a81c1b`, in `apply_package_filter()`, so a reader learns one
+  vocabulary from one script and finds it missing on the other. `install_dotfiles`,
+  `check_dotfiles` and `uninstall_dotfiles` are each a loop over `load_dotfiles`, so
+  filtering by positional arguments is roughly ten lines and needs no config format
+  change. `add_dotfile` already takes one path. The README no longer overpromises here:
+  "Taking only part of it" states the all-or-nothing plainly and sends the reader to
+  copy by hand, so this is now a convenience rather than a correction.
+  *Difficulty: low. Priority: medium, and it is the cheapest way for a stranger to try
+  this without committing to all of it.*
+
+- **KDE theming is not optional, and it lands on a session the reader did not offer.**
+  `config_files.conf` links `~/.config/kdeglobals`, `~/.config/kcminputrc` and
+  `~/.local/share/color-schemes/Voidashi.colors`, which is where Plasma applications read
+  their palette and their cursor, so installing on a machine that already runs KDE
+  rethemes the desktop the reader meant to keep. A reviewer reading only the README
+  named this as the single reason not to install on a working laptop, and they were right
+  before the README warned about it. The warning is now in the install block, which fixes
+  the surprise and not the situation. Options, in rough order of cost: let
+  `backup-configs.sh install` take paths, which is the first entry of this group and
+  makes every subset possible rather than this one; a documented "everything except
+  the Qt/KDE paths" invocation; or splitting the Qt/KDE entries into their own section
+  of `config_files.conf` so they can be skipped by name. Isolating it to the Hyprland and
+  Sway sessions is the option that sounds best and does not exist: `kdeglobals` is read
+  per user, not per session.
+  *Difficulty: low once `install` takes paths. Priority: medium, and it is the one
+  finding that changed a reviewer's answer from yes to no.*
+
+- **The two management scripts are two CLIs for one job.** The rehearsal is `preview`, a
+  subcommand, on one and `--dry-run`, a flag, on the other, and the README prints both in
+  one code block. Four flags exist on one and not the other for no reason arising from its
+  job. Pick one vocabulary. Whichever loses, `README.md`, `SETUP.md` steps 1 to 5 and
+  `MAINTENANCE.md` all name the old one, so this is four documents as well as two scripts.
+  *Difficulty: low. Priority: medium.*
+
+- **The clone path is load-bearing in seven lines, and it does not have to be.** Cloning
+  anywhere but `~/.dotfiles` silently breaks the wallpaper, the clipboard picker, the
+  bar's power button and Neovim's dashboard. Ruled out already, with the incident recorded
+  in the `autostart.lua` comment on absolute paths: relative paths, because they depended
+  on the cwd Hyprland was started with and the bar did not come up depending on how you
+  logged in.
+  The seven lines are three different problems. Five are script calls
+  (`clipboard-picker.sh` in both compositors, `power-menu.sh` in the bar,
+  `select-random-wallpaper.sh` in both), one is a data directory
+  (`$HOME/.dotfiles/wallpapers` as the picker's last fallback), and one is Neovim's
+  dashboard opening the repo as a project, which names the repo by definition and should
+  probably stay. Two mechanisms, and the choice is the work. A symlink farm, where
+  `backup-configs.sh install` links the `scripts/wm/` helpers into `~/.local/bin` from
+  whatever root it is actually running in, fixes the five script calls and works whatever
+  starts the session. A session variable in the already-tracked
+  `~/.config/environment.d/50-voidashi.conf` reaches all seven and turns the edit into one
+  line in one file, but `environment.d` is read by the systemd user session, and this
+  repo documents reaching the desktop by typing `Hyprland` at a console, which is exactly
+  where it may not arrive.
+  *Difficulty: low either way, and the decision is most of it. Priority: medium.*
+
+- **`[hooks]` has no users and a repair plan.** Zero entries, one commented example, and
+  `run_hooks()` is fifteen lines of awk-inside-bash carrying three known MEDIUM defects: a
+  hook command containing `=` is truncated at the first one; a hook key is interpolated
+  into a regex rather than compared literally, so `pipesXsh` fires for `pipes.sh`; and
+  `add_repos` discards `update_pkg_db`'s status. The honest fix was always to replace that
+  awk with a bash read loop. Deleting the feature closes all three instead.
+  *Difficulty: trivial to delete, low to rewrite. Priority: medium, because work is
+  scheduled on something nobody uses.*
+
+- **The apt and dnf machinery has never run, and could not work as configured.** Fourteen
+  non-comment lines mention apt or dnf, in the low thirties counting whole `case` branches
+  and the `repos` dispatch. The dispatch itself is sound. Measured with
+  `DEFAULT_PACKAGE_MANAGER=apt ./scripts/install-packages.sh preview`, which selects the
+  apt branch and lists every package for it. What is not sound is the data: `[apt]` and
+  `[dnf]` in `packages.conf` are empty, so all the names live in `[common]` and are Arch
+  names. On Debian this resolves to `apt-get install hyprland`, `apt-get install paru`.
+  So the choice is to populate the two sections or to delete the branches, and it is not
+  a question of testing what is there. One cost before touching it: `SETUP.md` still tells
+  a reader "the package installer also handles apt and dnf", so this is a documentation
+  edit too. The
+  README no longer does, since "cross-distro package installer" is gone from the
+  repository layout. And `install_all()` reaches
+  `update_pkg_db()` only through `add_repos()`, so deleting that function without rewiring
+  drops `pacman -Syy` from every Arch install. The Microsoft repository key in the apt
+  branch serves `code`, which is declared in `packages.conf`, so it is apt-only
+  machinery rather than an orphan and stands or falls with the branch.
+  *Difficulty: low. Priority: medium.*
+
+- **Packages are declared for programs nothing here launches.** `dunst`, `hyprpaper`,
+  `hyprlauncher` and `catnap` all have configs that are deliberate keeps, but a reference
+  config does not need its program on a stranger's machine, and the question was only ever
+  asked of `dunst`. `pfetch-rs` is the same shape with no config at all. `ranger`,
+  `supergfxctl`, `cava`, `zathura`, `cmatrix` and `hyprpicker` have no config, launch or
+  bind either, though `hyprpicker` is an optional dependency of `hyprshot`. If `pfetch-rs`
+  goes, its comment about declaring a bare AUR name letting the helper pick a different
+  provider applies to every AUR entry here and belongs in `MAINTENANCE.md`.
+  *Difficulty: trivial. Priority: low.*
+
+- **`config_files.conf` carries example blocks.** "Template Examples" is filler for a
+  format that is one path per line. "Optional Configurations" is not: it names
+  `~/.ssh/config`, `~/.ssh/known_hosts` and `~/.local/share/applications/`, and a
+  commented `~/.ssh` is a visible decision not to track secrets by default.
+  *Difficulty: trivial. Priority: low.*
+
+## The generator and its checks
+
+`scripts/theme/` and `scripts/verify.sh`: what the checkers look at, and what is
+emitted today without anything looking at it.
+
+- **`check_palette.py` should walk `git ls-files` rather than the filesystem.** Its
+  docstring promises "a colour in a tracked config" and it walks `REPO_ROOT.rglob("*")`,
+  which is why `SKIP_PARTS` keeps growing entries that patch around what git already
+  knows: `.git/`, and now `.claude/worktrees/`. Walking the index makes both unnecessary,
+  makes the docstring true, and means the next ignored directory needs no edit here.
+  Three entries stay, since `fish_variables`, `lazy-lock.json` and `palette.json` are
+  tracked and are content exceptions rather than scope ones.
+  *Difficulty: low, about ten lines. Priority: medium, and it removes a class of edit
+  rather than an instance.*
 
 - **`kdeglobals` never learns the scheme's name, and it is not clear that it should.**
   `kde_globals_merged` drops the `[General]` of the generated `.colors` file, on the stated
@@ -332,23 +249,37 @@ Sorted by priority. Within a priority, by nothing.
   is the likely substitute.
   *Difficulty: low. Priority: low.*
 
-- **Decide whether `minimal/` survives its own rule.** `THEMING.md`'s "Rollback is git, not
-  a directory" bullet settles "Do not reintroduce a legacy directory", and
-  `.config/fastfetch/minimal/` is five files whose own header calls them frozen snapshots
-  "NOT kept in sync". The presets are a recorded keep, so the two statements now disagree
-  and one has to move: either `minimal/` is the documented exception, or it is the thing
-  the rule was written about.
-  *Difficulty: trivial, and it is a decision rather than work. Priority: low.*
+## Colour decisions the roles layer made visible
 
-- **Packages are declared for programs nothing here launches.** `dunst`, `hyprpaper`,
-  `hyprlauncher` and `catnap` all have configs that are deliberate keeps, but a reference
-  config does not need its program on a stranger's machine, and the question was only ever
-  asked of `dunst`. `pfetch-rs` is the same shape with no config at all. `ranger`,
-  `supergfxctl`, `cava`, `zathura`, `cmatrix` and `hyprpicker` have no config, launch or
-  bind either, though `hyprpicker` is an optional dependency of `hyprshot`. If `pfetch-rs`
-  goes, its comment about declaring a bare AUR name letting the helper pick a different
-  provider applies to every AUR entry here and belongs in `MAINTENANCE.md`.
-  *Difficulty: trivial. Priority: low.*
+`roles.py` and [`design/RICE-GUIDE.md`](design/RICE-GUIDE.md). None of these is a bug
+and none has a check that would catch it, which is why they are questions rather than
+work. Two of them want eyes on a screen rather than a refactor.
+
+- **Three role decisions the layer made visible and did not settle.** `roles.py` names
+  each of them now, so each is legible in one place. None is a bug and none has a check
+  that would catch it, which is why they are here rather than in the code.
+  - **Ice is spent at three steps and only two are written down.** `ice-600` is the
+    selection surface and `ice-300` the line form for rings, links and active text, both
+    in `RICE-GUIDE.md`. `ice-400` is Qt's focus decoration and is documented nowhere: the
+    only justification on record was the name of a local variable, `ice_focus`. Decide
+    whether Qt's focus decoration belongs between the two or should join one of them. It
+    changes what Qt applications look like, so it wants eyes on a screen rather than a
+    refactor.
+  - **Bright green does not follow the rule that placed bright red and bright yellow.**
+    `RICE-GUIDE.md` justifies slots 9 and 11 taking alert tones, because in a terminal
+    bright red means *error* and bright yellow means *warning*. By that argument bright
+    green means *success* and should take `alert.good.fg`; it takes `moss-300` instead,
+    which the guide's own ANSI table states without explaining. Either the argument
+    extends and the slot moves, or it has a boundary and the guide should say where.
+  - **`alert.neutral` is the Ice family without saying so.** Its `bg` and `border` are
+    `ice-deep` and `ice-800` exactly, while its `fg` is a step of nothing; the other three
+    alert families have a `bg` and `border` of their own. Turning the pair into references
+    would *create* a coupling that today may be coincidence, so the question is whether
+    the coincidence was intent. Worth knowing while deciding: the orphan warning cannot
+    see this pair, because it skips everything under `alert.`, and moving `scales.ice.deep`
+    leaves four generated lines behind with nothing reported.
+  *Difficulty: trivial each, and they are decisions rather than work. Priority: medium,
+  and the first is the only one of the three that shows on a screen.*
 
 - **`focus-ring` is a GTK variable nobody reads.** `gen_gtk_css` emits
   `@define-color focus-ring` into the shared partial and into wofi's block, and no
@@ -364,6 +295,28 @@ Sorted by priority. Within a priority, by nothing.
   waybar and wlogout are GTK3 while swaync is GTK4.
   *Difficulty: trivial. Priority: low, since nothing renders wrong either way.*
 
+## The two compositors
+
+`.config/hypr/` against `.config/sway/`: what is mirrored between them and has
+diverged, and what exists in one and not the other. The palette half of that divergence is
+in "Configs that still paste hex" and not here.
+
+- **The two compositors describe every runtime service twice, and have diverged.** The
+  autostart block in `autostart.lua` against the run of `exec` lines in `sway/config`; the
+  idle schedule in two syntaxes with a comment asking future editors to keep them in step;
+  three screenshot binds under Hyprland against one bare `grim` under Sway; different
+  launcher keys. Sway also carries nine hand-pasted hex while Hyprland reads a generated
+  `palette.lua`, so the two sit on opposite sides of this repo's most important seam;
+  the palette half of that is "Bring the hand-written half onto the generator" and not
+  this one. Dropping Sway is not on the table: `sway/config` carries four findings that
+  could only come from booting it, including notifications that were dead under Sway with
+  the config themed and in place. The standing cost is that anything mirrored into
+  `sway/config` from a Hyprland session is checked by `sway --validate` and never run. The
+  brightness curve and the clipboard wipe both went in that way: confirmed working under
+  Hyprland, untried under Sway.
+  *Difficulty: high, now that the palette half has its own entry and what is left is the
+  divergence. Priority: medium.*
+
 - **The launcher and the keybinding open different terminals.** `.config/wofi/config` sets
   `term=alacritty` while `.config/hypr/conf/programs.lua` sets `terminal = "kitty"`.
   All four terminals are themed identically, which is why it went unnoticed. Pick one.
@@ -376,17 +329,111 @@ Sorted by priority. Within a priority, by nothing.
   the one geometry the design does not allow.
   *Difficulty: trivial. Priority: low while hyprlauncher stays off.*
 
+- **The bar carries laptop-only modules with no guard.** `battery` and `backlight` sit in
+  `modules-right` unconditionally, so on a desktop they are empty or absent, and
+  `SETUP.md` tells a reader to remove them, which is a workaround. Waybar has no
+  conditional module mechanism, so the options are a second `modules-right` in the
+  per-compositor files or accepting the manual step.
+  *Difficulty: low. Priority: low.*
+
+- **Per-application workspace layouts.** `hypr/conf/window_rules.lua` already drops gaps
+  and borders when a workspace holds one window, so this is an extension rather than
+  a build. What does not exist is any application-to-workspace assignment. Decide the rule
+  before writing it, because a workspace map that fights how you work is worse than none,
+  and mirror it in the Sway config, which has no equivalent selectors and would need
+  explicit `assign` rules.
+  *Difficulty: low to write, and the design is the real work. Priority: low.*
+
+## Documents that answer the same question twice
+
+`docs/` and `docs/design/`. Each entry is one fact with two owners, which is the
+failure the layout exists to prevent, so each is settled by deciding which document owns
+the question and cutting the other copy.
+
+- **`CLAUDE.md` holds one rule that exists nowhere else.** It claims it "can be deleted
+  without losing anything", which is true of four of its five rules. "Never write a count
+  that a config file owns" appears nowhere under `docs/`. Move it to `MAINTENANCE.md`
+  before the file goes, and move the general form with it: a file must not restate a fact
+  another file owns, only point at the owner. The count is the narrow case.
+  `hyprtoolkit.conf` carried the wide one twice. A line number is a third case worth
+  naming in the same breath, because it is a coordinate rather than a fact: a citation of
+  `README.md:161` went stale twice inside one session as the file grew, and both times
+  nothing failed. Cite the sentence, not where it currently sits.
+  *Difficulty: trivial. Priority: medium, because it is lost silently at deletion.*
+
+- **`THEMING.md` carries open work eight lines after saying this file owns it.** Delete its
+  "Not covered yet" section, whose three items are verbatim from here. Its first three
+  "Settled decisions"
+  bullets restate `RICE-GUIDE.md` in their opening sentences; cut those sentences and keep
+  the mechanism clause after each, which is this document's actual subject and exists only
+  here. Bullets 4 and 5 must survive whole: the relaxed accent budget for fetches, and
+  "Rollback is git, not a directory".
+  *Difficulty: trivial. Priority: medium.*
+
+- **Decide whether `minimal/` survives its own rule.** `THEMING.md`'s "Rollback is git, not
+  a directory" bullet settles "Do not reintroduce a legacy directory", and
+  `.config/fastfetch/minimal/` is five files whose own header calls them frozen snapshots
+  "NOT kept in sync". The presets are a recorded keep, so the two statements now disagree
+  and one has to move: either `minimal/` is the documented exception, or it is the thing
+  the rule was written about.
+  *Difficulty: trivial, and it is a decision rather than work. Priority: low.*
+
+- **`AESTHETIC-DIRECTION.md` states photography direction that two other documents also
+  state**, for a repository that has no photography; `RICE-GUIDE.md` already carries the
+  wallpaper rules standalone. Its temperature map overlaps `DESIGN-SYSTEM.md`'s but the
+  two disagree on row count and wording, so reconcile before deleting either, and decide
+  the map's home only once `DESIGN-SYSTEM.md`'s is decided. Untouchable: the material
+  references, "The right temperature of darkness", "What the system is not" and the note
+  on coherence over time.
+  *Difficulty: low. Priority: low.*
+
+## The reader deciding whether to install
+
+`README.md` and `SETUP.md`, read by someone who has not cloned anything yet, plus the
+one file that leaves the repository at publication.
+
+- **The README does not answer the reader who is deciding whether to install.** Six gaps
+  from the same review, none of them worth a section on their own and all of them cheap.
+  There is no statement of what the repository assumes beyond Arch and Wayland: nothing
+  about Nvidia, nothing about laptop against desktop, while the install block says the
+  bar carries laptop-only modules, so hardware evidently matters. There is no order of
+  magnitude for what will be installed, so `preview` means reading sixty lines cold. The
+  section on taking only part of it does not say which file inside a terminal's directory
+  carries the colours, so the reader lists the directory to find `voidashi-colors.conf`.
+  It also does not say whether `generate_theme.py` reaches a config that was copied by
+  hand rather than symlinked, which is the first thing that reader wants after copying
+  one. The three badges restate the first sentence and the last section. And the
+  repository layout block sits above the reader's decision while answering a question
+  they only have afterwards, which is why it was skipped outright.
+  *Difficulty: trivial each. Priority: medium, and they are worth doing in one pass
+  rather than one at a time.*
+
+- **`CLAUDE.md` is deleted at publication.** `.claude/` is already out: it is untracked and
+  ignored, and the checks it held are in `scripts/verify.sh`, which every clone gets. Only
+  the root file is left. Before deleting it, run both checks, because the first alone was
+  trusted once and was not enough:
+
+  ```bash
+  # 1. no repo knowledge left in the file itself
+  grep -icE "kded6|8-digit hex|process cwd|swaylock-effects" CLAUDE.md   # expect 0
+  # 2. nothing anywhere points at it. Code counts, not just docs.
+  grep -rn "CLAUDE\.md" --exclude-dir=.git --exclude-dir=.claude .
+  ```
+
+  The second exists because the first was run with `--include="*.md"` and reported clean
+  while eight references sat in six config and script files. What it may legitimately
+  return is prose about the file rather than a use of it: `CLAUDE.md`'s own title line,
+  this entry, "`CLAUDE.md` holds one rule that exists nowhere else", and the mention in
+  `TURNING-POINTS.md` of where the rules came from. Anything else is a real reference to
+  deal with first. Note the "Never write a count that a config file owns" rule still has no
+  home under `docs/`, which is that entry.
+  *Difficulty: low. Priority: medium, and it blocks nothing until publication.*
+
 - **`wallpapers/` holds two files of one image.** `Topography.png` and `Topography.jpg`
   are the same image at the same size, mean absolute difference 0.78/255, and both match
   the picker's glob, so a fresh clone randomises between two copies of one wallpaper while
   the README's repository layout promises "one sample image". Deleting the 1.1MB PNG makes
   the sentence true with no edit.
-  *Difficulty: trivial. Priority: low.*
-
-- **`config_files.conf` carries example blocks.** "Template Examples" is filler for a
-  format that is one path per line. "Optional Configurations" is not: it names
-  `~/.ssh/config`, `~/.ssh/known_hosts` and `~/.local/share/applications/`, and a
-  commented `~/.ssh` is a visible decision not to track secrets by default.
   *Difficulty: trivial. Priority: low.*
 
 - **The greetd section of `SETUP.md` explains greetd's own documentation.** The stock
@@ -398,26 +445,33 @@ Sorted by priority. Within a priority, by nothing.
   gets introduced by accident.
   *Difficulty: trivial. Priority: low.*
 
-- **`AESTHETIC-DIRECTION.md` states photography direction that two other documents also
-  state**, for a repository that has no photography; `RICE-GUIDE.md` already carries the
-  wallpaper rules standalone. Its temperature map overlaps `DESIGN-SYSTEM.md`'s but the
-  two disagree on row count and wording, so reconcile before deleting either, and decide
-  the map's home only once `DESIGN-SYSTEM.md`'s is decided. Untouchable: the material
-  references, "The right temperature of darkness", "What the system is not" and the note
-  on coherence over time.
-  *Difficulty: low. Priority: low.*
+## Waiting on the world
 
-- **Dolphin's icons are still `breeze-dark`**, so folders come out blue against a Voidashi
-  window. Every alternative installed here is worse aligned, so this waits on an icon set
-  being chosen, which is an asset decision.
-  *Difficulty: low once a set is chosen. Priority: low.*
+None of these finishes at this keyboard today: they want a second machine, images, an
+icon set, or a look at a running screen. The screenshots are the highest-priority entry in
+the file and still belong here, because they are the last thing to do rather than the next.
+Photographing a desktop that is still being edited is work done twice, so they wait until
+the groups above have stopped changing what the desktop looks like.
 
-- **The bar carries laptop-only modules with no guard.** `battery` and `backlight` sit in
-  `modules-right` unconditionally, so on a desktop they are empty or absent, and
-  `SETUP.md` tells a reader to remove them, which is a workaround. Waybar has no
-  conditional module mechanism, so the options are a second `modules-right` in the
-  per-compositor files or accepting the manual step.
-  *Difficulty: low. Priority: low.*
+- **The screenshots in the README predate the current theme.** Committed April 2025, they
+  show the Kanagawa desktop this repo no longer contains. They stay until replaced, since
+  a stale screenshot beats none.
+  *Difficulty: low, blocked on taking new ones. Priority: high, because it is the first
+  thing a visitor sees.*
+
+- **The greetd path has never been run.** It is documented in `SETUP.md` step 6 and
+  declared in `packages.conf`, but this machine reaches its desktop through `plasmalogin`,
+  so nothing has exercised the config or the unit. Verified and worth not re-doing: both
+  packages exist in `extra`, the config format and tuigreet flags come from upstream's own
+  README, and `/usr/share/wayland-sessions/` already holds `hyprland.desktop` and
+  `sway.desktop`. Unverified is the whole path end to end. A spare machine or a VM is the
+  honest test, and until then `SETUP.md` must not gain a sentence claiming it was tried.
+  *Difficulty: low, blocked on a second machine. Priority: medium.*
+
+- **Wallpaper curation** is the largest remaining visual gap. Images chosen against the
+  Wallpaper section of [`design/RICE-GUIDE.md`](design/RICE-GUIDE.md): material,
+  desaturated, dark, at or below `void-00` in perceived lightness.
+  *Difficulty: medium, blocked on sourcing images. Priority: medium.*
 
 - **Bring the greeter onto the palette, by hand.** `tuigreet` takes a `--theme` flag in
   `component=color` form, which is why it was chosen over the alternatives, and today it
@@ -433,6 +487,11 @@ Sorted by priority. Within a priority, by nothing.
   *Difficulty: low. Priority: low, and it is the first surface a visitor sees, which
   argues it up once greetd is in use.*
 
+- **Dolphin's icons are still `breeze-dark`**, so folders come out blue against a Voidashi
+  window. Every alternative installed here is worse aligned, so this waits on an icon set
+  being chosen, which is an asset decision.
+  *Difficulty: low once a set is chosen. Priority: low.*
+
 - **Power profiles, on the machine rather than in the repo.** Idle handling exists;
   switching a CPU governor or a platform profile does not. `power-profiles-daemon` is the
   usual answer and it needs `systemctl enable`, a system service that `backup-configs.sh`
@@ -442,13 +501,10 @@ Sorted by priority. Within a priority, by nothing.
   once considered.
   *Difficulty: low. Priority: low.*
 
-- **Per-application workspace layouts.** `hypr/conf/window_rules.lua` already drops gaps
-  and borders when a workspace holds one window, so this is an extension rather than
-  a build. What does not exist is any application-to-workspace assignment. Decide the rule
-  before writing it, because a workspace map that fights how you work is worse than none,
-  and mirror it in the Sway config, which has no equivalent selectors and would need
-  explicit `assign` rules.
-  *Difficulty: low to write, and the design is the real work. Priority: low.*
+## While you are already in the file
+
+Never a session of their own. The cost of each is opening the file, so they are paid by
+whatever task opens it for another reason.
 
 - **Many comments under `.config/hypr/` are in Portuguese** while the rest of the tree is
   English, including the `autostart.lua` note on why absolute paths are used, which is
