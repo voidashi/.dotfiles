@@ -248,31 +248,55 @@ looks cuttable from the outside, which is the only reason they are written down.
   compositors call, and waybar is not a compositor. The script is bound to
   `common.jsonc` by a serialisation contract its own docstring names.
 
-## Rewriting the generator was authorised and then ruled out by measurement
+## Replacing the generator wholesale was authorised and then ruled out by measurement
 
-The reading that "change one hex and nothing moves" led to the generator being put
-up for a rewrite, with a free hand to replace it entirely. It was measured first
-and kept, so nobody should reopen that on the same evidence.
+This entry is about one specific proposal, not about the generator being off limits.
+The proposal was to throw `generate_theme.py` away and write another one, on the
+reading that "change one hex and nothing moves". Measurement did not support that
+diagnosis, so the file was kept. Restructuring it is a different question and has
+since been done; see the entry below.
 
-What the measurement said. Every one of the 103 colour keys in `palette.json`
-reaches at least one generated file and no generated file is unreachable, so there
-is no dead key and no orphaned emitter. The generator is idempotent across repeated
-runs, including the three files it merges into rather than writes. Its output is
-accepted by the applications' own parsers rather than by inspection: `foot
---check-config`, `ghostty +validate-config`, kitty's own `load_config`, luajit and
-Neovim on both generated `palette.lua` files, and GTK4's `CssProvider` on the
-stylesheets, each with a negative control that failed.
+What the measurement said. Every colour key in `palette.json` reaches at least one
+generated file and no generated file is unreachable, so there was no dead key and no
+orphaned emitter. The generator is idempotent across repeated runs, including the
+three files it merges into rather than writes. Its output is accepted by the
+applications' own parsers rather than by inspection: `foot --check-config`, `ghostty
++validate-config`, kitty's own `load_config`, luajit and Neovim on both generated
+`palette.lua` files, and GTK4's `CssProvider` on the stylesheets, each with a negative
+control that failed.
 
-What was actually wrong was two things a rewrite would not have fixed. `palette.json`
-expresses roles as *copies* of scale values rather than references, so moving
-`scales.ice.300` leaves even the generated stylesheet emitting the retired
-`focus-ring`; and most themed files are outside the generator's reach entirely. Both
-are open work in `docs/TODO.md`, and both are additive.
+What was actually wrong was two things replacing the file would not have fixed.
+`palette.json` expressed roles as *copies* of scale values rather than references, so
+moving `scales.ice.300` left even the generated stylesheet emitting the retired
+`focus-ring`. And most themed files are outside the generator's reach entirely, which
+is still open work in `docs/TODO.md`.
 
 The lasting shape of it: this repository's characteristic bug had reached the tool
 built to prevent it. Dropping the `#` from one value passed the generator, passed
 both checks, and shipped a stylesheet GTK rejects. The generator now refuses a
-malformed value at load, which is the fix a rewrite would have had to include anyway.
+malformed value at load, which is the fix a replacement would have had to include
+anyway.
+
+## The desktop got the three layers the editor already had
+
+`roles.py` sits between the palette and the emitters, and the split it makes is that
+`palette.json` holds values while roles hold decisions. It was copied from
+`.config/nvim/lua/voidashi/theme/`, which had worked this way since the colorscheme was
+written: palette, roles, groups. Written in Python rather than as data in JSON for the
+reason `roles.lua` gives about its own layer, that this is where colour mixes with
+design decision and the rationale belongs beside the choice; and referencing tokens in
+the language rather than through string paths, so a typo is an error at generation time
+instead of a value that silently resolves to something else.
+
+Two measurements bracket it. Before: moving `scales.ice.300` left seven lines of the
+generator's own output on the retired value and moving `scales.bordeaux.300` left four.
+After: five and zero, and the five are the ANSI slots, which is the table doing its job.
+Throughout the conversion the generated output stayed byte for byte identical, which is
+the only reason a change of that size is reviewable at all.
+
+`ansi16` did not move and should not. A program asking for red expects red whatever the
+identity colour is, and the accent recipe in `docs/SETUP.md` rewrites the whole Bordeaux
+ramp, so a slot naming `scales.bordeaux.400` would repaint ANSI red in silence.
 
 ## Three things about the bar are provisional
 

@@ -259,26 +259,29 @@ the tree and not of the rest, so this is the whole procedure.
 focused window border, the active workspace, the selected launcher entry, GTK and Qt
 selection. Bordeaux is *identity*: the terminal cursor, the shell prompt, the lock
 screen, the fetch banners. Asking to change the accent almost always means Bordeaux, and
-that is what this section does. Ice works the same way, out of `scales.ice` and
-`focus_ring`. The role table is in [`design/RICE-GUIDE.md`](design/RICE-GUIDE.md).
+that is what this section does. Ice works the same way, out of `scales.ice` alone. The
+role table is in [`design/RICE-GUIDE.md`](design/RICE-GUIDE.md), and which role reads
+which step is `scripts/theme/roles.py`.
 
 ### The keys
 
 Bordeaux is a ten-step ramp in `scripts/theme/palette.json` under `scales.bordeaux`,
 `100` lightest down to `deep`. Every step is used somewhere, so all ten move together.
 
-Two of those values are typed a second time in the same file, and neither copy follows
-the ramp on its own:
+One value is typed a second time in the same file, and it does not follow the ramp:
 
 | Key | Today | What to do with it |
 |---|---|---|
-| `terminal.cursor` | `#c76870`, a copy of `bordeaux.300` | Change it with the ramp. It is what moves the terminals. |
 | `ansi16` slot 1 | `#b44955`, a copy of `bordeaux.400` | Leave it. |
 
 `ansi16` is the sixteen-colour terminal table, and slot 1 is red because a program that
 asks for red expects red. It carries the identity colour today only because the identity
 colour is a red. Move Bordeaux to another hue and the two stop being the same value,
 which is correct.
+
+Everything else that uses Bordeaux follows the ramp on its own. The terminal cursor used
+to be a second copy here and is now a role in `roles.py`, which names `bordeaux.300`
+instead of repeating its hex.
 
 ### What follows the generator, and what does not
 
@@ -313,7 +316,6 @@ only the hue, because the ten steps are tuned for contrast against the void surf
 },
 ```
 
-**Follow it with the cursor.** Set `terminal.cursor` to `#c7689f`, the new `300`.
 Leave `ansi16` alone.
 
 **Regenerate.**
@@ -354,9 +356,11 @@ measured rather than read off the source:
   colour.** Changing the ramp alone and regenerating moved four files and left nineteen
   tracked files on the old accent, at exit 0 throughout, and the checker's colour count
   went *up* by one rather than staying flat, which is the signal that a retired value is
-  still alive. The checker now says so in as many words, on its `roles:` line, and the
+  still alive. The checker now says so in as many words, on its `ansi:` line, and the
   warning is not a failure because this recipe puts the palette in exactly that state
-  between the ramp and the grep. What still ends it is the grep above.
+  between the ramp and the grep. What still ends it is the grep above. `ansi16` is the
+  only place left where this can happen: everything else that uses a colour names a
+  token in `roles.py` rather than repeating its hex.
 - **This document is skipped by the checker**, because the example ramp above is
   deliberately not the palette. The current values quoted here are therefore unchecked
   too, so update them by hand if you swap the accent.

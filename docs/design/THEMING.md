@@ -32,6 +32,18 @@ The hand-written ones are the ones that age in silence, which is why
 `scripts/theme/palette.json` is the single source of truth, transcribed from
 `RICE-GUIDE.md`. Edit it there, never a hex in an application config.
 
+`scripts/theme/roles.py` sits between the palette and the output and holds what a colour
+is *for*: window chrome is `surface.window`, selection is `selection.bg`, the terminal
+cursor is `identity.cursor`. Every role names a token rather than repeating its hex, and
+one that does not is refused at load. This is the same three-layer shape the editor's
+theme has had all along, and it is why one decision reaches GTK, Qt and the terminals
+without being written three times: before it existed, "the window chrome is `void-10`"
+was typed in three separate places and "selection is `ice-600`" in four.
+
+Two things skip the layer. `ansi16` is consumed raw by the four terminals and by Neovim,
+because slot 1 is red whatever this desktop's identity colour happens to be, and
+`geometry` and `typography` are values with no decision to add.
+
 `scripts/theme/generate_theme.py` **writes** ten files whole, each in the format its
 consumer already reads: the four terminal partials, the Hyprland Lua module, the Neovim
 palette layer, the shared CSS partial at `.config/theme/voidashi-colors.css`, the GTK3
@@ -144,6 +156,16 @@ table's mono-primary row, which is for bars that render their own text outside a
   identity and primary action: terminal cursor, prompt accent, launcher prompt,
   lockscreen accent. A **Verdigris** family fills the ANSI cyan slot the core palette has
   no family for, and is not a UI accent. The semantic states are called **alert tones**.
+  Ice is spent at three steps and they are three different things: `ice-600` is the
+  selection surface, `ice-300` is the line form for rings, links and active text, and
+  `ice-400` is Qt's focus decoration. The third has never been written down anywhere but
+  in the code, and `docs/TODO.md` carries the question.
+- **Bright green is the one ANSI slot that does not follow its own rule.** Slots 9 and 11
+  take alert tones because in a terminal bright red means error and bright yellow means
+  warning, which `RICE-GUIDE.md` states and justifies. By that argument bright green
+  means success and should take `alert.good.fg`; it takes `moss-300` instead. The value
+  is deliberate as far as the guide's table goes and unexplained as far as its prose
+  goes, so `docs/TODO.md` carries it as a decision rather than a bug.
 - **Two radii, decided by whether a surface floats.** Floating takes 4px, docked takes
   0. No scale, no third value. Both live in `palette.json` under `geometry`; Hyprland and
   swaync read them, while GTK3 stylesheets carry the literal because GTK3 has no CSS

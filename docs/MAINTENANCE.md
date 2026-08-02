@@ -32,10 +32,14 @@ doing nothing, with no error message anywhere.
   `[pacman]`, `[dnf]` and `[hooks]` sections.
 - `scripts/wm/`: helpers the compositors call *while running*, as opposed to the
   top-level scripts, which you run yourself.
-- `scripts/theme/`: `palette.json` is the single source of truth for every colour;
-  `generate_theme.py` renders it into each application's own format;
-  `check_palette.py` proves nothing drifted. Rerun the generator after editing the
-  palette, and never hand-edit its output, which carries a `GENERATED` header.
+- `scripts/theme/`: three layers, the same three the editor's theme has.
+  `palette.json` holds values and nothing else; `roles.py` holds decisions, naming a
+  token for each thing a colour is used for; `generate_theme.py` renders those into
+  each application's own format; `check_palette.py` proves nothing drifted. Rerun the
+  generator after editing either of the first two, and never hand-edit its output.
+  **Change a colour in `palette.json`, change what a colour is for in `roles.py`.**
+  A hex written into `roles.py` is refused at load, because a role that carries its
+  own value is a second source of truth and is exactly the bug the layer ends.
 - `fonts/`, `wallpapers/`, `docs/`: assets and documentation.
 
 **Naming is not a preference.** Shell scripts use hyphens (`backup-configs.sh`),
@@ -506,11 +510,20 @@ After any colour change, on its own:
 python3 scripts/theme/check_palette.py
 ```
 
-It fails on four things: a hex in a tracked config that is not in `palette.json`; a
+It fails on five things: a hex in a tracked config that is not in `palette.json`; a
 **named** terminal colour (`green`, `brwhite`, `cyan`) inside fish or starship
-config; bare hex with no `#` in the swaylock config; and a `GENERATED` file that no
+config; bare hex with no `#` in the swaylock config; a `GENERATED` file that no
 longer matches what the generator would produce, which is how a hand-edit to
-generated output gets caught. The named-colour check exists because twelve fish
+generated output gets caught; and a role in `roles.py` holding a colour the palette
+does not hold, which catches both a hex pasted in by hand and a token reference
+mistyped into some other valid colour.
+
+It also warns, without failing, when an `ansi16` slot holds a hex no scale and no
+alert tone does. That table is literal on purpose and is the one place a retired
+colour can still hide inside the palette, where drift cannot see it: while a second
+copy survives, the old hex is still a palette colour and no file left on it can be
+reported. A half-finished hue swap looks exactly like this, so it is a warning and
+not an error. The named-colour check exists because twelve fish
 variables sat on stock names for an entire retheme while the hex-only check passed
 clean. Names are searched only in fish and starship, since words like "red" appear in
 prose everywhere else, and comments are stripped first so a colour discussed is not a

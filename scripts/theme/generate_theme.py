@@ -6,6 +6,11 @@ docs/design/RICE-GUIDE.md and docs/design/DESIGN-SYSTEM.md) and writes the
 color-only config partials each app natively includes. See RICE-GUIDE.md,
 "Working rules".
 
+The emitters here take two arguments: the palette, and the semantic layer that
+roles.py builds from it. A colour decision belongs there and a toolkit's key
+names belong here, which is the split that lets one decision reach GTK, Qt and
+the terminals without being written three times.
+
 Never hand-edit the files this script writes; they carry a GENERATED
 header. Edit palette.json and rerun this script instead.
 """
@@ -13,6 +18,8 @@ header. Edit palette.json and rerun this script instead.
 import json
 import re
 from pathlib import Path
+
+import roles
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent.parent
@@ -33,6 +40,9 @@ def colour_keys(p: dict):
     Written out rather than inferred, because the file also holds glyphs,
     geometry numbers and font names, and a walk that guessed which is which
     would have to guess again every time a key is added.
+
+    Roles are not in here and cannot be. They live in roles.py and hold a
+    colour this file already holds, which roles.validate() is what enforces.
     """
     for family, shades in p["scales"].items():
         for step, value in shades.items():
@@ -42,9 +52,6 @@ def colour_keys(p: dict):
             yield f"alert.{name}.{key}", entry[key]
     for i, value in enumerate(p["ansi16"]):
         yield f"ansi16[{i}]", value
-    for key, value in p["terminal"].items():
-        yield f"terminal.{key}", value
-    yield "focus_ring", p["focus_ring"]
 
 
 def validate_palette(p: dict) -> None:
@@ -69,6 +76,10 @@ def load_palette() -> dict:
     with open(SCRIPT_DIR / "palette.json", encoding="utf-8") as f:
         p = json.load(f)
     validate_palette(p)
+    # Here rather than at each emitter, so that a broken semantic layer stops
+    # the run instead of reaching one file and not another. check_palette.py
+    # loads through this function too and inherits the check for free.
+    roles.validate(p, roles.build(p))
     return p
 
 
@@ -91,33 +102,35 @@ def write(path: Path, content: str) -> None:
 #  Terminals
 # =====================================================================
 
-def gen_kitty(p: dict) -> str:
-    t, a = p["terminal"], p["ansi16"]
+def gen_kitty(p: dict, r: dict) -> str:
+    a = p["ansi16"]
+    # cursor_text_color is the text drawn underneath the cursor, which takes the
+    # surface it sits on so the cursor reads as an inversion. Same in all four.
     out = header("#")
-    out += f"background            {t['background']}\n"
-    out += f"foreground            {t['foreground']}\n"
-    out += f"cursor                {t['cursor']}\n"
-    out += f"cursor_text_color     {t['cursor_text']}\n"
-    out += f"selection_background  {t['selection_background']}\n"
-    out += f"selection_foreground  {t['selection_foreground']}\n\n"
+    out += f"background            {r['surface']['content']}\n"
+    out += f"foreground            {r['text']['body']}\n"
+    out += f"cursor                {r['identity']['cursor']}\n"
+    out += f"cursor_text_color     {r['surface']['content']}\n"
+    out += f"selection_background  {r['selection']['bg']}\n"
+    out += f"selection_foreground  {r['selection']['fg']}\n\n"
     for i, hexval in enumerate(a):
         out += f"color{i:<2} {hexval}\n"
     return out
 
 
-def gen_foot(p: dict) -> str:
-    t, a = p["terminal"], p["ansi16"]
+def gen_foot(p: dict, r: dict) -> str:
+    a = p["ansi16"]
     strip = lambda h: h.lstrip("#")
     out = header("#")
     out += "[colors-dark]\n"
-    out += f"background={strip(t['background'])}\n"
-    out += f"foreground={strip(t['foreground'])}\n"
-    out += f"selection-foreground={strip(t['selection_foreground'])}\n"
-    out += f"selection-background={strip(t['selection_background'])}\n"
+    out += f"background={strip(r['surface']['content'])}\n"
+    out += f"foreground={strip(r['text']['body'])}\n"
+    out += f"selection-foreground={strip(r['selection']['fg'])}\n"
+    out += f"selection-background={strip(r['selection']['bg'])}\n"
     # [cursor].color was removed by foot. The replacement is a single "cursor"
     # key taking two colours, text first then background, which is why this is
     # written here rather than in a [cursor] section.
-    out += f"cursor={strip(t['cursor_text'])} {strip(t['cursor'])}\n\n"
+    out += f"cursor={strip(r['surface']['content'])} {strip(r['identity']['cursor'])}\n\n"
     for i in range(8):
         out += f"regular{i}={strip(a[i])}\n"
     out += "\n"
@@ -126,25 +139,25 @@ def gen_foot(p: dict) -> str:
     return out
 
 
-def gen_ghostty(p: dict) -> str:
-    t, a = p["terminal"], p["ansi16"]
+def gen_ghostty(p: dict, r: dict) -> str:
+    a = p["ansi16"]
     strip = lambda h: h.lstrip("#")
     out = header("#")
-    out += f"background = {strip(t['background'])}\n"
-    out += f"foreground = {strip(t['foreground'])}\n"
-    out += f"cursor-color = {strip(t['cursor'])}\n"
-    out += f"cursor-text = {strip(t['cursor_text'])}\n"
-    out += f"selection-background = {strip(t['selection_background'])}\n"
-    out += f"selection-foreground = {strip(t['selection_foreground'])}\n\n"
+    out += f"background = {strip(r['surface']['content'])}\n"
+    out += f"foreground = {strip(r['text']['body'])}\n"
+    out += f"cursor-color = {strip(r['identity']['cursor'])}\n"
+    out += f"cursor-text = {strip(r['surface']['content'])}\n"
+    out += f"selection-background = {strip(r['selection']['bg'])}\n"
+    out += f"selection-foreground = {strip(r['selection']['fg'])}\n\n"
     for i, hexval in enumerate(a):
         out += f"palette = {i}={hexval}\n"
     return out
 
 
-def gen_alacritty(p: dict) -> str:
-    t, a = p["terminal"], p["ansi16"]
+def gen_alacritty(p: dict, r: dict) -> str:
+    a = p["ansi16"]
     out = header("#")
-    out += f"[colors.primary]\nbackground = '{t['background']}'\nforeground = '{t['foreground']}'\n\n"
+    out += f"[colors.primary]\nbackground = '{r['surface']['content']}'\nforeground = '{r['text']['body']}'\n\n"
     names = ["black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"]
     out += "[colors.normal]\n"
     for i, name in enumerate(names):
@@ -152,8 +165,8 @@ def gen_alacritty(p: dict) -> str:
     out += "\n[colors.bright]\n"
     for i, name in enumerate(names):
         out += f"{name} = '{a[8 + i]}'\n"
-    out += f"\n[colors.cursor]\ntext = '{t['cursor_text']}'\ncursor = '{t['cursor']}'\n"
-    out += f"\n[colors.selection]\nbackground = '{t['selection_background']}'\ntext = '{t['selection_foreground']}'\n"
+    out += f"\n[colors.cursor]\ntext = '{r['surface']['content']}'\ncursor = '{r['identity']['cursor']}'\n"
+    out += f"\n[colors.selection]\nbackground = '{r['selection']['bg']}'\ntext = '{r['selection']['fg']}'\n"
     return out
 
 
@@ -251,7 +264,7 @@ def inlined_block(original: str, content: str, name: str) -> str:
     return original[:start] + block + original[end + len(BLOCK_END):]
 
 
-def gen_gtk_css(p: dict) -> str:
+def gen_gtk_css(p: dict, r: dict) -> str:
     out = header("/*", " */")
     for scale_name, shades in p["scales"].items():
         for shade, hexval in shades.items():
@@ -262,7 +275,7 @@ def gen_gtk_css(p: dict) -> str:
         out += f"@define-color alert-{name}-bg {entry['bg']};\n"
         out += f"@define-color alert-{name}-border {entry['border']};\n"
     out += "\n"
-    out += f"@define-color focus-ring {p['focus_ring']};\n"
+    out += f"@define-color focus-ring {r['accent']['line']};\n"
     g = p["geometry"]
     out += (
         "\n/* Non-colour tokens, for reference. GTK3 (waybar, wofi, wlogout) has no\n"
@@ -276,91 +289,94 @@ def gen_gtk_css(p: dict) -> str:
     return out
 
 
-def gen_gtk_app_css(p: dict, toolkit: str) -> str:
+def gen_gtk_app_css(p: dict, r: dict, toolkit: str) -> str:
     """Named-colour overrides for ordinary GTK applications.
 
     Distinct from gen_gtk_css, which exports the raw palette for stylesheets we
-    write ourselves. This one maps the palette onto the names GTK and libadwaita
-    already paint from, so applications nobody wrote a stylesheet for follow the
-    desktop: pavucontrol, zenity, file choosers, network dialogs.
+    write ourselves. This one maps the semantic layer onto the names GTK and
+    libadwaita already paint from, so applications nobody wrote a stylesheet for
+    follow the desktop: pavucontrol, zenity, file choosers, network dialogs.
 
-    Surfaces follow RICE-GUIDE.md's hierarchy. The window chrome sits at void-10
-    and content at void-00, so a text view reads as recessed into the window
-    rather than floating on it, matching how the terminals are built.
+    What is decided here is which GTK name each role belongs to, and nothing
+    else. Why a surface sits where it does is in roles.py, beside the role.
     """
-    s, a, g = p["scales"], p["alert"], p["geometry"]
+    g = p["geometry"]
+    surf, txt, ln = r["surface"], r["text"], r["line"]
+    sel, acc, st = r["selection"], r["accent"], r["status"]
     out = header("/*", " */")
     out += f"/* {toolkit} named colours, mapped from palette.json */\n\n"
 
     if toolkit == "gtk4":
         pairs = [
-            ("window_bg_color", s["void"]["10"]),
-            ("window_fg_color", s["ink"]["1"]),
-            ("view_bg_color", s["void"]["00"]),
-            ("view_fg_color", s["ink"]["1"]),
-            ("headerbar_bg_color", s["void"]["20"]),
-            ("headerbar_fg_color", s["ink"]["1"]),
-            ("headerbar_border_color", s["edge"]["20"]),
-            ("headerbar_backdrop_color", s["void"]["10"]),
-            ("headerbar_shade_color", s["edge"]["10"]),
-            ("sidebar_bg_color", s["void"]["10"]),
-            ("sidebar_fg_color", s["ink"]["2"]),
-            ("sidebar_border_color", s["edge"]["20"]),
-            ("sidebar_backdrop_color", s["void"]["10"]),
-            ("secondary_sidebar_bg_color", s["void"]["10"]),
-            ("secondary_sidebar_fg_color", s["ink"]["2"]),
-            ("card_bg_color", s["void"]["20"]),
-            ("card_fg_color", s["ink"]["1"]),
-            ("dialog_bg_color", s["void"]["20"]),
-            ("dialog_fg_color", s["ink"]["1"]),
-            ("popover_bg_color", s["void"]["20"]),
-            ("popover_fg_color", s["ink"]["1"]),
-            ("thumbnail_bg_color", s["void"]["20"]),
-            ("thumbnail_fg_color", s["ink"]["1"]),
-            ("shade_color", s["void"]["00"]),
-            ("scrollbar_outline_color", s["edge"]["20"]),
-            # Focus and selection are Ice everywhere in this desktop.
-            ("accent_bg_color", s["ice"]["600"]),
-            ("accent_fg_color", s["ink"]["0"]),
-            ("accent_color", s["ice"]["300"]),
-            ("destructive_bg_color", a["critical"]["bg"]),
-            ("destructive_fg_color", a["critical"]["fg"]),
-            ("destructive_color", a["critical"]["fg"]),
-            ("success_bg_color", a["good"]["bg"]),
-            ("success_fg_color", a["good"]["fg"]),
-            ("success_color", a["good"]["fg"]),
-            ("warning_bg_color", a["caution"]["bg"]),
-            ("warning_fg_color", a["caution"]["fg"]),
-            ("warning_color", a["caution"]["fg"]),
-            ("error_bg_color", a["critical"]["bg"]),
-            ("error_fg_color", a["critical"]["fg"]),
-            ("error_color", a["critical"]["fg"]),
-            ("borders", s["edge"]["20"]),
+            ("window_bg_color", surf["window"]),
+            ("window_fg_color", txt["emphasis"]),
+            ("view_bg_color", surf["content"]),
+            ("view_fg_color", txt["emphasis"]),
+            ("headerbar_bg_color", surf["raised"]),
+            ("headerbar_fg_color", txt["emphasis"]),
+            ("headerbar_border_color", ln["normal"]),
+            ("headerbar_backdrop_color", surf["window"]),
+            ("headerbar_shade_color", ln["dim"]),
+            ("sidebar_bg_color", surf["window"]),
+            ("sidebar_fg_color", txt["body"]),
+            ("sidebar_border_color", ln["normal"]),
+            ("sidebar_backdrop_color", surf["window"]),
+            ("secondary_sidebar_bg_color", surf["window"]),
+            ("secondary_sidebar_fg_color", txt["body"]),
+            ("card_bg_color", surf["raised"]),
+            ("card_fg_color", txt["emphasis"]),
+            ("dialog_bg_color", surf["raised"]),
+            ("dialog_fg_color", txt["emphasis"]),
+            ("popover_bg_color", surf["raised"]),
+            ("popover_fg_color", txt["emphasis"]),
+            ("thumbnail_bg_color", surf["raised"]),
+            ("thumbnail_fg_color", txt["emphasis"]),
+            # The scrim behind a modal, which is the deepest surface there is.
+            ("shade_color", surf["content"]),
+            ("scrollbar_outline_color", ln["normal"]),
+            ("accent_bg_color", sel["bg"]),
+            ("accent_fg_color", sel["fg"]),
+            ("accent_color", acc["line"]),
+            # libadwaita spends four names on two tones: destructive is the
+            # button, error is the message, and both are the critical tone.
+            ("destructive_bg_color", st["critical"]["bg"]),
+            ("destructive_fg_color", st["critical"]["fg"]),
+            ("destructive_color", st["critical"]["fg"]),
+            ("success_bg_color", st["good"]["bg"]),
+            ("success_fg_color", st["good"]["fg"]),
+            ("success_color", st["good"]["fg"]),
+            ("warning_bg_color", st["caution"]["bg"]),
+            ("warning_fg_color", st["caution"]["fg"]),
+            ("warning_color", st["caution"]["fg"]),
+            ("error_bg_color", st["critical"]["bg"]),
+            ("error_fg_color", st["critical"]["fg"]),
+            ("error_color", st["critical"]["fg"]),
+            ("borders", ln["normal"]),
         ]
     else:
         pairs = [
-            ("theme_bg_color", s["void"]["10"]),
-            ("theme_fg_color", s["ink"]["1"]),
-            ("theme_base_color", s["void"]["00"]),
-            ("theme_text_color", s["ink"]["1"]),
-            ("theme_selected_bg_color", s["ice"]["600"]),
-            ("theme_selected_fg_color", s["ink"]["0"]),
-            ("theme_unfocused_bg_color", s["void"]["10"]),
-            ("theme_unfocused_fg_color", s["ink"]["2"]),
-            ("theme_unfocused_base_color", s["void"]["00"]),
-            ("theme_unfocused_text_color", s["ink"]["2"]),
-            ("theme_unfocused_selected_bg_color", s["ice"]["700"]),
-            ("theme_unfocused_selected_fg_color", s["ink"]["1"]),
-            ("insensitive_bg_color", s["void"]["20"]),
-            ("insensitive_fg_color", s["ink"]["4"]),
-            ("insensitive_base_color", s["void"]["10"]),
-            ("borders", s["edge"]["20"]),
-            ("unfocused_borders", s["edge"]["10"]),
-            ("warning_color", a["caution"]["fg"]),
-            ("error_color", a["critical"]["fg"]),
-            ("success_color", a["good"]["fg"]),
-            ("link_color", s["ice"]["300"]),
-            ("visited_link_color", s["ash"]["300"]),
+            ("theme_bg_color", surf["window"]),
+            ("theme_fg_color", txt["emphasis"]),
+            ("theme_base_color", surf["content"]),
+            ("theme_text_color", txt["emphasis"]),
+            ("theme_selected_bg_color", sel["bg"]),
+            ("theme_selected_fg_color", sel["fg"]),
+            ("theme_unfocused_bg_color", surf["window"]),
+            ("theme_unfocused_fg_color", txt["body"]),
+            ("theme_unfocused_base_color", surf["content"]),
+            ("theme_unfocused_text_color", txt["body"]),
+            ("theme_unfocused_selected_bg_color", sel["bg_unfocused"]),
+            ("theme_unfocused_selected_fg_color", sel["fg_unfocused"]),
+            ("insensitive_bg_color", surf["raised"]),
+            ("insensitive_fg_color", txt["disabled"]),
+            ("insensitive_base_color", surf["window"]),
+            ("borders", ln["normal"]),
+            ("unfocused_borders", ln["dim"]),
+            ("warning_color", st["caution"]["fg"]),
+            ("error_color", st["critical"]["fg"]),
+            ("success_color", st["good"]["fg"]),
+            ("link_color", acc["line"]),
+            ("visited_link_color", acc["visited"]),
         ]
 
     for name, hexval in pairs:
@@ -430,7 +446,7 @@ def kde_font(p: dict, size_key: str = "ui_size", mono: bool = False) -> str:
     return f"{family},{t[size_key]},-1,5,{weight},0,0,0,0,0"
 
 
-def gen_kde_colors(p: dict) -> str:
+def gen_kde_colors(p: dict, r: dict) -> str:
     """KDE colour scheme, for the Qt half of the desktop.
 
     Nine KDE applications are installed (dolphin, ark, gwenview, kate,
@@ -441,57 +457,60 @@ def gen_kde_colors(p: dict) -> str:
     The blocks are not interchangeable: Window is the chrome, View is the
     content area a list or a text buffer draws on, Button is a raised control,
     Tooltip floats above everything. Mapping them all to one colour is what
-    makes a Qt application look flat and wrong.
+    makes a Qt application look flat and wrong. Which surface each one takes is
+    the depth order in roles.py; this decides only which KDE block asks for it.
     """
-    s, a = p["scales"], p["alert"]
+    surf, txt = r["surface"], r["text"]
+    sel, acc, st = r["selection"], r["accent"], r["status"]
     rgb = lambda h: ",".join(str(int(h.lstrip("#")[i:i + 2], 16)) for i in (0, 2, 4))
 
-    ice_focus = s["ice"]["400"]
     shared = {
-        "DecorationFocus": ice_focus,
-        "DecorationHover": ice_focus,
-        "ForegroundActive": s["ice"]["300"],
-        "ForegroundInactive": s["ink"]["4"],
-        "ForegroundLink": s["ice"]["300"],
-        "ForegroundVisited": s["ash"]["300"],
-        "ForegroundNegative": a["critical"]["fg"],
-        "ForegroundNeutral": a["caution"]["fg"],
-        "ForegroundPositive": a["good"]["fg"],
+        "DecorationFocus": acc["decoration"],
+        "DecorationHover": acc["decoration"],
+        "ForegroundActive": acc["line"],
+        "ForegroundInactive": txt["disabled"],
+        "ForegroundLink": acc["line"],
+        "ForegroundVisited": acc["visited"],
+        "ForegroundNegative": st["critical"]["fg"],
+        "ForegroundNeutral": st["caution"]["fg"],
+        "ForegroundPositive": st["good"]["fg"],
     }
 
-    # background normal, background alternate, foreground normal
-    roles = {
-        "Window": (s["void"]["10"], s["void"]["20"], s["ink"]["1"]),
-        "View": (s["void"]["00"], s["void"]["10"], s["ink"]["1"]),
-        "Button": (s["void"]["20"], s["void"]["30"], s["ink"]["1"]),
-        "Selection": (s["ice"]["600"], s["ice"]["700"], s["ink"]["0"]),
-        "Tooltip": (s["void"]["30"], s["void"]["40"], s["ink"]["1"]),
-        "Complementary": (s["void"]["10"], s["void"]["20"], s["ink"]["1"]),
-        "Header": (s["void"]["20"], s["void"]["30"], s["ink"]["1"]),
+    # background normal, background alternate, foreground normal. The alternate
+    # is the striped row, and in every block but Selection it is simply the next
+    # surface up; Selection stripes with the step the unfocused selection takes.
+    blocks = {
+        "Window": (surf["window"], surf["raised"], txt["emphasis"]),
+        "View": (surf["content"], surf["window"], txt["emphasis"]),
+        "Button": (surf["raised"], surf["floating"], txt["emphasis"]),
+        "Selection": (sel["bg"], sel["bg_unfocused"], sel["fg"]),
+        "Tooltip": (surf["floating"], surf["overlay"], txt["emphasis"]),
+        "Complementary": (surf["window"], surf["raised"], txt["emphasis"]),
+        "Header": (surf["raised"], surf["floating"], txt["emphasis"]),
     }
 
     out = header("#")
-    for role, (bg, alt, fg) in roles.items():
-        out += f"[Colors:{role}]\n"
+    for block, (bg, alt, fg) in blocks.items():
+        out += f"[Colors:{block}]\n"
         out += f"BackgroundNormal={rgb(bg)}\n"
         out += f"BackgroundAlternate={rgb(alt)}\n"
         out += f"ForegroundNormal={rgb(fg)}\n"
         for key, hexval in shared.items():
             # Selection inverts: its foreground roles read against Ice, not void.
-            if role == "Selection" and key == "ForegroundInactive":
-                hexval = s["ink"]["2"]
+            if block == "Selection" and key == "ForegroundInactive":
+                hexval = txt["body"]
             out += f"{key}={rgb(hexval)}\n"
         out += "\n"
 
     # Title bars. activeBlend/inactiveBlend are the gradient partner Breeze uses;
     # keeping them equal to the background is what removes the gradient.
     out += "[WM]\n"
-    out += f"activeBackground={rgb(s['void']['20'])}\n"
-    out += f"activeBlend={rgb(s['void']['20'])}\n"
-    out += f"activeForeground={rgb(s['ink']['0'])}\n"
-    out += f"inactiveBackground={rgb(s['void']['10'])}\n"
-    out += f"inactiveBlend={rgb(s['void']['10'])}\n"
-    out += f"inactiveForeground={rgb(s['ink']['3'])}\n"
+    out += f"activeBackground={rgb(surf['raised'])}\n"
+    out += f"activeBlend={rgb(surf['raised'])}\n"
+    out += f"activeForeground={rgb(txt['bright'])}\n"
+    out += f"inactiveBackground={rgb(surf['window'])}\n"
+    out += f"inactiveBlend={rgb(surf['window'])}\n"
+    out += f"inactiveForeground={rgb(txt['muted'])}\n"
     # The title bar font lives in [WM], and this whole section is replaced on
     # merge, so it has to be emitted here or it is dropped on the next run.
     out += f"activeFont={kde_font(p)}\n\n"
@@ -645,17 +664,18 @@ def generated_files(p: dict) -> dict:
     The three files merged into rather than written whole are in merged_files()
     below, because what they should contain depends on what is already in them.
     """
+    r = roles.build(p)
     return {
-        CONFIG / "kitty" / "voidashi-colors.conf": gen_kitty(p),
-        CONFIG / "foot" / "voidashi-colors.ini": gen_foot(p),
-        CONFIG / "ghostty" / "voidashi-colors": gen_ghostty(p),
-        CONFIG / "alacritty" / "conf.d" / "voidashi-colors.toml": gen_alacritty(p),
+        CONFIG / "kitty" / "voidashi-colors.conf": gen_kitty(p, r),
+        CONFIG / "foot" / "voidashi-colors.ini": gen_foot(p, r),
+        CONFIG / "ghostty" / "voidashi-colors": gen_ghostty(p, r),
+        CONFIG / "alacritty" / "conf.d" / "voidashi-colors.toml": gen_alacritty(p, r),
         CONFIG / "hypr" / "conf" / "palette.lua": gen_hypr_palette(p),
-        CONFIG / "theme" / "voidashi-colors.css": gen_gtk_css(p),
-        CONFIG / "gtk-3.0" / "voidashi.css": gen_gtk_app_css(p, "gtk3"),
-        CONFIG / "gtk-4.0" / "voidashi.css": gen_gtk_app_css(p, "gtk4"),
+        CONFIG / "theme" / "voidashi-colors.css": gen_gtk_css(p, r),
+        CONFIG / "gtk-3.0" / "voidashi.css": gen_gtk_app_css(p, r, "gtk3"),
+        CONFIG / "gtk-4.0" / "voidashi.css": gen_gtk_app_css(p, r, "gtk4"),
         CONFIG / "nvim" / "lua" / "voidashi" / "theme" / "palette.lua": gen_nvim_palette(p),
-        REPO_ROOT / ".local" / "share" / "color-schemes" / "Voidashi.colors": gen_kde_colors(p),
+        REPO_ROOT / ".local" / "share" / "color-schemes" / "Voidashi.colors": gen_kde_colors(p, r),
     }
 
 
@@ -672,11 +692,12 @@ def merged_files(p: dict) -> dict:
     hand-edit to an owned section visible: check_sync used to iterate
     generated_files() alone, so edits to all three went unreported.
     """
+    r = roles.build(p)
     return {
         CONFIG / "wofi" / "style.css":
-            lambda current: inlined_block(current, gen_gtk_css(p), "wofi/style.css"),
+            lambda current: inlined_block(current, gen_gtk_css(p, r), "wofi/style.css"),
         CONFIG / "kdeglobals":
-            lambda current: kde_globals_merged(current, gen_kde_colors(p), p),
+            lambda current: kde_globals_merged(current, gen_kde_colors(p, r), p),
         CONFIG / "kcminputrc":
             lambda current: kcm_input_merged(current, p),
     }

@@ -1,7 +1,8 @@
 {
   "_meta": {
     "source": "docs/design/RICE-GUIDE.md (desktop-authoritative) + docs/design/DESIGN-SYSTEM.md §2 (full ramps, unchanged bg/border companions for alert tones)",
-    "note": "Single source of truth for rice colour. Edit here and rerun generate_theme.py; never hand-edit a hex in an app config (RICE-GUIDE.md, 'Working rules'). Where RICE-GUIDE.md and DESIGN-SYSTEM.md differ for desktop use, RICE-GUIDE.md wins: see cursor/selection/ANSI-cyan below."
+    "note": "Single source of truth for rice colour. Edit here and rerun generate_theme.py; never hand-edit a hex in an app config (RICE-GUIDE.md, 'Working rules'). Where RICE-GUIDE.md and DESIGN-SYSTEM.md differ for desktop use, RICE-GUIDE.md wins: see the ANSI cyan slots below.",
+    "layers": "This file holds values, not decisions. What a colour is used for lives in roles.py, which names a token rather than repeating its hex, so moving a ramp moves everything that reads it. ansi16 is the exception and is consumed raw: a program asking for red expects red whatever the identity colour is."
   },
   "scales": {
     "void": {
@@ -136,15 +137,6 @@
     "#64a9a9",
     "#e8e8e8"
   ],
-  "terminal": {
-    "background": "#0a0908",
-    "foreground": "#b1b1b1",
-    "cursor": "#c76870",
-    "cursor_text": "#0a0908",
-    "selection_background": "#215b7c",
-    "selection_foreground": "#e8e8e8"
-  },
-  "focus_ring": "#6aa3c7",
   "geometry": {
     "_note": "Non-colour tokens. GTK3 (waybar, wofi, wlogout) has no CSS custom properties, so these cannot be emitted as variables the way colours are -- each GTK3 stylesheet carries the literal with a comment pointing here. swaync is GTK4 and does read them as variables; Hyprland reads rounding from the generated palette.lua.",
     "radius_floating": 4,
