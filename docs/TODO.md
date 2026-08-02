@@ -22,14 +22,21 @@ while the stale screenshots are `high`, and those are blocked on someone taking 
    scale. Making that systematic would have a role point at a token by name rather than
    repeat its value. The Neovim theme already works this way in three layers.
 
-   What an audit of the generator added, and it raises the priority of this rather than the
-   difficulty. **The leak is not confined to the hand-written half.** Moving
-   `scales.ice.300` alone and regenerating leaves the *generated* GTK stylesheet emitting
-   `@define-color focus-ring #6aa3c7`, the retired value, because `gen_gtk_css` reads
-   `focus_ring` as an independent literal; the four terminals keep their old cursor,
-   background and selection for the same reason. So "change one hex and everything moves"
-   is false inside the generator's own output, not only outside it, and that is the
-   sharpest argument for doing this at all.
+   What an audit of the generator added, and it raises the priority of this rather than
+   the difficulty. **The leak is not confined to the hand-written half.** Two swaps,
+   each measured by moving one scale value, regenerating and grepping the output.
+   Moving `scales.ice.300` leaves `@define-color focus-ring #6aa3c7`, the retired value,
+   in the shared GTK partial and in wofi's merged block, because `gen_gtk_css` reads
+   `focus_ring` as an independent literal. Moving `scales.bordeaux.300` leaves all four
+   terminals on the old cursor, `terminal.cursor` being the same shape. So "change one
+   hex and everything moves" is false inside the generator's own output, not only
+   outside it, and that is the sharpest argument for doing this at all.
+
+   What the same runs showed is *not* a leak, and the distinction is the design: after
+   moving `ice.300`, five generated files still carry the old hex as ANSI slot 12, in
+   the four terminals and Neovim. That is the canonical table doing its job, and any
+   check written for this work has to exempt it or it will report the decision as a
+   bug.
 
    Three things that make the work cheaper than it looks. `colour_keys()` in
    `generate_theme.py` already enumerates every place that must hold a colour in one
@@ -61,6 +68,15 @@ while the stale screenshots are `high`, and those are blocked on someone taking 
    value is in the palette and the question drift asks is only whether it is there at
    all. Naming the token is what answers the real question, and it retires the warning
    with it.
+
+   **The check that ends it.** Move `scales.ice.300` by one digit, regenerate, and
+   `git grep` the retired hex over the generator's own output, meaning the files
+   carrying a `GENERATED` header plus wofi's block. Today it comes back in seven: the
+   two role leaks and the five ANSI slots. When it comes back in the ANSI five alone,
+   every role has followed its token. Repeat with `scales.bordeaux.300` for the cursor,
+   which is the second shape. Scope matters here: the same grep over all of `.config`
+   also returns six hand-written files, and those are the coverage entry's business
+   rather than this one's.
    *Difficulty: medium, and the design questions are most of it. Priority: medium, and it
    makes the accent recipe shorter rather than replacing it.*
 
