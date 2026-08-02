@@ -396,9 +396,21 @@ What was never executed, so nobody reads that number as broader than it is:
   `.config/wofi/style.css`, `kdeglobals` and `kcminputrc` were outside it: an edit
   was made in each and the checker returned 0 for all three. It now merges again
   and compares, which reports any difference in a section the generator owns while
-  leaving everything else alone, both measured. Adding a fourth merged file means
-  adding it to `merged_files()` in `generate_theme.py`, which is the one list both
-  the generator and the checker read.
+  leaving everything else alone, both measured. `starship.toml` was the fourth to
+  join them. A merged file means one entry in `merged_files()` in
+  `generate_theme.py`, which is the one list both the generator and the checker
+  read.
+- **starship's generated palette table has to stay at the end of its file.**
+  `[palettes.voidashi]` is a TOML table header, so every key below it belongs to
+  that table until the next header: a module added underneath the markers becomes
+  a palette entry and stops configuring anything. Nothing warns.
+- **A starship style naming a colour that is not in that table renders with no
+  colour and says nothing.** Only a missing table is reported, as `Could not find
+  color palette`, and then the whole prompt loses its colours at once, which is the
+  easy case. Measured with `ink-2` misspelt: the path segment came out with no
+  escape sequence while every other segment kept its own. `check_palette.py` grew
+  its `names` check for exactly this, because moving that file off pasted hex is
+  what created the failure.
 - **The lock screen is plain `swaylock`, not `swaylock-effects`,** and its config was
   originally written for the latter. Seven options were unknown to the installed
   binary: `screenshots`, `effect-blur`, `effect-vignette`, `indicator`, `clock`,

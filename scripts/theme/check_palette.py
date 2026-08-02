@@ -3,17 +3,21 @@
 
 RICE-GUIDE.md has a non-negotiable, "never invent a colour", which used to be
 an honour-system rule. Several files carry hand-pasted hex because colour mixes
-with structural config in them (swaylock, bottom, starship, fastfetch, catnap,
-fish, yazi and Neovim's roles layer), and nothing said so when one of them aged
+with structural config in them (swaylock, bottom, fastfetch, catnap, fish,
+yazi and Neovim's roles layer), and nothing said so when one of them aged
 out of step with palette.json.
 
-Two checks and a warning:
+Three checks and a warning:
 
   drift    a colour in a tracked config that palette.json does not contain, in
            any of the forms colour is written here rather than only "#rrggbb"
   sync     a generated file that differs from what the generator would write
            now, or a merged file whose owned sections a second merge would
            change, both of which mean someone edited the output not the source
+  names    a starship style naming a colour its generated palette table does
+           not define, which renders that one segment uncoloured and says
+           nothing. Measured: with 'ink-2' misspelt, the path lost its escape
+           sequence while every other segment kept its own
   ansi     an ansi16 slot holding a hex no scale or alert tone holds, which is
            a retired colour still inside the palette and therefore invisible to
            drift. A warning, since a half-finished hue swap looks like this
@@ -21,7 +25,7 @@ Two checks and a warning:
 Usage:
     python3 scripts/theme/check_palette.py
 
-Exits 1 if either check fails, so it can be wired into a hook. The warning does
+Exits 1 if any check fails, so it can be wired into a hook. The warning does
 not affect the exit code.
 """
 import json
@@ -278,6 +282,54 @@ def check_orphan_roles(p: dict) -> list:
             if not name.startswith(("scales.", "alert.")) and value.lower() not in live]
 
 
+STARSHIP = ".config/starship.toml"
+
+# What a starship style token may be besides a colour: its modifiers, and the
+# two prefixes that put a colour on the background or the foreground.
+STYLE_WORDS = {
+    "bold", "italic", "underline", "dimmed", "inverted", "blink", "hidden",
+    "strikethrough", "none", "prev_fg", "prev_bg", "",
+}
+# style = '...' and the markdown form inside a symbol, "[glyph](style)".
+STYLE_RE = re.compile(r"^\s*style\s*=\s*['\"]([^'\"]*)['\"]", re.MULTILINE)
+INLINE_STYLE_RE = re.compile(r"\]\(([^)]*)\)")
+PALETTE_ENTRY_RE = re.compile(r"^([A-Za-z][\w-]*)\s*=\s*['\"]#", re.MULTILINE)
+
+
+def check_starship_names(p: dict) -> list:
+    """A starship style naming a colour its palette table does not define.
+
+    Moving that file from pasted hex onto names traded one failure for another.
+    A hex typo was still a colour; a name typo is not, and starship neither
+    fails nor warns: the segment renders in the terminal's default while every
+    other one stays right, which is this repository's signature bug wearing a
+    new hat. Its own warning covers only the whole table going missing.
+
+    The names come out of the generated block rather than from palette.json, so
+    what is checked is what starship will actually resolve against.
+    """
+    path = REPO_ROOT / STARSHIP
+    if not path.exists():
+        return [(STARSHIP, "does not exist")]
+    text = path.read_text(encoding="utf-8")
+    known = set(PALETTE_ENTRY_RE.findall(text))
+    if not known:
+        return [(STARSHIP, "no palette table, so no style in it can resolve")]
+
+    problems = []
+    for style in STYLE_RE.findall(text) + INLINE_STYLE_RE.findall(text):
+        for token in style.split():
+            colour = token.split(":", 1)[-1] if token.startswith(("bg:", "fg:")) else token
+            if colour in STYLE_WORDS or colour in known:
+                continue
+            # A hex or an ANSI index is legal starship and is somebody else's
+            # problem: drift is what reports a hex outside the palette.
+            if HEX.fullmatch(colour) or colour.isdigit():
+                continue
+            problems.append((STARSHIP, f"{token!r} in style {style!r}"))
+    return problems
+
+
 def check_sync(p: dict) -> list:
     stale = []
     for path, expected in gen.generated_files(p).items():
@@ -331,6 +383,16 @@ def main() -> int:
         written = len(gen.generated_files(p))
         merged = len(gen.merged_files(p))
         print(f"sync:  {written} generated and {merged} merged files match palette.json")
+
+    unknown = check_starship_names(p)
+    if unknown:
+        failed = True
+        print("starship styles naming a colour its palette does not define:\n")
+        for rel, what in unknown:
+            print(f"  {rel}: {what}")
+        print()
+    else:
+        print("names: every starship style names a colour its palette defines")
 
     orphans = check_orphan_roles(p)
     if orphans:

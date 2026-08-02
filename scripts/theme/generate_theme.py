@@ -296,6 +296,45 @@ def gen_nvim_palette(p: dict) -> str:
 
 
 # =====================================================================
+#  starship
+# =====================================================================
+
+TOML_BLOCK_START = "# >>> VOIDASHI COLORS (GENERATED) >>>"
+TOML_BLOCK_END = "# <<< END VOIDASHI COLORS <<<"
+
+
+def gen_starship_palette(p: dict) -> str:
+    """starship's own palette table, which its `style` fields then name.
+
+    starship has no include of any kind, so this is inlined between markers the
+    way wofi's is. It exports the raw palette under the same names the shared
+    CSS partial uses rather than the roles, because the styles that read it are
+    written here by us: which tone a prompt segment takes is a decision that
+    belongs beside the segment, and RICE-GUIDE.md's "Shell and prompt" is what
+    settles it.
+
+    A table entry nothing names costs a line and no risk, which is why the whole
+    palette goes in rather than the five in use today: the next style to want a
+    colour then names one instead of pasting a hex, which is the whole point.
+
+    The block sits at the end of the file on purpose. `[palettes.voidashi]` is a
+    TOML table header, so every key after it belongs to that table until the
+    next header, and a hand-written module placed below would silently become a
+    palette entry.
+    """
+    out = header("#")
+    out += "[palettes.voidashi]\n"
+    for scale_name, shades in p["scales"].items():
+        for shade, hexval in shades.items():
+            out += f'{scale_name}-{shade} = "{hexval}"\n'
+    for name, entry in p["alert"].items():
+        out += f'alert-{name} = "{entry["fg"]}"\n'
+        out += f'alert-{name}-bg = "{entry["bg"]}"\n'
+        out += f'alert-{name}-border = "{entry["border"]}"\n'
+    return out
+
+
+# =====================================================================
 #  GTK
 # =====================================================================
 
@@ -303,21 +342,27 @@ BLOCK_START = "/* >>> VOIDASHI COLORS (GENERATED) >>> */"
 BLOCK_END = "/* <<< END VOIDASHI COLORS <<< */"
 
 
-def inlined_block(original: str, content: str, name: str) -> str:
-    """Replace the marked block inside a hand-written CSS file.
+def inlined_block(original: str, content: str, name: str,
+                  start_marker: str = BLOCK_START,
+                  end_marker: str = BLOCK_END) -> str:
+    """Replace the marked block inside a hand-written file.
 
-    For apps that cannot @import the shared partial. wofi hands its stylesheet
+    For apps that cannot include the shared partial. wofi hands its stylesheet
     to GTK as a string, so relative @import urls resolve against the process's
     cwd (usually $HOME) instead of the file's directory, so the colors silently
-    never load. Inlining sidesteps path resolution entirely. Everything outside
-    the markers stays hand-written.
+    never load. starship has no include mechanism of any kind. Inlining
+    sidesteps path resolution entirely. Everything outside the markers stays
+    hand-written.
+
+    The markers are arguments because the two files comment differently, and a
+    marker in the wrong syntax is content rather than a marker.
     """
-    start = original.find(BLOCK_START)
-    end = original.find(BLOCK_END)
+    start = original.find(start_marker)
+    end = original.find(end_marker)
     if start == -1 or end == -1:
         raise SystemExit(
             f"{name}: missing the "
-            f"{BLOCK_START} / {BLOCK_END} markers the generator writes between."
+            f"{start_marker} / {end_marker} markers the generator writes between."
         )
     if end < start:
         # Without this the slice either side of the block re-emits the span
@@ -327,8 +372,8 @@ def inlined_block(original: str, content: str, name: str) -> str:
             f"{name}: {BLOCK_END} comes before "
             f"{BLOCK_START}; put them back in order."
         )
-    block = f"{BLOCK_START}\n{content}{BLOCK_END}"
-    return original[:start] + block + original[end + len(BLOCK_END):]
+    block = f"{start_marker}\n{content}{end_marker}"
+    return original[:start] + block + original[end + len(end_marker):]
 
 
 def gen_gtk_css(p: dict, r: dict) -> str:
@@ -765,6 +810,9 @@ def merged_files(p: dict) -> dict:
     return {
         CONFIG / "wofi" / "style.css":
             lambda current: inlined_block(current, gen_gtk_css(p, r), "wofi/style.css"),
+        CONFIG / "starship.toml":
+            lambda current: inlined_block(current, gen_starship_palette(p), "starship.toml",
+                                          TOML_BLOCK_START, TOML_BLOCK_END),
         CONFIG / "kdeglobals":
             lambda current: kde_globals_merged(current, gen_kde_colors(p, r), p),
         CONFIG / "kcminputrc":
