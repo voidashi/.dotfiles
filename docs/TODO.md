@@ -13,72 +13,15 @@ alone. A one-line fix can be urgent and a rewrite optional. "Start here next" is
 
 ## Start here next
 
-One item, chosen for the next session rather than by rating: it is `medium` on both axes
-while the stale screenshots are `high`, and those are blocked on someone taking new ones.
+One item, chosen for the next session rather than by rating: the stale screenshots are
+`high` and blocked on someone taking new ones, and this is the other half of a promise
+whose first half just landed.
 
-1. **Rethink how the generator decides colour, and consider a roles layer.**
-   `palette.json` holds raw ramps plus a few roles expressed as duplicated literals:
-   `terminal.cursor` and `focus_ring` are semantic keys carrying a hex that also exists in a
-   scale. Making that systematic would have a role point at a token by name rather than
-   repeat its value. The Neovim theme already works this way in three layers.
-
-   What an audit of the generator added, and it raises the priority of this rather than
-   the difficulty. **The leak is not confined to the hand-written half.** Two swaps,
-   each measured by moving one scale value, regenerating and grepping the output.
-   Moving `scales.ice.300` leaves `@define-color focus-ring #6aa3c7`, the retired value,
-   in the shared GTK partial and in wofi's merged block, because `gen_gtk_css` reads
-   `focus_ring` as an independent literal. Moving `scales.bordeaux.300` leaves all four
-   terminals on the old cursor, `terminal.cursor` being the same shape. So "change one
-   hex and everything moves" is false inside the generator's own output, not only
-   outside it, and that is the sharpest argument for doing this at all.
-
-   What the same runs showed is *not* a leak, and the distinction is the design: after
-   moving `ice.300`, five generated files still carry the old hex as ANSI slot 12, in
-   the four terminals and Neovim. That is the canonical table doing its job, and any
-   check written for this work has to exempt it or it will report the decision as a
-   bug.
-
-   Three things that make the work cheaper than it looks. `colour_keys()` in
-   `generate_theme.py` already enumerates every place that must hold a colour in one
-   function, which is the hook a resolver would use. `palette.json` is structurally sound
-   today, so the conversion starts from a consistent state: every role literal still equals
-   the scale value it was copied from, and every ramp is monotonic in relative luminance.
-   And the checker's palette count is a free signal for the failure this fixes, since a
-   value entering while the old one stays makes the count go *up*, which is exactly the
-   retired-value-still-alive state; a real swap leaves it flat or smaller.
-
-   One design inconsistency to settle in passing, since it is a role question: ANSI 9 and
-   11 take `alert.critical.fg` and `alert.caution.fg`, while ANSI 10 takes `moss.300`
-   rather than `alert.good.fg`.
-
-   Three things to settle first. **ANSI must not follow the accent**: slot 1 is red
-   because red means red, so `ansi16` stays a canonical table no role touches. **The
-   guide still constrains which family suits which role**, so a free accent swap can
-   produce a configuration `RICE-GUIDE.md` forbids, and whoever clones this is entitled
-   to ignore that. **Roles only reach the generated half**, so any README claim has to
-   say which half; which files those are, and which of them could be brought across, is
-   the entry on bringing the hand-written half onto the generator, not a second count
-   here.
-
-   The check for orphaned literals that would complement this now exists, in the weak
-   form: `check_palette.py` warns, without failing, when a role literal holds a hex no
-   scale and no alert tone holds, which is what a half-finished hue swap leaves behind.
-   It reads `colour_keys()`, so it covers `ansi16`, `focus_ring` and every `terminal.*`
-   key. What it cannot see is a role that repeats the *wrong* scale value, since that
-   value is in the palette and the question drift asks is only whether it is there at
-   all. Naming the token is what answers the real question, and it retires the warning
-   with it.
-
-   **The check that ends it.** Move `scales.ice.300` by one digit, regenerate, and
-   `git grep` the retired hex over the generator's own output, meaning the files
-   carrying a `GENERATED` header plus wofi's block. Today it comes back in seven: the
-   two role leaks and the five ANSI slots. When it comes back in the ANSI five alone,
-   every role has followed its token. Repeat with `scales.bordeaux.300` for the cursor,
-   which is the second shape. Scope matters here: the same grep over all of `.config`
-   also returns six hand-written files, and those are the coverage entry's business
-   rather than this one's.
-   *Difficulty: medium, and the design questions are most of it. Priority: medium, and it
-   makes the accent recipe shorter rather than replacing it.*
+1. **Bring the hand-written half onto the generator, in the order the survey found.** The
+   entry is below, under Open work. It is worth doing next because `roles.py` now exists:
+   Sway's nine pasted hex and starship's five become a generated partial reading roles
+   rather than a second transcription of the palette, which is the shape the four
+   terminals already have.
 
 ## Open work
 
@@ -203,6 +146,32 @@ Sorted by priority. Within a priority, by nothing.
   copy by hand, so this is now a convenience rather than a correction.
   *Difficulty: low. Priority: medium, and it is the cheapest way for a stranger to try
   this without committing to all of it.*
+
+- **Three role decisions the layer made visible and did not settle.** `roles.py` names
+  each of them now, so each is legible in one place. None is a bug and none has a check
+  that would catch it, which is why they are here rather than in the code.
+  - **Ice is spent at three steps and only two are written down.** `ice-600` is the
+    selection surface and `ice-300` the line form for rings, links and active text, both
+    in `RICE-GUIDE.md`. `ice-400` is Qt's focus decoration and is documented nowhere: the
+    only justification on record was the name of a local variable, `ice_focus`. Decide
+    whether Qt's focus decoration belongs between the two or should join one of them. It
+    changes what Qt applications look like, so it wants eyes on a screen rather than a
+    refactor.
+  - **Bright green does not follow the rule that placed bright red and bright yellow.**
+    `RICE-GUIDE.md` justifies slots 9 and 11 taking alert tones, because in a terminal
+    bright red means *error* and bright yellow means *warning*. By that argument bright
+    green means *success* and should take `alert.good.fg`; it takes `moss-300` instead,
+    which the guide's own ANSI table states without explaining. Either the argument
+    extends and the slot moves, or it has a boundary and the guide should say where.
+  - **`alert.neutral` is the Ice family without saying so.** Its `bg` and `border` are
+    `ice-deep` and `ice-800` exactly, while its `fg` is a step of nothing; the other three
+    alert families have a `bg` and `border` of their own. Turning the pair into references
+    would *create* a coupling that today may be coincidence, so the question is whether
+    the coincidence was intent. Worth knowing while deciding: the orphan warning cannot
+    see this pair, because it skips everything under `alert.`, and moving `scales.ice.deep`
+    leaves four generated lines behind with nothing reported.
+  *Difficulty: trivial each, and they are decisions rather than work. Priority: medium,
+  and the first is the only one of the three that shows on a screen.*
 
 - **Bring the hand-written half onto the generator, in the order the survey found.** The
   generator owns 13 files; 19 more paste a palette colour by hand and follow nothing. A

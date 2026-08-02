@@ -50,9 +50,11 @@ ignore the rest.
 
 ## The one idea worth stealing
 
-Every colour starts in **one file**: `scripts/theme/palette.json`. A generator renders it
-into the format each program natively reads, and a checker proves the generated files
-still match it.
+Every colour starts in **one file**: `scripts/theme/palette.json`. Beside it,
+`roles.py` says what each colour is *for*, naming a token rather than repeating a hex, so
+one decision reaches GTK, Qt and the terminals instead of being typed once per toolkit. A
+generator renders those into the format each program natively reads, and a checker proves
+the generated files still match.
 
 ```bash
 $EDITOR scripts/theme/palette.json          # change a colour
@@ -176,7 +178,7 @@ scripts/
   install-packages.sh     installs the packages listed in packages.conf
   verify.sh               runs every validator and prints what each returned
   tests/                  sandboxed tests for backup-configs.sh
-  theme/                  palette.json, the generator and the checker
+  theme/                  palette.json, roles.py, the generator and the checker
   wm/                     helpers the compositors call while running
 wallpapers/               one sample image, so a fresh clone has something to show
 ```
