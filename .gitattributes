@@ -1,0 +1,42 @@
+# Line endings, normalised on commit and LF in every working tree. Two vendored
+# licence files arrived with CRLF and are normalised along with everything else,
+# because the text of a licence does not depend on its line endings and one rule
+# with no exceptions is cheaper to remember than two.
+* text=auto eol=lf
+
+# Assets. "binary" means "-text -diff": never normalised, never diffed. The fonts
+# are the bulk of this repository by size, so a normalisation that reached them
+# would corrupt them quietly.
+*.ttf binary
+*.otf binary
+*.ttc binary
+*.png binary
+*.jpg binary
+
+# Hunk headers that name the enclosing function or rule rather than whatever line
+# of context happened to be above the change. These are git's own built-in
+# drivers, so a clone needs no configuration to get them.
+*.lua diff=lua
+*.py  diff=python
+*.css diff=css
+*.md  diff=markdown
+*.sh  diff=bash
+
+# Generator output, marked for GitHub the way the GENERATED header marks it for a
+# reader: collapsed in diffs and left out of the language statistics, since
+# reviewing one of these means reading scripts/theme/palette.json instead.
+#
+# generated_files() in scripts/theme/generate_theme.py owns this list. A file
+# added there and not here is simply not collapsed, so this going stale costs a
+# convenience rather than correctness. .config/wofi/style.css is deliberately
+# absent: only the marked block inside it is generated, the rest is hand-written.
+.config/kitty/voidashi-colors.conf            linguist-generated=true
+.config/foot/voidashi-colors.ini              linguist-generated=true
+.config/ghostty/voidashi-colors               linguist-generated=true
+.config/alacritty/conf.d/voidashi-colors.toml linguist-generated=true
+.config/hypr/conf/palette.lua                 linguist-generated=true
+.config/theme/voidashi-colors.css             linguist-generated=true
+.config/gtk-3.0/voidashi.css                  linguist-generated=true
+.config/gtk-4.0/voidashi.css                  linguist-generated=true
+.config/nvim/lua/voidashi/theme/palette.lua   linguist-generated=true
+.local/share/color-schemes/Voidashi.colors    linguist-generated=true
