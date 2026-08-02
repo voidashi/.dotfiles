@@ -17,12 +17,12 @@ colour fails to arrive.
 
 | Mechanism | How it works | Applications |
 |---|---|---|
-| **Generated partial, included** | The generator writes a colour-only file in the application's native format and its config includes it | kitty, foot, ghostty, alacritty, Hyprland (`conf/palette.lua`), Neovim (`theme/palette.lua`) |
+| **Generated partial, included** | The generator writes a colour-only file in the application's native format and its config includes it | kitty, foot, ghostty, alacritty, Sway (`sway/voidashi-colors`), Hyprland (`conf/palette.lua`), Neovim (`theme/palette.lua`) |
 | **Generated partial, `@import`ed** | The same idea through CSS: one shared file at `.config/theme/voidashi-colors.css`, imported by path on the stylesheet's first line | waybar, swaync, wlogout |
 | **Generated block, inlined** | The same content pasted into the stylesheet between markers, because the application cannot import | wofi |
 | **Generated named colours** | The palette is mapped onto the names the toolkit already paints from, and the application carries on unaware | GTK3, GTK4 and libadwaita |
 | **Merged INI** | Only the colour, font and cursor keys of a file another program also writes | KDE (`kdeglobals`, `kcminputrc`) |
-| **Hand-written** | Colour mixes with structural config, so generating into it would risk corrupting what is not colour | swaylock, bottom, starship, fastfetch, catnap, fish, yazi, Sway, `nvim/theme/roles.lua` |
+| **Hand-written** | Colour mixes with structural config, so generating into it would risk corrupting what is not colour | swaylock, bottom, starship, fastfetch, catnap, fish, yazi, `nvim/theme/roles.lua` |
 
 The hand-written ones are the ones that age in silence, which is why
 `scripts/theme/check_palette.py` exists. Run it after touching colour.
@@ -44,11 +44,17 @@ Two things skip the layer. `ansi16` is consumed raw by the four terminals and by
 because slot 1 is red whatever this desktop's identity colour happens to be, and
 `geometry` and `typography` are values with no decision to add.
 
-`scripts/theme/generate_theme.py` **writes** ten files whole, each in the format its
-consumer already reads: the four terminal partials, the Hyprland Lua module, the Neovim
-palette layer, the shared CSS partial at `.config/theme/voidashi-colors.css`, the GTK3
-and GTK4 named-colour files, and the selectable KDE colour scheme
-`Voidashi.colors`.
+`scripts/theme/generate_theme.py` **writes** eleven files whole, each in the format its
+consumer already reads: the four terminal partials, Sway's variables, the Hyprland Lua
+module, the Neovim palette layer, the shared CSS partial at
+`.config/theme/voidashi-colors.css`, the GTK3 and GTK4 named-colour files, and the
+selectable KDE colour scheme `Voidashi.colors`.
+
+Sway's partial holds variables and nothing else: which window state takes which role is
+hand-written beside the `client.*` directives that read them, the same split as
+Hyprland, where `appearance.lua` decides and `palette.lua` is generated. It is also what
+gives the file a check that can fail, since `sway --validate` rejects a `$vd_*` that no
+include defined.
 
 It also **edits** three files it does not own rather than writing them: wofi's
 stylesheet, where the palette is spliced between markers because wofi cannot import, and

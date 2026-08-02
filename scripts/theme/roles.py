@@ -65,9 +65,17 @@ def build(p: dict) -> dict:
         # Edge is for rules and separators, never for text or fills. dim is the
         # unfocused form: a window that lost focus loses the contrast of its
         # borders rather than their presence.
+        #
+        # window is a third step and a different axis: RICE-GUIDE.md's palette
+        # table gives edge-30 to "unfocused window borders, input outlines",
+        # which has to read across a gap against the wallpaper rather than
+        # against the surface it sits on. Hyprland's appearance.lua paints the
+        # same step and still reaches into the raw palette for it, so this role
+        # is what Sway reads and the two are only mirrored by hand.
         "line": {
             "normal": s["edge"]["20"],
             "dim": s["edge"]["10"],
+            "window": s["edge"]["30"],
         },
 
         # Focus is Ice across the whole desktop, and selection is the surface

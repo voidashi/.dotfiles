@@ -4,8 +4,8 @@
 RICE-GUIDE.md has a non-negotiable, "never invent a colour", which used to be
 an honour-system rule. Several files carry hand-pasted hex because colour mixes
 with structural config in them (swaylock, bottom, starship, fastfetch, catnap,
-fish, yazi, Sway and Neovim's roles layer), and nothing said so when one of them
-aged out of step with palette.json.
+fish, yazi and Neovim's roles layer), and nothing said so when one of them aged
+out of step with palette.json.
 
 Two checks and a warning:
 

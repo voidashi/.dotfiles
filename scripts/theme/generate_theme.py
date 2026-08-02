@@ -171,6 +171,41 @@ def gen_alacritty(p: dict, r: dict) -> str:
 
 
 # =====================================================================
+#  Sway
+# =====================================================================
+
+def gen_sway_colors(p: dict, r: dict) -> str:
+    """Sway variables, for the `client.*` directives in .config/sway/config.
+
+    Only the roles those directives consume, named after the role rather than
+    after the palette step. Emitting the whole palette here is the shape this
+    file already paid for: the block this replaces once carried Kanagawa's 41
+    colours as variables with not one `client.*` line to read them, so Sway ran
+    on its factory colours while the config looked themed.
+
+    Which window state takes which role stays hand-written next to the
+    directives, the way Hyprland's appearance.lua decides and reads the
+    generated palette.lua. What is decided here is only that Sway spells a
+    colour `set $name #rrggbb`.
+    """
+    surf, txt, ln = r["surface"], r["text"], r["line"]
+    pairs = [
+        ("vd_focus", r["accent"]["line"]),
+        ("vd_unfocused", ln["window"]),
+        ("vd_border", ln["normal"]),
+        ("vd_urgent", r["status"]["critical"]["fg"]),
+        ("vd_bg_window", surf["window"]),
+        ("vd_bg_content", surf["content"]),
+        ("vd_text_bright", txt["bright"]),
+        ("vd_text_body", txt["body"]),
+        ("vd_text_disabled", txt["disabled"]),
+    ]
+    width = max(len(name) for name, _ in pairs)
+    out = header("#")
+    return out + "".join(f"set ${name:<{width}} {hexval}\n" for name, hexval in pairs)
+
+
+# =====================================================================
 #  Lua: Hyprland and Neovim
 # =====================================================================
 
@@ -670,6 +705,7 @@ def generated_files(p: dict) -> dict:
         CONFIG / "foot" / "voidashi-colors.ini": gen_foot(p, r),
         CONFIG / "ghostty" / "voidashi-colors": gen_ghostty(p, r),
         CONFIG / "alacritty" / "conf.d" / "voidashi-colors.toml": gen_alacritty(p, r),
+        CONFIG / "sway" / "voidashi-colors": gen_sway_colors(p, r),
         CONFIG / "hypr" / "conf" / "palette.lua": gen_hypr_palette(p),
         CONFIG / "theme" / "voidashi-colors.css": gen_gtk_css(p, r),
         CONFIG / "gtk-3.0" / "voidashi.css": gen_gtk_app_css(p, r, "gtk3"),
