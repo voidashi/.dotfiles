@@ -14,7 +14,7 @@ Two checks and a warning:
   sync     a generated file that differs from what the generator would write
            now, or a merged file whose owned sections a second merge would
            change, both of which mean someone edited the output not the source
-  roles    a role literal holding a hex no scale or alert tone holds, which is
+  ansi     an ansi16 slot holding a hex no scale or alert tone holds, which is
            a retired colour still inside the palette and therefore invisible to
            drift. A warning, since a half-finished hue swap looks like this
 
@@ -213,10 +213,10 @@ def palette_colours(p: dict) -> set:
         # than the palette has.
         known |= {v.lower() for v in entry.values() if v.startswith("#")}
     known |= {v.lower() for v in p["ansi16"]}
-    known.add(p["focus_ring"].lower())
-    for value in p["terminal"].values():
-        if isinstance(value, str) and value.startswith("#"):
-            known.add(value.lower())
+    # Roles are not unioned in, and must not be: roles.validate() refuses one
+    # that is not already a scale or an alert tone, so adding them here would
+    # be a no-op that reads like coverage. If that ever stops being true, this
+    # check is not the place to find out.
     return known
 
 
@@ -251,19 +251,23 @@ def check_drift(known: set) -> list:
 
 
 def check_orphan_roles(p: dict) -> list:
-    """Role literals holding a hex that no scale and no alert tone holds.
+    """An ansi16 slot holding a hex that no scale and no alert tone holds.
 
     palette_colours() unions every value in the file, so a hex that appears
     twice stays a palette colour while either copy survives, and drift can never
-    report a file carrying it. The roles are where that bites, because each one
-    repeats a scale value rather than naming it: ansi16 slot 1 is a second copy
-    of bordeaux.400, focus_ring of ice.300, terminal.cursor of bordeaux.300.
-    Measured: moving the bordeaux ramp alone and regenerating moved four files
-    and left nineteen tracked files on the old accent, at exit 0 throughout.
+    report a file carrying it. ansi16 is the only place left where that can
+    happen: every slot repeats a scale value or an alert tone rather than naming
+    it, and it stays that way on purpose, because a program asking for red
+    expects red whatever the identity colour is. Measured: moving the bordeaux
+    ramp alone and regenerating moved four files and left nineteen tracked files
+    on the old accent, at exit 0 throughout.
+
+    The roles used to be here too and are not any more; roles.py names a token,
+    so it cannot hold a retired value and there is nothing here to report. This
+    is what is left, not what was forgotten.
 
     A warning and not a failure. A deliberate hue swap puts the palette in this
-    state on the way through, and the fix for the shape is a roles layer that
-    has a role name a token instead of repeating its value.
+    state on the way through.
     """
     live = set()
     for shades in p["scales"].values():
@@ -330,14 +334,15 @@ def main() -> int:
 
     orphans = check_orphan_roles(p)
     if orphans:
-        print("\nWarning, not a failure: a role holds a colour no scale or alert tone does.")
+        print("\nWarning, not a failure: an ANSI slot holds a colour no scale or alert "
+              "tone does.")
         for name, value in orphans:
             print(f"  {name} = {value}")
         print("  While a second copy of a retired hex survives, that hex is still a "
               "palette\n  colour and no file left on it can be reported. Expected "
               "mid-swap; finish it.")
     else:
-        print("roles: every role literal is also a scale or alert tone")
+        print("ansi:  every ANSI slot is also a scale or alert tone")
 
     return 1 if failed else 0
 
