@@ -25,9 +25,11 @@ first half just landed.
 
 1. **Bring the hand-written half onto the generator, in the order the survey found.** The
    entry is the first one below, under "Configs that still paste hex". It is worth doing
-   next because `roles.py` now exists: Sway's nine pasted hex and starship's five become a
-   generated partial reading roles rather than a second transcription of the palette,
-   which is the shape the four terminals already have.
+   next because `roles.py` now exists: Sway's nine pasted hex, starship's five and
+   hyprtoolkit's six become generated partials reading roles rather than a second
+   transcription of the palette, which is the shape the four terminals already have. Yazi
+   is in the same entry and not in the same session, because its keys have to be brought
+   onto the current schema first.
 
 ## Configs that still paste hex
 
@@ -53,10 +55,23 @@ transcription.
   | `.config/yazi/theme.toml` | `[flavor]` dark/light | 18 | the yazi binary's embedded default `theme.toml` and its `flavors/<name>.yazi/flavor.toml` path |
 
   Sway is the cheapest of the three and hyprtoolkit splits cleanest, 6 colour lines out and
-  `rounding_*` and the font keys staying. Yazi is the largest single drift surface in the
-  repository, 18 colours over 69 sites, but it needs a flavor package built, and whether
-  `tmtheme.xml` is required at load is **unconfirmed**: the binary references it, the
-  upstream package layout lists it, and nobody has watched yazi refuse a flavor without it.
+  `rounding_*` and the font keys staying. Nothing renders `hyprtoolkit.conf` today, since
+  `programs.lua` sets `menu = "wofi --show drun"` and leaves the hyprlauncher line
+  commented, so its check stops at the toolkit accepting the `source` directive and never
+  reaches a screen. That limits the evidence rather than excusing the pasted hex, and the
+  screen half is its own entry under "Waiting on the world".
+
+  Yazi is the largest single drift surface in the repository, 18 colours over 69 sites, and
+  the `tmtheme.xml` question is answered: it is not required at load. Measured under yazi
+  26.5.6 with `YAZI_CONFIG_HOME` pointed at a throwaway tree. A flavor directory holding
+  only `flavor.toml` reports `Dark/light flavor: ArcSwapAny("voidashi")` and exits clean,
+  while a flavor named with no directory behind it fails loudly with `Failed to read flavor
+  ".../flavor.toml"`, which is what makes the passing case worth anything. Rendered in a
+  40x120 pty, the set of colour escapes the flavor emits is identical to the set today's
+  `theme.toml` emits. The `tmtheme.xml` hook is `[mgr] syntect_theme`, empty in yazi's own
+  default and never set here, so preview highlighting already comes from yazi's built-in
+  theme and would stay there. It buys that one surface and gates nothing. What yazi does
+  need first is the entry below.
 
   **Named colours in the same file, so a generated block inside it.** `.config/starship.toml`
   takes `palette = "<name>"` plus a `[palettes.<name>]` table, and `style` fields then name
@@ -78,6 +93,29 @@ transcription.
   all, only ANSI tokens, which already resolve through the generated terminal table.
   *Difficulty: low each for sway, hyprtoolkit and starship; medium for yazi; high for
   fastfetch. Priority: medium, and it is what would make the README's promise true.*
+
+- **Six keys in `.config/yazi/theme.toml` name a schema yazi renamed, and the colours they
+  carry reach nothing.** Found while measuring the flavor question above, by extracting the
+  default `theme.toml` embedded in the yazi 26.5.6 binary and diffing key names against
+  ours. `mgr.hovered` and `mgr.preview_hovered` are now `indicator.current` and
+  `indicator.preview`; `mode.normal`, `mode.select` and `mode.unset` each split into a
+  `_main` and an `_alt` half; `confirm.content` is now `confirm.body`. Rendered in a pty,
+  the cursor row comes out as the default's reverse video and the `NOR` badge as `48;5;4`,
+  yazi's default blue, so the `ice-600` cursor fill and the `bordeaux-300` identity mark are
+  written in the file and never painted. Renaming the keys in a test flavor took the ice-600
+  background from zero occurrences to one and bordeaux-300 from zero to three, which is what
+  establishes that the names are the whole fault.
+
+  No check here would have caught it. `check_palette.py` asks whether a colour belongs to
+  the palette, not whether the key carrying it still exists, and an override matched by name
+  fails silently when upstream renames one. A checker that validates our key names against
+  the binary's embedded default is the obvious rung up, and it would cover every application
+  whose config we override by name rather than yazi alone. Do this before the flavor
+  conversion, so one commit changes how yazi looks and a separate one changes where its
+  colours come from.
+  *Difficulty: low to rename, and the work is deciding what the `_alt` halves should be,
+  since the split gives the mode indicator a second surface this palette never assigned.
+  Priority: medium, because two colour decisions that are documented are not on screen.*
 
 - **The upstream bump this entry was waiting for has already happened, and nobody
   noticed.** It said the AUR package was still on 1.1.1 and that catnap 2.0 would break
@@ -486,6 +524,18 @@ the groups above have stopped changing what the desktop looks like.
   has reached is the wrong order.
   *Difficulty: low. Priority: low, and it is the first surface a visitor sees, which
   argues it up once greetd is in use.*
+
+- **Nobody has seen hyprlauncher on a screen.** `.config/hypr/hyprtoolkit.conf` is themed,
+  and once the first entry of "Configs that still paste hex" lands it is generated, but
+  `programs.lua` runs wofi and the hyprlauncher line stays commented, so every check that
+  file has ever had stops at the toolkit accepting it. Switching the launcher for long
+  enough to look is a person's job rather than a script's: confirm the surface is void-20,
+  the input field one step lighter, the selected entry Ice, the identity mark Bordeaux
+  rather than a second selection colour, and the corners square. The radius entry under
+  "The two compositors" is the one defect already known to be waiting there, so fix it
+  before looking or it is what you will see.
+  *Difficulty: trivial, blocked on someone switching the launcher and looking. Priority:
+  low, since nothing runs it today.*
 
 - **Dolphin's icons are still `breeze-dark`**, so folders come out blue against a Voidashi
   window. Every alternative installed here is worse aligned, so this waits on an icon set
