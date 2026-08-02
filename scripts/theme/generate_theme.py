@@ -289,91 +289,94 @@ def gen_gtk_css(p: dict, r: dict) -> str:
     return out
 
 
-def gen_gtk_app_css(p: dict, toolkit: str) -> str:
+def gen_gtk_app_css(p: dict, r: dict, toolkit: str) -> str:
     """Named-colour overrides for ordinary GTK applications.
 
     Distinct from gen_gtk_css, which exports the raw palette for stylesheets we
-    write ourselves. This one maps the palette onto the names GTK and libadwaita
-    already paint from, so applications nobody wrote a stylesheet for follow the
-    desktop: pavucontrol, zenity, file choosers, network dialogs.
+    write ourselves. This one maps the semantic layer onto the names GTK and
+    libadwaita already paint from, so applications nobody wrote a stylesheet for
+    follow the desktop: pavucontrol, zenity, file choosers, network dialogs.
 
-    Surfaces follow RICE-GUIDE.md's hierarchy. The window chrome sits at void-10
-    and content at void-00, so a text view reads as recessed into the window
-    rather than floating on it, matching how the terminals are built.
+    What is decided here is which GTK name each role belongs to, and nothing
+    else. Why a surface sits where it does is in roles.py, beside the role.
     """
-    s, a, g = p["scales"], p["alert"], p["geometry"]
+    g = p["geometry"]
+    surf, txt, ln = r["surface"], r["text"], r["line"]
+    sel, acc, st = r["selection"], r["accent"], r["status"]
     out = header("/*", " */")
     out += f"/* {toolkit} named colours, mapped from palette.json */\n\n"
 
     if toolkit == "gtk4":
         pairs = [
-            ("window_bg_color", s["void"]["10"]),
-            ("window_fg_color", s["ink"]["1"]),
-            ("view_bg_color", s["void"]["00"]),
-            ("view_fg_color", s["ink"]["1"]),
-            ("headerbar_bg_color", s["void"]["20"]),
-            ("headerbar_fg_color", s["ink"]["1"]),
-            ("headerbar_border_color", s["edge"]["20"]),
-            ("headerbar_backdrop_color", s["void"]["10"]),
-            ("headerbar_shade_color", s["edge"]["10"]),
-            ("sidebar_bg_color", s["void"]["10"]),
-            ("sidebar_fg_color", s["ink"]["2"]),
-            ("sidebar_border_color", s["edge"]["20"]),
-            ("sidebar_backdrop_color", s["void"]["10"]),
-            ("secondary_sidebar_bg_color", s["void"]["10"]),
-            ("secondary_sidebar_fg_color", s["ink"]["2"]),
-            ("card_bg_color", s["void"]["20"]),
-            ("card_fg_color", s["ink"]["1"]),
-            ("dialog_bg_color", s["void"]["20"]),
-            ("dialog_fg_color", s["ink"]["1"]),
-            ("popover_bg_color", s["void"]["20"]),
-            ("popover_fg_color", s["ink"]["1"]),
-            ("thumbnail_bg_color", s["void"]["20"]),
-            ("thumbnail_fg_color", s["ink"]["1"]),
-            ("shade_color", s["void"]["00"]),
-            ("scrollbar_outline_color", s["edge"]["20"]),
-            # Focus and selection are Ice everywhere in this desktop.
-            ("accent_bg_color", s["ice"]["600"]),
-            ("accent_fg_color", s["ink"]["0"]),
-            ("accent_color", s["ice"]["300"]),
-            ("destructive_bg_color", a["critical"]["bg"]),
-            ("destructive_fg_color", a["critical"]["fg"]),
-            ("destructive_color", a["critical"]["fg"]),
-            ("success_bg_color", a["good"]["bg"]),
-            ("success_fg_color", a["good"]["fg"]),
-            ("success_color", a["good"]["fg"]),
-            ("warning_bg_color", a["caution"]["bg"]),
-            ("warning_fg_color", a["caution"]["fg"]),
-            ("warning_color", a["caution"]["fg"]),
-            ("error_bg_color", a["critical"]["bg"]),
-            ("error_fg_color", a["critical"]["fg"]),
-            ("error_color", a["critical"]["fg"]),
-            ("borders", s["edge"]["20"]),
+            ("window_bg_color", surf["window"]),
+            ("window_fg_color", txt["emphasis"]),
+            ("view_bg_color", surf["content"]),
+            ("view_fg_color", txt["emphasis"]),
+            ("headerbar_bg_color", surf["raised"]),
+            ("headerbar_fg_color", txt["emphasis"]),
+            ("headerbar_border_color", ln["normal"]),
+            ("headerbar_backdrop_color", surf["window"]),
+            ("headerbar_shade_color", ln["dim"]),
+            ("sidebar_bg_color", surf["window"]),
+            ("sidebar_fg_color", txt["body"]),
+            ("sidebar_border_color", ln["normal"]),
+            ("sidebar_backdrop_color", surf["window"]),
+            ("secondary_sidebar_bg_color", surf["window"]),
+            ("secondary_sidebar_fg_color", txt["body"]),
+            ("card_bg_color", surf["raised"]),
+            ("card_fg_color", txt["emphasis"]),
+            ("dialog_bg_color", surf["raised"]),
+            ("dialog_fg_color", txt["emphasis"]),
+            ("popover_bg_color", surf["raised"]),
+            ("popover_fg_color", txt["emphasis"]),
+            ("thumbnail_bg_color", surf["raised"]),
+            ("thumbnail_fg_color", txt["emphasis"]),
+            # The scrim behind a modal, which is the deepest surface there is.
+            ("shade_color", surf["content"]),
+            ("scrollbar_outline_color", ln["normal"]),
+            ("accent_bg_color", sel["bg"]),
+            ("accent_fg_color", sel["fg"]),
+            ("accent_color", acc["line"]),
+            # libadwaita spends four names on two tones: destructive is the
+            # button, error is the message, and both are the critical tone.
+            ("destructive_bg_color", st["critical"]["bg"]),
+            ("destructive_fg_color", st["critical"]["fg"]),
+            ("destructive_color", st["critical"]["fg"]),
+            ("success_bg_color", st["good"]["bg"]),
+            ("success_fg_color", st["good"]["fg"]),
+            ("success_color", st["good"]["fg"]),
+            ("warning_bg_color", st["caution"]["bg"]),
+            ("warning_fg_color", st["caution"]["fg"]),
+            ("warning_color", st["caution"]["fg"]),
+            ("error_bg_color", st["critical"]["bg"]),
+            ("error_fg_color", st["critical"]["fg"]),
+            ("error_color", st["critical"]["fg"]),
+            ("borders", ln["normal"]),
         ]
     else:
         pairs = [
-            ("theme_bg_color", s["void"]["10"]),
-            ("theme_fg_color", s["ink"]["1"]),
-            ("theme_base_color", s["void"]["00"]),
-            ("theme_text_color", s["ink"]["1"]),
-            ("theme_selected_bg_color", s["ice"]["600"]),
-            ("theme_selected_fg_color", s["ink"]["0"]),
-            ("theme_unfocused_bg_color", s["void"]["10"]),
-            ("theme_unfocused_fg_color", s["ink"]["2"]),
-            ("theme_unfocused_base_color", s["void"]["00"]),
-            ("theme_unfocused_text_color", s["ink"]["2"]),
-            ("theme_unfocused_selected_bg_color", s["ice"]["700"]),
-            ("theme_unfocused_selected_fg_color", s["ink"]["1"]),
-            ("insensitive_bg_color", s["void"]["20"]),
-            ("insensitive_fg_color", s["ink"]["4"]),
-            ("insensitive_base_color", s["void"]["10"]),
-            ("borders", s["edge"]["20"]),
-            ("unfocused_borders", s["edge"]["10"]),
-            ("warning_color", a["caution"]["fg"]),
-            ("error_color", a["critical"]["fg"]),
-            ("success_color", a["good"]["fg"]),
-            ("link_color", s["ice"]["300"]),
-            ("visited_link_color", s["ash"]["300"]),
+            ("theme_bg_color", surf["window"]),
+            ("theme_fg_color", txt["emphasis"]),
+            ("theme_base_color", surf["content"]),
+            ("theme_text_color", txt["emphasis"]),
+            ("theme_selected_bg_color", sel["bg"]),
+            ("theme_selected_fg_color", sel["fg"]),
+            ("theme_unfocused_bg_color", surf["window"]),
+            ("theme_unfocused_fg_color", txt["body"]),
+            ("theme_unfocused_base_color", surf["content"]),
+            ("theme_unfocused_text_color", txt["body"]),
+            ("theme_unfocused_selected_bg_color", sel["bg_unfocused"]),
+            ("theme_unfocused_selected_fg_color", sel["fg_unfocused"]),
+            ("insensitive_bg_color", surf["raised"]),
+            ("insensitive_fg_color", txt["disabled"]),
+            ("insensitive_base_color", surf["window"]),
+            ("borders", ln["normal"]),
+            ("unfocused_borders", ln["dim"]),
+            ("warning_color", st["caution"]["fg"]),
+            ("error_color", st["critical"]["fg"]),
+            ("success_color", st["good"]["fg"]),
+            ("link_color", acc["line"]),
+            ("visited_link_color", acc["visited"]),
         ]
 
     for name, hexval in pairs:
@@ -666,8 +669,8 @@ def generated_files(p: dict) -> dict:
         CONFIG / "alacritty" / "conf.d" / "voidashi-colors.toml": gen_alacritty(p, r),
         CONFIG / "hypr" / "conf" / "palette.lua": gen_hypr_palette(p),
         CONFIG / "theme" / "voidashi-colors.css": gen_gtk_css(p, r),
-        CONFIG / "gtk-3.0" / "voidashi.css": gen_gtk_app_css(p, "gtk3"),
-        CONFIG / "gtk-4.0" / "voidashi.css": gen_gtk_app_css(p, "gtk4"),
+        CONFIG / "gtk-3.0" / "voidashi.css": gen_gtk_app_css(p, r, "gtk3"),
+        CONFIG / "gtk-4.0" / "voidashi.css": gen_gtk_app_css(p, r, "gtk4"),
         CONFIG / "nvim" / "lua" / "voidashi" / "theme" / "palette.lua": gen_nvim_palette(p),
         REPO_ROOT / ".local" / "share" / "color-schemes" / "Voidashi.colors": gen_kde_colors(p),
     }

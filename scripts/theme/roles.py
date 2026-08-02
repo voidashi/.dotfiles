@@ -31,7 +31,7 @@ second source of truth, which is the failure this layer exists to end.
 
 def build(p: dict) -> dict:
     """The semantic layer, as section -> role -> colour."""
-    s = p["scales"]
+    s, a = p["scales"], p["alert"]
 
     return {
         # Surfaces, in the depth order RICE-GUIDE.md's "Form" section describes:
@@ -39,31 +39,53 @@ def build(p: dict) -> dict:
         # into its window rather than floating on top of it. The terminals are
         # built the same way, which is why their background is the content
         # surface and not the window one.
+        #
+        # content is also what a scrim takes, being the deepest thing there is.
         "surface": {
             "content": s["void"]["00"],
+            "window": s["void"]["10"],
+            "raised": s["void"]["20"],
         },
 
-        # Ink, at the three steps the guide's palette table names. bright is
-        # "primary foreground, focused text"; emphasis is "emphasis text", which
-        # is what a GTK window uses for its body; body is "default terminal
-        # foreground, body text".
+        # Ink, at the steps the guide's palette table names. bright is "primary
+        # foreground, focused text"; emphasis is "emphasis text", which is what
+        # a GTK window uses for its body; body is "default terminal foreground,
+        # body text". A terminal running one step dimmer than a window is the
+        # guide's decision, not an oversight.
         "text": {
             "bright": s["ink"]["0"],
+            "emphasis": s["ink"]["1"],
             "body": s["ink"]["2"],
+            "disabled": s["ink"]["4"],
+        },
+
+        # Edge is for rules and separators, never for text or fills. dim is the
+        # unfocused form: a window that lost focus loses the contrast of its
+        # borders rather than their presence.
+        "line": {
+            "normal": s["edge"]["20"],
+            "dim": s["edge"]["10"],
         },
 
         # Focus is Ice across the whole desktop, and selection is the surface
         # form of it. The foreground pair inverts: text on a selection reads
-        # against Ice rather than against void.
+        # against Ice rather than against void. The unfocused pair steps the
+        # background down and the foreground back, so an inactive window keeps
+        # its selection visible without competing with the active one.
         "selection": {
             "bg": s["ice"]["600"],
             "fg": s["ink"]["0"],
+            "bg_unfocused": s["ice"]["700"],
+            "fg_unfocused": s["ink"]["1"],
         },
 
         # The line form of the accent, for anything drawn as a rule rather than
-        # as a filled surface: focus rings, links, active text.
+        # as a filled surface: focus rings, links, active text. visited is the
+        # one place Ash appears in the generated half, and it is Ash precisely
+        # so that a followed link stops reading as focus.
         "accent": {
             "line": s["ice"]["300"],
+            "visited": s["ash"]["300"],
         },
 
         # Bordeaux is identity rather than focus. The terminal cursor is the
@@ -72,6 +94,15 @@ def build(p: dict) -> dict:
         # hand-written. docs/SETUP.md, "Two colours get called the accent".
         "identity": {
             "cursor": s["bordeaux"]["300"],
+        },
+
+        # The alert tones, under the palette's own names rather than a second
+        # vocabulary of error/warning/success. They are a tuned set that does
+        # not come out of the ramps, so these name a tone and not a step.
+        "status": {
+            "critical": {"fg": a["critical"]["fg"], "bg": a["critical"]["bg"]},
+            "caution": {"fg": a["caution"]["fg"], "bg": a["caution"]["bg"]},
+            "good": {"fg": a["good"]["fg"], "bg": a["good"]["bg"]},
         },
     }
 
