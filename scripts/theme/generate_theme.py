@@ -446,7 +446,7 @@ def kde_font(p: dict, size_key: str = "ui_size", mono: bool = False) -> str:
     return f"{family},{t[size_key]},-1,5,{weight},0,0,0,0,0"
 
 
-def gen_kde_colors(p: dict) -> str:
+def gen_kde_colors(p: dict, r: dict) -> str:
     """KDE colour scheme, for the Qt half of the desktop.
 
     Nine KDE applications are installed (dolphin, ark, gwenview, kate,
@@ -457,57 +457,60 @@ def gen_kde_colors(p: dict) -> str:
     The blocks are not interchangeable: Window is the chrome, View is the
     content area a list or a text buffer draws on, Button is a raised control,
     Tooltip floats above everything. Mapping them all to one colour is what
-    makes a Qt application look flat and wrong.
+    makes a Qt application look flat and wrong. Which surface each one takes is
+    the depth order in roles.py; this decides only which KDE block asks for it.
     """
-    s, a = p["scales"], p["alert"]
+    surf, txt = r["surface"], r["text"]
+    sel, acc, st = r["selection"], r["accent"], r["status"]
     rgb = lambda h: ",".join(str(int(h.lstrip("#")[i:i + 2], 16)) for i in (0, 2, 4))
 
-    ice_focus = s["ice"]["400"]
     shared = {
-        "DecorationFocus": ice_focus,
-        "DecorationHover": ice_focus,
-        "ForegroundActive": s["ice"]["300"],
-        "ForegroundInactive": s["ink"]["4"],
-        "ForegroundLink": s["ice"]["300"],
-        "ForegroundVisited": s["ash"]["300"],
-        "ForegroundNegative": a["critical"]["fg"],
-        "ForegroundNeutral": a["caution"]["fg"],
-        "ForegroundPositive": a["good"]["fg"],
+        "DecorationFocus": acc["decoration"],
+        "DecorationHover": acc["decoration"],
+        "ForegroundActive": acc["line"],
+        "ForegroundInactive": txt["disabled"],
+        "ForegroundLink": acc["line"],
+        "ForegroundVisited": acc["visited"],
+        "ForegroundNegative": st["critical"]["fg"],
+        "ForegroundNeutral": st["caution"]["fg"],
+        "ForegroundPositive": st["good"]["fg"],
     }
 
-    # background normal, background alternate, foreground normal
-    roles = {
-        "Window": (s["void"]["10"], s["void"]["20"], s["ink"]["1"]),
-        "View": (s["void"]["00"], s["void"]["10"], s["ink"]["1"]),
-        "Button": (s["void"]["20"], s["void"]["30"], s["ink"]["1"]),
-        "Selection": (s["ice"]["600"], s["ice"]["700"], s["ink"]["0"]),
-        "Tooltip": (s["void"]["30"], s["void"]["40"], s["ink"]["1"]),
-        "Complementary": (s["void"]["10"], s["void"]["20"], s["ink"]["1"]),
-        "Header": (s["void"]["20"], s["void"]["30"], s["ink"]["1"]),
+    # background normal, background alternate, foreground normal. The alternate
+    # is the striped row, and in every block but Selection it is simply the next
+    # surface up; Selection stripes with the step the unfocused selection takes.
+    blocks = {
+        "Window": (surf["window"], surf["raised"], txt["emphasis"]),
+        "View": (surf["content"], surf["window"], txt["emphasis"]),
+        "Button": (surf["raised"], surf["floating"], txt["emphasis"]),
+        "Selection": (sel["bg"], sel["bg_unfocused"], sel["fg"]),
+        "Tooltip": (surf["floating"], surf["overlay"], txt["emphasis"]),
+        "Complementary": (surf["window"], surf["raised"], txt["emphasis"]),
+        "Header": (surf["raised"], surf["floating"], txt["emphasis"]),
     }
 
     out = header("#")
-    for role, (bg, alt, fg) in roles.items():
-        out += f"[Colors:{role}]\n"
+    for block, (bg, alt, fg) in blocks.items():
+        out += f"[Colors:{block}]\n"
         out += f"BackgroundNormal={rgb(bg)}\n"
         out += f"BackgroundAlternate={rgb(alt)}\n"
         out += f"ForegroundNormal={rgb(fg)}\n"
         for key, hexval in shared.items():
             # Selection inverts: its foreground roles read against Ice, not void.
-            if role == "Selection" and key == "ForegroundInactive":
-                hexval = s["ink"]["2"]
+            if block == "Selection" and key == "ForegroundInactive":
+                hexval = txt["body"]
             out += f"{key}={rgb(hexval)}\n"
         out += "\n"
 
     # Title bars. activeBlend/inactiveBlend are the gradient partner Breeze uses;
     # keeping them equal to the background is what removes the gradient.
     out += "[WM]\n"
-    out += f"activeBackground={rgb(s['void']['20'])}\n"
-    out += f"activeBlend={rgb(s['void']['20'])}\n"
-    out += f"activeForeground={rgb(s['ink']['0'])}\n"
-    out += f"inactiveBackground={rgb(s['void']['10'])}\n"
-    out += f"inactiveBlend={rgb(s['void']['10'])}\n"
-    out += f"inactiveForeground={rgb(s['ink']['3'])}\n"
+    out += f"activeBackground={rgb(surf['raised'])}\n"
+    out += f"activeBlend={rgb(surf['raised'])}\n"
+    out += f"activeForeground={rgb(txt['bright'])}\n"
+    out += f"inactiveBackground={rgb(surf['window'])}\n"
+    out += f"inactiveBlend={rgb(surf['window'])}\n"
+    out += f"inactiveForeground={rgb(txt['muted'])}\n"
     # The title bar font lives in [WM], and this whole section is replaced on
     # merge, so it has to be emitted here or it is dropped on the next run.
     out += f"activeFont={kde_font(p)}\n\n"
@@ -672,7 +675,7 @@ def generated_files(p: dict) -> dict:
         CONFIG / "gtk-3.0" / "voidashi.css": gen_gtk_app_css(p, r, "gtk3"),
         CONFIG / "gtk-4.0" / "voidashi.css": gen_gtk_app_css(p, r, "gtk4"),
         CONFIG / "nvim" / "lua" / "voidashi" / "theme" / "palette.lua": gen_nvim_palette(p),
-        REPO_ROOT / ".local" / "share" / "color-schemes" / "Voidashi.colors": gen_kde_colors(p),
+        REPO_ROOT / ".local" / "share" / "color-schemes" / "Voidashi.colors": gen_kde_colors(p, r),
     }
 
 
@@ -694,7 +697,7 @@ def merged_files(p: dict) -> dict:
         CONFIG / "wofi" / "style.css":
             lambda current: inlined_block(current, gen_gtk_css(p, r), "wofi/style.css"),
         CONFIG / "kdeglobals":
-            lambda current: kde_globals_merged(current, gen_kde_colors(p), p),
+            lambda current: kde_globals_merged(current, gen_kde_colors(p, r), p),
         CONFIG / "kcminputrc":
             lambda current: kcm_input_merged(current, p),
     }

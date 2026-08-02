@@ -45,6 +45,8 @@ def build(p: dict) -> dict:
             "content": s["void"]["00"],
             "window": s["void"]["10"],
             "raised": s["void"]["20"],
+            "floating": s["void"]["30"],
+            "overlay": s["void"]["40"],
         },
 
         # Ink, at the steps the guide's palette table names. bright is "primary
@@ -56,6 +58,7 @@ def build(p: dict) -> dict:
             "bright": s["ink"]["0"],
             "emphasis": s["ink"]["1"],
             "body": s["ink"]["2"],
+            "muted": s["ink"]["3"],
             "disabled": s["ink"]["4"],
         },
 
@@ -83,8 +86,15 @@ def build(p: dict) -> dict:
         # as a filled surface: focus rings, links, active text. visited is the
         # one place Ash appears in the generated half, and it is Ash precisely
         # so that a followed link stops reading as focus.
+        # decoration is the one step of Ice no document sustains. Qt draws its
+        # focus and hover decoration a step below the line accent and two above
+        # the selection surface, and the only justification on record was the
+        # name of a local variable. Named here so the question is visible;
+        # changing it is a decision that wants eyes on a screen, and it is
+        # written down in docs/TODO.md as exactly that.
         "accent": {
             "line": s["ice"]["300"],
+            "decoration": s["ice"]["400"],
             "visited": s["ash"]["300"],
         },
 
