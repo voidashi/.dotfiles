@@ -13,15 +13,56 @@ alone. A one-line fix can be urgent and a rewrite optional. "Start here next" is
 
 ## Start here next
 
-Nothing stands here. What did, `check_palette.py` passing on colours it could not see,
-is closed: the four extra colour formats, the quoted colour name, the merged files and
-the duplicated-value warning all shipped, each with a sentinel planted and reverted. What
-survives of it is a rule in `MAINTENANCE.md` about scoping a new colour format rather
-than loosening a regex.
+One item, chosen for the next session rather than by rating: it is `medium` on both axes
+while the stale screenshots are `high`, and those are blocked on someone taking new ones.
 
-The other `high` entry, the stale screenshots, is blocked on someone taking new ones, so
-it stays below rather than moving up here. Promote something from "Open work" when a
-session names it.
+1. **Rethink how the generator decides colour, and consider a roles layer.**
+   `palette.json` holds raw ramps plus a few roles expressed as duplicated literals:
+   `terminal.cursor` and `focus_ring` are semantic keys carrying a hex that also exists in a
+   scale. Making that systematic would have a role point at a token by name rather than
+   repeat its value. The Neovim theme already works this way in three layers.
+
+   What an audit of the generator added, and it raises the priority of this rather than the
+   difficulty. **The leak is not confined to the hand-written half.** Moving
+   `scales.ice.300` alone and regenerating leaves the *generated* GTK stylesheet emitting
+   `@define-color focus-ring #6aa3c7`, the retired value, because `gen_gtk_css` reads
+   `focus_ring` as an independent literal; the four terminals keep their old cursor,
+   background and selection for the same reason. So "change one hex and everything moves"
+   is false inside the generator's own output, not only outside it, and that is the
+   sharpest argument for doing this at all.
+
+   Three things that make the work cheaper than it looks. `colour_keys()` in
+   `generate_theme.py` already enumerates every place that must hold a colour in one
+   function, which is the hook a resolver would use. `palette.json` is structurally sound
+   today, so the conversion starts from a consistent state: every role literal still equals
+   the scale value it was copied from, and every ramp is monotonic in relative luminance.
+   And the checker's palette count is a free signal for the failure this fixes, since a
+   value entering while the old one stays makes the count go *up*, which is exactly the
+   retired-value-still-alive state; a real swap leaves it flat or smaller.
+
+   One design inconsistency to settle in passing, since it is a role question: ANSI 9 and
+   11 take `alert.critical.fg` and `alert.caution.fg`, while ANSI 10 takes `moss.300`
+   rather than `alert.good.fg`.
+
+   Three things to settle first. **ANSI must not follow the accent**: slot 1 is red
+   because red means red, so `ansi16` stays a canonical table no role touches. **The
+   guide still constrains which family suits which role**, so a free accent swap can
+   produce a configuration `RICE-GUIDE.md` forbids, and whoever clones this is entitled
+   to ignore that. **Roles only reach the generated half**, so any README claim has to
+   say which half; which files those are, and which of them could be brought across, is
+   the entry on bringing the hand-written half onto the generator, not a second count
+   here.
+
+   The check for orphaned literals that would complement this now exists, in the weak
+   form: `check_palette.py` warns, without failing, when a role literal holds a hex no
+   scale and no alert tone holds, which is what a half-finished hue swap leaves behind.
+   It reads `colour_keys()`, so it covers `ansi16`, `focus_ring` and every `terminal.*`
+   key. What it cannot see is a role that repeats the *wrong* scale value, since that
+   value is in the palette and the question drift asks is only whether it is there at
+   all. Naming the token is what answers the real question, and it retires the warning
+   with it.
+   *Difficulty: medium, and the design questions are most of it. Priority: medium, and it
+   makes the accent recipe shorter rather than replacing it.*
 
 ## Open work
 
@@ -206,51 +247,6 @@ Sorted by priority. Within a priority, by nothing.
   Sway.
   *Difficulty: high, now that the palette half has its own entry and what is left is the
   divergence. Priority: medium.*
-
-- **Rethink how the generator decides colour, and consider a roles layer.**
-  `palette.json` holds raw ramps plus a few roles expressed as duplicated literals:
-  `terminal.cursor` and `focus_ring` are semantic keys carrying a hex that also exists in a
-  scale. Making that systematic would have a role point at a token by name rather than
-  repeat its value. The Neovim theme already works this way in three layers.
-
-  What an audit of the generator added, and it raises the priority of this rather than the
-  difficulty. **The leak is not confined to the hand-written half.** Moving
-  `scales.ice.300` alone and regenerating leaves the *generated* GTK stylesheet emitting
-  `@define-color focus-ring #6aa3c7`, the retired value, because `gen_gtk_css` reads
-  `focus_ring` as an independent literal; the four terminals keep their old cursor,
-  background and selection for the same reason. So "change one hex and everything moves"
-  is false inside the generator's own output, not only outside it, and that is the
-  sharpest argument for doing this at all.
-
-  Three things that make the work cheaper than it looks. `colour_keys()` in
-  `generate_theme.py` already enumerates every place that must hold a colour in one
-  function, which is the hook a resolver would use. `palette.json` is structurally sound
-  today, so the conversion starts from a consistent state: every role literal still equals
-  the scale value it was copied from, and every ramp is monotonic in relative luminance.
-  And the checker's palette count is a free signal for the failure this fixes, since a
-  value entering while the old one stays makes the count go *up*, which is exactly the
-  retired-value-still-alive state; a real swap leaves it flat or smaller.
-
-  One design inconsistency to settle in passing, since it is a role question: ANSI 9 and
-  11 take `alert.critical.fg` and `alert.caution.fg`, while ANSI 10 takes `moss.300`
-  rather than `alert.good.fg`.
-
-  Three things to settle first. **ANSI must not follow the accent**: slot 1 is red because red means
-  red, so `ansi16` stays a canonical table no role touches. **The guide still constrains
-  which family suits which role**, so a free accent swap can produce a configuration
-  `RICE-GUIDE.md` forbids, and whoever clones this is entitled to ignore that. **Roles
-  only reach the generated half**, so any README claim has to say which half; which files
-  those are, and which of them could be brought across, is the coverage entry above rather
-  than a second count here. The check for orphaned literals that would complement this
-  now exists, in the weak form: `check_palette.py` warns, without failing, when a role
-  literal holds a hex no scale and no alert tone holds, which is what a half-finished hue
-  swap leaves behind. It reads `colour_keys()`, so it covers `ansi16`, `focus_ring` and
-  every `terminal.*` key. What it cannot see is a role that repeats the *wrong* scale
-  value, since that value is in the palette and the question drift asks is only whether it
-  is there at all. Naming the token is what answers the real question, and it retires the
-  warning with it.
-  *Difficulty: medium, and the design questions are most of it. Priority: medium, and it
-  makes the accent recipe shorter rather than replacing it.*
 
 - **Wallpaper curation** is the largest remaining visual gap. Images chosen against the
   Wallpaper section of [`design/RICE-GUIDE.md`](design/RICE-GUIDE.md): material,
