@@ -17,7 +17,7 @@ colour fails to arrive.
 
 | Mechanism | How it works | Applications |
 |---|---|---|
-| **Generated partial, included** | The generator writes a colour-only file in the application's native format and its config includes it | kitty, foot, ghostty, alacritty, Sway (`sway/voidashi-colors`), Hyprland (`conf/palette.lua`), Neovim (`theme/palette.lua`) |
+| **Generated partial, included** | The generator writes a colour-only file in the application's native format and its config includes it | kitty, foot, ghostty, alacritty, Sway (`sway/voidashi-colors`), Hyprland (`conf/palette.lua`), hyprtoolkit (`hypr/voidashi-toolkit-colors.conf`), Neovim (`theme/palette.lua`) |
 | **Generated partial, `@import`ed** | The same idea through CSS: one shared file at `.config/theme/voidashi-colors.css`, imported by path on the stylesheet's first line | waybar, swaync, wlogout |
 | **Generated block, inlined** | The same content pasted into the stylesheet between markers, because the application cannot import | wofi |
 | **Generated named colours** | The palette is mapped onto the names the toolkit already paints from, and the application carries on unaware | GTK3, GTK4 and libadwaita |
@@ -44,10 +44,10 @@ Two things skip the layer. `ansi16` is consumed raw by the four terminals and by
 because slot 1 is red whatever this desktop's identity colour happens to be, and
 `geometry` and `typography` are values with no decision to add.
 
-`scripts/theme/generate_theme.py` **writes** eleven files whole, each in the format its
+`scripts/theme/generate_theme.py` **writes** twelve files whole, each in the format its
 consumer already reads: the four terminal partials, Sway's variables, the Hyprland Lua
-module, the Neovim palette layer, the shared CSS partial at
-`.config/theme/voidashi-colors.css`, the GTK3 and GTK4 named-colour files, and the
+module, hyprtoolkit's six colour keys, the Neovim palette layer, the shared CSS partial
+at `.config/theme/voidashi-colors.css`, the GTK3 and GTK4 named-colour files, and the
 selectable KDE colour scheme `Voidashi.colors`.
 
 Sway's partial holds variables and nothing else: which window state takes which role is
@@ -96,7 +96,11 @@ relative to the stylesheet size so the two move together.
 **Launcher.** wofi on `void-20`, input one step lighter, Ice on the selected entry,
 Bordeaux on the prompt. Its palette is inlined rather than imported. hyprlauncher is
 configured too and takes its appearance from `.config/hypr/hyprtoolkit.conf`, since its
-own config covers behaviour only.
+own config covers behaviour only; that file's six colour keys are sourced from a
+generated partial and the rest of it, rounding and fonts, stays hand-written. Rendered
+and sampled once: the surface comes out `191817`, against `181818` for the toolkit's
+own default, and the corners are square. The selected entry and the identity mark were
+not on screen in that capture, since the list was empty.
 
 **Notifications.** swaync on `void-20`, painting from custom properties on `:root`
 rather than from our own selectors, which is what makes upstream's radius and surfaces

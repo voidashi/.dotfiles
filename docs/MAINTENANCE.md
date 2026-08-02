@@ -196,6 +196,27 @@ What was never executed, so nobody reads that number as broader than it is:
   hyprlang**: `hypridle.conf`, `hyprpaper.conf` and `hyprtoolkit.conf`. Only Hyprland
   itself gained a Lua config in 0.55; hypridle, hyprlock and hyprtoolkit still read
   hyprlang. Do not port any of them to the syntax `conf/*.lua` uses.
+- **hyprlang resolves a relative `source =` against the process cwd, not against
+  the file that contains it,** and says nothing at all when the glob then finds no
+  match. `hyprtoolkit.conf` therefore sources
+  `~/.config/hypr/voidashi-toolkit-colors.conf` by absolute path. Measured with
+  hyprlauncher on screen and the pixels sampled: started from any directory but
+  `.config/hypr/`, a `./voidashi-toolkit-colors.conf` renders the toolkit's own
+  default `181818` with an empty stderr, while the absolute form renders `191817`,
+  which is `void-20`. Started *from* that directory the relative form works, which is
+  how a broken path passes a hand test. This is wofi's `@import` failure in a second
+  toolkit; the two are the same bug.
+- **hyprtoolkit validates nothing it reads.** A colour key set to `notacolour` and a
+  key that does not exist are both accepted in silence, inline and in a sourced file
+  alike. So a hyprtoolkit config that loads without error is no evidence that any of
+  it applied: the only thing an error proves is a path that failed to glob. The check
+  is a screenshot. `hyprlauncher` is a layer-shell surface, so its geometry comes
+  from `hyprctl layers` and never from `hyprctl clients`, and it fades in, so a
+  capture taken the moment it appears samples a blend with whatever is behind it.
+- **hyprtoolkit falls back to `$HOME/.config` when `XDG_CONFIG_HOME` holds no config
+  of its own,** which quietly makes a throwaway config tree read the installed one.
+  A control run needs both variables pointed away from `$HOME`, or it measures the
+  real desktop while appearing to measure the copy.
 - **Waybar is one config split three ways, not three configs.** `common.jsonc` holds
   the bar geometry and every module definition; `hyprland.jsonc` and `sway.jsonc`
   each `include` it and add only their own compositor's `modules-left`; `style.css`

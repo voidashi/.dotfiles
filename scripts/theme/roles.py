@@ -94,10 +94,12 @@ def build(p: dict) -> dict:
         # as a filled surface: focus rings, links, active text. visited is the
         # one place Ash appears in the generated half, and it is Ash precisely
         # so that a followed link stops reading as focus.
-        # decoration is the one step of Ice no document sustains. Qt draws its
-        # focus and hover decoration a step below the line accent and two above
-        # the selection surface, and the only justification on record was the
-        # name of a local variable. Named here so the question is visible;
+        # decoration is the one step of Ice no document sustains. Qt and
+        # hyprtoolkit both draw their focus decoration a step below the line
+        # accent and two above the selection surface, and the only
+        # justification on record was the name of a local variable. Two
+        # toolkits reading it is the argument for the step existing and not for
+        # its value. Named here so the question is visible;
         # changing it is a decision that wants eyes on a screen, and it is
         # written down in docs/TODO.md as exactly that.
         "accent": {
@@ -106,12 +108,16 @@ def build(p: dict) -> dict:
             "visited": s["ash"]["300"],
         },
 
-        # Bordeaux is identity rather than focus. The terminal cursor is the
-        # one place the identity colour appears in the generated half; the rest
-        # of it is the shell prompt, the lock screen and the fetch banners, all
-        # hand-written. docs/SETUP.md, "Two colours get called the accent".
+        # Bordeaux is identity rather than focus, and it is spent at two steps.
+        # The cursor is bordeaux-300, which RICE-GUIDE.md's terminal table
+        # names. The mark is bordeaux-400, which is what the hand-written half
+        # already calls "the identity mark" wherever it labels the colour: the
+        # fetch titles, bottom's average line, hyprtoolkit's secondary accent.
+        # The rest of that half is the shell prompt and the lock screen.
+        # docs/SETUP.md, "Two colours get called the accent".
         "identity": {
             "cursor": s["bordeaux"]["300"],
+            "mark": s["bordeaux"]["400"],
         },
 
         # The alert tones, under the palette's own names rather than a second

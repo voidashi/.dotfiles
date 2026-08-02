@@ -206,6 +206,38 @@ def gen_sway_colors(p: dict, r: dict) -> str:
 
 
 # =====================================================================
+#  hyprtoolkit
+# =====================================================================
+
+def gen_hyprtoolkit_colors(p: dict, r: dict) -> str:
+    """The six colour keys of hyprtoolkit.conf, which hyprlauncher renders.
+
+    Everything else in that file stays hand-written: the two rounding keys and
+    the two font families are not colour, and the roles that explain the
+    surfaces are prose worth keeping beside them.
+
+    Nothing here is validated by the toolkit. Measured under hyprtoolkit 0.5.4:
+    a colour key set to "notacolour" and a key that does not exist are both
+    accepted in silence, in the sourced file and in the main one alike, so the
+    only thing an error proves is a path that failed to glob. What the file
+    says is therefore worth nothing without a screen; see docs/MAINTENANCE.md.
+    """
+    surf, acc = r["surface"], r["accent"]
+    rgb = lambda h: f"rgb({h.lstrip('#')})"
+    pairs = [
+        ("background", surf["raised"]),
+        ("alternate_base", surf["floating"]),
+        ("bright_text", r["text"]["bright"]),
+        ("link_text", acc["line"]),
+        ("accent", acc["decoration"]),
+        ("accent_secondary", r["identity"]["mark"]),
+    ]
+    width = max(len(name) for name, _ in pairs)
+    out = header("#")
+    return out + "".join(f"{name:<{width}} = {rgb(hexval)}\n" for name, hexval in pairs)
+
+
+# =====================================================================
 #  Lua: Hyprland and Neovim
 # =====================================================================
 
@@ -706,6 +738,7 @@ def generated_files(p: dict) -> dict:
         CONFIG / "ghostty" / "voidashi-colors": gen_ghostty(p, r),
         CONFIG / "alacritty" / "conf.d" / "voidashi-colors.toml": gen_alacritty(p, r),
         CONFIG / "sway" / "voidashi-colors": gen_sway_colors(p, r),
+        CONFIG / "hypr" / "voidashi-toolkit-colors.conf": gen_hyprtoolkit_colors(p, r),
         CONFIG / "hypr" / "conf" / "palette.lua": gen_hypr_palette(p),
         CONFIG / "theme" / "voidashi-colors.css": gen_gtk_css(p, r),
         CONFIG / "gtk-3.0" / "voidashi.css": gen_gtk_app_css(p, r, "gtk3"),
