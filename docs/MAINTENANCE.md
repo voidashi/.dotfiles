@@ -29,7 +29,7 @@ doing nothing, with no error message anywhere.
 - `scripts/config_files.conf`: every path, relative to `~`, that
   `backup-configs.sh` manages. A new dotfile goes here before anything else.
 - `scripts/packages.conf`: the package list, INI-style, with `[common]`, `[apt]`,
-  `[pacman]`, `[dnf]` and `[hooks]` sections.
+  `[pacman]` and `[dnf]` sections.
 - `scripts/wm/`: helpers the compositors call *while running*, as opposed to the
   top-level scripts, which you run yourself.
 - `scripts/theme/`: three layers, the same three the editor's theme has.
@@ -173,16 +173,13 @@ believing.
   reinstalling everything else. An unrecognised name exits 1.
 - `install` distinguishes `Already present` from `Installed`. Every installer here
   exits 0 when there is nothing to do, so a second run used to report the whole list as
-  freshly installed. Hooks fire only on a real install, not on a re-run.
+  freshly installed.
 - Both scripts send `ERROR` and `WARNING` to stderr and blank their colours when stdout
   is not a terminal.
 - In `packages.conf`, keys under `[common]` apply to every distro. A same-named key
   under `[apt]`, `[pacman]` or `[dnf]` overrides the package name passed to that
   distro's installer (`key=value`; a bare `key` means the name is identical
   everywhere).
-- `[hooks]`: `<package-key> = <shell command>` runs immediately after that package
-  installs successfully. Matched via awk against the common name, not the
-  distro-specific one.
 - `install` needs sudo. It prompts unless `--yes`, in which case it errors out rather
   than hanging on a password prompt.
 - **The rehearsal is `--dry-run` on both scripts.** It was `preview`, a command, on this
@@ -224,8 +221,6 @@ What was never executed, so nobody reads that number as broader than it is:
   `update_pkg_db` are reasoned from reading alone, including an unchecked
   `wget | gpg | tee` that writes an empty repository key when the download fails and
   leaves every later `apt-get update` broken.
-- `run_hooks` was analysed by running its awk program standalone. Its `system()` call
-  was never allowed to execute anything.
 - Everything ran on one CachyOS machine, so only the pacman branches met a real
   package manager. `install_fonts` and `init_dotfiles` were read and not run.
 - Two runs sharing a `$TIMESTAMP`, and behaviour under an empty `$HOME`, were reasoned

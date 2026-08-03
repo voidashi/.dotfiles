@@ -277,24 +277,7 @@ install_package() {
     fi
 
     log "SUCCESS" "Installed: $key"
-    run_hooks "$key" # Use the key for hooks
     return 0
-}
-
-run_hooks() {
-    local common_name="$1"
-    # Use awk to find and execute the hook command for the given common name
-    awk -F'=' -v pkg="$common_name" '
-        BEGIN { in_hooks = 0 }
-        /\[hooks\]/ { in_hooks = 1; next }
-        /\[.*\]/ && !/\[hooks\]/ { in_hooks = 0 } # Exit hooks section
-        in_hooks && $1 ~ "^[[:space:]]*" pkg "[[:space:]]*$" {
-            # Trim whitespace and execute the command
-            sub(/^[[:space:]]*/, "", $2);
-            sub(/[[:space:]]*$/, "", $2);
-            system($2)
-        }
-    ' "$CONFIG_FILE"
 }
 
 # ---- User Commands ----

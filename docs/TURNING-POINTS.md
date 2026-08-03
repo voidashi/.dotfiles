@@ -349,6 +349,22 @@ the only reason a change of that size is reviewable at all.
 identity colour is, and the accent recipe in `docs/SETUP.md` rewrites the whole Bordeaux
 ramp, so a slot naming `scales.bordeaux.400` would repaint ANSI red in silence.
 
+## `[hooks]` was deleted rather than repaired
+
+`packages.conf` had a `[hooks]` section that ran a shell command after a package
+installed. It had zero entries and one commented example for its whole life, and
+`run_hooks()` was fifteen lines of awk-inside-bash carrying three defects the script
+audit found: a command containing `=` was truncated at the first one, the package key
+was interpolated into a regex rather than compared literally so `pipesXsh` matched
+`pipes.sh`, and the `system()` call was the one thing in the audit nobody was willing
+to let execute. The repair was known and was a bash read loop.
+
+It was deleted because the feature had no users, and a rewrite would have been work
+scheduled on something nobody had ever run. What fell is this mechanism, not the idea:
+if a package here ever needs a post-install step, write it deliberately against a real
+case rather than restoring an awk program that was never exercised. Nothing else read
+the section, since `load_packages` filters on the manager's name and `[common]`.
+
 ## Three things about the bar are provisional
 
 Settled only until they have been lived with: whether numerals beat application
