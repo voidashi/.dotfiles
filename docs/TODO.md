@@ -144,6 +144,22 @@ once `install` takes paths and awkward before.
 `scripts/theme/` and `scripts/verify.sh`: what the checkers look at, and what is
 emitted today without anything looking at it.
 
+- **yazi paints five off-palette colours and they come from its own icon table.** Found
+  by `check_render.py` on its first real run, which prints everything emitted and not
+  only what it required: `03a9f4` thirteen times, plus `89e051`, `cddc39`, `dddddd`
+  and `dea584`, written here without the leading hash because the drift check reads a
+  document's examples as applied colour and is right to. They are Material colours
+  from the `[icon]` section of the default
+  theme embedded in the binary, one per file type, and nothing here overrides them. So
+  this is not drift: no tracked file carries these, which is exactly why `check_palette`
+  cannot see them and never could. The question is whether a file manager's icon row
+  gets an exemption the way the ANSI table does, or whether `[icon]` belongs in the
+  generated flavor on the palette's families. Decide that before writing anything,
+  because the second answer is a large table and the guide's restraint rule argues
+  against a different hue per extension.
+  *Difficulty: trivial to decide, medium to write out. Priority: medium, since it is
+  colour on screen that no document accounts for.*
+
 - **`check_palette.py` should walk `git ls-files` rather than the filesystem.** Its
   docstring promises "a colour in a tracked config" and it walks `REPO_ROOT.rglob("*")`,
   which is why `SKIP_PARTS` keeps growing entries that patch around what git already

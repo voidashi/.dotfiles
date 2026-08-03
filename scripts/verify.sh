@@ -150,36 +150,15 @@ if have fastfetch; then
     verdict "$ff_bad" "fastfetch"
 fi
 
-section "catnap" "timeout 5 catnap -n -c .config/catnap/config.cat"
-if have catnap; then
-    # This check asks whether the palette arrived, not whether the file parses.
-    # The version that asked the second question was passing a .toml to a binary
-    # with no TOML parser in it: catnap 2 reads $XDG_CONFIG_HOME/catnap/config.cat
-    # and then /etc/catnap/config.cat, nothing else, so the two tracked TOML files
-    # were live in the repository and dead on the machine for an entire release
-    # while every run here reported a pass.
-    #
-    # So: render, and require the identity colour on screen. bordeaux-400 is the
-    # username, the hostname and the logo, and it only lands there if config.cat,
-    # themes/voidashi.cat and distros.cat all resolved. A stray hex cannot satisfy
-    # it, because nothing in the tracked .cat files carries one.
-    #
-    # -c is still passed so the check reads the repository rather than whatever is
-    # linked into $HOME, but note that catnap resolves `import` against the config
-    # file's directory, so the theme and the art come from the repo either way.
-    ident=$(python3 -c 'import json,sys
-p=json.load(open("scripts/theme/palette.json"))
-h=p["scales"]["bordeaux"]["400"].lstrip("#")
-print("38;2;%d;%d;%d" % tuple(int(h[i:i+2],16) for i in (0,2,4)))')
-    out=$(timeout 5 catnap -n -c .config/catnap/config.cat 2>&1)
-    printf '%s\n' "$out" | grep -i error | head -3
-    if printf '%s' "$out" | grep -q "$ident"; then
-        printf 'identity colour %s is on screen\n' "$ident"
-    else
-        printf '[FAIL] identity colour %s never emitted, so the theme did not arrive\n' "$ident"
-        verdict 1 "catnap"
-    fi
-fi
+section "Colour actually painted" "python3 scripts/theme/check_render.py"
+# Every check above this line reads a file. This one runs the program and reads
+# the escapes it emits, which is the only question that catches a config that is
+# correct and reaches nothing. Both applications it covers were in that state:
+# yazi had six keys naming a schema it had renamed, and catnap had two tracked
+# config files in a format the binary no longer parses. Neither showed up in
+# anything here until this existed. It skips a program that is not installed.
+python3 scripts/theme/check_render.py 2>&1
+verdict $? "render"
 
 section "Tracked symlinks" "bash scripts/backup-configs.sh check"
 # SUCCESS lines only appear under --verbose, so this filter is insurance rather

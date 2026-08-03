@@ -567,8 +567,30 @@ generated output gets caught; and a role in `roles.py` holding a colour the pale
 does not hold, which catches both a hex pasted in by hand and a token reference
 mistyped into some other valid colour.
 
-It also warns, without failing, when an `ansi16` slot holds a hex no scale and no
-alert tone does. That table is literal on purpose and is the one place a retired
+What it cannot ask is whether any of that was painted, and that is a different check:
+
+```bash
+python3 scripts/theme/check_render.py
+```
+
+It runs yazi and catnap under a pty and requires a short list of colours to appear in
+the escapes they emit. Both were the reason it exists. yazi named six theme keys it
+had renamed, so the cursor fill and the mode badge were written and drawn zero times;
+catnap stopped reading its config format entirely, so a themed, checked, tracked file
+was inert for a release. `check_palette.py` reported clean throughout both. Read its
+scope narrowly: two applications, chosen because their overrides are matched by name
+against something upstream owns and because they can be driven headless. Nothing here
+covers the rest.
+
+Two traps if you extend it. Set the window size on the pty with `TIOCSWINSZ`, not
+through `LINES` and `COLUMNS`: yazi drew into an 0x0 terminal and emitted 764 bytes
+with no colour in them, which is what a theme that failed to load also looks like. And
+match colours in two stages, finding each SGR and then reading every colour inside it,
+because both programs write foreground and background in one sequence and a single
+anchored pattern silently counts only the first.
+
+`check_palette.py` also warns, without failing, when an `ansi16` slot holds a hex no
+scale and no alert tone does. That table is literal on purpose and is the one place a retired
 colour can still hide inside the palette, where drift cannot see it: while a second
 copy survives, the old hex is still a palette colour and no file left on it can be
 reported. A half-finished hue swap looks exactly like this, so it is a warning and
