@@ -19,50 +19,17 @@ hardware, images or a decision come last. Inside a group, by priority.
 
 ## Start here next
 
-The whole of "The two management scripts", below. It runs over several sessions rather
-than one, which is why it is named as a front and not as a task: each session opens the
-same two scripts and the same four documents, and one that picks up a single entry pays
-for all of them anyway. Take the entries in the order they are written.
+The two entries left under "The two management scripts", below. They are independent of
+each other, and the apt and dnf one is the larger.
 
 ## The two management scripts
 
 `backup-configs.sh` and `install-packages.sh`, the two `.conf` files they read, and
-`README.md`, `SETUP.md` and `MAINTENANCE.md`, which all print their vocabulary. Several
-sessions of work on one front. The order below is not arbitrary, and its first entry is
-now done: `add`, `install`, `uninstall` and `check` take paths, which is what makes the
-KDE opt-out cheap.
-
-- **KDE theming is not optional, and it lands on a session the reader did not offer.**
-  `config_files.conf` links `~/.config/kdeglobals`, `~/.config/kcminputrc` and
-  `~/.local/share/color-schemes/Voidashi.colors`, which is where Plasma applications read
-  their palette and their cursor, so installing on a machine that already runs KDE
-  rethemes the desktop the reader meant to keep. A reviewer reading only the README
-  named this as the single reason not to install on a working laptop, and they were right
-  before the README warned about it. The warning is now in the install block, which fixes
-  the surprise and not the situation. `install` now takes paths, so every subset is
-  reachable by naming what you want; what is missing is the opposite, a way to say
-  "everything except these three" without typing every other entry of
-  `config_files.conf`. Two options left, in rough order of cost: a documented invocation
-  in `README.md` and `SETUP.md`, which costs nothing in the script and leaves the reader
-  assembling a list; or splitting the Qt/KDE entries into their own section of
-  `config_files.conf` so they can be skipped by name, which is a config format change and
-  needs `load_dotfiles` to learn sections. One thing to know before pricing the second:
-  the filter that just landed is path-typed all the way down, since `normalize_path` and
-  `match_entry` both assume a filesystem path, so a section name fits neither and
-  `apply_dotfile_filter` grows an arm with its own error vocabulary. An exclusion is also
-  the one case where `FILTERED` is the wrong question: a caller who says "all of it
-  except kdeglobals" almost certainly does want the fonts, and three call sites read that
-  flag. Isolating it to the Hyprland and Sway sessions is the option that sounds best and
-  does not exist: `kdeglobals` is read per user, not per session.
-  *Difficulty: low. Priority: medium, and it is the one finding that changed a
-  reviewer's answer from yes to no.*
-
-- **The two management scripts are two CLIs for one job.** The rehearsal is `preview`, a
-  subcommand, on one and `--dry-run`, a flag, on the other, and the README prints both in
-  one code block. Four flags exist on one and not the other for no reason arising from its
-  job. Pick one vocabulary. Whichever loses, `README.md`, `SETUP.md` steps 1 to 5 and
-  `MAINTENANCE.md` all name the old one, so this is four documents as well as two scripts.
-  *Difficulty: low. Priority: medium.*
+`README.md`, `SETUP.md` and `MAINTENANCE.md`, which all print their vocabulary. Four of
+the six entries this group opened with are done and are recorded where each belongs:
+paths and `--except` on the dotfiles script, one rehearsal vocabulary across both, the
+KDE opt-out in `SETUP.md`, and `[hooks]` deleted, which is in
+[`TURNING-POINTS.md`](TURNING-POINTS.md). What is left is these two.
 
 - **The clone path is load-bearing in seven lines, and it does not have to be.** Cloning
   anywhere but `~/.dotfiles` silently breaks the wallpaper, the clipboard picker, the
@@ -85,15 +52,6 @@ KDE opt-out cheap.
   repo documents reaching the desktop by typing `Hyprland` at a console, which is exactly
   where it may not arrive.
   *Difficulty: low either way, and the decision is most of it. Priority: medium.*
-
-- **`[hooks]` has no users and a repair plan.** Zero entries, one commented example, and
-  `run_hooks()` is fifteen lines of awk-inside-bash carrying three known MEDIUM defects: a
-  hook command containing `=` is truncated at the first one; a hook key is interpolated
-  into a regex rather than compared literally, so `pipesXsh` fires for `pipes.sh`; and
-  `add_repos` discards `update_pkg_db`'s status. The honest fix was always to replace that
-  awk with a bash read loop. Deleting the feature closes all three instead.
-  *Difficulty: trivial to delete, low to rewrite. Priority: medium, because work is
-  scheduled on something nobody uses.*
 
 - **The apt and dnf machinery has never run, and could not work as configured.** Fourteen
   non-comment lines mention apt or dnf, in the low thirties counting whole `case` branches
@@ -123,12 +81,6 @@ KDE opt-out cheap.
   write them anyway and have them tested when a machine exists that can. What must not
   happen is `SETUP.md` gaining a sentence that claims they were tried.
   *Difficulty: low. Priority: medium.*
-
-- **`config_files.conf` carries example blocks.** "Template Examples" is filler for a
-  format that is one path per line. "Optional Configurations" is not: it names
-  `~/.ssh/config`, `~/.ssh/known_hosts` and `~/.local/share/applications/`, and a
-  commented `~/.ssh` is a visible decision not to track secrets by default.
-  *Difficulty: trivial. Priority: low.*
 
 ## The generator and its checks
 
@@ -169,7 +121,13 @@ emitted today without anything looking at it.
   no `ColorScheme` at all. So the justification covers `shadeSortColumn` and not the other
   two. What is *not* established, and is the whole question, is whether any KDE component
   reads `ColorScheme` from kdeglobals rather than from the `.colors` file; an audit could
-  not settle it from the installed binaries. Establish that before changing anything, since
+  not settle it from the installed binaries. One measurement since, which narrows it
+  without answering it: `plasma-apply-colorscheme --list-schemes` on this machine lists
+  `Voidashi` among the installed schemes and marks `BreezeLight (current color scheme)`,
+  while the colours actually painted are Voidashi's. So something reads a current scheme
+  name, gets it from neither the `.colors` file nor the colours in force, and reports a
+  scheme nothing is using. It is Plasma's own switching tool rather than an application
+  painting a window, which is the distinction the question turns on. Establish that before changing anything, since
   the colours themselves are demonstrably applied today and this may be a key nobody reads.
   *Difficulty: low to change, and the work is answering the question. Priority: low.*
 
