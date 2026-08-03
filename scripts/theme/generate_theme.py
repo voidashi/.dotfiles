@@ -238,6 +238,167 @@ def gen_hyprtoolkit_colors(p: dict, r: dict) -> str:
 
 
 # =====================================================================
+#  yazi
+# =====================================================================
+
+def gen_yazi_flavor(p: dict, r: dict) -> str:
+    """yazi's whole appearance, as the flavor its theme.toml names.
+
+    A flavor is yazi's own mechanism: a directory `flavors/<name>.yazi/` holding
+    a `flavor.toml` in the same schema as theme.toml, which theme.toml then
+    selects under `[flavor]` and may override key by key. So this is a generated
+    partial the application includes, not a wrapper. What stays hand-written
+    next door is what carries no colour: the border glyph, the status
+    separators, the button labels.
+
+    Two kinds of colour decision meet here and they are sourced differently.
+    Chrome reads roles, because a cursor row is the same decision as a selected
+    row in GTK and must move with it. Classification does not: which family
+    marks an archive, or a cut file, is a per-application decision RICE-GUIDE.md
+    leaves open, so those name a scale step and say which one. Inventing a role
+    for each would put yazi's file-type taxonomy into the layer that GTK, Qt and
+    the compositors all read.
+
+    yazi renames keys between releases and drops the old spelling in silence.
+    Six of ours named a schema it had already dropped. Diff any key added here
+    against the default embedded in the binary, not against the online docs:
+
+        strings -n 4 /usr/bin/yazi | sed -n '/^#:schema.*theme\\.json/,/^\\[icon\\]/p'
+    """
+    s = p["scales"]
+    surf, txt, sel = r["surface"], r["text"], r["selection"]
+    acc, st = r["accent"], r["status"]
+
+    # The steps no role names, kept together so a reader sees the whole of
+    # yazi's private vocabulary at once rather than finding it a line at a time.
+    verdigris = s["verdigris"]["400"]   # the marked file, and the which-key candidate
+    ash = s["ash"]["400"]               # images, and the position within a find
+    bronze = s["bronze"]["400"]         # media, and the unset mode
+    bordeaux = s["bordeaux"]["300"]     # the identity mark, matching the terminal cursor
+    faint = s["ink"]["5"]               # the which-key separator, below disabled text
+
+    out = header("#")
+    out += f"""[mgr]
+cwd = {{ fg = "{acc['line']}" }}
+
+# A mark, not a fill: the selection here is a different thing from the cursor.
+marker_copied   = {{ fg = "{st['good']['fg']}", bg = "{st['good']['fg']}" }}
+marker_cut      = {{ fg = "{st['critical']['fg']}", bg = "{st['critical']['fg']}" }}
+marker_marked   = {{ fg = "{verdigris}", bg = "{verdigris}" }}
+marker_selected = {{ fg = "{bordeaux}", bg = "{bordeaux}" }}
+
+count_copied   = {{ fg = "{surf['content']}", bg = "{st['good']['fg']}" }}
+count_cut      = {{ fg = "{surf['content']}", bg = "{st['critical']['fg']}" }}
+count_selected = {{ fg = "{surf['content']}", bg = "{bordeaux}" }}
+
+border_style = {{ fg = "{r['line']['window']}" }}
+
+find_keyword  = {{ fg = "{st['caution']['fg']}", bold = true }}
+find_position = {{ fg = "{ash}", bold = true }}
+
+[tabs]
+active   = {{ fg = "{sel['fg']}", bg = "{sel['bg']}" }}
+inactive = {{ fg = "{txt['muted']}", bg = "{surf['raised']}" }}
+
+# The mode badge, in two halves. `_main` is the filled badge and `_alt` is what
+# the separator either side of it is drawn in, which is why yazi's own default
+# writes the main's colour as the alt's foreground. One filled surface, and the
+# alt reads as the seam with the status bar.
+[mode]
+normal_main = {{ fg = "{surf['content']}", bg = "{bordeaux}", bold = true }}
+normal_alt  = {{ fg = "{bordeaux}", bg = "{surf['raised']}" }}
+select_main = {{ fg = "{surf['content']}", bg = "{acc['decoration']}", bold = true }}
+select_alt  = {{ fg = "{acc['decoration']}", bg = "{surf['raised']}" }}
+unset_main  = {{ fg = "{surf['content']}", bg = "{bronze}", bold = true }}
+unset_alt   = {{ fg = "{bronze}", bg = "{surf['raised']}" }}
+
+# The hovered row is the cursor, and it is the selection role, so it moves with
+# GTK's and Qt's rather than on its own.
+[indicator]
+current = {{ fg = "{sel['fg']}", bg = "{sel['bg']}" }}
+preview = {{ underline = true }}
+
+[status]
+overall         = {{ fg = "{txt['body']}" }}
+progress_label  = {{ fg = "{txt['bright']}", bold = true }}
+progress_normal = {{ fg = "{acc['decoration']}", bg = "{surf['raised']}" }}
+progress_error  = {{ fg = "{st['critical']['fg']}", bg = "{surf['raised']}" }}
+
+[pick]
+border   = {{ fg = "{acc['decoration']}" }}
+active   = {{ fg = "{bordeaux}", bold = true }}
+inactive = {{ fg = "{txt['body']}" }}
+
+[input]
+border   = {{ fg = "{acc['decoration']}" }}
+title    = {{}}
+value    = {{}}
+selected = {{ reversed = true }}
+
+[confirm]
+border = {{ fg = "{acc['decoration']}" }}
+title  = {{ fg = "{acc['decoration']}" }}
+body   = {{}}
+list   = {{}}
+btn_yes = {{ reversed = true }}
+btn_no  = {{}}
+
+[cmp]
+border   = {{ fg = "{acc['decoration']}" }}
+active   = {{ reversed = true }}
+inactive = {{}}
+
+[tasks]
+border  = {{ fg = "{acc['decoration']}" }}
+title   = {{}}
+hovered = {{ fg = "{bordeaux}", underline = true }}
+
+[which]
+mask            = {{ bg = "{surf['raised']}" }}
+cand            = {{ fg = "{verdigris}" }}
+rest            = {{ fg = "{txt['disabled']}" }}
+desc            = {{ fg = "{bordeaux}" }}
+separator_style = {{ fg = "{faint}" }}
+
+[help]
+on      = {{ fg = "{verdigris}" }}
+run     = {{ fg = "{bordeaux}" }}
+hovered = {{ reversed = true, bold = true }}
+footer  = {{ fg = "{surf['raised']}", bg = "{txt['body']}" }}
+
+[notify]
+title_info  = {{ fg = "{st['good']['fg']}" }}
+title_warn  = {{ fg = "{st['caution']['fg']}" }}
+title_error = {{ fg = "{st['critical']['fg']}" }}
+
+# Classification, not decoration: one family per kind of thing, rather than a
+# different hue per extension. The key is `url` and not `name`, which yazi 26
+# renamed; the old spelling fails to parse rather than being ignored.
+[filetype]
+rules = [
+"""
+    filetypes = [
+        ('mime = "image/*"', ash),
+        ('mime = "video/*"', bronze),
+        ('mime = "audio/*"', bronze),
+        ('mime = "application/zip"', st["critical"]["fg"]),
+        ('mime = "application/gzip"', st["critical"]["fg"]),
+        ('mime = "application/x-tar"', st["critical"]["fg"]),
+        ('mime = "application/x-bzip*"', st["critical"]["fg"]),
+        ('mime = "application/x-7z-compressed"', st["critical"]["fg"]),
+        ('mime = "application/x-rar"', st["critical"]["fg"]),
+        ('mime = "application/pdf"', bordeaux),
+        ('url = "*/"', acc["decoration"]),
+        ('url = "*"', txt["body"]),
+    ]
+    width = max(len(match) for match, _ in filetypes)
+    for match, hexval in filetypes:
+        out += f'    {{ {match:<{width}}, fg = "{hexval}" }},\n'
+    out += "]\n"
+    return out
+
+
+# =====================================================================
 #  Lua: Hyprland and Neovim
 # =====================================================================
 
@@ -785,6 +946,7 @@ def generated_files(p: dict) -> dict:
         CONFIG / "sway" / "voidashi-colors": gen_sway_colors(p, r),
         CONFIG / "hypr" / "voidashi-toolkit-colors.conf": gen_hyprtoolkit_colors(p, r),
         CONFIG / "hypr" / "conf" / "palette.lua": gen_hypr_palette(p),
+        CONFIG / "yazi" / "flavors" / "voidashi.yazi" / "flavor.toml": gen_yazi_flavor(p, r),
         CONFIG / "theme" / "voidashi-colors.css": gen_gtk_css(p, r),
         CONFIG / "gtk-3.0" / "voidashi.css": gen_gtk_app_css(p, r, "gtk3"),
         CONFIG / "gtk-4.0" / "voidashi.css": gen_gtk_app_css(p, r, "gtk4"),
