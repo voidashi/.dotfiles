@@ -19,14 +19,17 @@ hardware, images or a decision come last. Inside a group, by priority.
 
 ## Start here next
 
-Chosen for the next session. Everything in the "## The two management scripts" section.
+The whole of "The two management scripts", below. It runs over several sessions rather
+than one, which is why it is named as a front and not as a task: each session opens the
+same two scripts and the same four documents, and one that picks up a single entry pays
+for all of them anyway. Take the entries in the order they are written.
 
 ## The two management scripts
 
 `backup-configs.sh` and `install-packages.sh`, the two `.conf` files they read, and
-`README.md`, `SETUP.md` and `MAINTENANCE.md`, which all print their vocabulary. More than
-one session's work, and the order at the top is not arbitrary: the KDE opt-out is cheap
-once `install` takes paths and awkward before.
+`README.md`, `SETUP.md` and `MAINTENANCE.md`, which all print their vocabulary. Several
+sessions of work on one front, and the order below is not arbitrary: the KDE opt-out is
+cheap once `install` takes paths and awkward before.
 
 - **Let `install` take paths, the way the package installer already does.**
   `backup-configs.sh install` is still every path in `config_files.conf` or nothing:
@@ -77,11 +80,11 @@ once `install` takes paths and awkward before.
   `select-random-wallpaper.sh` in both), one is a data directory
   (`$HOME/.dotfiles/wallpapers` as the picker's last fallback), and one is Neovim's
   dashboard opening the repo as a project, which names the repo by definition and should
-  probably stay. Tree mechanisms are suggested, but not enforced, and the choice is the work. A symlink farm, where
-  `backup-configs.sh install` links the `scripts/wm/` helpers into `~/scripts/wm` or other simiilar folder. A symlink farm, where
-  `backup-configs.sh install` links the `scripts/wm/` helpers into `~/.local/bin` from
-  whatever root it is actually running in, fixes the five script calls and works whatever
-  starts the session. A session variable in the already-tracked
+  probably stay. Two mechanisms are suggested rather than enforced, and the choice is
+  the work. A symlink farm, where `backup-configs.sh install` links the `scripts/wm/`
+  helpers from whatever root it is actually running in into either `~/.local/bin`, which
+  is already on PATH, or a directory of its own such as `~/scripts/wm`, fixes the five
+  script calls and works whatever starts the session. A session variable in the already-tracked
   `~/.config/environment.d/50-voidashi.conf` reaches all seven and turns the edit into one
   line in one file, but `environment.d` is read by the systemd user session, and this
   repo documents reaching the desktop by typing `Hyprland` at a console, which is exactly
@@ -115,13 +118,16 @@ once `install` takes paths and awkward before.
   branch serves `code`, which is declared in `packages.conf`, so it is apt-only
   machinery rather than an orphan and stands or falls with the branch.
 
-  The agent can write it without properly testing it (since the current machine is arch), and the user will test the functioning when available.
-  the function intended, but not enforced. able to search and think for something better. but the previous intended was on [common], the usual names, and under [apt], [dnf], etc, specific names which would take priority over the common ones if the user was using that packs.
-  *Difficulty: low. Priority: medium.*
+  The shape that was intended, offered rather than imposed: `[common]` holds the usual
+  names, and `[apt]`, `[dnf]` and the rest hold the ones that differ, taking priority
+  over `[common]` for whichever manager is in use. Look for something better before
+  building that; it is a starting point and not a requirement.
 
-- **Packages are declared for programs nothing here launches.** `dunst`, `hyprpaper`,
-  `hyprlauncher` and `catnap` all have configs that are deliberate keeps. Other apps also as in the install packages script, because it mainly serves the current user needs.
-  *Difficulty: trivial. Priority: low.*
+  This one may be written without being run. The machine here is Arch, so the apt and
+  dnf paths cannot be exercised at this keyboard, and the standing permission is to
+  write them anyway and have them tested when a machine exists that can. What must not
+  happen is `SETUP.md` gaining a sentence that claims they were tried.
+  *Difficulty: low. Priority: medium.*
 
 - **`config_files.conf` carries example blocks.** "Template Examples" is filler for a
   format that is one path per line. "Optional Configurations" is not: it names
