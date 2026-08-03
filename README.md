@@ -130,9 +130,21 @@ The package installer accepts names, so you can bring in only what you want:
 ./scripts/install-packages.sh install kitty fish starship
 ```
 
-`backup-configs.sh install` has no equivalent: it is every path in `config_files.conf`,
-plus the fonts, or none. For a subset, copy the directories you want out of `.config/`
-yourself. Copy the whole directory rather than a single file, since a config often
+`backup-configs.sh` takes paths the same way, and `uninstall` and `check` take them too,
+so you can undo or audit exactly what you brought in:
+
+```bash
+./scripts/backup-configs.sh install ~/.config/kitty ~/.config/fish
+```
+
+They have to be entries of `config_files.conf`, which is the list of what this repo
+manages. A single file inside a tracked directory is not one: the directory is linked
+whole, and the script says which entry covers the path you gave it. Naming paths also
+leaves the fonts alone, since `fonts/` is not in that file and no argument can name it;
+run `install` bare to get them.
+
+If you would rather not symlink anything, copy the directories you want out of `.config/`
+by hand. Copy the whole directory rather than a single file, since a config often
 includes a sibling, and expect to edit the Hyprland, Sway, Waybar and Neovim ones, which
 name `~/.dotfiles` by absolute path.
 

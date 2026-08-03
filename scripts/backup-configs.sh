@@ -1,7 +1,7 @@
 #!/bin/bash
 # Linux Dotfiles Manager
 # Purpose: Backup, version-control, and sync config files across machines.
-# Usage: ./backup-configs.sh [init|add|install|uninstall|check|backups|restore] [--dry-run] [--force]
+# Usage: ./backup-configs.sh [init|add|install|uninstall|check|backups|restore] [PATH...] [--dry-run] [--force]
 
 # ---- Configuration ----
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
@@ -24,6 +24,15 @@ RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC
 DRY_RUN=false
 FORCE=false
 VERBOSE=false
+
+# The entries this run acts on: read from the config file once, then narrowed to
+# whatever paths were named on the command line. Every loop reads this array,
+# so none of them knows a filter exists.
+DOTFILE_ENTRIES=()
+# Whether that narrowing happened. fonts/ is not an entry of the config file, so
+# no path can name it, and the three commands that touch it ask this one
+# question rather than each inspecting the arguments.
+FILTERED=false
 
 # ---- Functions ----
 log() {
@@ -75,13 +84,105 @@ load_dotfiles() {
   grep -vE '^\s*(#|$)' "$CONFIG_FILE"
 }
 
+# One spelling for two path formats that mean the same place. Entries are
+# written "~/.config/kitty" and a caller types whatever their shell completed,
+# which is an absolute path with a trailing slash on a directory.
+normalize_path() {
+  local path
+  path="$(resolve_path "$1")"
+  # Repeated and trailing slashes are squeezed, not just one of each: a shell
+  # produces "~/.config/kitty//" readily, and left alone it compares unequal to
+  # the entry and then matches the prefix test below, so naming a tracked path
+  # was refused with an explanation saying it was inside itself.
+  while [[ "$path" == *//* ]]; do path="${path//\/\//\/}"; done
+  while [[ "$path" == */ && "$path" != "/" ]]; do path="${path%/}"; done
+  printf '%s\n' "$path"
+}
+
+# Where a named path sits in the config file. Returns 0 and prints the entry it
+# matched, 2 and prints the entry that contains it, or 1 and prints nothing.
+#
+# The middle case exists because install links a tracked directory whole, so a
+# single file inside one is not something this script can act on, and tab
+# completion is exactly what produces that argument. Naming the entry that
+# covers it is more use than "not in the config file" about a path that plainly
+# is. The exact pass runs first and separately, so a config tracking both a
+# directory and something inside it still answers "that is an entry".
+# Prefix matched on a path boundary: ~/.config/kitty must not cover
+# ~/.config/kitty-old.
+match_entry() {
+  local wanted entry norm
+  wanted="$(normalize_path "$1")"
+
+  for entry in "${DOTFILE_ENTRIES[@]}"; do
+    if [ "$(normalize_path "$entry")" = "$wanted" ]; then
+      printf '%s\n' "$entry"
+      return 0
+    fi
+  done
+
+  for entry in "${DOTFILE_ENTRIES[@]}"; do
+    norm="$(normalize_path "$entry")"
+    case "$wanted" in
+      "$norm"/*) printf '%s\n' "$entry"; return 2 ;;
+    esac
+  done
+
+  return 1
+}
+
+# Narrows DOTFILE_ENTRIES to the paths named on the command line, validating in
+# the same pass, which is what install-packages.sh's apply_package_filter does
+# for package names. One unrecognised name stops the whole run there and here,
+# and the reason is stronger on this script: a partial run ends in a summary
+# about a set nobody asked for, and one of these commands removes things.
+apply_dotfile_filter() {
+  [ "$#" -eq 0 ] && return 0
+
+  local wanted entry matched rc bad=0 requested=()
+  for wanted in "$@"; do
+    matched="$(match_entry "$wanted")"; rc=$?
+    case $rc in
+      0) requested+=("$matched") ;;
+      2) log "ERROR" "Not tracked on its own: $wanted. It is inside $matched, which is linked whole, so name that instead."; bad=1 ;;
+      *) log "ERROR" "Not in $CONFIG_FILE: $wanted"; bad=1 ;;
+    esac
+  done
+  [ "$bad" -eq 0 ] || exit 1
+
+  # Rebuilt in config file order rather than argument order, so one path named
+  # twice is acted on once and a filtered run's output reads like a bare one's.
+  local narrowed=()
+  for entry in "${DOTFILE_ENTRIES[@]}"; do
+    for wanted in "${requested[@]}"; do
+      if [ "$entry" = "$wanted" ]; then
+        narrowed+=("$entry")
+        break
+      fi
+    done
+  done
+
+  DOTFILE_ENTRIES=("${narrowed[@]}")
+  FILTERED=true
+}
+
+# What every command that loops over the config file does first. Hoisted out of
+# the four case arms, but not as far as the argument parser: the command has to
+# come off the front before what is left can be read as paths, or restore loses
+# its timestamp to the filter.
+prepare_entries() {
+  mapfile -t DOTFILE_ENTRIES < <(load_dotfiles)
+  require_entries
+  apply_dotfile_filter "$@"
+}
+
 # load_dotfiles() used to raise this itself. It is always called as
 # `< <(load_dotfiles)`, so its exit 1 killed only the process-substitution
 # subshell, and its error text went to the same stdout the loop was reading:
 # the message came back as a bogus filename, every command processed it as a
 # path, and the script exited 0. Check once, in main, before anything runs.
 require_entries() {
-  if [ -z "$(load_dotfiles)" ]; then
+  if [ "${#DOTFILE_ENTRIES[@]}" -eq 0 ]; then
     log "ERROR" "No valid entries in $CONFIG_FILE"
     exit 1
   fi
@@ -203,7 +304,8 @@ add_dotfile() {
 install_dotfiles() {
   local linked=0 unchanged=0 skipped=0 failed=0
 
-  while IFS= read -r file; do
+  local file
+  for file in "${DOTFILE_ENTRIES[@]}"; do
     local target
     target="$(resolve_path "$file")"
     local rel
@@ -272,7 +374,7 @@ install_dotfiles() {
         failed=$((failed + 1))
       fi
     fi
-  done < <(load_dotfiles)
+  done
 
   if $DRY_RUN; then
     log "INFO" "Simulated. Nothing above was carried out."
@@ -286,13 +388,14 @@ install_dotfiles() {
 # why add never gained the summary or the exit code that install has.
 add_dotfiles() {
   local added=0 failed=0
-  while IFS= read -r file; do
+  local file
+  for file in "${DOTFILE_ENTRIES[@]}"; do
     if add_dotfile "$file"; then
       added=$((added + 1))
     else
       failed=$((failed + 1))
     fi
-  done < <(load_dotfiles)
+  done
   log "INFO" "Added: $added. Failed: $failed."
   [ "$failed" -eq 0 ]
 }
@@ -330,7 +433,8 @@ install_fonts() {
 uninstall_dotfiles() {
   local removed=0 kept=0 failed=0
 
-  while IFS= read -r file; do
+  local file
+  for file in "${DOTFILE_ENTRIES[@]}"; do
     local target
     target="$(resolve_path "$file")"
     local rel
@@ -363,12 +467,15 @@ uninstall_dotfiles() {
       log "ERROR" "Could not remove link: $target"
       failed=$((failed + 1))
     fi
-  done < <(load_dotfiles)
+  done
 
   # fonts/ is linked outside config_files.conf by install_fonts, so it has to
-  # be removed here too or uninstall leaves one link behind.
+  # be removed here too or uninstall leaves one link behind. Not when paths were
+  # named: no path can name fonts/, so removing it would be the one thing the
+  # caller did not ask for.
   local fonts_dest="$HOME/.local/share/fonts/dotfiles"
-  if [ -L "$fonts_dest" ] && [ "$(readlink "$fonts_dest")" = "$DOTFILES_DIR/fonts" ]; then
+  if ! $FILTERED &&
+     [ -L "$fonts_dest" ] && [ "$(readlink "$fonts_dest")" = "$DOTFILES_DIR/fonts" ]; then
     if $DRY_RUN; then
       log "INFO" "Simulate: remove link $fonts_dest"
       removed=$((removed + 1))
@@ -433,7 +540,8 @@ check_one() {
 check_dotfiles() {
   local valid=0 broken=0 pending=0 rc
 
-  while IFS= read -r file; do
+  local file
+  for file in "${DOTFILE_ENTRIES[@]}"; do
     local target
     target="$(resolve_path "$file")"
     local rel
@@ -448,14 +556,20 @@ check_dotfiles() {
       1) broken=$((broken + 1)) ;;
       *) pending=$((pending + 1)) ;;
     esac
-  done < <(load_dotfiles)
+  done
 
-  check_one "$HOME/.local/share/fonts/dotfiles" "$DOTFILES_DIR/fonts"; rc=$?
-  case $rc in
-    0) valid=$((valid + 1)) ;;
-    1) broken=$((broken + 1)) ;;
-    *) pending=$((pending + 1)) ;;
-  esac
+  # fonts/ is not an entry in the config file, so no path can name it and a
+  # filtered run must not report on it. Otherwise `check ~/.config/kitty` on a
+  # machine that never installed the fonts answers a question nobody asked, and
+  # exits non-zero for it.
+  if ! $FILTERED; then
+    check_one "$HOME/.local/share/fonts/dotfiles" "$DOTFILES_DIR/fonts"; rc=$?
+    case $rc in
+      0) valid=$((valid + 1)) ;;
+      1) broken=$((broken + 1)) ;;
+      *) pending=$((pending + 1)) ;;
+    esac
+  fi
 
   log "INFO" "Valid: $valid. Broken: $broken. Not installed: $pending."
 
@@ -522,7 +636,7 @@ restore_backup() {
 # One usage text, printed both by -h and by the unknown-command path. They were
 # two different strings in install-packages.sh, each missing what the other had.
 usage() {
-  echo "Usage: $0 COMMAND [--dry-run] [--force] [--verbose]"
+  echo "Usage: $0 COMMAND [PATH...] [--dry-run] [--force] [--verbose]"
   echo "Commands:"
   echo "  init       Initialize dotfiles repo"
   echo "  add        Move files from \$HOME into the repo and symlink them back"
@@ -531,10 +645,18 @@ usage() {
   echo "  check      Validate the symlinks, non-zero if the tree is not fully installed"
   echo "  backups    List the backups taken by --force"
   echo "  restore TIMESTAMP  Restore from a backup (list them with: $0 backups)"
+  echo "Paths:"
+  echo "  add, install, uninstall and check take entries of config_files.conf and"
+  echo "  act on those alone. With none they act on all of them, plus fonts/, which"
+  echo "  no path can name and a filtered run therefore leaves alone."
   echo "Flags:"
   echo "  --dry-run  Simulate, change nothing"
   echo "  --force    Replace a real file, backing it up into \$BACKUP_DIR first"
   echo "  --verbose  Also print the entries that are already correct"
+  echo "Examples:"
+  echo "  $0 install"
+  echo "  $0 install ~/.config/kitty ~/.config/hypr   # just these two"
+  echo "  $0 check ~/.config/kitty"
   echo "Environment:"
   echo "  DOTFILES_DIR, CONFIG_FILE, BACKUP_DIR override the paths, which is how"
   echo "  you try any of this against a throwaway \$HOME. See scripts/tests/."
@@ -546,23 +668,34 @@ main() {
   command -v git >/dev/null || { log "ERROR" "Git not installed"; exit 1; }
   [ -f "$CONFIG_FILE" ] || { log "ERROR" "Config file missing: $CONFIG_FILE"; exit 1; }
 
-  case "$1" in
+  # The command comes off the front, so what is left is this command's own
+  # arguments: paths for the four that loop over the config file, a timestamp
+  # for restore. Reading the filter from "$@" in the parser instead would have
+  # eaten that timestamp.
+  local command="${1:-}"
+  [ "$#" -gt 0 ] && shift
+
+  case "$command" in
     "init") init_dotfiles ;;
-    "add")
-      require_entries
-      add_dotfiles
-      ;;
+    "add") prepare_entries "$@"; add_dotfiles ;;
     "install")
-      require_entries
+      prepare_entries "$@"
       local rc=0
       install_dotfiles || rc=1
-      install_fonts || rc=1
+      # fonts/ is not in config_files.conf, so naming paths cannot mean it.
+      # Linking it anyway would make the subset install touch something the
+      # caller did not list, which is the whole reason this filter exists.
+      if $FILTERED; then
+        log "INFO" "Paths named, so fonts/ was left alone. Run without arguments to link it."
+      else
+        install_fonts || rc=1
+      fi
       return $rc
       ;;
-    "check") require_entries; check_dotfiles ;;
-    "uninstall") require_entries; uninstall_dotfiles ;;
+    "check") prepare_entries "$@"; check_dotfiles ;;
+    "uninstall") prepare_entries "$@"; uninstall_dotfiles ;;
     "backups") list_backups ;;
-    "restore") restore_backup "$2" ;;
+    "restore") restore_backup "${1:-}" ;;
     *)
       # Only reachable by getting the arguments wrong, so it goes to stderr.
       # -h is handled in the argument parser and prints the same text to stdout.
