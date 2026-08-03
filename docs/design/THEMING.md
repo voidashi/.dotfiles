@@ -17,15 +17,23 @@ colour fails to arrive.
 
 | Mechanism | How it works | Applications |
 |---|---|---|
-| **Generated partial, included** | The generator writes a colour-only file in the application's native format and its config includes it | kitty, foot, ghostty, alacritty, Sway (`sway/voidashi-colors`), Hyprland (`conf/palette.lua`), hyprtoolkit (`hypr/voidashi-toolkit-colors.conf`), Neovim (`theme/palette.lua`) |
+| **Generated partial, included** | The generator writes a colour-only file in the application's native format and its config includes it | kitty, foot, ghostty, alacritty, Sway (`sway/voidashi-colors`), Hyprland (`conf/palette.lua`), hyprtoolkit (`hypr/voidashi-toolkit-colors.conf`), Neovim (`theme/palette.lua`), yazi (`yazi/flavors/voidashi.yazi/flavor.toml`), catnap (`catnap/themes/voidashi.cat`) |
 | **Generated partial, `@import`ed** | The same idea through CSS: one shared file at `.config/theme/voidashi-colors.css`, imported by path on the stylesheet's first line | waybar, swaync, wlogout |
-| **Generated block, inlined** | The palette pasted into the file itself between markers, because the application cannot include anything | wofi, starship |
+| **Generated block, inlined** | The palette pasted into the file itself between markers, because the application cannot include anything | wofi, starship, swaylock, bottom |
 | **Generated named colours** | The palette is mapped onto the names the toolkit already paints from, and the application carries on unaware | GTK3, GTK4 and libadwaita |
 | **Merged INI** | Only the colour, font and cursor keys of a file another program also writes | KDE (`kdeglobals`, `kcminputrc`) |
-| **Hand-written** | Colour mixes with structural config, so generating into it would risk corrupting what is not colour | swaylock, bottom, fastfetch, catnap, fish, yazi, `nvim/theme/roles.lua` |
+| **Hand-written** | No route the survey could find, or colour that is a per-file decision rather than a palette value | fastfetch, fish, `waybar/common.jsonc`, `nvim/theme/roles.lua` |
 
 The hand-written ones are the ones that age in silence, which is why
-`scripts/theme/check_palette.py` exists. Run it after touching colour.
+`scripts/theme/check_palette.py` exists. Run it after touching colour. Why the
+last row is only four entries, and which proposals were refused to get there, is
+in [`TURNING-POINTS.md`](../TURNING-POINTS.md).
+
+A block inlined into an application's own config is a wrapper and not that
+application's mechanism, so each of the four says so in the file itself. Reach
+for one only when the application has no include at all, which is measured
+rather than assumed: swaylock and bottom each take one config file and no
+directive to pull in another.
 
 ## The pipeline
 
@@ -44,11 +52,13 @@ Two things skip the layer. `ansi16` is consumed raw by the four terminals and by
 because slot 1 is red whatever this desktop's identity colour happens to be, and
 `geometry` and `typography` are values with no decision to add.
 
-`scripts/theme/generate_theme.py` **writes** twelve files whole, each in the format its
+`scripts/theme/generate_theme.py` **writes** files whole, each in the format its
 consumer already reads: the four terminal partials, Sway's variables, the Hyprland Lua
-module, hyprtoolkit's six colour keys, the Neovim palette layer, the shared CSS partial
-at `.config/theme/voidashi-colors.css`, the GTK3 and GTK4 named-colour files, and the
-selectable KDE colour scheme `Voidashi.colors`.
+module, hyprtoolkit's six colour keys, the Neovim palette layer, yazi's flavor,
+catnap's `.cat` theme, the shared CSS partial at `.config/theme/voidashi-colors.css`,
+the GTK3 and GTK4 named-colour files, and the selectable KDE colour scheme
+`Voidashi.colors`. `generated_files()` is the list; `check_palette.py` prints how many
+there are, so no count is written here.
 
 Sway's partial holds variables and nothing else: which window state takes which role is
 hand-written beside the `client.*` directives that read them, the same split as
@@ -56,10 +66,11 @@ Hyprland, where `appearance.lua` decides and `palette.lua` is generated. It is a
 gives the file a check that can fail, since `sway --validate` rejects a `$vd_*` that no
 include defined.
 
-It also **edits** four files it does not own rather than writing them: wofi's
-stylesheet and `starship.toml`, where the palette is spliced between markers because
-neither can include a file, and `kdeglobals` plus `kcminputrc`, where colour, font and
-cursor keys are merged in one by one so nothing of KDE's own is lost. The distinction matters when reading the generator:
+It also **edits** files it does not own rather than writing them: wofi's stylesheet,
+`starship.toml`, swaylock's config and `bottom.toml`, where the palette is spliced
+between markers because none of the four can include a file, and `kdeglobals` plus
+`kcminputrc`, where colour, font and cursor keys are merged in one by one so nothing
+of KDE's own is lost. The distinction matters when reading the generator:
 `generated_files()` holds the ones it writes whole and `merged_files()` the ones it
 merges into. Output written whole carries a `GENERATED` header and must not be
 hand-edited.
@@ -134,13 +145,19 @@ carrying the family and the value staying `ink-2` so the content column reads un
 Bronze and Verdigris stay out. A one-accent variant of every fastfetch preset lives in
 `.config/fastfetch/minimal/`, because the competing reading is also legitimate: the
 guide calls a fetch the desktop's cover page, and a cover page wants one focal point.
-catnap follows the same mapping with less reach, since its vocabulary is seven ANSI
-tokens with no grey among them, so its keys sit at `ink-2` where fastfetch's sit at
-`ink-4`.
+catnap follows the same mapping row for row. It could not until it moved to the `.cat`
+format, whose theme import takes hex: under 1.x its whole vocabulary was seven ANSI
+tokens with no grey among them, so its keys sat at `ink-2` where fastfetch's sit at
+`ink-4`. Its distro art names the same roles, which is why the CachyOS logo is
+Bordeaux rather than the Verdigris upstream draws it in.
 
 **Terminal file manager.** yazi inherits the emulator's background and ANSI table and
 supplies only its own chrome: Ice on the hovered row, Bordeaux on the mode indicator,
-alert tones for real states.
+alert tones for real states. That chrome is a generated flavor and `theme.toml` keeps
+only the border glyph, the status separators and the button labels. Its chrome reads
+roles so the cursor row moves with GTK's and Qt's selection; its file-type
+classification names scale steps, because which family marks an archive is a decision
+this document leaves to the application.
 
 **Ordinary GTK applications** are themed by overriding the named colours GTK and
 libadwaita already paint from, not by shipping a theme. Window chrome sits at `void-10`

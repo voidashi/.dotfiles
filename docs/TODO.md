@@ -20,121 +20,14 @@ hardware, images or a decision come last. Inside a group, by priority.
 ## Start here next
 
 One item, chosen for the next session rather than by rating. Everything rated `high` is in
-"Waiting on the world" and cannot start today; this is the thing that gates the largest
-drift surface left in the repository.
+"Waiting on the world" and cannot start today.
 
-1. **Rename the six yazi keys that name a schema yazi renamed.** The entry is the second
-   one below, under "Configs that still paste hex". It is worth doing next because it
-   gates the other half of the same file: yazi's 18 colours cannot move onto a generated
-   flavor until the keys carrying them are the ones the binary reads, and the two are
-   deliberately separate commits, one changing how yazi looks and one changing where its
-   colours come from. Sway, hyprtoolkit and starship, which this entry used to name, have
-   landed.
-
-## Configs that still paste hex
-
-The seam this repository is built on. A colour is either decided once in
-`palette.json` and read from there, or it is transcribed and drifts. Each entry here
-closes a transcription.
-
-- **Bring the hand-written half onto the generator, in the order the survey found.** The
-  generator owns 16 files; 16 more paste a palette colour by hand and follow nothing. A
-  survey established, per application and against its own documentation or binary, whether
-  the palette could reach it. The precedent is `.config/hypr/conf/decoration.lua`, already
-  converted: it read `require("conf/palette")` for its radius while its shadow colour sat
-  pasted, and the fix was one line.
-
-  Three of the survey's rows have landed and are not open work: Sway's nine colours, now a
-  generated partial its config includes; hyprtoolkit's six, now sourced; and starship's
-  five, now names against a generated palette table inside its own file. Which route each
-  takes is in [`design/THEMING.md`](design/THEMING.md) and what breaks when editing them is
-  in [`MAINTENANCE.md`](MAINTENANCE.md). What that leaves here is yazi, which has its own
-  route, and the four with no route at all.
-
-  **The application has its own include, confirmed by running it.** This wants a generated
-  partial and one directive in the hand-written file, which is the pattern the four
-  terminals and now Sway and hyprtoolkit use.
-
-  | File | Directive | Colours | How it was confirmed |
-  |---|---|---|---|
-  | `.config/yazi/theme.toml` | `[flavor]` dark/light | 18 | the yazi binary's embedded default `theme.toml` and its `flavors/<name>.yazi/flavor.toml` path |
-
-  Yazi is the largest single drift surface in the repository, 18 colours over 69 sites, and
-  the `tmtheme.xml` question is answered: it is not required at load. Measured under yazi
-  26.5.6 with `YAZI_CONFIG_HOME` pointed at a throwaway tree. A flavor directory holding
-  only `flavor.toml` reports `Dark/light flavor: ArcSwapAny("voidashi")` and exits clean,
-  while a flavor named with no directory behind it fails loudly with `Failed to read flavor
-  ".../flavor.toml"`, which is what makes the passing case worth anything. Rendered in a
-  40x120 pty, the set of colour escapes the flavor emits is identical to the set today's
-  `theme.toml` emits. The `tmtheme.xml` hook is `[mgr] syntect_theme`, empty in yazi's own
-  default and never set here, so preview highlighting already comes from yazi's built-in
-  theme and would stay there. It buys that one surface and gates nothing. What yazi does
-  need first is the entry below.
-
-  **No mechanism, and the reason differs.** `bottom` (18 colours) and `swaylock` (15) have
-  one config file each and no include; their colour keys are contiguous, so a marked block
-  like wofi's would work, but that is a wrapper rather than the application's own mechanism
-  and taking it means saying so where it lives. The eight `fastfetch` presets are 107 sites
-  and have neither route: measured, `fastfetch -c a -c b` answers `only one config file can
-  be loaded`, and `display.constants` does not expand inside a colour field, which emitted
-  the placeholder literally. `.config/waybar/common.jsonc` has one colour, inside pango
-  markup, and waybar's `include` would force the whole module to move; the real answer there
-  is CSS, since `waybar/style.css` already imports the generated stylesheet, but that
-  changes module output and is a functional change rather than a theming one.
-  `.config/catnap/config.toml` needs nothing and should not be counted: it pastes no hex at
-  all, only ANSI tokens, which already resolve through the generated terminal table.
-  The four with no route are worth one decision rather than four, and `starship.toml` is
-  now the worked example of what a marked block costs and buys.
-  *Difficulty: medium for yazi; high for fastfetch. Priority: medium, and it is what would
-  make the README's promise true.*
-
-- **Six keys in `.config/yazi/theme.toml` name a schema yazi renamed, and the colours they
-  carry reach nothing.** Found while measuring the flavor question above, by extracting the
-  default `theme.toml` embedded in the yazi 26.5.6 binary and diffing key names against
-  ours. `mgr.hovered` and `mgr.preview_hovered` are now `indicator.current` and
-  `indicator.preview`; `mode.normal`, `mode.select` and `mode.unset` each split into a
-  `_main` and an `_alt` half; `confirm.content` is now `confirm.body`. Rendered in a pty,
-  the cursor row comes out as the default's reverse video and the `NOR` badge as `48;5;4`,
-  yazi's default blue, so the `ice-600` cursor fill and the `bordeaux-300` identity mark are
-  written in the file and never painted. Renaming the keys in a test flavor took the ice-600
-  background from zero occurrences to one and bordeaux-300 from zero to three, which is what
-  establishes that the names are the whole fault.
-
-  No check here would have caught it. `check_palette.py` asks whether a colour belongs to
-  the palette, not whether the key carrying it still exists, and an override matched by name
-  fails silently when upstream renames one. A checker that validates our key names against
-  the binary's embedded default is the obvious rung up, and it would cover every application
-  whose config we override by name rather than yazi alone. Half of that shape now exists:
-  `check_palette.py`'s `names` check asks whether a starship style names a colour the
-  file's own palette table defines. That is the same question one level in, ours against
-  ours rather than ours against upstream, so it is worth reading before writing the harder
-  one. Do this before the flavor conversion, so one commit changes how yazi looks and a
-  separate one changes where its colours come from.
-  *Difficulty: low to rename, and the work is deciding what the `_alt` halves should be,
-  since the split gives the mode indicator a second surface this palette never assigned.
-  Priority: medium, because two colour decisions that are documented are not on screen.*
-
-- **The upstream bump this entry was waiting for has already happened, and nobody
-  noticed.** It said the AUR package was still on 1.1.1 and that catnap 2.0 would break
-  both tracked files. Measured: `catnap --version` reports `Catnap v2.1.1` and `pacman -Q`
-  says `catnap 2.1.1-2`. What did not happen is the breakage: `catnap -n -c
-  .config/catnap/config.toml` is not rejected under 2.1.1, where a garbage TOML exits 1
-  immediately, so the file still parses. What is unmeasured is whether it is still
-  *honoured*, and that is the question worth answering, because a config that parses and
-  is ignored is this repository's signature failure.
-
-  Two reasons the check said nothing. It passed `-a .config/catnap/distros.toml` and
-  catnap has no `-a`, so every run printed `ERROR: Unknown option '-a'` and `distros.toml`
-  has never been validated by anything. And it read the exit code the wrong way round:
-  catnap does not exit at all when its stdout is not a terminal, so the code only means
-  something in the negative. Both are fixed in `scripts/verify.sh`, which now covers
-  `config.toml` only and says why.
-
-  The payoff for moving to the `.cat` format is unchanged and real: v2 takes hex and theme
-  imports, so the palette becomes reachable exactly instead of through seven ANSI tokens
-  with no grey among them.
-  *Difficulty: low, and it is a rewrite of two files. Priority: medium, because the
-  version that was supposed to be the trigger is already installed.*
+1. **`check_palette.py` should walk `git ls-files` rather than the filesystem.** The entry
+   is under "The generator and its checks". It is worth doing next because it removes a
+   class of edit rather than an instance, and because the group above it, "Configs that
+   still paste hex", is now closed: every file the survey found a route for reads its
+   colour instead of pasting it, and the two it found no route for are settled in
+   [`TURNING-POINTS.md`](TURNING-POINTS.md).
 
 ## The two management scripts
 

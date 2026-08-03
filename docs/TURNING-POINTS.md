@@ -50,6 +50,39 @@ instead, and those are the ones that drift. `check_palette.py` exists because
 "never invent a colour" was an honour system rule that went unenforced through
 an entire retheme. It found Sway on its first run.
 
+## The hand-written half was surveyed, and two of it stayed hand-written
+
+Sixteen files pasted a palette colour by hand and followed nothing. Each was
+asked one question against its own documentation or binary: can the palette
+reach it. Most could, and did: Sway, hyprtoolkit and starship first, then yazi
+through a generated flavor, catnap through a generated `.cat` theme, and
+swaylock and bottom through marked blocks spliced into their own files. What is
+recorded here is the other answer, for the two where the survey found no route,
+because an entry saying only what was rejected gets read as a fence.
+
+**fastfetch stays hand-written**, eight presets and 107 colour sites.
+`fastfetch -c a -c b` answers `only one config file can be loaded`, so there is
+no include. `display.constants` does not expand inside a colour field: pointed
+at one it emitted the placeholder literally. Generating the presets whole was
+the remaining option and was refused, because their colour is a handful of keys
+inside module lists, output formats and comments, and moving all of that into a
+Python emitter to reach the colour would make the presets uneditable by the
+person who tunes them. The drift check is the coverage, and `MAINTENANCE.md`
+already requires hex rather than ANSI codes there for exactly that reason.
+
+**`waybar/common.jsonc` keeps one hex**, `alert-critical` inside a Pango span on
+four notification glyphs. waybar's `include` works at the module level, so
+reaching that one value would move the whole module definition into a generated
+file. The right answer is CSS, which `waybar/style.css` already imports, but a
+glyph that takes its colour from a stylesheet class instead of from inline
+markup changes what the module outputs, and that is a functional change rather
+than a theming one. It is recorded here as unblocked and out of scope, not as
+impossible.
+
+Neither of these forecloses anything else in those files. What was rejected is
+one proposal per file: generating the fastfetch presets, and moving waybar's
+notification module to reach one colour.
+
 ## Waybar became one bar described once
 
 There were three configs: the root one Sway loaded, `fixed/` that Hyprland
