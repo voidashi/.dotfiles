@@ -19,15 +19,7 @@ hardware, images or a decision come last. Inside a group, by priority.
 
 ## Start here next
 
-One item, chosen for the next session rather than by rating. Everything rated `high` is in
-"Waiting on the world" and cannot start today.
-
-1. **`check_palette.py` should walk `git ls-files` rather than the filesystem.** The entry
-   is under "The generator and its checks". It is worth doing next because it removes a
-   class of edit rather than an instance, and because the group above it, "Configs that
-   still paste hex", is now closed: every file the survey found a route for reads its
-   colour instead of pasting it, and the two it found no route for are settled in
-   [`TURNING-POINTS.md`](TURNING-POINTS.md).
+Chosen for the next session. Everything in the "## The two management scripts" section.
 
 ## The two management scripts
 
@@ -85,7 +77,8 @@ once `install` takes paths and awkward before.
   `select-random-wallpaper.sh` in both), one is a data directory
   (`$HOME/.dotfiles/wallpapers` as the picker's last fallback), and one is Neovim's
   dashboard opening the repo as a project, which names the repo by definition and should
-  probably stay. Two mechanisms, and the choice is the work. A symlink farm, where
+  probably stay. Tree mechanisms are suggested, but not enforced, and the choice is the work. A symlink farm, where
+  `backup-configs.sh install` links the `scripts/wm/` helpers into `~/scripts/wm` or other simiilar folder. A symlink farm, where
   `backup-configs.sh install` links the `scripts/wm/` helpers into `~/.local/bin` from
   whatever root it is actually running in, fixes the five script calls and works whatever
   starts the session. A session variable in the already-tracked
@@ -121,16 +114,13 @@ once `install` takes paths and awkward before.
   drops `pacman -Syy` from every Arch install. The Microsoft repository key in the apt
   branch serves `code`, which is declared in `packages.conf`, so it is apt-only
   machinery rather than an orphan and stands or falls with the branch.
+
+  The agent can write it without properly testing it (since the current machine is arch), and the user will test the functioning when available.
+  the function intended, but not enforced. able to search and think for something better. but the previous intended was on [common], the usual names, and under [apt], [dnf], etc, specific names which would take priority over the common ones if the user was using that packs.
   *Difficulty: low. Priority: medium.*
 
 - **Packages are declared for programs nothing here launches.** `dunst`, `hyprpaper`,
-  `hyprlauncher` and `catnap` all have configs that are deliberate keeps, but a reference
-  config does not need its program on a stranger's machine, and the question was only ever
-  asked of `dunst`. `pfetch-rs` is the same shape with no config at all. `ranger`,
-  `supergfxctl`, `cava`, `zathura`, `cmatrix` and `hyprpicker` have no config, launch or
-  bind either, though `hyprpicker` is an optional dependency of `hyprshot`. If `pfetch-rs`
-  goes, its comment about declaring a bare AUR name letting the helper pick a different
-  provider applies to every AUR entry here and belongs in `MAINTENANCE.md`.
+  `hyprlauncher` and `catnap` all have configs that are deliberate keeps. Other apps also as in the install packages script, because it mainly serves the current user needs.
   *Difficulty: trivial. Priority: low.*
 
 - **`config_files.conf` carries example blocks.** "Template Examples" is filler for a
