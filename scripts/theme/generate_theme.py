@@ -573,6 +573,97 @@ def gen_swaylock_colors(p: dict, r: dict) -> str:
 
 
 # =====================================================================
+#  bottom
+# =====================================================================
+
+def gen_bottom_styles(p: dict, r: dict) -> str:
+    """bottom's whole [styles] tree, spliced into bottom.toml between markers.
+
+    A wrapper, like swaylock's and for the same reason: bottom has one config
+    file, `--config_location` to point at it, and no include. Everything the
+    tree holds is colour, so the block can own it whole.
+
+    Two vocabularies meet here. Single surfaces are roles. The per-core and
+    per-source lists are not: a series is a per-application decision, and
+    RICE-GUIDE.md's "System monitors and TUIs" settles only which families may
+    appear in it, Ice, Moss and Bordeaux, never Ash or Bronze, and never a
+    rainbow ramp. The steps within each family are tuned by eye rather than
+    generated, which is why they are written out and named.
+
+    The block ends inside [styles.widgets], so a key written after the end
+    marker joins that table in silence. starship.toml has the same hazard for
+    the same reason and says so; here the only thing below is bottom's own
+    commented layout example.
+    """
+    s = p["scales"]
+    txt, ln = r["text"], r["line"]
+    acc, ident, st = r["accent"], r["identity"], r["status"]
+    ice, moss, bordeaux = s["ice"], s["moss"], s["bordeaux"]
+
+    # One entry per core, then repeating. Ice, Moss and Bordeaux in turn, each
+    # stepping darker on the second pass, so eight cores read as three families
+    # rather than eight hues.
+    cores = [ice["400"], moss["400"], bordeaux["400"], ice["500"],
+             moss["500"], bordeaux["600"], ice["600"], moss["700"]]
+    # No Bordeaux here: a GPU line is not an identity row, and the guide keeps
+    # the identity colour for the average rather than for a source.
+    gpus = [ice["400"], moss["400"], ice["500"],
+            moss["500"], ice["600"], moss["700"]]
+    lst = lambda values: "[" + ", ".join(f'"{v}"' for v in values) + "]"
+
+    out = header("#")
+    out += f"""# Per-core lines and the average across them. The average carries the identity
+# colour, which is the one row that is about this machine rather than a source.
+[styles.cpu]
+all_entry_color = "{acc['decoration']}"
+avg_entry_color = "{ident['mark']}"
+cpu_core_colors = {lst(cores)}
+
+# Ice for the memory a program asked for, Moss for the rest, and an alert tone
+# on swap, because swapping is a condition rather than a quantity.
+[styles.memory]
+ram_color   = "{acc['decoration']}"
+cache_color = "{ice['500']}"
+swap_color  = "{st['caution']['fg']}"
+arc_color   = "{ice['600']}"
+gpu_colors  = {lst(gpus)}
+
+# Ice in, Moss out, each with its cumulative total one step darker.
+[styles.network]
+rx_color       = "{acc['decoration']}"
+tx_color       = "{moss['400']}"
+rx_total_color = "{ice['500']}"
+tx_total_color = "{moss['500']}"
+
+# The one place a ramp is genuinely a state, so it is the alert tones and not a
+# family.
+[styles.battery]
+high_battery_color   = "{st['good']['fg']}"
+medium_battery_color = "{st['caution']['fg']}"
+low_battery_color    = "{st['critical']['fg']}"
+
+[styles.tables]
+headers = {{ color = "{txt['body']}", bold = true }}
+
+# The graph's own grid sits at edge-40, the one step above the border, so the
+# plot reads against it without competing with the widget frame.
+[styles.graphs]
+graph_color = "{s['edge']['40']}"
+legend_text = {{ color = "{txt['body']}" }}
+
+# Focus is Ice, the same as every other window on this desktop.
+[styles.widgets]
+border_color          = "{ln['window']}"
+selected_border_color = "{acc['decoration']}"
+widget_title  = {{ color = "{txt['bright']}" }}
+text          = {{ color = "{txt['body']}" }}
+selected_text = {{ color = "{r['surface']['content']}", bg_color = "{acc['line']}" }}
+disabled_text = {{ color = "{txt['disabled']}" }}
+"""
+    return out
+
+
+# =====================================================================
 #  GTK
 # =====================================================================
 
@@ -1052,6 +1143,10 @@ def merged_files(p: dict) -> dict:
         CONFIG / "starship.toml":
             lambda current: inlined_block(current, gen_starship_palette(p), "starship.toml",
                                           TOML_BLOCK_START, TOML_BLOCK_END),
+        CONFIG / "bottom" / "bottom.toml":
+            lambda current: inlined_block(current, gen_bottom_styles(p, r),
+                                          "bottom/bottom.toml",
+                                          CONF_BLOCK_START, CONF_BLOCK_END),
         CONFIG / "swaylock" / "config":
             lambda current: inlined_block(current, gen_swaylock_colors(p, r),
                                           "swaylock/config",
