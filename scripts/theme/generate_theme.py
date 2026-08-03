@@ -496,6 +496,83 @@ def gen_starship_palette(p: dict) -> str:
 
 
 # =====================================================================
+#  swaylock
+# =====================================================================
+
+CONF_BLOCK_START = "# >>> VOIDASHI COLORS (GENERATED) >>>"
+CONF_BLOCK_END = "# <<< END VOIDASHI COLORS <<<"
+
+
+def gen_swaylock_colors(p: dict, r: dict) -> str:
+    """Every colour swaylock takes, spliced into its own config between markers.
+
+    This is a wrapper and not swaylock's own mechanism, which it is worth saying
+    plainly: swaylock has no include of any kind, one config file, and its
+    format is its command line written down. wofi and starship are here for the
+    same reason. What makes it safe is that the keys are all colour and nothing
+    else, so the block can own the whole run of them.
+
+    The values carry no leading '#', which is swaylock's format rather than an
+    oversight; check_palette.py has a scope for this file so it reads bare hex
+    here as applied colour. Getting that wrong is invisible: swaylock ignores a
+    key it does not recognise without a word, which is how seven
+    swaylock-effects options survived here doing nothing, one of them the only
+    thing setting a background.
+
+    Every one of these is a role. A lock screen is one of the two places
+    Bordeaux is the accent, so the typing indicator takes identity while the
+    verifying state stays Ice, the way focus is Ice everywhere else.
+    """
+    surf, txt, ln = r["surface"], r["text"], r["line"]
+    acc, ident, st = r["accent"], r["identity"], r["status"]
+    bare = lambda h: h.lstrip("#")
+    groups = [
+        ("The background, solid: a lockscreen is a spacious identity surface.",
+         [("color", surf["content"])]),
+        ("The ring, by state.",
+         [("ring-color", ln["window"]),
+          ("ring-clear-color", ln["normal"]),
+          ("ring-ver-color", acc["decoration"]),
+          ("ring-wrong-color", st["critical"]["fg"]),
+          ("ring-caps-lock-color", st["caution"]["fg"])]),
+        ("Keypress and backspace highlights. Bordeaux is the lockscreen accent.",
+         [("key-hl-color", ident["mark"]),
+          ("bs-hl-color", ident["cursor"]),
+          ("caps-lock-key-hl-color", st["caution"]["fg"]),
+          ("caps-lock-bs-hl-color", st["caution"]["fg"])]),
+        ("The inner and outer rules of the ring.",
+         [("line-color", ln["normal"]),
+          ("line-clear-color", ln["dim"]),
+          ("line-ver-color", acc["decoration"]),
+          ("line-wrong-color", st["critical"]["fg"]),
+          ("line-caps-lock-color", st["caution"]["fg"]),
+          ("separator-color", ln["normal"])]),
+        ("The ring's fill.",
+         [("inside-color", surf["raised"]),
+          ("inside-clear-color", surf["window"]),
+          ("inside-ver-color", surf["raised"]),
+          ("inside-wrong-color", st["critical"]["bg"]),
+          ("inside-caps-lock-color", surf["raised"])]),
+        ("The text inside the ring.",
+         [("text-color", txt["bright"]),
+          ("text-clear-color", txt["body"]),
+          ("text-ver-color", acc["line"]),
+          ("text-wrong-color", st["critical"]["fg"]),
+          ("text-caps-lock-color", st["caution"]["fg"])]),
+        ("The keyboard layout box.",
+         [("layout-bg-color", surf["raised"]),
+          ("layout-border-color", ln["normal"]),
+          ("layout-text-color", txt["body"])]),
+    ]
+    out = header("#")
+    for note, pairs in groups:
+        out += f"# {note}\n"
+        out += "".join(f"{key}={bare(hexval)}\n" for key, hexval in pairs)
+        out += "\n"
+    return out
+
+
+# =====================================================================
 #  GTK
 # =====================================================================
 
@@ -975,6 +1052,10 @@ def merged_files(p: dict) -> dict:
         CONFIG / "starship.toml":
             lambda current: inlined_block(current, gen_starship_palette(p), "starship.toml",
                                           TOML_BLOCK_START, TOML_BLOCK_END),
+        CONFIG / "swaylock" / "config":
+            lambda current: inlined_block(current, gen_swaylock_colors(p, r),
+                                          "swaylock/config",
+                                          CONF_BLOCK_START, CONF_BLOCK_END),
         CONFIG / "kdeglobals":
             lambda current: kde_globals_merged(current, gen_kde_colors(p, r), p),
         CONFIG / "kcminputrc":
