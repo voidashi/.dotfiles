@@ -281,6 +281,30 @@ nothing is there to skip, and which changes nothing until you select it. And onc
 lands in the repository, so `git status` in `~/.dotfiles` starts reporting your desktop
 settings.
 
+So on a machine that already runs Plasma, leave those two out and take the palette the
+way KDE hands it to everyone else:
+
+```bash
+./scripts/backup-configs.sh install \
+  --except ~/.config/kdeglobals \
+  --except ~/.config/kcminputrc
+
+plasma-apply-colorscheme Voidashi     # or System Settings > Colours > Voidashi
+```
+
+The first command links everything else, `fonts/` included. The second is Plasma's own
+mechanism, it writes the colours into your `kdeglobals` rather than replacing the file,
+and picking Breeze again undoes it. What you give up is the cursor and the font keys,
+which live in `kcminputrc` and in the `[General]` section this repository does not reach
+that way; set them in System Settings if you want them.
+
+Applying a scheme copies its colours into your `kdeglobals` once, so after changing the
+accent colour and regenerating, run the second command again.
+
+If you do not run Plasma, none of this applies: there is no System Settings to select the
+scheme, which is exactly why `kdeglobals` is written directly, and both files are almost
+certainly absent so `install` links them without a word.
+
 ## Changing the accent colour
 
 The README promises that one hex moves everything. That is true of the generated half of

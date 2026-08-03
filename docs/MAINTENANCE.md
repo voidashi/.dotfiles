@@ -104,6 +104,18 @@ previously made the README's own `./scripts/install-packages.sh install` abort w
   check alike; a filtered `check` that audited it would fail over something the caller
   never mentioned. `FILTERED` is the one question those three ask, so the next thing
   that changes what "the caller narrowed the set" means edits one place.
+- `--except PATH` is the filter's other direction: everything but the entries it names.
+  It is path-typed like the filter, reusing `match_entry` and its two error sentences
+  rather than growing a vocabulary, which is why it is a flag over paths and not a
+  section marker in `config_files.conf`. One flag per path, because a greedy `--except`
+  could not tell its own arguments from the positional paths that follow. **It must not
+  set `FILTERED`.** That flag answers "did the caller name the set they wanted", and it
+  is what keeps `fonts/` out of a filtered run; someone asking for all of it except
+  `kdeglobals` is asking for the rest, fonts included. Exclusions are applied before the
+  positional filter so both are validated against the whole config file, which is why a
+  path named and excluded in one run gets its own error instead of being reported absent
+  from a file it is written in. Excluding every entry is refused, because a run with
+  nothing to do prints a summary that reads like one that worked.
 - `--dry-run` must reach every destructive line, and once did not. `install --dry-run
   --force` ran `rm -rf "$target"` for real, because the guard sat around the linking
   block further down and not around the `$FORCE` branch that removes the original.

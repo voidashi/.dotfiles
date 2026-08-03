@@ -142,6 +142,19 @@ whole, and the script says which entry covers the path you gave it. Naming paths
 leaves the fonts alone, since `fonts/` is not in that file and no argument can name it;
 run `install` bare to get them.
 
+`--except` is the other direction, for when you want everything but a few entries:
+
+```bash
+./scripts/backup-configs.sh install \
+  --except ~/.config/kdeglobals \
+  --except ~/.config/kcminputrc
+```
+
+One flag per path. Unlike naming paths, this still links `fonts/`, because asking for all
+of it but two entries is still asking for the rest. Those two entries are the ones to
+leave out if you already run KDE, and [`docs/SETUP.md`](docs/SETUP.md) says what to do
+instead of linking them.
+
 If you would rather not symlink anything, copy the directories you want out of `.config/`
 by hand. Copy the whole directory rather than a single file, since a config often
 includes a sibling, and expect to edit the Hyprland, Sway, Waybar and Neovim ones, which

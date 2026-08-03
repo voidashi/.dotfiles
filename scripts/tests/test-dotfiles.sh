@@ -403,6 +403,99 @@ case_filter_uninstall_removes_only_the_named_link() {
 }
 
 # =====================================================================
+# Group B4: --except, the other direction
+# =====================================================================
+#
+# Naming paths says "only these". --except says "all but these", and the two
+# differ on more than sign: a caller who excludes one entry still wants the rest,
+# and fonts/ is part of the rest. That is the case worth writing down, because it
+# is the one a shared FILTERED flag would have got wrong.
+
+case_except_install_links_everything_but_the_named_entry() {
+  track '~/.config/wanted.conf'
+  track '~/.config/skipped.conf'
+  repo_file ".config/wanted.conf"
+  repo_file ".config/skipped.conf"
+  run_backup install --except '~/.config/skipped.conf'
+  assert_symlink_to "$HOME/.config/wanted.conf" "$DOTFILES_DIR/.config/wanted.conf" || return 1
+  [ ! -e "$HOME/.config/skipped.conf" ] || { fail "an excluded entry was linked anyway"; return 1; }
+}
+
+# The distinction that makes --except its own thing rather than a filter with a
+# minus sign in front. A filtered run leaves fonts/ alone because no path can
+# name it; an excluding run must not, because the caller asked for the rest.
+case_except_install_still_links_the_fonts() {
+  track '~/.config/wanted.conf'
+  track '~/.config/skipped.conf'
+  repo_file ".config/wanted.conf"
+  repo_file ".config/skipped.conf"
+  mkdir -p "$DOTFILES_DIR/fonts"
+  printf 'font\n' > "$DOTFILES_DIR/fonts/probe.ttf"
+  run_backup install --except '~/.config/skipped.conf'
+  assert_symlink_to "$HOME/.local/share/fonts/dotfiles" "$DOTFILES_DIR/fonts"
+}
+
+# Same rule as the filter: one unrecognised name stops the run rather than
+# acting on a set the caller did not describe.
+case_except_rejects_an_unknown_path_and_links_nothing() {
+  track '~/.config/wanted.conf'
+  repo_file ".config/wanted.conf"
+  run_backup install --except '~/.config/typo.conf'
+  assert_rc_nonzero || return 1
+  [ ! -e "$HOME/.config/wanted.conf" ] || { fail "the run continued past an unknown exclusion"; return 1; }
+}
+
+# Excluding everything leaves a run with nothing to do, whose summary reads
+# exactly like a run that worked.
+case_except_refuses_to_exclude_every_entry() {
+  track '~/.config/only.conf'
+  repo_file ".config/only.conf"
+  run_backup install --except '~/.config/only.conf'
+  assert_rc_nonzero || return 1
+  [ ! -e "$HOME/.config/only.conf" ] || { fail "something was linked despite the refusal"; return 1; }
+}
+
+# A flag with a missing argument. --log on the sibling script shifted nothing,
+# returned 1 and looped forever on exactly this input.
+case_except_without_a_path_fails_instead_of_looping() {
+  track '~/.config/wanted.conf'
+  repo_file ".config/wanted.conf"
+  timeout 10 bash "$BACKUP_SCRIPT" install --except >"$LAST_OUT" 2>&1; LAST_RC=$?
+  [ "$LAST_RC" -ne 124 ] || { fail "--except with no path hung rather than failing"; return 1; }
+  assert_rc_nonzero
+}
+
+# Naming a path and excluding it in the same run. The exclusion is applied first,
+# so without a word for this the caller is told the path is not in a config file
+# it is written in.
+case_except_and_named_path_disagreeing_says_so() {
+  track '~/.config/wanted.conf'
+  track '~/.config/other.conf'
+  repo_file ".config/wanted.conf"
+  repo_file ".config/other.conf"
+  run_backup install '~/.config/wanted.conf' --except '~/.config/wanted.conf'
+  assert_rc_nonzero || return 1
+  grep -q 'Named and excluded at once' "$LAST_OUT" || { fail "the error blamed the config file rather than the two arguments"; return 1; }
+}
+
+# The two mechanisms in one run, disagreeing about nothing. Both filters are
+# validated against the whole config file rather than against what the other one
+# left, which is what stops this being rejected as a path that is not tracked.
+case_except_and_named_paths_coexist() {
+  track '~/.config/one.conf'
+  track '~/.config/two.conf'
+  track '~/.config/three.conf'
+  repo_file ".config/one.conf"
+  repo_file ".config/two.conf"
+  repo_file ".config/three.conf"
+  run_backup install '~/.config/one.conf' '~/.config/two.conf' --except '~/.config/three.conf'
+  [ "$LAST_RC" -eq 0 ] || { fail "naming paths and excluding another was refused"; return 1; }
+  assert_symlink_to "$HOME/.config/one.conf" "$DOTFILES_DIR/.config/one.conf" || return 1
+  assert_symlink_to "$HOME/.config/two.conf" "$DOTFILES_DIR/.config/two.conf" || return 1
+  [ ! -e "$HOME/.config/three.conf" ] || { fail "an entry that was neither named nor wanted was linked"; return 1; }
+}
+
+# =====================================================================
 # Group C: the destructive paths. A failed step must not destroy the source.
 # =====================================================================
 
@@ -535,6 +628,14 @@ main() {
   run_case filter_uninstall_leaves_the_fonts_link_alone
   run_case filter_check_ignores_the_fonts_link
   run_case filter_accepts_a_path_with_redundant_slashes
+
+  run_case except_install_links_everything_but_the_named_entry
+  run_case except_install_still_links_the_fonts
+  run_case except_rejects_an_unknown_path_and_links_nothing
+  run_case except_refuses_to_exclude_every_entry
+  run_case except_without_a_path_fails_instead_of_looping
+  run_case except_and_named_path_disagreeing_says_so
+  run_case except_and_named_paths_coexist
 
   run_case add_keeps_file_when_repo_is_unwritable
   run_case add_keeps_directory_when_repo_is_unwritable
