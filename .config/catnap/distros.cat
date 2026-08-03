@@ -1,0 +1,58 @@
+;   /\_/\   catnap distro art
+;  ( -.- )  imported by config.cat, which is where the colour names come from
+;   > z <
+;
+; Deliberately not a copy of upstream's. Its distros.cat carries 62 entries and
+; 27KB of art, and the diff between it and what this repository actually changed
+; was two things: the cachy logo, and the removal of an arch_old entry nothing
+; selects. Tracking the other 61 would be tracking upstream data that goes stale
+; without anything noticing.
+;
+; What that costs, stated rather than discovered: a machine whose distro is not
+; listed here gets no art. `catnap -g distro` says what would be detected, and
+; the fix is to add an entry, not to copy upstream's file back.
+;
+; The colour names resolve through themes/voidashi.cat. The art must not carry a
+; hex; that is the whole point of naming it.
+
+$distros = [
+
+    ; Upstream draws this in cyan, which is Verdigris here, and the guide keeps
+    ; Verdigris to ANSI slots 6 and 14 and to syntax highlighting rather than
+    ; letting it be an accent. The logo is the fetch's identity row, so it takes
+    ; the identity family, the same colour as the username above it.
+    %{  id=["cachy" "cachyos"]
+        art=[
+            "{$identity}   /''''''''''''/  "
+            "{$identity}  /''''''''''''/   "
+            "{$identity} /''''''/          "
+            "{$identity}/''''''/           "
+            "{$identity}\\......\\           "
+            "{$identity} \\......\\          "
+            "{$identity}  \\.............../"
+            "{$identity}   \\............./ "
+        ]
+        margin=[2 2 2]
+    }
+
+    ; The repository documents Arch as what it assumes, so the base distro is
+    ; carried too. Ice is function here, which is what a distro row is.
+    %{  id="arch"
+        art=[
+            "{$function}      /\\      "
+            "{$function}     /  \\     "
+            "{$function}    /\\   \\    "
+            "{$function}   /      \\   "
+            "{$function}  /   ,,   \\  "
+            "{$function} /   |  |  -\\ "
+            "{$function}/_-''    ''-_\\"
+        ]
+        margin=[2 2 2]
+    }
+
+    ; Selected by -d none, and the fallback worth having: no art, no error.
+    %{  id="none"
+        art=[""]
+        margin=[0 0 0]
+    }
+]

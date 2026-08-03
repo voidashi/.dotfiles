@@ -1,0 +1,85 @@
+;   /\_/\   catnap, themed for Voidashi
+;  ( o.o )  https://github.com/iinsertNameHere/catnap
+;   > ^ <
+;
+; Same mapping as the fastfetch configs, so switching the fish greeter between
+; them does not change what a colour means. Each family appears only on the rows
+; it stands for, and the names come from themes/voidashi.cat, which the
+; generator writes from scripts/theme/palette.json. Never paste a hex here.
+;
+;   $identity  bordeaux-400  who and where: user, hostname, and the logo
+;   $duration  moss-400      how long: uptime
+;   $function  ice-400       what the system is: distro, kernel, desktop, shell
+;   $quantity  ink-4         a count is not a role, so it takes the key grey
+;
+; Not used: bronze, since rarity of use is part of its meaning; verdigris, which
+; the guide restricts to ANSI slots 6 and 14 and to syntax highlighting, and
+; which the cachy logo was using until distros.cat moved it onto identity.
+;
+; Three things worth knowing before editing this file.
+;
+; This replaced config.toml, which catnap 2 does not read. The binary looks at
+; $XDG_CONFIG_HOME/catnap/config.cat and then /etc/catnap/config.cat, and holds
+; no TOML parser at all, so the tracked TOML pair was live in the repository and
+; dead on the machine. Measured; see docs/MAINTENANCE.md.
+;
+; `import` resolves against this file's directory, and a leading "/" is joined
+; onto it rather than treated as absolute: importing "/etc/catnap/distros.cat"
+; is an error naming ".../catnap/etc/catnap/distros.cat". So both imports below
+; are siblings of this file and have to be.
+;
+; $border_color is set by the theme. Upstream's example sets it again here,
+; after the import, which would win; that line is deliberately absent.
+
+import "themes/voidashi.cat"
+import "distros.cat"
+
+; -- Appearance ---------------------------------------------------------------
+; layout:       inline | art_on_top | stats_on_top
+; border_style: single | dashed | dotted | double | none
+
+$layout       = "inline"
+$border_style = "single"
+
+; Empty means autodetect, which is what this machine wants.
+$distroid     = ""
+
+$stats_margin_top = 0
+$graph_width      = 15
+
+; The weather stat is off below, so this stays empty.
+$location = ""
+
+; -- Stat list ----------------------------------------------------------------
+; enabled=false hides a stat without removing it, which is how the ones marked
+; resource intensive stay documented rather than forgotten.
+
+$stats = [
+
+    @{id="username"  icon=' '  name="user"      color=$identity}
+    @{id="hostname"  icon=' '  name="hostname"  color=$identity}
+    @{id="uptime"    icon=' '  name="uptime"    color=$duration}
+
+    @{id="distro"    icon=' '  name="distro"    color=$function}
+    @{id="kernel"    icon=' '  name="kernel"    color=$function}
+    @{id="desktop"   icon=' '  name="desktop"   color=$function}
+    @{id="terminal"  icon=' '  name="term"      color=$function}
+    @{id="shell"     icon=' '  name="shell"     color=$function}
+
+    ; Counts and hardware. Off because each one costs a subprocess or a probe on
+    ; every prompt, and this runs as the fish greeter.
+    @{id="packages"  icon=' '  name="packages"  color=$quantity enabled=false}
+    @{id="memory"    icon=' '  name="memory"    color=$quantity enabled=false}
+    @{id="disk_0"    icon=' '  name="disk"      color=$quantity enabled=false}
+    @{id="battery"   icon=' '  name="battery"   color=$quantity enabled=false}
+    @{id="cpu"       icon=' '  name="cpu"       color=$function enabled=false}
+    @{id="gpu"       icon='󱔐 '  name="gpu"       color=$function enabled=false}
+
+    ; Needs curl and an emoji font, and reaches the network.
+    @{id="weather"   icon=' '  name="weather"   color=$quantity enabled=false}
+
+    @{id="separator"}
+    ; The swatch row draws its own sixteen colours, so its key takes $reset,
+    ; catnap's own built-in rather than anything the theme defines.
+    @{id="colors"    icon=' '  name="colors"    color=$reset symbol='●'}
+]

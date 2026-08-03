@@ -473,20 +473,36 @@ What was never executed, so nobody reads that number as broader than it is:
   `check_palette.py`. Ten configs live under `.config/fastfetch/`. Set
   `display.percent.type` to `["num"]` on the short ones: the default is `9`, a
   *coloured* number, which tints by threshold and puts an accent on screen at rest.
-- **catnap cannot do hex, and its config format is one upstream release from being
-  deleted.** Writing `#b44955` in `config.toml` prints the literal string. The whole
-  vocabulary is seven tokens and anything unrecognised silently becomes a reset:
-  `(RD)`->31, `(YW)`->33, `(BE)`->34, `(GN)`->32, `(MA)`->35, `(CN)`->36, `(BK)`->30.
-  Those are ANSI slots and the ANSI table is the palette, so catnap cannot drift
-  off-palette; what it cannot reach is a specific level. Separately, catnap 2.0
-  replaced TOML with a `.cat` language and upstream says `config.toml` and
-  `distros.toml` are not compatible with v2. **The installed version is already
-  2.1.1**, not the 1.1.1 this note used to claim, and the tracked `config.toml` is
-  still not rejected by it. Whether it is still honoured is unmeasured, and that is
-  the open question in `TODO.md`. Two things about validating it, both learned the
-  hard way: catnap has no flag for `distros.toml`, so that file is checked by
-  nothing, and catnap never exits when its stdout is not a terminal, so its exit
-  code is only readable as a rejection.
+- **catnap reads `config.cat` and only that, and a `config.toml` beside it is
+  inert.** The binary looks at `$XDG_CONFIG_HOME/catnap/config.cat` and then
+  `/etc/catnap/config.cat`, and carries no TOML parser at all:
+  `strings $(which catnap) | grep -i toml` returns nothing. The repository tracked
+  a themed `config.toml` and `distros.toml` through the whole of the 2.x series
+  while the fetch on screen was `/etc/catnap/config.cat` from the package, drawing
+  the CachyOS logo in the cyan the guide reserves for ANSI slots 6 and 14. Nothing
+  reported it, and the check that was supposed to was passing the dead file to a
+  binary that could not read it.
+- **Three things about the `.cat` language, each of which cost a run to find.**
+  `import` resolves against the importing file's own directory, and a leading `/`
+  is joined onto it rather than treated as absolute, so
+  `import "/etc/catnap/distros.cat"` fails naming `.../catnap/etc/catnap/`; every
+  import has to be a sibling. A variable set *after* an import wins over the
+  import, which is why `config.cat` does not repeat upstream's
+  `$border_color = $white`. And a stat missing a required field is a hard error
+  naming the index, `$stats[16] (@colors) missing required field 'color'`, which
+  is the one place catnap is loud.
+- **catnap now reaches the palette exactly, and its keys match the fastfetch
+  presets.** v2 takes hex, so `scripts/theme/generate_theme.py` writes
+  `.config/catnap/themes/voidashi.cat` with the ANSI table and the role names the
+  stat list uses. Under 1.x the vocabulary was seven ANSI tokens with no grey among
+  them, which is why the keys sat at ink-2 while fastfetch used ink-4 for the same
+  rows; that constraint is gone and the two fetches now agree.
+- **`.config/catnap/distros.cat` is deliberately not a copy of upstream's.**
+  Upstream ships 62 entries and 27KB of art; the diff against what this repository
+  had actually changed was the cachy logo and the removal of an `arch_old` entry
+  nothing selects. What the short file costs is that a machine whose distro is not
+  listed gets no art. `catnap -g distro` says what would be detected, and the fix is
+  to add an entry rather than to paste upstream's file back.
 - **A colour is written five ways here, and `check_palette.py` used to see one of
   them.** Its regex wants `#RRGGBB`, so the other four went unchecked: bare hex, in
   swaylock's `ring-color=393835` and in fish, which had one scoped exception for
@@ -596,9 +612,10 @@ cd .config/fastfetch && for f in config.jsonc */config.jsonc minimal/*.jsonc; do
   out=$(fastfetch --pipe true -c "$f" 2>&1 >/dev/null); [ -n "$out" ] && echo "$f: $out"
 done
 
-# catnap: exit 1 means it rejected the config. It never exits when stdout is not a
-# terminal, so the timeout is the pass, and there is no flag for distros.toml.
-timeout 5 catnap -n -c .config/catnap/config.toml >/dev/null 2>&1; echo $?
+# catnap: not "does it parse" but "did the palette arrive". bordeaux-400 is the
+# username, the hostname and the logo, and it lands there only if config.cat, the
+# generated theme and distros.cat all resolved.
+timeout 5 catnap -n -c .config/catnap/config.cat 2>&1 | grep -c "38;2;180;73;85"
 
 # every tracked path is still a symlink into the repo
 ./scripts/backup-configs.sh check

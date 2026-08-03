@@ -150,34 +150,35 @@ if have fastfetch; then
     verdict "$ff_bad" "fastfetch"
 fi
 
-section "catnap" "timeout 5 catnap -n -c .config/catnap/config.toml"
+section "catnap" "timeout 5 catnap -n -c .config/catnap/config.cat"
 if have catnap; then
-    # Covers config.toml only. There is no flag for distros.toml: catnap's whole
-    # option list is -h -v -d -g -n -c -m -l, and the -a this check used to pass
-    # was rejected as an unknown option every single run, so that file has never
-    # been validated by anything. Do not add it back without a flag that exists.
+    # This check asks whether the palette arrived, not whether the file parses.
+    # The version that asked the second question was passing a .toml to a binary
+    # with no TOML parser in it: catnap 2 reads $XDG_CONFIG_HOME/catnap/config.cat
+    # and then /etc/catnap/config.cat, nothing else, so the two tracked TOML files
+    # were live in the repository and dead on the machine for an entire release
+    # while every run here reported a pass.
     #
-    # Read the exit code only in the negative. catnap renders to a terminal and
-    # never exits when its stdout is not one, so a config it accepts leaves it
-    # running until the timeout while a broken one is rejected immediately with 1.
-    # Measured all three ways: the tracked config times out, a garbage TOML exits
-    # 1, and a path that does not exist exits 0 because catnap falls back to its
-    # defaults in silence. That last one is the limit of this check: it proves the
-    # file parses, not that catnap read the file you meant.
+    # So: render, and require the identity colour on screen. bordeaux-400 is the
+    # username, the hostname and the logo, and it only lands there if config.cat,
+    # themes/voidashi.cat and distros.cat all resolved. A stray hex cannot satisfy
+    # it, because nothing in the tracked .cat files carries one.
     #
-    # This check lived in an agent skill and reported "exit: 0" for months, because
-    # the harness handed it a pty and the unknown-option errors went unread.
-    err=$(timeout 5 catnap -n -c .config/catnap/config.toml 2>&1 >/dev/null \
-          | grep -i error | head -3)
-    timeout 5 catnap -n -c .config/catnap/config.toml >/dev/null 2>&1
-    status=$?
-    [ -n "$err" ] && printf '%s\n' "$err"
-    case "$status" in
-        124) printf 'accepted: still rendering at the timeout, which is the pass\n' ;;
-        0)   printf 'exited 0, which also means the config file was not found\n' ;;
-        *)   printf 'rejected the config, exit %d\n' "$status"
-             verdict 1 "catnap" ;;
-    esac
+    # -c is still passed so the check reads the repository rather than whatever is
+    # linked into $HOME, but note that catnap resolves `import` against the config
+    # file's directory, so the theme and the art come from the repo either way.
+    ident=$(python3 -c 'import json,sys
+p=json.load(open("scripts/theme/palette.json"))
+h=p["scales"]["bordeaux"]["400"].lstrip("#")
+print("38;2;%d;%d;%d" % tuple(int(h[i:i+2],16) for i in (0,2,4)))')
+    out=$(timeout 5 catnap -n -c .config/catnap/config.cat 2>&1)
+    printf '%s\n' "$out" | grep -i error | head -3
+    if printf '%s' "$out" | grep -q "$ident"; then
+        printf 'identity colour %s is on screen\n' "$ident"
+    else
+        printf '[FAIL] identity colour %s never emitted, so the theme did not arrive\n' "$ident"
+        verdict 1 "catnap"
+    fi
 fi
 
 section "Tracked symlinks" "bash scripts/backup-configs.sh check"

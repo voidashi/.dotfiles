@@ -573,6 +573,68 @@ def gen_swaylock_colors(p: dict, r: dict) -> str:
 
 
 # =====================================================================
+#  catnap
+# =====================================================================
+
+CATNAP_ANSI = (
+    "black", "red", "green", "yellow", "blue", "magenta", "cyan", "white",
+    "bright_black", "bright_red", "bright_green", "bright_yellow",
+    "bright_blue", "bright_magenta", "bright_cyan", "bright_white",
+)
+
+
+def gen_catnap_theme(p: dict, r: dict) -> str:
+    """catnap's theme, in the .cat language its config imports.
+
+    catnap 2 replaced its TOML with a small declarative language, and a theme in
+    it is a file of `$name = #rrggbb` that the config pulls in with `import`.
+    That is the application's own mechanism, so this is a generated partial and
+    not a wrapper: the hand-written config.cat next door names these and holds
+    no hex.
+
+    Two vocabularies, because two readers need them. The sixteen ANSI names are
+    what distros.cat's art references inside its strings, and they are the ANSI
+    table verbatim for the reason every terminal here takes it verbatim. The
+    roles below are what the stat list names, and they exist because catnap 1.x
+    could not reach them: its whole vocabulary was seven ANSI tokens with no
+    grey among them, which is why its keys sat at ink-2 while the fastfetch
+    presets used ink-4 for the same rows. Hex closes that, so the two fetches
+    now agree row for row.
+
+    `import` resolves against the importing file's directory and a leading '/'
+    is joined onto it rather than treated as absolute, so this has to sit under
+    .config/catnap/ and be reached as "themes/voidashi.cat".
+    """
+    txt, ln, ident, acc = r["text"], r["line"], r["identity"], r["accent"]
+    out = header(";")
+    out += "; The ANSI table verbatim, which is what the art in distros.cat names.\n"
+    width = max(len(n) for n in CATNAP_ANSI)
+    for name, hexval in zip(CATNAP_ANSI, p["ansi16"]):
+        out += f"${name:<{width}} = {hexval}\n"
+    out += "\n"
+    out += (
+        "; Roles, named by what a row means rather than by rotation. The same\n"
+        "; assignment the fastfetch presets use: identity on who and where, function\n"
+        "; on what the system is, duration on how long, and no family on a count.\n"
+    )
+    roles_out = [
+        ("identity", ident["mark"]),
+        ("function", acc["decoration"]),
+        ("duration", p["scales"]["moss"]["400"]),
+        ("quantity", txt["disabled"]),
+        ("value", txt["body"]),
+    ]
+    width = max(len(n) for n, _ in roles_out)
+    for name, hexval in roles_out:
+        out += f"${name:<{width}} = {hexval}\n"
+    out += "\n"
+    out += "; What catnap paints without being asked: the value column and the frame.\n"
+    out += "$text_color   = $value\n"
+    out += f"$border_color = {ln['window']}\n"
+    return out
+
+
+# =====================================================================
 #  bottom
 # =====================================================================
 
@@ -1115,6 +1177,7 @@ def generated_files(p: dict) -> dict:
         CONFIG / "hypr" / "voidashi-toolkit-colors.conf": gen_hyprtoolkit_colors(p, r),
         CONFIG / "hypr" / "conf" / "palette.lua": gen_hypr_palette(p),
         CONFIG / "yazi" / "flavors" / "voidashi.yazi" / "flavor.toml": gen_yazi_flavor(p, r),
+        CONFIG / "catnap" / "themes" / "voidashi.cat": gen_catnap_theme(p, r),
         CONFIG / "theme" / "voidashi-colors.css": gen_gtk_css(p, r),
         CONFIG / "gtk-3.0" / "voidashi.css": gen_gtk_app_css(p, r, "gtk3"),
         CONFIG / "gtk-4.0" / "voidashi.css": gen_gtk_app_css(p, r, "gtk4"),
