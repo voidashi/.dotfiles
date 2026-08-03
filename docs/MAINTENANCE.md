@@ -54,7 +54,7 @@ so they work from any directory. Do not reintroduce cwd-relative paths: that
 previously made the README's own `./scripts/install-packages.sh install` abort with
 "Configuration file not found" and drop a stray log in the repo root.
 
-### `backup-configs.sh [init|add|install|uninstall|check|backups|restore] [PATH...] [--dry-run] [--force] [--verbose]`
+### `backup-configs.sh [init|add|install|uninstall|check|backups|restore] [PATH...] [--dry-run] [--force] [--verbose] [--no-color]`
 
 - `add` moves each path in `config_files.conf` out of `$HOME` into this repo,
   preserving directory contents via rsync with `--remove-source-files`, backs the
@@ -149,7 +149,7 @@ something here, add the case first and watch it fail: on the run that introduced
 of 16 cases failed against the code as it stood, and that is what made the fixes worth
 believing.
 
-### `install-packages.sh [preview|install|check|repos] [PACKAGE...] [--yes] [--no-color] [--log FILE]`
+### `install-packages.sh [install|check|repos] [PACKAGE...] [--dry-run] [--yes] [--no-color] [--verbose] [--log FILE]`
 
 - Detects apt, pacman or dnf, unless `DEFAULT_PACKAGE_MANAGER` is set in the
   environment. That override was a plain assignment for a long time, so it could not be
@@ -173,6 +173,22 @@ believing.
   distro-specific one.
 - `install` needs sudo. It prompts unless `--yes`, in which case it errors out rather
   than hanging on a password prompt.
+- **The rehearsal is `--dry-run` on both scripts.** It was `preview`, a command, on this
+  one, and the README printed both spellings in a single code block. The flag is the
+  shape that survives, because it composes: `install --dry-run` lists what is configured
+  and `repos --dry-run` names the repository steps, where a command could only ever
+  rehearse whichever one it was written for. Typing `preview` now reaches the
+  unknown-command branch, which names the flag that replaced it rather than printing the
+  command list and leaving the reader to spot what is missing.
+- `install --dry-run` returns before `check_sudo` and before `add_repos`, and
+  `repos --dry-run` skips the sudo check the same way, so no rehearsal asks for a
+  password, reaches the network or writes outside `$HOME`.
+- **Three flags are on one script and not the other, and each arises from the job.**
+  `--force` only means something where there is a real file to replace, `--yes` only
+  where there is sudo to prompt for, `--log FILE` only where a log is written. The four
+  that mean the same thing on both are spelled the same on both: `--dry-run`,
+  `--verbose`, `--no-color` and `-h`. Anything added to one from here answers that
+  question first.
 - On pacman, anything missing from the official repos falls back to an AUR helper
   (`paru`, `yay`, `pikaur`). `catnap` and `pipes.sh` have no official-repo version.
   `pfetch-rs` usually needs the AUR too, though a repo that rebuilds AUR packages, as

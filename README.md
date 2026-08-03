@@ -81,10 +81,11 @@ The design identity behind the palette is called Voidashi, and it is documented 
 git clone https://github.com/voidashi/.dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 
-./scripts/install-packages.sh preview    # list the configured packages, install nothing
-./scripts/install-packages.sh install    # install them
-./scripts/backup-configs.sh install      # symlink the configs into $HOME
-./scripts/backup-configs.sh check        # confirm every link landed
+./scripts/install-packages.sh install --dry-run   # list the configured packages, install nothing
+./scripts/install-packages.sh install             # install them
+./scripts/backup-configs.sh install --dry-run     # list every path it would link
+./scripts/backup-configs.sh install               # symlink the configs into $HOME
+./scripts/backup-configs.sh check                 # confirm every link landed
 ```
 
 The install step needs `sudo`, and an AUR helper is recommended: a few of the packages
@@ -101,11 +102,8 @@ console works too.
 > unless you pass `--force`, and backs up anything it replaces. Its sibling `add` runs the
 > other direction and **moves files out of `$HOME`** into the repo. You want `install`.
 >
-> Add `--dry-run` and the script prints every path it would touch, changing nothing:
->
-> ```bash
-> ./scripts/backup-configs.sh install --dry-run
-> ```
+> `--dry-run` is the rehearsal on both scripts, which is why it appears twice above: it
+> prints everything the command would do and changes nothing.
 >
 > Changed your mind afterwards? `./scripts/backup-configs.sh uninstall` removes the
 > symlinks and leaves your own files and the repo alone. `docs/SETUP.md` has the

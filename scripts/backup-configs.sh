@@ -1,7 +1,7 @@
 #!/bin/bash
 # Linux Dotfiles Manager
 # Purpose: Backup, version-control, and sync config files across machines.
-# Usage: ./backup-configs.sh [init|add|install|uninstall|check|backups|restore] [PATH...] [--dry-run] [--force]
+# Usage: ./backup-configs.sh [init|add|install|uninstall|check|backups|restore] [PATH...] [--dry-run] [--force] [--verbose] [--no-color]
 
 # ---- Configuration ----
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
@@ -15,10 +15,11 @@ TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
 CURRENT_BACKUP="$BACKUP_DIR/$TIMESTAMP"
 
 # Colors. Blanked when stdout is not a terminal, so a redirected run does not
-# fill a file with escape sequences. This script has no --no-color flag and does
-# not need one now.
+# fill a file with escape sequences, and by --no-color for the case that is not
+# covered: a terminal that renders them badly, or a log kept by hand.
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
-[ -t 1 ] || { RED=''; GREEN=''; YELLOW=''; BLUE=''; NC=''; }
+disable_colors() { RED=''; GREEN=''; YELLOW=''; BLUE=''; NC=''; }
+[ -t 1 ] || disable_colors
 
 # Flags
 DRY_RUN=false
@@ -636,7 +637,7 @@ restore_backup() {
 # One usage text, printed both by -h and by the unknown-command path. They were
 # two different strings in install-packages.sh, each missing what the other had.
 usage() {
-  echo "Usage: $0 COMMAND [PATH...] [--dry-run] [--force] [--verbose]"
+  echo "Usage: $0 COMMAND [PATH...] [--dry-run] [--force] [--verbose] [--no-color]"
   echo "Commands:"
   echo "  init       Initialize dotfiles repo"
   echo "  add        Move files from \$HOME into the repo and symlink them back"
@@ -653,6 +654,7 @@ usage() {
   echo "  --dry-run  Simulate, change nothing"
   echo "  --force    Replace a real file, backing it up into \$BACKUP_DIR first"
   echo "  --verbose  Also print the entries that are already correct"
+  echo "  --no-color Plain output (also automatic when not writing to a terminal)"
   echo "Examples:"
   echo "  $0 install"
   echo "  $0 install ~/.config/kitty ~/.config/hypr   # just these two"
@@ -713,6 +715,7 @@ while [[ $# -gt 0 ]]; do
     --dry-run) DRY_RUN=true; shift ;;
     --force) FORCE=true; shift ;;
     --verbose|-v) VERBOSE=true; shift ;;
+    --no-color) disable_colors; shift ;;
     -h|--help) usage; exit 0 ;;
     # Not a flag: store it in the positional argument array and carry on
     *) POSITIONAL_ARGS+=("$1"); shift ;;

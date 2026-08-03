@@ -203,7 +203,7 @@ its program present.
 It was refused because the file is not a dependency manifest. It is what this desktop's
 owner installs on a new machine, and that is the job it does well; a name in it costs a
 line and a package, and removing one costs a step nobody remembers on the next install.
-Anyone cloning this reads `preview` first, which prints the whole list.
+Anyone cloning this reads `install --dry-run` first, which prints the whole list.
 
 What stays open on the same file is different work and is in the task list: `[apt]` and
 `[dnf]` are empty while every name sits in `[common]` and is an Arch name, so the

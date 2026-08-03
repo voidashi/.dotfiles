@@ -98,7 +98,7 @@ KDE opt-out cheap.
 - **The apt and dnf machinery has never run, and could not work as configured.** Fourteen
   non-comment lines mention apt or dnf, in the low thirties counting whole `case` branches
   and the `repos` dispatch. The dispatch itself is sound. Measured with
-  `DEFAULT_PACKAGE_MANAGER=apt ./scripts/install-packages.sh preview`, which selects the
+  `DEFAULT_PACKAGE_MANAGER=apt ./scripts/install-packages.sh install --dry-run`, which selects the
   apt branch and lists every package for it. What is not sound is the data: `[apt]` and
   `[dnf]` in `packages.conf` are empty, so all the names live in `[common]` and are Arch
   names. On Debian this resolves to `apt-get install hyprland`, `apt-get install paru`.
@@ -335,7 +335,7 @@ one file that leaves the repository at publication.
   There is no statement of what the repository assumes beyond Arch and Wayland: nothing
   about Nvidia, nothing about laptop against desktop, while the install block says the
   bar carries laptop-only modules, so hardware evidently matters. There is no order of
-  magnitude for what will be installed, so `preview` means reading sixty lines cold. The
+  magnitude for what will be installed, so the rehearsal means reading sixty lines cold. The
   section on taking only part of it does not say which file inside a terminal's directory
   carries the colours, so the reader lists the directory to find `voidashi-colors.conf`.
   It also does not say whether `generate_theme.py` reaches a config that was copied by

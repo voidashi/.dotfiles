@@ -41,13 +41,14 @@ grep -rn '\$HOME/\.dotfiles' .config/
 
 Two of the steps below change nothing. Step 1 lists the packages without installing
 them and step 3 walks the whole symlink pass without touching a file, so you can watch
-both scripts describe their own work before you let either of them do it. Neither needs
-you to read any bash.
+both scripts describe their own work before you let either of them do it. Both are the
+same `--dry-run` flag, which is the rehearsal on either script. Neither needs you to read
+any bash.
 
 **1. See what would be installed, before installing it.**
 
 ```bash
-./scripts/install-packages.sh preview
+./scripts/install-packages.sh install --dry-run
 ```
 
 **2. Install the packages.**

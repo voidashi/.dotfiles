@@ -1,7 +1,7 @@
 #!/bin/bash
 # Unified Package Installer (Optimized)
 # Purpose: Reliably install packages across Linux distros with third-party repo support
-# Usage: ./install-packages.sh [preview|install|check|repos] [PACKAGE...] [--yes] [--no-color] [--log FILE]
+# Usage: ./install-packages.sh [install|check|repos] [PACKAGE...] [--dry-run] [--yes] [--no-color] [--verbose] [--log FILE]
 
 # ---- Configuration ----
 # Resolved from the script's own location, not the current directory, so it
@@ -16,6 +16,12 @@ LOG_FILE="${LOG_FILE:-$SCRIPT_DIR/package_install.log}"
 DEFAULT_PACKAGE_MANAGER="${DEFAULT_PACKAGE_MANAGER:-auto}"
 AUR_HELPER=""
 UNATTENDED=false
+# The rehearsal. It was a subcommand here, `preview`, and a flag on the sibling
+# script, and the README printed both in one code block. A flag is the shape that
+# survives: it composes with install and with repos, while a command could only
+# ever rehearse one of them.
+DRY_RUN=false
+VERBOSE=false
 UPDATED_DB=false
 PROGRESS=""   # set by install_all, prefixed onto the per-package line
 COMMAND=""    # read at the dispatch, was never declared with the other globals
@@ -128,6 +134,20 @@ check_sudo() {
 
 # ---- Repository Management ----
 add_repos() {
+    # Every branch below either writes outside $HOME or reaches the network, so
+    # the rehearsal has to stop before the case rather than inside it.
+    if $DRY_RUN; then
+        case "$PKG_MANAGER" in
+            "apt")    log "INFO" "Simulate: add the Microsoft repository for VSCode, if it is not already present" ;;
+            "pacman") log "INFO" "Simulate: nothing, no extra pacman repositories are required" ;;
+            "dnf")    log "INFO" "Simulate: add RPM Fusion free, if it is not already present" ;;
+            *)        log "INFO" "Simulate: nothing, no repository step for '$PKG_MANAGER'" ;;
+        esac
+        log "INFO" "Simulate: refresh the package database"
+        log "INFO" "Simulated. Nothing above was carried out."
+        return 0
+    fi
+
     case "$PKG_MANAGER" in
         "apt")
             if ! grep -qr "packages.microsoft.com" /etc/apt/sources.list.d/; then
@@ -169,7 +189,7 @@ load_packages() {
     # Use a global associative array to map common names to distro-specific names
     declare -gA PACKAGE_MAP=()
     # And a parallel list in file order. Bash iterates an associative array in
-    # hash order, so preview, install and check all threw away the grouping that
+    # hash order, so listing, installing and checking all threw away the grouping that
     # packages.conf is carefully organised into: the Hyprland packages came out
     # scattered through the list and a long install gave no sense of position.
     declare -ga PACKAGE_ORDER=()
@@ -278,7 +298,8 @@ run_hooks() {
 }
 
 # ---- User Commands ----
-preview() {
+# What the `preview` command used to be, now reached by `install --dry-run`.
+list_configured() {
     # Not "to be installed": most of them usually already are.
     log "INFO" "${#PACKAGE_ORDER[@]} packages configured for $PKG_MANAGER:"
     for key in "${PACKAGE_ORDER[@]}"; do
@@ -294,9 +315,18 @@ preview() {
 }
 
 install_all() {
+    # Before check_sudo, so a rehearsal never asks for a password. The list is
+    # the whole of what a simulated install can honestly show: which packages
+    # are already present is what `check` answers, and it answers it for real.
+    if $DRY_RUN; then
+        list_configured
+        log "INFO" "Simulated. Nothing above was installed."
+        return 0
+    fi
+
     check_sudo
     add_repos
-    
+
     local installed=0 present=0 failures=0 rc
     local failed_keys=()
     local total="${#PACKAGE_ORDER[@]}" index=0
@@ -331,6 +361,7 @@ verify_installed() {
     log "INFO" "Checking ${#PACKAGE_ORDER[@]} configured packages against $PKG_MANAGER..."
     for key in "${PACKAGE_ORDER[@]}"; do
         if is_installed "${PACKAGE_MAP[$key]}"; then
+            $VERBOSE && log "INFO" "Present: $key"
             present=$((present + 1))
         else
             missing_keys+=("$key")
@@ -354,18 +385,20 @@ verify_installed() {
 # explicitly asked for help listed no flags at all, while the path where they
 # made a typo listed every one.
 usage() {
-    echo "Usage: $0 COMMAND [PACKAGE...] [--yes] [--no-color] [--log FILE]"
+    echo "Usage: $0 COMMAND [PACKAGE...] [--dry-run] [--yes] [--no-color] [--verbose] [--log FILE]"
     echo "Commands:"
-    echo "  preview    List the configured packages, install nothing"
-    echo "  install    Install them"
+    echo "  install    Install the configured packages"
     echo "  check      Report which are missing, non-zero if any are"
     echo "  repos      Add the extra repositories some packages need"
     echo "Flags:"
+    echo "  --dry-run  Simulate, change nothing. install lists what is configured"
+    echo "             and repos names the steps it would take; check only reads"
     echo "  --yes      Fail instead of prompting for sudo"
     echo "  --no-color Plain output (also automatic when not writing to a terminal)"
+    echo "  --verbose  Also print the packages that are already present"
     echo "  --log FILE Write the run log somewhere other than $LOG_FILE"
     echo "Examples:"
-    echo "  $0 preview"
+    echo "  $0 install --dry-run          # list the configured packages, install nothing"
     echo "  $0 install --yes"
     echo "  $0 install waybar cliphist    # just these two"
     echo "  $0 check"
@@ -373,8 +406,8 @@ usage() {
     echo "  CONFIG_FILE, LOG_FILE and DEFAULT_PACKAGE_MANAGER override the defaults."
 }
 
-# Narrow PACKAGE_ORDER to the names given on the command line, so install,
-# preview and check all take a subset the same way.
+# Narrow PACKAGE_ORDER to the names given on the command line, so install and
+# check both take a subset the same way.
 apply_package_filter() {
     [ "${#PACKAGE_FILTER[@]}" -eq 0 ] && return 0
     local wanted selected=() missing=()
@@ -396,8 +429,10 @@ apply_package_filter() {
 parse_args() {
     while [[ $# -gt 0 ]]; do
         case "$1" in
+            --dry-run) DRY_RUN=true; shift ;;
             --yes) UNATTENDED=true; shift ;;
             --no-color) disable_colors; shift ;;
+            --verbose|-v) VERBOSE=true; shift ;;
             --log)
                 # shift 2 with only one argument left shifts nothing and returns
                 # 1, so the loop rematched --log forever. parse_args runs before
@@ -470,12 +505,23 @@ main() {
     fi
 
     case "$COMMAND" in
-        preview) preview ;;
         install) install_all ;;
-        repos) check_sudo; add_repos ;;
+        # add_repos returns before anything happens under --dry-run, so asking
+        # for a password first would be the one thing the rehearsal did for real.
+        repos)
+            $DRY_RUN || check_sudo
+            add_repos
+            ;;
         check) verify_installed ;;
         *)
             log "ERROR" "Unknown command: '$COMMAND'"
+            # This script's rehearsal was a command until the two were given one
+            # vocabulary, and it is printed in a README that is now older than
+            # some clones. Say where it went rather than listing four commands
+            # and leaving the reader to spot which one is missing.
+            if [ "$COMMAND" = "preview" ]; then
+                log "INFO" "The rehearsal is a flag now: $0 install --dry-run"
+            fi
             usage >&2
             exit 1
             ;;
