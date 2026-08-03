@@ -12,14 +12,16 @@
 # Roles: Ice for the hovered row, since focus is Ice everywhere in this desktop;
 # Bordeaux as the identity mark on the mode indicator, matching the prompt and
 # the terminal cursor; alert tones only for states that are genuinely states.
+#
+# Key names are yazi's, and yazi renames them. Six here named a schema it had
+# already dropped, so the colours were written and never painted; see the
+# [indicator] and [mode] comments below. Diff any new key against the default
+# theme.toml embedded in the binary rather than against yazi's online docs:
+#
+#   strings -n 4 /usr/bin/yazi | sed -n '/^#:schema.*theme\.json/,/^\[icon\]/p'
 
 [mgr]
 cwd = { fg = "#6aa3c7" }              # ice-300
-
-# The hovered row is the cursor. Ice, filled, the same relationship the bar's
-# active workspace has with its rule.
-hovered = { fg = "#e8e8e8", bg = "#215b7c" }   # ink-0 on ice-600
-preview_hovered = { underline = true }
 
 # Selection is a different thing from the cursor and reads as a mark, not a fill.
 marker_copied   = { fg = "#57a26d", bg = "#57a26d" }   # alert-good
@@ -41,10 +43,29 @@ find_position = { fg = "#9270a7", bold = true }   # ash-400
 active   = { fg = "#e8e8e8", bg = "#215b7c" }
 inactive = { fg = "#929292", bg = "#191817" }
 
+# The mode badge. yazi splits each mode into a filled half and a trailing half:
+# `_main` is the badge itself and `_alt` is what the separator either side of it
+# is drawn in, which is why the default writes the main's colour as the alt's
+# foreground. This desktop keeps one filled surface and lets the alt read as the
+# seam with the status bar, so alt is the main's tone over void-20.
+#
+# These were `normal`, `select` and `unset` until yazi split them, and the three
+# old spellings were parsed and dropped: the badge came out 48;5;4, yazi's own
+# blue, while bordeaux-300 sat in this file being read by nothing.
 [mode]
-normal = { fg = "#0a0908", bg = "#c76870", bold = true }   # bordeaux-300, the identity mark
-select = { fg = "#0a0908", bg = "#498bb2", bold = true }   # ice-400
-unset  = { fg = "#0a0908", bg = "#a57636", bold = true }   # bronze-400
+normal_main = { fg = "#0a0908", bg = "#c76870", bold = true }   # bordeaux-300, the identity mark
+normal_alt  = { fg = "#c76870", bg = "#191817" }               # bordeaux-300 on void-20
+select_main = { fg = "#0a0908", bg = "#498bb2", bold = true }   # ice-400
+select_alt  = { fg = "#498bb2", bg = "#191817" }
+unset_main  = { fg = "#0a0908", bg = "#a57636", bold = true }   # bronze-400
+unset_alt   = { fg = "#a57636", bg = "#191817" }
+
+# The hovered row is the cursor. Ice, filled, the same relationship the bar's
+# active workspace has with its rule. This lived under [mgr] as `hovered` and
+# `preview_hovered`, which yazi moved here and renamed.
+[indicator]
+current = { fg = "#e8e8e8", bg = "#215b7c" }   # ink-0 on ice-600
+preview = { underline = true }
 
 [status]
 overall     = { fg = "#b1b1b1" }
@@ -68,7 +89,7 @@ selected = { reversed = true }
 [confirm]
 border     = { fg = "#498bb2" }
 title      = { fg = "#498bb2" }
-content    = {}
+body       = {}                       # was `content`, which yazi renamed
 list       = {}
 btn_yes    = { reversed = true }
 btn_no     = {}
