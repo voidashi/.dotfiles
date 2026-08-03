@@ -421,6 +421,32 @@ What was never executed, so nobody reads that number as broader than it is:
   and says nothing. Also never wrap it in a script passing the same options as CLI
   flags, because flags override the config file, which is how the committed theme
   silently stopped applying once before.
+- **yazi renames theme keys and drops the old spelling without a word.** Six of ours
+  named a schema it had already replaced: `mgr.hovered` and `mgr.preview_hovered` are
+  `indicator.current` and `indicator.preview`, `mode.normal`, `select` and `unset` each
+  split into a `_main` and an `_alt` half, and `confirm.content` is `confirm.body`. The
+  ice-600 cursor fill and the bordeaux-300 mode badge were written, parsed, discarded,
+  and painted zero times. Its online docs describe the current release and not the
+  installed one, so diff against the default embedded in the binary:
+
+  ```bash
+  strings -n 4 /usr/bin/yazi | sed -n '/^#:schema.*theme\.json/,/^\[icon\]/p'
+  ```
+
+  The colours themselves live in a generated flavor, and `theme.toml` overrides it key
+  by key rather than table by table, which is measured: the border glyph in `theme.toml`
+  renders while every colour in the flavor's `[mgr]` still applies. A flavor named with
+  no directory behind it fails loudly, which is the only reason a passing run means
+  anything.
+- **bottom rejects a bad colour and accepts a bad key, and cannot be checked without a
+  terminal.** A value it cannot parse is a hard exit 1 naming the key,
+  `Please update 'styles.widgets.border_colour' in your config file. 'notacolour' is an
+  invalid named colour`, which is what makes a clean run worth something. A key that
+  does not exist is accepted in silence and the program runs, the same shape as swaylock
+  and hyprtoolkit. And `btm -C <file>` outside a terminal exits 1 with
+  `No such device or address` whatever the config holds, so an exit status read from a
+  pipe discriminates nothing; `scripts/theme/check_render.py` has the pty harness.
+  Its whole `[styles]` tree is a generated block and the file says so.
 - **wlogout is the opposite case and does need its wrapper.**
   `scripts/wm/power-menu.sh` is the only place its geometry exists: wlogout reads
   actions from `.config/wlogout/layout` and colours from `style.css`, but
