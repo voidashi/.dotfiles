@@ -42,13 +42,18 @@ KDE opt-out cheap.
   the surprise and not the situation. `install` now takes paths, so every subset is
   reachable by naming what you want; what is missing is the opposite, a way to say
   "everything except these three" without typing every other entry of
-  `config_files.conf`. Two options
-  left, in rough order of cost: a documented invocation in `README.md` and `SETUP.md`,
-  which costs nothing in the script and leaves the reader assembling a list; or splitting
-  the Qt/KDE entries into their own section of `config_files.conf` so they can be skipped
-  by name, which is a config format change and needs `load_dotfiles` to learn sections.
-  Isolating it to the Hyprland and Sway sessions is the option that sounds best and does
-  not exist: `kdeglobals` is read per user, not per session.
+  `config_files.conf`. Two options left, in rough order of cost: a documented invocation
+  in `README.md` and `SETUP.md`, which costs nothing in the script and leaves the reader
+  assembling a list; or splitting the Qt/KDE entries into their own section of
+  `config_files.conf` so they can be skipped by name, which is a config format change and
+  needs `load_dotfiles` to learn sections. One thing to know before pricing the second:
+  the filter that just landed is path-typed all the way down, since `normalize_path` and
+  `match_entry` both assume a filesystem path, so a section name fits neither and
+  `apply_dotfile_filter` grows an arm with its own error vocabulary. An exclusion is also
+  the one case where `FILTERED` is the wrong question: a caller who says "all of it
+  except kdeglobals" almost certainly does want the fonts, and three call sites read that
+  flag. Isolating it to the Hyprland and Sway sessions is the option that sounds best and
+  does not exist: `kdeglobals` is read per user, not per session.
   *Difficulty: low. Priority: medium, and it is the one finding that changed a
   reviewer's answer from yes to no.*
 
