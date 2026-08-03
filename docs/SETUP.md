@@ -261,6 +261,25 @@ All four terminals are configured and themed identically, so switching `terminal
 **Sway sets no outputs at all**, so it uses whatever your compositor detects. If you
 need a specific layout there, add `output` lines to `.config/sway/config`.
 
+**If you already run KDE.** `~/.config/kdeglobals` and `~/.config/kcminputrc` are tracked
+entries, and they are where Plasma reads its palette, fonts, icon theme and cursor. On a
+machine that already runs Plasma those files exist, so `install` refuses them the way it
+refuses any real file, and prints one line each:
+
+```
+[WARNING] Skipping existing file: /home/you/.config/kdeglobals (use --force to overwrite)
+[WARNING] Skipping existing file: /home/you/.config/kcminputrc (use --force to overwrite)
+```
+
+That run does not retheme your session. `--force` is what replaces them, after copying
+the originals into `~/.dotfiles_backup/<timestamp>/`. Two things to know before reaching
+for it. The palette also ships as an ordinary KDE colour scheme,
+`~/.local/share/color-schemes/Voidashi.colors`, which the same run *does* link because
+nothing is there to skip, and which changes nothing until you select it. And once
+`kdeglobals` is a symlink, KDE writes through it: every change made in System Settings
+lands in the repository, so `git status` in `~/.dotfiles` starts reporting your desktop
+settings.
+
 ## Changing the accent colour
 
 The README promises that one hex moves everything. That is true of the generated half of

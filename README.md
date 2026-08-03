@@ -116,10 +116,11 @@ console works too.
 > so another location silently breaks the wallpaper, the clipboard picker, the bar's power
 > button and Neovim's dashboard. Three more things need a look before this feels right on
 > your machine: the monitor layout in `.config/hypr/conf/monitors.lua` names specific
-> outputs, the bar carries laptop-only modules, and if you already run KDE, the install
-> links `kdeglobals` and `kcminputrc`, which is where Plasma applications read their
-> palette and cursor, so your existing session is rethemed too. And if you want the themed
-> prompt, fish has to become your login shell; nothing does that for you.
+> outputs, the bar carries laptop-only modules, and if you already run KDE, `kdeglobals`
+> and `kcminputrc` are tracked here, which is where Plasma applications read their palette
+> and cursor. A bare `install` leaves a file that already exists alone and says so, so it
+> does not retheme a running Plasma session; `--force` is the flag that would. And if you
+> want the themed prompt, fish has to become your login shell; nothing does that for you.
 > [`docs/SETUP.md`](docs/SETUP.md) covers each of these.
 
 ### Taking only part of it
