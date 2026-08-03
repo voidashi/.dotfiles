@@ -85,6 +85,17 @@ run first, since it is the flag that has something to destroy:
 ./scripts/backup-configs.sh install --dry-run --force
 ```
 
+For part of it rather than all of it, name the paths you want. They have to be entries
+of `scripts/config_files.conf`, and naming any of them leaves `fonts/` alone, which a
+bare run links:
+
+```bash
+./scripts/backup-configs.sh install ~/.config/kitty ~/.config/fish
+```
+
+`uninstall` and `check` take paths the same way, so the subset can be undone and audited
+on its own terms.
+
 **5. Check that it worked.**
 
 ```bash

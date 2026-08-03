@@ -299,6 +299,110 @@ case_uninstall_dry_run_changes_nothing() {
 }
 
 # =====================================================================
+# Group B3: paths named on the command line
+# =====================================================================
+#
+# The filter narrows what the loops read. What these cases ask is the half that
+# is easy to get wrong: not that the named path was acted on, but that nothing
+# else was.
+
+case_filter_install_links_only_the_named_entry() {
+  track '~/.config/wanted.conf'
+  track '~/.config/other.conf'
+  repo_file ".config/wanted.conf"
+  repo_file ".config/other.conf"
+  run_backup install '~/.config/wanted.conf'
+  assert_symlink_to "$HOME/.config/wanted.conf" "$DOTFILES_DIR/.config/wanted.conf" || return 1
+  [ ! -e "$HOME/.config/other.conf" ] || { fail "an entry nobody named was linked anyway"; return 1; }
+}
+
+# fonts/ is linked by install_fonts and is not an entry of the config file, so
+# no argument can name it and a filtered run must not touch it.
+case_filter_install_leaves_the_fonts_link_alone() {
+  track '~/.config/wanted.conf'
+  repo_file ".config/wanted.conf"
+  mkdir -p "$DOTFILES_DIR/fonts"
+  printf 'font\n' > "$DOTFILES_DIR/fonts/probe.ttf"
+  run_backup install '~/.config/wanted.conf'
+  assert_symlink_to "$HOME/.config/wanted.conf" "$DOTFILES_DIR/.config/wanted.conf" || return 1
+  [ ! -e "$HOME/.local/share/fonts/dotfiles" ] || { fail "a filtered install linked fonts/, which no path can name"; return 1; }
+}
+
+# One unknown name stops the run. The alternative, acting on the ones it
+# recognised, ends in a summary about a set the caller never asked for.
+case_filter_rejects_an_unknown_path_and_links_nothing() {
+  track '~/.config/wanted.conf'
+  repo_file ".config/wanted.conf"
+  run_backup install '~/.config/wanted.conf' '~/.config/typo.conf'
+  assert_rc_nonzero || return 1
+  [ ! -e "$HOME/.config/wanted.conf" ] || { fail "the valid path was acted on despite an invalid one"; return 1; }
+}
+
+# install links a tracked directory whole, so one file inside it is not
+# something the script can act on. The error has to say which entry covers it,
+# or the caller reads "not in the config file" about a path that plainly is.
+case_filter_rejects_a_path_inside_a_tracked_entry() {
+  track '~/.config/app'
+  mkdir -p "$DOTFILES_DIR/.config/app"
+  printf 'repo version\n' > "$DOTFILES_DIR/.config/app/settings.conf"
+  run_backup install '~/.config/app/settings.conf'
+  assert_rc_nonzero || return 1
+  # Matched on the sentence, not on the entry: the entry is a prefix of the
+  # argument, so grepping for it alone passes against the "not in the config
+  # file" message too, and the case proved nothing about which one was printed.
+  grep -q 'It is inside ~/.config/app,' "$LAST_OUT" || { fail "the error did not name the entry that covers the path"; return 1; }
+  [ ! -e "$HOME/.config/app" ] || { fail "something was linked despite the rejection"; return 1; }
+}
+
+# The other two commands that touch fonts/. Each guard is asserted separately,
+# because a suite that covers one of three reads as covering the behaviour.
+case_filter_uninstall_leaves_the_fonts_link_alone() {
+  track '~/.config/wanted.conf'
+  repo_file ".config/wanted.conf"
+  mkdir -p "$DOTFILES_DIR/fonts"
+  printf 'font\n' > "$DOTFILES_DIR/fonts/probe.ttf"
+  run_backup install
+  assert_symlink_to "$HOME/.local/share/fonts/dotfiles" "$DOTFILES_DIR/fonts" || return 1
+  run_backup uninstall '~/.config/wanted.conf'
+  [ ! -e "$HOME/.config/wanted.conf" ] || { fail "the named link survived uninstall"; return 1; }
+  assert_symlink_to "$HOME/.local/share/fonts/dotfiles" "$DOTFILES_DIR/fonts"
+}
+
+# A filtered check must not fail over fonts/. The named entry is linked and the
+# fonts are not, so an audit that included them would exit non-zero about
+# something the caller never mentioned.
+case_filter_check_ignores_the_fonts_link() {
+  track '~/.config/wanted.conf'
+  repo_file ".config/wanted.conf"
+  mkdir -p "$DOTFILES_DIR/fonts"
+  run_backup install '~/.config/wanted.conf'
+  run_backup check '~/.config/wanted.conf'
+  [ "$LAST_RC" -eq 0 ] || { fail "a filtered check reported on fonts/, which no path can name"; return 1; }
+}
+
+# A shell produces these readily and they name the entry, so they must not be
+# refused, and above all not refused with "it is inside" the entry they are.
+case_filter_accepts_a_path_with_redundant_slashes() {
+  track '~/.config/app'
+  mkdir -p "$DOTFILES_DIR/.config/app"
+  printf 'repo version\n' > "$DOTFILES_DIR/.config/app/settings.conf"
+  run_backup install "$HOME/.config//app//"
+  [ "$LAST_RC" -eq 0 ] || { fail "a path spelled with redundant slashes was refused"; return 1; }
+  assert_symlink_to "$HOME/.config/app" "$DOTFILES_DIR/.config/app"
+}
+
+case_filter_uninstall_removes_only_the_named_link() {
+  track '~/.config/wanted.conf'
+  track '~/.config/other.conf'
+  repo_file ".config/wanted.conf"
+  repo_file ".config/other.conf"
+  run_backup install
+  run_backup uninstall '~/.config/wanted.conf'
+  [ ! -e "$HOME/.config/wanted.conf" ] || { fail "the named link survived uninstall"; return 1; }
+  assert_symlink_to "$HOME/.config/other.conf" "$DOTFILES_DIR/.config/other.conf"
+}
+
+# =====================================================================
 # Group C: the destructive paths. A failed step must not destroy the source.
 # =====================================================================
 
@@ -422,6 +526,15 @@ main() {
   run_case uninstall_leaves_a_link_pointing_elsewhere
   run_case uninstall_leaves_the_repo_intact
   run_case uninstall_dry_run_changes_nothing
+
+  run_case filter_install_links_only_the_named_entry
+  run_case filter_install_leaves_the_fonts_link_alone
+  run_case filter_rejects_an_unknown_path_and_links_nothing
+  run_case filter_rejects_a_path_inside_a_tracked_entry
+  run_case filter_uninstall_removes_only_the_named_link
+  run_case filter_uninstall_leaves_the_fonts_link_alone
+  run_case filter_check_ignores_the_fonts_link
+  run_case filter_accepts_a_path_with_redundant_slashes
 
   run_case add_keeps_file_when_repo_is_unwritable
   run_case add_keeps_directory_when_repo_is_unwritable

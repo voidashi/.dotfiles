@@ -54,7 +54,7 @@ so they work from any directory. Do not reintroduce cwd-relative paths: that
 previously made the README's own `./scripts/install-packages.sh install` abort with
 "Configuration file not found" and drop a stray log in the repo root.
 
-### `backup-configs.sh [init|add|install|uninstall|check|backups|restore] [--dry-run] [--force] [--verbose]`
+### `backup-configs.sh [init|add|install|uninstall|check|backups|restore] [PATH...] [--dry-run] [--force] [--verbose]`
 
 - `add` moves each path in `config_files.conf` out of `$HOME` into this repo,
   preserving directory contents via rsync with `--remove-source-files`, backs the
@@ -84,6 +84,26 @@ previously made the README's own `./scripts/install-packages.sh install` abort w
 - `init` runs `git init` in the repo and creates the directory skeleton. It is for
   starting a dotfiles repo from nothing, not for using this one, which is why the
   install path never mentions it.
+- `add`, `install`, `uninstall` and `check` take paths and act on those alone, the way
+  `install-packages.sh` takes `[PACKAGE...]`. Both narrow a list once and then forget
+  the filter existed: there it is `apply_package_filter` over `PACKAGE_ORDER`, here
+  `apply_dotfile_filter` over `DOTFILE_ENTRIES`, which the four loops read instead of
+  the config file. The one place they differ is where the arguments are taken, the
+  parser there and the dispatch here, and that is forced: the command has to come off
+  the front before what is left can be read as paths, or `restore` loses its timestamp
+  to the filter. Four behaviours are load-bearing and each has a case in
+  `scripts/tests/test-dotfiles.sh`, each proven by breaking it and watching exactly one
+  case notice. An unrecognised path stops the whole run rather than acting on the ones
+  it understood, because a partial run ends in a summary about a set nobody asked for,
+  and one of these commands removes things. A path inside a tracked directory is
+  rejected naming the entry that covers it, since `install` links a directory whole and
+  there is nothing it could do with one file inside. Redundant slashes are squeezed
+  before any comparison, because without that `~/.config/kitty//` is refused with an
+  explanation that it sits inside itself. And `fonts/` is not in `config_files.conf`, so
+  no argument can name it and a filtered run leaves it alone in install, uninstall and
+  check alike; a filtered `check` that audited it would fail over something the caller
+  never mentioned. `FILTERED` is the one question those three ask, so the next thing
+  that changes what "the caller narrowed the set" means edits one place.
 - `--dry-run` must reach every destructive line, and once did not. `install --dry-run
   --force` ran `rm -rf "$target"` for real, because the guard sat around the linking
   block further down and not around the `$FORCE` branch that removes the original.

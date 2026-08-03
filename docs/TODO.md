@@ -28,22 +28,9 @@ for all of them anyway. Take the entries in the order they are written.
 
 `backup-configs.sh` and `install-packages.sh`, the two `.conf` files they read, and
 `README.md`, `SETUP.md` and `MAINTENANCE.md`, which all print their vocabulary. Several
-sessions of work on one front, and the order below is not arbitrary: the KDE opt-out is
-cheap once `install` takes paths and awkward before.
-
-- **Let `install` take paths, the way the package installer already does.**
-  `backup-configs.sh install` is still every path in `config_files.conf` or nothing:
-  `main()` dispatches on `$1` alone and `install_dotfiles` takes no argument. The
-  asymmetry is the argument for fixing it, since `install-packages.sh` gained a
-  `[PACKAGE...]` filter in `4a81c1b`, in `apply_package_filter()`, so a reader learns one
-  vocabulary from one script and finds it missing on the other. `install_dotfiles`,
-  `check_dotfiles` and `uninstall_dotfiles` are each a loop over `load_dotfiles`, so
-  filtering by positional arguments is roughly ten lines and needs no config format
-  change. `add_dotfile` already takes one path. The README no longer overpromises here:
-  "Taking only part of it" states the all-or-nothing plainly and sends the reader to
-  copy by hand, so this is now a convenience rather than a correction.
-  *Difficulty: low. Priority: medium, and it is the cheapest way for a stranger to try
-  this without committing to all of it.*
+sessions of work on one front. The order below is not arbitrary, and its first entry is
+now done: `add`, `install`, `uninstall` and `check` take paths, which is what makes the
+KDE opt-out cheap.
 
 - **KDE theming is not optional, and it lands on a session the reader did not offer.**
   `config_files.conf` links `~/.config/kdeglobals`, `~/.config/kcminputrc` and
@@ -52,15 +39,23 @@ cheap once `install` takes paths and awkward before.
   rethemes the desktop the reader meant to keep. A reviewer reading only the README
   named this as the single reason not to install on a working laptop, and they were right
   before the README warned about it. The warning is now in the install block, which fixes
-  the surprise and not the situation. Options, in rough order of cost: let
-  `backup-configs.sh install` take paths, which is the first entry of this group and
-  makes every subset possible rather than this one; a documented "everything except
-  the Qt/KDE paths" invocation; or splitting the Qt/KDE entries into their own section
-  of `config_files.conf` so they can be skipped by name. Isolating it to the Hyprland and
-  Sway sessions is the option that sounds best and does not exist: `kdeglobals` is read
-  per user, not per session.
-  *Difficulty: low once `install` takes paths. Priority: medium, and it is the one
-  finding that changed a reviewer's answer from yes to no.*
+  the surprise and not the situation. `install` now takes paths, so every subset is
+  reachable by naming what you want; what is missing is the opposite, a way to say
+  "everything except these three" without typing every other entry of
+  `config_files.conf`. Two options left, in rough order of cost: a documented invocation
+  in `README.md` and `SETUP.md`, which costs nothing in the script and leaves the reader
+  assembling a list; or splitting the Qt/KDE entries into their own section of
+  `config_files.conf` so they can be skipped by name, which is a config format change and
+  needs `load_dotfiles` to learn sections. One thing to know before pricing the second:
+  the filter that just landed is path-typed all the way down, since `normalize_path` and
+  `match_entry` both assume a filesystem path, so a section name fits neither and
+  `apply_dotfile_filter` grows an arm with its own error vocabulary. An exclusion is also
+  the one case where `FILTERED` is the wrong question: a caller who says "all of it
+  except kdeglobals" almost certainly does want the fonts, and three call sites read that
+  flag. Isolating it to the Hyprland and Sway sessions is the option that sounds best and
+  does not exist: `kdeglobals` is read per user, not per session.
+  *Difficulty: low. Priority: medium, and it is the one finding that changed a
+  reviewer's answer from yes to no.*
 
 - **The two management scripts are two CLIs for one job.** The rehearsal is `preview`, a
   subcommand, on one and `--dry-run`, a flag, on the other, and the README prints both in
