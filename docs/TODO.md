@@ -19,10 +19,7 @@ hardware, images or a decision come last. Inside a group, by priority.
 
 ## Start here next
 
-The whole of "The two management scripts", below. It runs over several sessions rather
-than one, which is why it is named as a front and not as a task: each session opens the
-same two scripts and the same four documents, and one that picks up a single entry pays
-for all of them anyway. Take the entries in the order they are written.
+The whole of "The two management scripts", below.
 
 ## The two management scripts
 
