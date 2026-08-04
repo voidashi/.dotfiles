@@ -19,14 +19,7 @@ hardware, images or a decision come last. Inside a group, by priority.
 
 ## Start here next
 
-"The generator and its checks", below. The management scripts group is empty: all six
-of its entries are done and each is recorded where it belongs, the last two in
-[`TURNING-POINTS.md`](TURNING-POINTS.md) as `[apt]` and `[dnf]` populated and the
-helpers reached through `~/.local/bin`. What that group left behind is one entry under
-"Waiting on the world", because the apt and dnf names have never been installed.
-
-Of the two entries there rated medium, the yazi one is a decision before it is work and
-the `check_palette.py` one removes a class of edit rather than an instance.
+"The generator and its checks", below.
 
 ## The generator and its checks
 
