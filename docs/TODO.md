@@ -379,9 +379,12 @@ Never a session of their own. The cost of each is opening the file, so they are 
 whatever task opens it for another reason.
 
 - **Many comments under `.config/hypr/` are in Portuguese** while the rest of the tree is
-  English, including the `autostart.lua` note on why absolute paths are used, which is
-  worth reading. Translate on touch. This is a
-  translation and not a deletion, so it should not be batched with cuts.
+  English. Translate on touch, which is how the two in `autostart.lua` that the
+  `~/.local/bin` work touched came across: the note on why absolute paths are used, and
+  the wallpaper order above the swaybg line. The rest of that file is still Portuguese,
+  including the `kill mako` note and the one on why hypridle runs under `systemd-cat`,
+  both of which are worth reading. This is a translation and not a deletion, so it should
+  not be batched with cuts.
   *Difficulty: trivial per file. Priority: low.*
 
 - **Double hyphens standing in for a dash are not finished.** They are out of the shell
