@@ -31,7 +31,8 @@ doing nothing, with no error message anywhere.
 - `scripts/packages.conf`: the package list, INI-style, with `[common]`, `[apt]`,
   `[pacman]` and `[dnf]` sections.
 - `scripts/wm/`: helpers the compositors call *while running*, as opposed to the
-  top-level scripts, which you run yourself.
+  top-level scripts, which you run yourself. `backup-configs.sh install` links each of
+  them into `~/.local/bin`, so the configs call them by bare name.
 - `scripts/theme/`: three layers, the same three the editor's theme has.
   `palette.json` holds values and nothing else; `roles.py` holds decisions, naming a
   token for each thing a colour is used for; `generate_theme.py` renders those into
@@ -99,11 +100,21 @@ previously made the README's own `./scripts/install-packages.sh install` abort w
   rejected naming the entry that covers it, since `install` links a directory whole and
   there is nothing it could do with one file inside. Redundant slashes are squeezed
   before any comparison, because without that `~/.config/kitty//` is refused with an
-  explanation that it sits inside itself. And `fonts/` is not in `config_files.conf`, so
-  no argument can name it and a filtered run leaves it alone in install, uninstall and
-  check alike; a filtered `check` that audited it would fail over something the caller
-  never mentioned. `FILTERED` is the one question those three ask, so the next thing
-  that changes what "the caller narrowed the set" means edits one place.
+  explanation that it sits inside itself. And `fonts/`, `wallpapers/` and the
+  `scripts/wm/` helpers are not in `config_files.conf`, so no argument can name one and
+  a filtered run leaves them alone in install, uninstall and check alike; a filtered
+  `check` that audited them would fail over something the caller never mentioned.
+  `FILTERED` is the one question those three ask, so the next thing that changes what
+  "the caller narrowed the set" means edits one place.
+- **The repo-root links are one list, `extra_links()`.** Those three sit at the repo
+  root rather than mirroring a `$HOME` path, so `install_dotfiles` cannot carry them and
+  each needs a symlink of its own: `fonts/` and `wallpapers/` under
+  `~/.local/share/<name>/dotfiles`, and every `scripts/wm/*.sh` into `~/.local/bin`.
+  install, uninstall and check read that one function, so a fourth is one edit. The
+  helpers land on PATH so the compositors and the bar can call them by bare name, which
+  is what stops the clone directory being load-bearing; see `TURNING-POINTS.md`.
+  `uninstall` removes one only after `readlink` says it points into the repo, which
+  matters most in `~/.local/bin`, shared with everything else the user installs.
 - `--except PATH` is the filter's other direction: everything but the entries it names.
   It is path-typed like the filter, reusing `match_entry` and its two error sentences
   rather than growing a vocabulary, which is why it is a flag over paths and not a
@@ -111,7 +122,8 @@ previously made the README's own `./scripts/install-packages.sh install` abort w
   could not tell its own arguments from the positional paths that follow. **It must not
   set `FILTERED`.** That flag answers "did the caller name the set they wanted", and it
   is what keeps `fonts/` out of a filtered run; someone asking for all of it except
-  `kdeglobals` is asking for the rest, fonts included. Exclusions are applied before the
+  `kdeglobals` is asking for the rest, the repo-root links included. Exclusions are
+  applied before the
   positional filter so both are validated against the whole config file, which is why a
   path named and excluded in one run gets its own error instead of being reported absent
   from a file it is written in. Excluding every entry is refused, because a run with
@@ -231,7 +243,8 @@ What was never executed, so nobody reads that number as broader than it is:
   `wget | gpg | tee` that writes an empty repository key when the download fails and
   leaves every later `apt-get update` broken.
 - Everything ran on one CachyOS machine, so only the pacman branches met a real
-  package manager. `install_fonts` and `init_dotfiles` were read and not run.
+  package manager. `init_dotfiles` was read and not run, as was `install_fonts`, which
+  is now `install_extras` and does have sandboxed cases.
 - Two runs sharing a `$TIMESTAMP`, and behaviour under an empty `$HOME`, were reasoned
   about rather than reproduced.
 
@@ -540,6 +553,8 @@ What was never executed, so nobody reads that number as broader than it is:
 - **Wallpapers:** `scripts/wm/select-random-wallpaper.sh` takes a list of directories
   and uses the first one that contains images. It must print errors to **stderr**,
   because callers embed it in `$(...)` and pass the result to `swaybg` as a filename.
+  The last directory both compositors pass is `~/.local/share/wallpapers/dotfiles`,
+  which `install` links at the repo's `wallpapers/`.
 - **Nerd Font glyphs: verify a codepoint before trusting it.** Nerd Fonts v3 removed
   the old `nf-mdi-*` range, so a glyph copied from any pre-v3 config silently falls
   back to another font and renders as a box. Four had been sitting in the waybar
@@ -723,9 +738,16 @@ timeout 5 catnap -n -c .config/catnap/config.cat 2>&1 | grep -c "38;2;180;73;85"
 
 `check` prints its own totals and exits non-zero unless everything is valid, so read
 those rather than counting lines. The one thing worth knowing is that the total is the
-number of paths in `scripts/config_files.conf` **plus one**: `check_dotfiles()` also
-checks the font symlink at `~/.local/share/fonts/dotfiles`, which is not listed in that
-file. If the total looks wrong, that off-by-one is the first thing to rule out.
+number of paths in `scripts/config_files.conf` **plus the repo-root links**, which are
+not listed in that file: the fonts and wallpapers directories, and one per
+`scripts/wm/*.sh`. `extra_links()` is where they come from. If the total looks wrong,
+that difference is the first thing to rule out.
+
+**A missing helper link is a keybinding that does nothing.** `check` reports it and
+exits non-zero, which is the only warning you get: the compositors call those helpers
+by bare name, so an absent link produces no error anywhere. Anyone who installed before
+they existed has to run `install` once more, because the configs no longer carry the
+absolute path that used to work without them.
 A broken link usually means an external program replaced it with a real file,
 which `kded6` has done to `gtk.css` before; re-link with `install --force`, but look
 at the content first, because the same event has also overwritten what the repo held.

@@ -6,9 +6,12 @@
 # Walks the directories in the order given and uses the first one that contains
 # images. That order is this repo's convention:
 #
-#   ~/Pictures/Current_wallpapers  ->  the set in rotation right now
-#   ~/Pictures/Wallpapers          ->  the full collection
-#   ~/.dotfiles/wallpapers         ->  the sample shipped with the repo
+#   ~/Pictures/Current_wallpapers        ->  the set in rotation right now
+#   ~/Pictures/Wallpapers                ->  the full collection
+#   ~/.local/share/wallpapers/dotfiles   ->  the sample shipped with the repo,
+#                                            linked there by backup-configs.sh
+#                                            install, so no caller has to know
+#                                            where the repository was cloned
 #
 # So a fresh install works with no setup: if the first two directories do not
 # exist yet, it falls back to the wallpaper the repo ships.

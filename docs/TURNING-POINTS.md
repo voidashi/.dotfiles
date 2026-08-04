@@ -364,6 +364,38 @@ if a package here ever needs a post-install step, write it deliberately against 
 case rather than restoring an awk program that was never exercised. Nothing else read
 the section, since `load_packages` filters on the manager's name and `[common]`.
 
+## The compositors reach this repo's helpers through `~/.local/bin`
+
+Seven lines across five tracked files named `$HOME/.dotfiles` absolutely, so cloning
+anywhere else silently broke the wallpaper, the clipboard picker, the bar's power
+button and Neovim's dashboard. `install` now links every `scripts/wm/*.sh` into
+`~/.local/bin` and the `wallpapers/` directory into
+`~/.local/share/wallpapers/dotfiles`, and the configs use those names. One line is
+left, Neovim's dashboard, which opens this repository and therefore names it by
+definition.
+
+`~/.local/bin` was chosen because it is already on PATH and nothing has to arrange
+that. Measured on a live session started by plasmalogin, Hyprland, waybar and swaync
+all carry it first in PATH, and `config.fish` prepends it as well, so the console
+start path has it too. That is the whole argument: the configs end up with no path in
+them at all.
+
+What fell was a directory of this repository's own, `~/scripts/wm`. It fixes the same
+problem, since it is a fixed location independent of the clone, and it isolates these
+three helpers from a `~/.local/bin` shared with everything else the user installs. It
+lost on the mechanism rather than on taste. Nothing puts it on PATH, so it either
+keeps an absolute path in five config lines, which renames the coupling instead of
+removing it, or it needs `environment.d`, whose delivery could not be isolated on this
+machine: `conf/env_vars.lua` sets the same variables through `hl.env`, so the values
+reaching waybar and swaync prove only that one of the two sources works.
+
+Reopen it if `~/.local/bin` turns out to collide. The names are generic
+(`clipboard-picker.sh`, `power-menu.sh`, `select-random-wallpaper.sh`) and the risk is
+real rather than theoretical; what makes it cheap today is that `uninstall` removes a
+link only after `readlink` says it points into the repo, so a collision costs a
+warning and not someone else's file. A case in `scripts/tests/test-dotfiles.sh` holds
+that.
+
 ## `[apt]` and `[dnf]` were filled in rather than removed
 
 The two sections were empty while every name sat in `[common]` in its Arch spelling,

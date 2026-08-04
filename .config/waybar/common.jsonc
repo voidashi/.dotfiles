@@ -158,7 +158,9 @@
     "custom/power": {
         "format": "<span size=\"110%\"></span>",
         "tooltip": false,
-        "on-click": "$HOME/.dotfiles/scripts/wm/power-menu.sh"
+        // Bare name: backup-configs.sh install links the scripts/wm/ helpers into
+        // ~/.local/bin, which is on PATH, so this does not name the clone directory.
+        "on-click": "power-menu.sh"
     },
     // The dot marking unread notifications is alert-critical from the palette,
     // not the literal keyword 'red' this module shipped with.

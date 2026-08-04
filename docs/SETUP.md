@@ -37,15 +37,23 @@ git clone https://github.com/voidashi/.dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 ```
 
-**The path matters.** Clone to `~/.dotfiles` exactly. Seven lines across five tracked
-files reference `$HOME/.dotfiles` absolutely: the wallpaper picker and the clipboard picker in both
-compositors' configs, the bar's power button, and Neovim's dashboard. Clone anywhere else
-and those four things stop working with no error at all. If you must use another path,
-grep for it first and change every hit:
+**Clone anywhere you like, with one exception.** The configs used to name
+`~/.dotfiles` in seven places, so any other location silently broke the wallpaper, the
+clipboard picker and the bar's power button. They no longer do: `install` links the
+`scripts/wm/` helpers into `~/.local/bin`, which is on PATH, and the sample wallpaper
+into `~/.local/share/wallpapers/dotfiles`, and the configs call both by those names.
+
+The exception is Neovim's dashboard, whose `dotfiles` entry opens `~/.dotfiles` and has
+to name it. One line, and this finds it:
 
 ```bash
 grep -rn '\$HOME/\.dotfiles' .config/
 ```
+
+**If you installed before this change, run `install` again.** The configs no longer
+carry the absolute path, and the links that replaced it do not exist until the script
+creates them. Between pulling and re-running, the power button and the clipboard picker
+do nothing.
 
 Two of the steps below change nothing. Step 1 lists the packages without installing
 them and step 3 walks the whole symlink pass without touching a file, so you can watch
@@ -482,7 +490,7 @@ the same three:
 |---|---|
 | `~/Pictures/Current_wallpapers` | The set currently in rotation |
 | `~/Pictures/Wallpapers` | A full personal collection |
-| `~/.dotfiles/wallpapers` | The sample shipped here |
+| `~/.local/share/wallpapers/dotfiles` | The sample shipped here, linked by `install` |
 
 The last one is the fallback, so a fresh clone shows something immediately. The two
 personal directories are deliberately not tracked, because GitHub is a poor place to

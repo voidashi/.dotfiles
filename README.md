@@ -110,9 +110,12 @@ console works too.
 > details, including where `--force` put your originals.
 
 > [!IMPORTANT]
-> **Clone to `~/.dotfiles` exactly.** Five tracked files reference that path absolutely,
-> so another location silently breaks the wallpaper, the clipboard picker, the bar's power
-> button and Neovim's dashboard. Three more things need a look before this feels right on
+> **Clone wherever you like.** `install` links the `scripts/wm/` helpers into
+> `~/.local/bin` and the sample wallpaper into `~/.local/share/wallpapers/dotfiles`, and
+> the configs use those names, so only Neovim's dashboard still points at `~/.dotfiles`.
+> If you installed before this change, run `install` again: the old absolute paths are
+> gone from the configs and the links replacing them do not exist until it runs. Three
+> more things need a look before this feels right on
 > your machine: the monitor layout in `.config/hypr/conf/monitors.lua` names specific
 > outputs, the bar carries laptop-only modules, and if you already run KDE, `kdeglobals`
 > and `kcminputrc` are tracked here, which is where Plasma applications read their palette
@@ -157,8 +160,11 @@ instead of linking them.
 
 If you would rather not symlink anything, copy the directories you want out of `.config/`
 by hand. Copy the whole directory rather than a single file, since a config often
-includes a sibling, and expect to edit the Hyprland, Sway, Waybar and Neovim ones, which
-name `~/.dotfiles` by absolute path.
+includes a sibling. The Hyprland, Sway and Waybar ones then need one thing this repo
+would otherwise have done: they call `clipboard-picker.sh`, `power-menu.sh` and
+`select-random-wallpaper.sh` by bare name, so put those three on your PATH or spell the
+paths out. Neovim's dashboard names `~/.dotfiles` directly and wants editing if you
+cloned elsewhere.
 
 Copying a terminal that way gets you the colours but not the typeface, since all four
 ask for Iosevka Extended and no package provides it. The setup guide has the font step.

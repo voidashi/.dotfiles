@@ -9,16 +9,20 @@ hl.on("hyprland.start", function()
 
     hl.exec_cmd("nm-applet")
     -- hl.exec_cmd("waybar")
-    -- Caminhos absolutos: com caminho relativo isto dependia do cwd com que
-    -- o Hyprland foi iniciado, e a barra não subia dependendo de como logava.
+    -- Absolute paths: with a relative one this depended on the cwd Hyprland was
+    -- started with, and the bar did not come up depending on how you logged in.
+    -- It is about $HOME-relative paths, not about the clone directory, which the
+    -- line below no longer names.
     hl.exec_cmd("waybar -c $HOME/.config/waybar/hyprland.jsonc -s $HOME/.config/waybar/style.css")
-    -- Ordem: os wallpapers em rotação, depois a coleção completa, depois o
-    -- wallpaper de exemplo do próprio repo (para uma instalação nova).
+    -- In order: the wallpapers in rotation, then the full collection, then the
+    -- repo's own sample, which is what makes a fresh install work. The script is
+    -- called by bare name and the sample is read through the link, both created by
+    -- backup-configs.sh install, so neither names where the repo was cloned.
     hl.exec_cmd(
-        "swaybg -m fill -i \"$($HOME/.dotfiles/scripts/wm/select-random-wallpaper.sh "
+        "swaybg -m fill -i \"$(select-random-wallpaper.sh "
             .. "$HOME/Pictures/Current_wallpapers "
             .. "$HOME/Pictures/Wallpapers "
-            .. "$HOME/.dotfiles/wallpapers)\""
+            .. "$HOME/.local/share/wallpapers/dotfiles)\""
     )
 
     -- Era "kill mako & swaync", com dois defeitos numa linha: kill so aceita

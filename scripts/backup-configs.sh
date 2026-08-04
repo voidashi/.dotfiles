@@ -39,6 +39,34 @@ FILTERED=false
 # could not tell its own arguments from the positional paths that follow it.
 EXCLUDED_PATHS=()
 
+# The repo paths linked into $HOME that config_files.conf cannot describe, because
+# they sit at the repo root instead of mirroring a $HOME path. install, uninstall
+# and check all read this one list, so the next one added is one edit and not three.
+#
+# The scripts/wm/ helpers go into ~/.local/bin, which is already on PATH under both
+# ways this repo documents reaching a desktop, so the compositors and the bar call
+# them by bare name and nothing under .config/ has to know where the repository was
+# cloned. docs/TURNING-POINTS.md has why there rather than a directory of our own.
+#
+# Prints "source<TAB>destination" with source relative to the repo, and only for
+# sources that exist, so a clone that dropped wallpapers/ is not then reported as
+# half installed. The trailing return is not decoration: without it the function
+# ends on a test that is false whenever the last candidate is absent, and returns 1
+# for a run with nothing to report, which is a shape this repository has paid for
+# twice.
+extra_links() {
+  local name script
+  for name in fonts wallpapers; do
+    [ -d "$DOTFILES_DIR/$name" ] &&
+      printf '%s\t%s\n' "$name" "$HOME/.local/share/$name/dotfiles"
+  done
+  for script in "$DOTFILES_DIR"/scripts/wm/*.sh; do
+    [ -f "$script" ] || continue
+    printf 'scripts/wm/%s\t%s\n' "${script##*/}" "$HOME/.local/bin/${script##*/}"
+  done
+  return 0
+}
+
 # ---- Functions ----
 log() {
   local level=$1; shift
@@ -473,30 +501,47 @@ add_dotfiles() {
   [ "$failed" -eq 0 ]
 }
 
-# fonts/ lives at the repo root, not mirrored under a $HOME-relative path like
-# config_files.conf entries, so it can't go through install_dotfiles(); it
-# gets its own symlink into the XDG font directory instead.
-install_fonts() {
-  local fonts_src="$DOTFILES_DIR/fonts"
-  local fonts_dest="$HOME/.local/share/fonts/dotfiles"
-  [ -d "$fonts_src" ] || { log "WARNING" "No fonts/ directory in repo, skipping font install"; return 0; }
+# The repo-root paths of extra_links(). They are not mirrored under a $HOME-relative
+# path the way config_files.conf entries are, so they cannot go through
+# install_dotfiles(); each gets its own symlink instead. This was install_fonts and
+# handled one of them.
+install_extras() {
+  local rc=0 src dest repo_src
+  while IFS=$'\t' read -r src dest; do
+    repo_src="$DOTFILES_DIR/$src"
 
-  if [ -L "$fonts_dest" ] && [ "$(readlink "$fonts_dest")" = "$fonts_src" ]; then
-    log "INFO" "Fonts already linked: $fonts_dest"
-  else
-    if $DRY_RUN; then
-      log "INFO" "Simulate: Link $fonts_src → $fonts_dest"
-    else
-      mkdir -p "$(dirname "$fonts_dest")"
-      ln -snf "$fonts_src" "$fonts_dest"
-      log "SUCCESS" "Linked: $fonts_src → $fonts_dest"
+    # Same distinction install_dotfiles makes: announcing a link that was already
+    # there is reporting work that did not happen.
+    if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$repo_src" ]; then
+      $VERBOSE && log "INFO" "Unchanged: $dest"
+      continue
     fi
+
+    if $DRY_RUN; then
+      log "INFO" "Simulate: link $repo_src → $dest"
+      continue
+    fi
+
+    # ~/.local/bin and ~/.local/share/wallpapers do not exist on every machine.
+    mkdir -p "$(dirname "$dest")"
+    if ln -snf "$repo_src" "$dest"; then
+      log "SUCCESS" "Linked: $dest"
+    else
+      log "ERROR" "Failed to link: $repo_src → $dest"
+      rc=1
+    fi
+  done < <(extra_links)
+
+  if [ -d "$DOTFILES_DIR/fonts" ]; then
+    if ! $DRY_RUN && command -v fc-cache >/dev/null; then
+      fc-cache -f "$HOME/.local/share/fonts/dotfiles" >/dev/null 2>&1
+      log "INFO" "Refreshed font cache"
+    fi
+  else
+    log "WARNING" "No fonts/ directory in repo, skipping font install"
   fi
 
-  if ! $DRY_RUN && command -v fc-cache >/dev/null; then
-    fc-cache -f "$fonts_dest" >/dev/null 2>&1
-    log "INFO" "Refreshed font cache"
-  fi
+  return $rc
 }
 
 # The inverse of install, and until now nothing was. install creates symlinks
@@ -542,23 +587,36 @@ uninstall_dotfiles() {
     fi
   done
 
-  # fonts/ is linked outside config_files.conf by install_fonts, so it has to
-  # be removed here too or uninstall leaves one link behind. Not when paths were
-  # named: no path can name fonts/, so removing it would be the one thing the
-  # caller did not ask for.
-  local fonts_dest="$HOME/.local/share/fonts/dotfiles"
-  if ! $FILTERED &&
-     [ -L "$fonts_dest" ] && [ "$(readlink "$fonts_dest")" = "$DOTFILES_DIR/fonts" ]; then
-    if $DRY_RUN; then
-      log "INFO" "Simulate: remove link $fonts_dest"
-      removed=$((removed + 1))
-    elif rm -f "$fonts_dest"; then
-      log "SUCCESS" "Removed link: $fonts_dest"
-      removed=$((removed + 1))
-    else
-      log "ERROR" "Could not remove link: $fonts_dest"
-      failed=$((failed + 1))
-    fi
+  # The repo-root links are made outside config_files.conf by install_extras, so
+  # they have to be removed here too or uninstall leaves them behind. Not when paths
+  # were named: no path can name any of them, so removing one would be the one thing
+  # the caller did not ask for.
+  #
+  # A helper in ~/.local/bin is the case that makes the readlink test earn its
+  # keep. That directory is shared with everything else the user installs, so a
+  # name we happen to collide with must survive untouched.
+  local src dest
+  if ! $FILTERED; then
+    while IFS=$'\t' read -r src dest; do
+      [ -L "$dest" ] || continue
+
+      if [ "$(readlink "$dest")" != "$DOTFILES_DIR/$src" ]; then
+        log "WARNING" "Kept, links outside the repo: $dest → $(readlink "$dest")"
+        kept=$((kept + 1))
+        continue
+      fi
+
+      if $DRY_RUN; then
+        log "INFO" "Simulate: remove link $dest"
+        removed=$((removed + 1))
+      elif rm -f "$dest"; then
+        log "SUCCESS" "Removed link: $dest"
+        removed=$((removed + 1))
+      else
+        log "ERROR" "Could not remove link: $dest"
+        failed=$((failed + 1))
+      fi
+    done < <(extra_links)
   fi
 
   log "INFO" "Links removed: $removed. Left alone: $kept. Failed: $failed."
@@ -631,17 +689,23 @@ check_dotfiles() {
     esac
   done
 
-  # fonts/ is not an entry in the config file, so no path can name it and a
-  # filtered run must not report on it. Otherwise `check ~/.config/kitty` on a
-  # machine that never installed the fonts answers a question nobody asked, and
+  # The repo-root links are not entries in the config file, so no path can name one
+  # and a filtered run must not report on them. Otherwise `check ~/.config/kitty` on
+  # a machine that never installed the fonts answers a question nobody asked, and
   # exits non-zero for it.
+  #
+  # A missing helper link is worth an exit code: the compositors call those by bare
+  # name, so without them a keybinding does nothing and says nothing.
+  local src dest
   if ! $FILTERED; then
-    check_one "$HOME/.local/share/fonts/dotfiles" "$DOTFILES_DIR/fonts"; rc=$?
-    case $rc in
-      0) valid=$((valid + 1)) ;;
-      1) broken=$((broken + 1)) ;;
-      *) pending=$((pending + 1)) ;;
-    esac
+    while IFS=$'\t' read -r src dest; do
+      check_one "$dest" "$DOTFILES_DIR/$src"; rc=$?
+      case $rc in
+        0) valid=$((valid + 1)) ;;
+        1) broken=$((broken + 1)) ;;
+        *) pending=$((pending + 1)) ;;
+      esac
+    done < <(extra_links)
   fi
 
   log "INFO" "Valid: $valid. Broken: $broken. Not installed: $pending."
@@ -761,13 +825,14 @@ main() {
       prepare_entries "$@"
       local rc=0
       install_dotfiles || rc=1
-      # fonts/ is not in config_files.conf, so naming paths cannot mean it.
-      # Linking it anyway would make the subset install touch something the
-      # caller did not list, which is the whole reason this filter exists.
+      # The repo-root links are not in config_files.conf, so naming paths cannot
+      # mean them. Linking them anyway would make the subset install touch
+      # something the caller did not list, which is the whole reason this filter
+      # exists.
       if $FILTERED; then
-        log "INFO" "Paths named, so fonts/ was left alone. Run without arguments to link it."
+        log "INFO" "Paths named, so fonts/, wallpapers/ and the scripts/wm/ helpers were left alone. Run without arguments to link them."
       else
-        install_fonts || rc=1
+        install_extras || rc=1
       fi
       return $rc
       ;;

@@ -496,6 +496,105 @@ case_except_and_named_paths_coexist() {
 }
 
 # =====================================================================
+# Group B4: the repo-root paths that config_files.conf cannot name
+# =====================================================================
+#
+# fonts/, wallpapers/ and the scripts/wm/ helpers live at the repo root rather
+# than mirroring a $HOME path, so no entry of the config file can describe them
+# and no argument can name them. They follow the rule fonts/ already set: a
+# filtered run leaves them alone, --except still links them, and uninstall
+# removes a link only after readlink says it points into the repo.
+#
+# The wm helpers matter more than the other two. Both compositors and the bar
+# call them by bare name now, so a missing link is a keybinding that silently
+# does nothing, which is this repository's characteristic bug.
+
+case_install_links_the_wm_helpers_onto_the_path() {
+  track '~/.config/probe.conf'
+  repo_file ".config/probe.conf"
+  repo_file "scripts/wm/probe-tool.sh" "#!/bin/sh"
+  run_backup install
+  assert_symlink_to "$HOME/.local/bin/probe-tool.sh" "$DOTFILES_DIR/scripts/wm/probe-tool.sh"
+}
+
+case_install_links_the_wallpapers_directory() {
+  track '~/.config/probe.conf'
+  repo_file ".config/probe.conf"
+  mkdir -p "$DOTFILES_DIR/wallpapers"
+  printf 'image\n' > "$DOTFILES_DIR/wallpapers/probe.png"
+  run_backup install
+  assert_symlink_to "$HOME/.local/share/wallpapers/dotfiles" "$DOTFILES_DIR/wallpapers"
+}
+
+# The assertion after install is not decoration. Without it this case passes on a
+# script that links nothing at all, which is the shape of an inert check: it would
+# have reported the reassuring answer for the one reason nobody goes back to test.
+case_uninstall_removes_the_wm_helper_links() {
+  track '~/.config/probe.conf'
+  repo_file ".config/probe.conf"
+  repo_file "scripts/wm/probe-tool.sh" "#!/bin/sh"
+  run_backup install
+  assert_symlink_to "$HOME/.local/bin/probe-tool.sh" "$DOTFILES_DIR/scripts/wm/probe-tool.sh" || return 1
+  run_backup uninstall
+  [ ! -L "$HOME/.local/bin/probe-tool.sh" ] && [ ! -e "$HOME/.local/bin/probe-tool.sh" ] ||
+    { fail "uninstall left a link in ~/.local/bin behind"; return 1; }
+}
+
+# ~/.local/bin is shared with everything else the user installs, which is the one
+# cost of putting the helpers there. A name collision must cost nothing.
+case_uninstall_leaves_a_local_bin_link_pointing_elsewhere() {
+  track '~/.config/probe.conf'
+  repo_file ".config/probe.conf"
+  repo_file "scripts/wm/probe-tool.sh" "#!/bin/sh"
+  mkdir -p "$HOME/elsewhere" "$HOME/.local/bin"
+  printf 'someone elses\n' > "$HOME/elsewhere/probe-tool.sh"
+  ln -s "$HOME/elsewhere/probe-tool.sh" "$HOME/.local/bin/probe-tool.sh"
+  run_backup uninstall
+  assert_symlink_to "$HOME/.local/bin/probe-tool.sh" "$HOME/elsewhere/probe-tool.sh"
+}
+
+case_filter_install_leaves_the_wm_helpers_alone() {
+  track '~/.config/wanted.conf'
+  repo_file ".config/wanted.conf"
+  repo_file "scripts/wm/probe-tool.sh" "#!/bin/sh"
+  run_backup install '~/.config/wanted.conf'
+  assert_symlink_to "$HOME/.config/wanted.conf" "$DOTFILES_DIR/.config/wanted.conf" || return 1
+  [ ! -e "$HOME/.local/bin/probe-tool.sh" ] ||
+    { fail "a filtered install linked a helper, which no path can name"; return 1; }
+}
+
+case_except_install_still_links_the_wm_helpers() {
+  track '~/.config/wanted.conf'
+  track '~/.config/skipped.conf'
+  repo_file ".config/wanted.conf"
+  repo_file ".config/skipped.conf"
+  repo_file "scripts/wm/probe-tool.sh" "#!/bin/sh"
+  run_backup install --except '~/.config/skipped.conf'
+  assert_symlink_to "$HOME/.local/bin/probe-tool.sh" "$DOTFILES_DIR/scripts/wm/probe-tool.sh"
+}
+
+# A missing helper link is the failure this whole change can introduce, so check
+# has to see it rather than reporting a fully installed tree.
+#
+# The clean run first is what makes the dirty one mean something. Without it the
+# case passes on any tree check dislikes for any reason, and the reason here would
+# have been the fonts link, which no part of this case is about.
+case_check_reports_a_missing_wm_helper_link() {
+  track '~/.config/probe.conf'
+  repo_file ".config/probe.conf"
+  repo_file "scripts/wm/probe-tool.sh" "#!/bin/sh"
+  mkdir -p "$DOTFILES_DIR/fonts" "$DOTFILES_DIR/wallpapers"
+  printf 'font\n' > "$DOTFILES_DIR/fonts/probe.ttf"
+  printf 'image\n' > "$DOTFILES_DIR/wallpapers/probe.png"
+  run_backup install
+  run_backup check
+  [ "$LAST_RC" -eq 0 ] || { fail "check called a fully installed tree broken"; return 1; }
+  rm -f "$HOME/.local/bin/probe-tool.sh"
+  run_backup check
+  assert_rc_nonzero
+}
+
+# =====================================================================
 # Group C: the destructive paths. A failed step must not destroy the source.
 # =====================================================================
 
@@ -636,6 +735,14 @@ main() {
   run_case except_without_a_path_fails_instead_of_looping
   run_case except_and_named_path_disagreeing_says_so
   run_case except_and_named_paths_coexist
+
+  run_case install_links_the_wm_helpers_onto_the_path
+  run_case install_links_the_wallpapers_directory
+  run_case uninstall_removes_the_wm_helper_links
+  run_case uninstall_leaves_a_local_bin_link_pointing_elsewhere
+  run_case filter_install_leaves_the_wm_helpers_alone
+  run_case except_install_still_links_the_wm_helpers
+  run_case check_reports_a_missing_wm_helper_link
 
   run_case add_keeps_file_when_repo_is_unwritable
   run_case add_keeps_directory_when_repo_is_unwritable

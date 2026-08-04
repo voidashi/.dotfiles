@@ -19,39 +19,14 @@ hardware, images or a decision come last. Inside a group, by priority.
 
 ## Start here next
 
-The one entry left under "The two management scripts", below.
+"The generator and its checks", below. The management scripts group is empty: all six
+of its entries are done and each is recorded where it belongs, the last two in
+[`TURNING-POINTS.md`](TURNING-POINTS.md) as `[apt]` and `[dnf]` populated and the
+helpers reached through `~/.local/bin`. What that group left behind is one entry under
+"Waiting on the world", because the apt and dnf names have never been installed.
 
-## The two management scripts
-
-`backup-configs.sh` and `install-packages.sh`, the two `.conf` files they read, and
-`README.md`, `SETUP.md` and `MAINTENANCE.md`, which all print their vocabulary. Five of
-the six entries this group opened with are done and are recorded where each belongs:
-paths and `--except` on the dotfiles script, one rehearsal vocabulary across both, the
-KDE opt-out in `SETUP.md`, `[hooks]` deleted, and `[apt]` and `[dnf]` populated, the
-last two of which are in [`TURNING-POINTS.md`](TURNING-POINTS.md). What is left is this
-one.
-
-- **The clone path is load-bearing in seven lines, and it does not have to be.** Cloning
-  anywhere but `~/.dotfiles` silently breaks the wallpaper, the clipboard picker, the
-  bar's power button and Neovim's dashboard. Ruled out already, with the incident recorded
-  in the `autostart.lua` comment on absolute paths: relative paths, because they depended
-  on the cwd Hyprland was started with and the bar did not come up depending on how you
-  logged in.
-  The seven lines are three different problems. Five are script calls
-  (`clipboard-picker.sh` in both compositors, `power-menu.sh` in the bar,
-  `select-random-wallpaper.sh` in both), one is a data directory
-  (`$HOME/.dotfiles/wallpapers` as the picker's last fallback), and one is Neovim's
-  dashboard opening the repo as a project, which names the repo by definition and should
-  probably stay. Two mechanisms are suggested rather than enforced, and the choice is
-  the work. A symlink farm, where `backup-configs.sh install` links the `scripts/wm/`
-  helpers from whatever root it is actually running in into either `~/.local/bin`, which
-  is already on PATH, or a directory of its own such as `~/scripts/wm`, fixes the five
-  script calls and works whatever starts the session. A session variable in the already-tracked
-  `~/.config/environment.d/50-voidashi.conf` reaches all seven and turns the edit into one
-  line in one file, but `environment.d` is read by the systemd user session, and this
-  repo documents reaching the desktop by typing `Hyprland` at a console, which is exactly
-  where it may not arrive.
-  *Difficulty: low either way, and the decision is most of it. Priority: medium.*
+Of the two entries there rated medium, the yazi one is a decision before it is work and
+the `check_palette.py` one removes a class of edit rather than an instance.
 
 ## The generator and its checks
 

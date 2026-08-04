@@ -46,6 +46,10 @@ return {
             desc = ' dotfiles',
             group = 'Number',
             -- action = 'Telescope dotfiles',
+            -- The one place left that names ~/.dotfiles absolutely, and it stays:
+            -- a dashboard entry that opens this repository names it by definition.
+            -- Everything else reaches the repo through links backup-configs.sh
+            -- install creates. Change this line if you cloned somewhere else.
             action = 'Telescope find_files cwd=$HOME/.dotfiles/ hidden=true',
             key = 'd',
           },

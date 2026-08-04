@@ -40,7 +40,9 @@ set $menu wofi --show drun
 
     # Clipboard history. Same key and same script as Hyprland: the pipeline is
     # identical for both, so it lives in one place instead of two.
-    bindsym $mod+Shift+v exec $HOME/.dotfiles/scripts/wm/clipboard-picker.sh
+    # Bare name: backup-configs.sh install links the scripts/wm/ helpers into
+    # ~/.local/bin, which is on PATH, so this does not name the clone directory.
+    bindsym $mod+Shift+v exec clipboard-picker.sh
 
     # Drag floating windows by holding down $mod and left mouse button.
     # Resize them with right mouse button + $mod.
@@ -235,7 +237,7 @@ client.background       $vd_bg_content
 exec waybar -c $HOME/.config/waybar/sway.jsonc -s $HOME/.config/waybar/style.css
 # In order: the wallpapers in rotation, then the full collection, then the
 # repo's own sample wallpaper (which is what makes a fresh install work).
-exec swaybg -m fill -i "$($HOME/.dotfiles/scripts/wm/select-random-wallpaper.sh $HOME/Pictures/Current_wallpapers $HOME/Pictures/Wallpapers $HOME/.dotfiles/wallpapers)"
+exec swaybg -m fill -i "$(select-random-wallpaper.sh $HOME/Pictures/Current_wallpapers $HOME/Pictures/Wallpapers $HOME/.local/share/wallpapers/dotfiles)"
 
 # Environment. Sway has no `env` directive, and an `exec` cannot change its own
 # parent's environment, so the session variables this desktop needs live in
