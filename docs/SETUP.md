@@ -12,9 +12,17 @@ than a design decision and lives here with the rest of the procedures.
 
 ## Before you start
 
-This is built for **Arch Linux on Wayland**. The package installer also handles apt
-and dnf, but the configs themselves assume Arch: package names, AUR fallbacks, and
-Hyprland at a version recent enough for a Lua config.
+This is built for **Arch Linux on Wayland**. The configs assume Arch: package names,
+AUR fallbacks, and Hyprland at a version recent enough for a Lua config.
+
+The package installer dispatches to apt and dnf as well, and `packages.conf` carries
+the Debian and Fedora names for the packages whose names differ. That is narrower than
+it sounds, and the limit is packaging rather than the script: Hyprland itself has no
+package in Debian trixie main or in Fedora 43, nor do hypridle, hyprpaper, hyprshot,
+hyprpicker, hyprlauncher, ghostty or yazi. Each section of `packages.conf` lists what
+its distribution has no package for. So apt or dnf gets you the Sway half of this
+desktop and none of the Hyprland half, and neither branch has ever been run: the
+machine this was developed on is Arch.
 
 You will want an AUR helper (`paru`, `yay` or `pikaur`) already installed. A handful of
 packages have no official-repo version and the installer falls back to whichever helper

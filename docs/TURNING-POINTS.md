@@ -205,9 +205,8 @@ owner installs on a new machine, and that is the job it does well; a name in it 
 line and a package, and removing one costs a step nobody remembers on the next install.
 Anyone cloning this reads `install --dry-run` first, which prints the whole list.
 
-What stays open on the same file is different work and is in the task list: `[apt]` and
-`[dnf]` are empty while every name sits in `[common]` and is an Arch name, so the
-cross-distro branches cannot work as configured. This entry does not settle that.
+What was open on the same file was different work and is settled below, under "`[apt]`
+and `[dnf]` were filled in rather than removed". This entry does not bear on it.
 
 ## The repository stops at `$HOME`
 
@@ -364,6 +363,32 @@ scheduled on something nobody had ever run. What fell is this mechanism, not the
 if a package here ever needs a post-install step, write it deliberately against a real
 case rather than restoring an awk program that was never exercised. Nothing else read
 the section, since `load_packages` filters on the manager's name and `[common]`.
+
+## `[apt]` and `[dnf]` were filled in rather than removed
+
+The two sections were empty while every name sat in `[common]` in its Arch spelling,
+so the cross-distro branches dispatched correctly and then asked apt for
+`hyprland`. The proposal that fell was deleting those branches and making the
+installer Arch-only. What replaced it is data: the sections now carry the names that
+differ, read out of the distributions' own package indexes rather than recalled.
+
+Two things were learned while pricing it, and both outlived the choice. The override
+mechanism the task list proposed building already existed, and only the data was
+missing; a test config with `bat = batcat` under `[apt]` printed `bat (batcat)` on the
+first try. And an override can only rename. There is no spelling for "this
+distribution has no such package", because an empty value falls back to the key, so
+absences are comments and an install still tries them.
+
+That matters because the absences are not a fringe. Hyprland has no package in Debian
+trixie main or in Fedora 43, and neither do hypridle, hyprpaper, hyprshot, hyprpicker,
+hyprlauncher, ghostty or yazi. So the apt and dnf branches reach the Sway half of this
+desktop and none of the Hyprland half. That is packaging rather than a defect here,
+and it is the reason the promise in `SETUP.md` is now bounded instead of removed.
+
+What stays open is one thing and it is in `docs/TODO.md`: none of it has been run. The
+machine this was written on is Arch, so every name above is read from an index and
+not from an install. Nothing here may gain a sentence saying otherwise until a machine
+with those repositories has tried it.
 
 ## Three things about the bar are provisional
 

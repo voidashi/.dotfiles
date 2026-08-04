@@ -19,17 +19,17 @@ hardware, images or a decision come last. Inside a group, by priority.
 
 ## Start here next
 
-The two entries left under "The two management scripts", below. They are independent of
-each other, and the apt and dnf one is the larger.
+The one entry left under "The two management scripts", below.
 
 ## The two management scripts
 
 `backup-configs.sh` and `install-packages.sh`, the two `.conf` files they read, and
-`README.md`, `SETUP.md` and `MAINTENANCE.md`, which all print their vocabulary. Four of
+`README.md`, `SETUP.md` and `MAINTENANCE.md`, which all print their vocabulary. Five of
 the six entries this group opened with are done and are recorded where each belongs:
 paths and `--except` on the dotfiles script, one rehearsal vocabulary across both, the
-KDE opt-out in `SETUP.md`, and `[hooks]` deleted, which is in
-[`TURNING-POINTS.md`](TURNING-POINTS.md). What is left is these two.
+KDE opt-out in `SETUP.md`, `[hooks]` deleted, and `[apt]` and `[dnf]` populated, the
+last two of which are in [`TURNING-POINTS.md`](TURNING-POINTS.md). What is left is this
+one.
 
 - **The clone path is load-bearing in seven lines, and it does not have to be.** Cloning
   anywhere but `~/.dotfiles` silently breaks the wallpaper, the clipboard picker, the
@@ -52,35 +52,6 @@ KDE opt-out in `SETUP.md`, and `[hooks]` deleted, which is in
   repo documents reaching the desktop by typing `Hyprland` at a console, which is exactly
   where it may not arrive.
   *Difficulty: low either way, and the decision is most of it. Priority: medium.*
-
-- **The apt and dnf machinery has never run, and could not work as configured.** Fourteen
-  non-comment lines mention apt or dnf, in the low thirties counting whole `case` branches
-  and the `repos` dispatch. The dispatch itself is sound. Measured with
-  `DEFAULT_PACKAGE_MANAGER=apt ./scripts/install-packages.sh install --dry-run`, which selects the
-  apt branch and lists every package for it. What is not sound is the data: `[apt]` and
-  `[dnf]` in `packages.conf` are empty, so all the names live in `[common]` and are Arch
-  names. On Debian this resolves to `apt-get install hyprland`, `apt-get install paru`.
-  So the choice is to populate the two sections or to delete the branches, and it is not
-  a question of testing what is there. One cost before touching it: `SETUP.md` still tells
-  a reader "the package installer also handles apt and dnf", so this is a documentation
-  edit too. The
-  README no longer does, since "cross-distro package installer" is gone from the
-  repository layout. And `install_all()` reaches
-  `update_pkg_db()` only through `add_repos()`, so deleting that function without rewiring
-  drops `pacman -Syy` from every Arch install. The Microsoft repository key in the apt
-  branch serves `code`, which is declared in `packages.conf`, so it is apt-only
-  machinery rather than an orphan and stands or falls with the branch.
-
-  The shape that was intended, offered rather than imposed: `[common]` holds the usual
-  names, and `[apt]`, `[dnf]` and the rest hold the ones that differ, taking priority
-  over `[common]` for whichever manager is in use. Look for something better before
-  building that; it is a starting point and not a requirement.
-
-  This one may be written without being run. The machine here is Arch, so the apt and
-  dnf paths cannot be exercised at this keyboard, and the standing permission is to
-  write them anyway and have them tested when a machine exists that can. What must not
-  happen is `SETUP.md` gaining a sentence that claims they were tried.
-  *Difficulty: low. Priority: medium.*
 
 ## The generator and its checks
 
@@ -363,6 +334,22 @@ the groups above have stopped changing what the desktop looks like.
   `sway.desktop`. Unverified is the whole path end to end. A spare machine or a VM is the
   honest test, and until then `SETUP.md` must not gain a sentence claiming it was tried.
   *Difficulty: low, blocked on a second machine. Priority: medium.*
+
+- **The apt and dnf names are written and have never been installed.** `[apt]` and
+  `[dnf]` in `packages.conf` now carry the names that differ, and where a package
+  exists the name is right by construction: each one was read out of the Debian trixie
+  main index or the Fedora 43 metadata before it was written, and each is a name the
+  key itself is not. Why that is not the same as working: an index says a package
+  exists, not that installing it succeeds, that it pulls what the configs expect, or
+  that `add_repos` does the right thing, and that last one has never executed on any
+  distribution. The check is one run of
+  `./scripts/install-packages.sh install --dry-run` and then a real `install` on a
+  machine with those repositories. Recorded so the next reader does not redo it: the
+  absences are listed per section in `packages.conf` and are packaging rather than
+  configuration, so finding that Hyprland fails to install under apt is the documented
+  outcome and not a bug to chase. Until such a machine exists, no document here may say
+  the branches were tried.
+  *Difficulty: low, blocked on a Debian or Fedora machine. Priority: medium.*
 
 - **Wallpaper curation** is the largest remaining visual gap. Images chosen against the
   Wallpaper section of [`design/RICE-GUIDE.md`](design/RICE-GUIDE.md): material,

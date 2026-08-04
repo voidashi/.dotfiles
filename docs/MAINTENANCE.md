@@ -179,7 +179,16 @@ believing.
 - In `packages.conf`, keys under `[common]` apply to every distro. A same-named key
   under `[apt]`, `[pacman]` or `[dnf]` overrides the package name passed to that
   distro's installer (`key=value`; a bare `key` means the name is identical
-  everywhere).
+  everywhere). `[apt]` and `[dnf]` carry the names that differ, read out of the
+  distributions' own indexes; `[pacman]` is empty because `[common]` is already
+  written in Arch names.
+- **An override can only rename, never skip.** `${value:-$key}` makes an empty value
+  fall back to the key, so there is no way to write "this distro has no such package".
+  Where one has none, `packages.conf` says so in a comment and the install still tries
+  it and fails. Hyprland is the head of both lists, so an apt or dnf run installs the
+  Sway half of this desktop and none of the Hyprland half. If that ever needs to be a
+  behaviour rather than a comment, it is a change to `load_packages`, and the sentinel
+  has to be something an empty value is not.
 - `install` needs sudo. It prompts unless `--yes`, in which case it errors out rather
   than hanging on a password prompt.
 - **The rehearsal is `--dry-run` on both scripts.** It was `preview`, a command, on this
