@@ -81,10 +81,11 @@ The design identity behind the palette is called Voidashi, and it is documented 
 git clone https://github.com/voidashi/.dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 
-./scripts/install-packages.sh preview    # list the configured packages, install nothing
-./scripts/install-packages.sh install    # install them
-./scripts/backup-configs.sh install      # symlink the configs into $HOME
-./scripts/backup-configs.sh check        # confirm every link landed
+./scripts/install-packages.sh install --dry-run   # list the configured packages, install nothing
+./scripts/install-packages.sh install             # install them
+./scripts/backup-configs.sh install --dry-run     # list every path it would link
+./scripts/backup-configs.sh install               # symlink the configs into $HOME
+./scripts/backup-configs.sh check                 # confirm every link landed
 ```
 
 The install step needs `sudo`, and an AUR helper is recommended: a few of the packages
@@ -101,11 +102,8 @@ console works too.
 > unless you pass `--force`, and backs up anything it replaces. Its sibling `add` runs the
 > other direction and **moves files out of `$HOME`** into the repo. You want `install`.
 >
-> Add `--dry-run` and the script prints every path it would touch, changing nothing:
->
-> ```bash
-> ./scripts/backup-configs.sh install --dry-run
-> ```
+> `--dry-run` is the rehearsal on both scripts, which is why it appears twice above: it
+> prints everything the command would do and changes nothing.
 >
 > Changed your mind afterwards? `./scripts/backup-configs.sh uninstall` removes the
 > symlinks and leaves your own files and the repo alone. `docs/SETUP.md` has the
@@ -116,10 +114,11 @@ console works too.
 > so another location silently breaks the wallpaper, the clipboard picker, the bar's power
 > button and Neovim's dashboard. Three more things need a look before this feels right on
 > your machine: the monitor layout in `.config/hypr/conf/monitors.lua` names specific
-> outputs, the bar carries laptop-only modules, and if you already run KDE, the install
-> links `kdeglobals` and `kcminputrc`, which is where Plasma applications read their
-> palette and cursor, so your existing session is rethemed too. And if you want the themed
-> prompt, fish has to become your login shell; nothing does that for you.
+> outputs, the bar carries laptop-only modules, and if you already run KDE, `kdeglobals`
+> and `kcminputrc` are tracked here, which is where Plasma applications read their palette
+> and cursor. A bare `install` leaves a file that already exists alone and says so, so it
+> does not retheme a running Plasma session; `--force` is the flag that would. And if you
+> want the themed prompt, fish has to become your login shell; nothing does that for you.
 > [`docs/SETUP.md`](docs/SETUP.md) covers each of these.
 
 ### Taking only part of it
@@ -142,6 +141,19 @@ manages. A single file inside a tracked directory is not one: the directory is l
 whole, and the script says which entry covers the path you gave it. Naming paths also
 leaves the fonts alone, since `fonts/` is not in that file and no argument can name it;
 run `install` bare to get them.
+
+`--except` is the other direction, for when you want everything but a few entries:
+
+```bash
+./scripts/backup-configs.sh install \
+  --except ~/.config/kdeglobals \
+  --except ~/.config/kcminputrc
+```
+
+One flag per path. Unlike naming paths, this still links `fonts/`, because asking for all
+of it but two entries is still asking for the rest. Those two entries are the ones to
+leave out if you already run KDE, and [`docs/SETUP.md`](docs/SETUP.md) says what to do
+instead of linking them.
 
 If you would rather not symlink anything, copy the directories you want out of `.config/`
 by hand. Copy the whole directory rather than a single file, since a config often

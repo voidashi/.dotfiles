@@ -1,7 +1,7 @@
 #!/bin/bash
 # Linux Dotfiles Manager
 # Purpose: Backup, version-control, and sync config files across machines.
-# Usage: ./backup-configs.sh [init|add|install|uninstall|check|backups|restore] [PATH...] [--dry-run] [--force]
+# Usage: ./backup-configs.sh [init|add|install|uninstall|check|backups|restore] [PATH...] [--except PATH] [--dry-run] [--force] [--verbose] [--no-color]
 
 # ---- Configuration ----
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/.dotfiles}"
@@ -15,10 +15,11 @@ TIMESTAMP="$(date +%Y%m%d_%H%M%S)"
 CURRENT_BACKUP="$BACKUP_DIR/$TIMESTAMP"
 
 # Colors. Blanked when stdout is not a terminal, so a redirected run does not
-# fill a file with escape sequences. This script has no --no-color flag and does
-# not need one now.
+# fill a file with escape sequences, and by --no-color for the case that is not
+# covered: a terminal that renders them badly, or a log kept by hand.
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
-[ -t 1 ] || { RED=''; GREEN=''; YELLOW=''; BLUE=''; NC=''; }
+disable_colors() { RED=''; GREEN=''; YELLOW=''; BLUE=''; NC=''; }
+[ -t 1 ] || disable_colors
 
 # Flags
 DRY_RUN=false
@@ -33,6 +34,10 @@ DOTFILE_ENTRIES=()
 # no path can name it, and the three commands that touch it ask this one
 # question rather than each inspecting the arguments.
 FILTERED=false
+# The paths named by --except, removed from the entries before anything reads
+# them. One flag per path rather than one flag taking several: a greedy --except
+# could not tell its own arguments from the positional paths that follow it.
+EXCLUDED_PATHS=()
 
 # ---- Functions ----
 log() {
@@ -145,7 +150,15 @@ apply_dotfile_filter() {
     case $rc in
       0) requested+=("$matched") ;;
       2) log "ERROR" "Not tracked on its own: $wanted. It is inside $matched, which is linked whole, so name that instead."; bad=1 ;;
-      *) log "ERROR" "Not in $CONFIG_FILE: $wanted"; bad=1 ;;
+      # Exclusions are applied before this runs, so a path named on both sides
+      # is no longer in the entries and would otherwise be reported as absent
+      # from a file it is written in.
+      *) if is_excluded "$wanted"; then
+           log "ERROR" "Named and excluded at once: $wanted"
+         else
+           log "ERROR" "Not in $CONFIG_FILE: $wanted"
+         fi
+         bad=1 ;;
     esac
   done
   [ "$bad" -eq 0 ] || exit 1
@@ -166,6 +179,65 @@ apply_dotfile_filter() {
   FILTERED=true
 }
 
+# Whether a path was named by --except, compared the way every other path here
+# is compared. Only used to tell one error message from another.
+is_excluded() {
+  local wanted excluded
+  wanted="$(normalize_path "$1")"
+  for excluded in "${EXCLUDED_PATHS[@]}"; do
+    [ "$(normalize_path "$excluded")" = "$wanted" ] && return 0
+  done
+  return 1
+}
+
+# Removes the entries named by --except. Path-typed like the filter above, so it
+# reuses match_entry and answers a bad path in the same two sentences rather than
+# growing an error vocabulary of its own.
+#
+# It deliberately does not set FILTERED. That flag answers "did the caller name
+# the set they wanted", which is what makes install, uninstall and check leave
+# fonts/ alone. Someone asking for all of it except kdeglobals is asking for the
+# rest, and the fonts are part of the rest.
+#
+# Runs before the positional filter, so both are validated against the whole
+# config file rather than against whatever the other one left behind.
+apply_dotfile_exclusions() {
+  [ "${#EXCLUDED_PATHS[@]}" -eq 0 ] && return 0
+
+  local wanted matched rc bad=0 excluded=()
+  for wanted in "${EXCLUDED_PATHS[@]}"; do
+    matched="$(match_entry "$wanted")"; rc=$?
+    case $rc in
+      0) excluded+=("$matched") ;;
+      2) log "ERROR" "Not tracked on its own: $wanted. It is inside $matched, which is linked whole, so name that instead."; bad=1 ;;
+      *) log "ERROR" "Not in $CONFIG_FILE: $wanted"; bad=1 ;;
+    esac
+  done
+  [ "$bad" -eq 0 ] || exit 1
+
+  # Not named "kept": uninstall_dotfiles counts into a scalar of that name, so
+  # the linter reads the two as one variable used both as array and as string.
+  # Keep the word "shellcheck" off the start of a comment line here, where it is
+  # parsed as a directive and fails the file.
+  local entry drop remaining=()
+  for entry in "${DOTFILE_ENTRIES[@]}"; do
+    drop=false
+    for wanted in "${excluded[@]}"; do
+      if [ "$entry" = "$wanted" ]; then drop=true; break; fi
+    done
+    $drop || remaining+=("$entry")
+  done
+
+  # Every entry excluded is a run with nothing to do, and the summary of one
+  # reads exactly like a run that worked.
+  if [ "${#remaining[@]}" -eq 0 ]; then
+    log "ERROR" "--except excluded every entry in $CONFIG_FILE, so there is nothing to do"
+    exit 1
+  fi
+
+  DOTFILE_ENTRIES=("${remaining[@]}")
+}
+
 # What every command that loops over the config file does first. Hoisted out of
 # the four case arms, but not as far as the argument parser: the command has to
 # come off the front before what is left can be read as paths, or restore loses
@@ -173,6 +245,7 @@ apply_dotfile_filter() {
 prepare_entries() {
   mapfile -t DOTFILE_ENTRIES < <(load_dotfiles)
   require_entries
+  apply_dotfile_exclusions
   apply_dotfile_filter "$@"
 }
 
@@ -636,7 +709,7 @@ restore_backup() {
 # One usage text, printed both by -h and by the unknown-command path. They were
 # two different strings in install-packages.sh, each missing what the other had.
 usage() {
-  echo "Usage: $0 COMMAND [PATH...] [--dry-run] [--force] [--verbose]"
+  echo "Usage: $0 COMMAND [PATH...] [--except PATH] [--dry-run] [--force] [--verbose] [--no-color]"
   echo "Commands:"
   echo "  init       Initialize dotfiles repo"
   echo "  add        Move files from \$HOME into the repo and symlink them back"
@@ -649,13 +722,19 @@ usage() {
   echo "  add, install, uninstall and check take entries of config_files.conf and"
   echo "  act on those alone. With none they act on all of them, plus fonts/, which"
   echo "  no path can name and a filtered run therefore leaves alone."
+  echo "  --except is the other direction: everything but the entries it names,"
+  echo "  fonts/ included, since asking for all of it but one is still asking for"
+  echo "  the rest. One flag per path."
   echo "Flags:"
+  echo "  --except PATH  Act on everything except this entry"
   echo "  --dry-run  Simulate, change nothing"
   echo "  --force    Replace a real file, backing it up into \$BACKUP_DIR first"
   echo "  --verbose  Also print the entries that are already correct"
+  echo "  --no-color Plain output (also automatic when not writing to a terminal)"
   echo "Examples:"
   echo "  $0 install"
   echo "  $0 install ~/.config/kitty ~/.config/hypr   # just these two"
+  echo "  $0 install --except ~/.config/kdeglobals --except ~/.config/kcminputrc"
   echo "  $0 check ~/.config/kitty"
   echo "Environment:"
   echo "  DOTFILES_DIR, CONFIG_FILE, BACKUP_DIR override the paths, which is how"
@@ -713,6 +792,15 @@ while [[ $# -gt 0 ]]; do
     --dry-run) DRY_RUN=true; shift ;;
     --force) FORCE=true; shift ;;
     --verbose|-v) VERBOSE=true; shift ;;
+    --no-color) disable_colors; shift ;;
+    --except)
+      # shift 2 with only one argument left shifts nothing and returns 1, which
+      # is an infinite loop. The sibling script's --log had exactly this bug.
+      if [ "$#" -lt 2 ] || [ -z "$2" ]; then
+        log "ERROR" "--except needs a path"
+        exit 1
+      fi
+      EXCLUDED_PATHS+=("$2"); shift 2 ;;
     -h|--help) usage; exit 0 ;;
     # Not a flag: store it in the positional argument array and carry on
     *) POSITIONAL_ARGS+=("$1"); shift ;;

@@ -41,13 +41,14 @@ grep -rn '\$HOME/\.dotfiles' .config/
 
 Two of the steps below change nothing. Step 1 lists the packages without installing
 them and step 3 walks the whole symlink pass without touching a file, so you can watch
-both scripts describe their own work before you let either of them do it. Neither needs
-you to read any bash.
+both scripts describe their own work before you let either of them do it. Both are the
+same `--dry-run` flag, which is the rehearsal on either script. Neither needs you to read
+any bash.
 
 **1. See what would be installed, before installing it.**
 
 ```bash
-./scripts/install-packages.sh preview
+./scripts/install-packages.sh install --dry-run
 ```
 
 **2. Install the packages.**
@@ -260,6 +261,49 @@ All four terminals are configured and themed identically, so switching `terminal
 
 **Sway sets no outputs at all**, so it uses whatever your compositor detects. If you
 need a specific layout there, add `output` lines to `.config/sway/config`.
+
+**If you already run KDE.** `~/.config/kdeglobals` and `~/.config/kcminputrc` are tracked
+entries, and they are where Plasma reads its palette, fonts, icon theme and cursor. On a
+machine that already runs Plasma those files exist, so `install` refuses them the way it
+refuses any real file, and prints one line each:
+
+```
+[WARNING] Skipping existing file: /home/you/.config/kdeglobals (use --force to overwrite)
+[WARNING] Skipping existing file: /home/you/.config/kcminputrc (use --force to overwrite)
+```
+
+That run does not retheme your session. `--force` is what replaces them, after copying
+the originals into `~/.dotfiles_backup/<timestamp>/`. Two things to know before reaching
+for it. The palette also ships as an ordinary KDE colour scheme,
+`~/.local/share/color-schemes/Voidashi.colors`, which the same run *does* link because
+nothing is there to skip, and which changes nothing until you select it. And once
+`kdeglobals` is a symlink, KDE writes through it: every change made in System Settings
+lands in the repository, so `git status` in `~/.dotfiles` starts reporting your desktop
+settings.
+
+So on a machine that already runs Plasma, leave those two out and take the palette the
+way KDE hands it to everyone else:
+
+```bash
+./scripts/backup-configs.sh install \
+  --except ~/.config/kdeglobals \
+  --except ~/.config/kcminputrc
+
+plasma-apply-colorscheme Voidashi     # or System Settings > Colours > Voidashi
+```
+
+The first command links everything else, `fonts/` included. The second is Plasma's own
+mechanism, it writes the colours into your `kdeglobals` rather than replacing the file,
+and picking Breeze again undoes it. What you give up is the cursor and the font keys,
+which live in `kcminputrc` and in the `[General]` section this repository does not reach
+that way; set them in System Settings if you want them.
+
+Applying a scheme copies its colours into your `kdeglobals` once, so after changing the
+accent colour and regenerating, run the second command again.
+
+If you do not run Plasma, none of this applies: there is no System Settings to select the
+scheme, which is exactly why `kdeglobals` is written directly, and both files are almost
+certainly absent so `install` links them without a word.
 
 ## Changing the accent colour
 

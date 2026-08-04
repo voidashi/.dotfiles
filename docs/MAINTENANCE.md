@@ -29,7 +29,7 @@ doing nothing, with no error message anywhere.
 - `scripts/config_files.conf`: every path, relative to `~`, that
   `backup-configs.sh` manages. A new dotfile goes here before anything else.
 - `scripts/packages.conf`: the package list, INI-style, with `[common]`, `[apt]`,
-  `[pacman]`, `[dnf]` and `[hooks]` sections.
+  `[pacman]` and `[dnf]` sections.
 - `scripts/wm/`: helpers the compositors call *while running*, as opposed to the
   top-level scripts, which you run yourself.
 - `scripts/theme/`: three layers, the same three the editor's theme has.
@@ -54,7 +54,7 @@ so they work from any directory. Do not reintroduce cwd-relative paths: that
 previously made the README's own `./scripts/install-packages.sh install` abort with
 "Configuration file not found" and drop a stray log in the repo root.
 
-### `backup-configs.sh [init|add|install|uninstall|check|backups|restore] [PATH...] [--dry-run] [--force] [--verbose]`
+### `backup-configs.sh [init|add|install|uninstall|check|backups|restore] [PATH...] [--dry-run] [--force] [--verbose] [--no-color]`
 
 - `add` moves each path in `config_files.conf` out of `$HOME` into this repo,
   preserving directory contents via rsync with `--remove-source-files`, backs the
@@ -104,6 +104,18 @@ previously made the README's own `./scripts/install-packages.sh install` abort w
   check alike; a filtered `check` that audited it would fail over something the caller
   never mentioned. `FILTERED` is the one question those three ask, so the next thing
   that changes what "the caller narrowed the set" means edits one place.
+- `--except PATH` is the filter's other direction: everything but the entries it names.
+  It is path-typed like the filter, reusing `match_entry` and its two error sentences
+  rather than growing a vocabulary, which is why it is a flag over paths and not a
+  section marker in `config_files.conf`. One flag per path, because a greedy `--except`
+  could not tell its own arguments from the positional paths that follow. **It must not
+  set `FILTERED`.** That flag answers "did the caller name the set they wanted", and it
+  is what keeps `fonts/` out of a filtered run; someone asking for all of it except
+  `kdeglobals` is asking for the rest, fonts included. Exclusions are applied before the
+  positional filter so both are validated against the whole config file, which is why a
+  path named and excluded in one run gets its own error instead of being reported absent
+  from a file it is written in. Excluding every entry is refused, because a run with
+  nothing to do prints a summary that reads like one that worked.
 - `--dry-run` must reach every destructive line, and once did not. `install --dry-run
   --force` ran `rm -rf "$target"` for real, because the guard sat around the linking
   block further down and not around the `$FORCE` branch that removes the original.
@@ -149,7 +161,7 @@ something here, add the case first and watch it fail: on the run that introduced
 of 16 cases failed against the code as it stood, and that is what made the fixes worth
 believing.
 
-### `install-packages.sh [preview|install|check|repos] [PACKAGE...] [--yes] [--no-color] [--log FILE]`
+### `install-packages.sh [install|check|repos] [PACKAGE...] [--dry-run] [--yes] [--no-color] [--verbose] [--log FILE]`
 
 - Detects apt, pacman or dnf, unless `DEFAULT_PACKAGE_MANAGER` is set in the
   environment. That override was a plain assignment for a long time, so it could not be
@@ -161,18 +173,31 @@ believing.
   reinstalling everything else. An unrecognised name exits 1.
 - `install` distinguishes `Already present` from `Installed`. Every installer here
   exits 0 when there is nothing to do, so a second run used to report the whole list as
-  freshly installed. Hooks fire only on a real install, not on a re-run.
+  freshly installed.
 - Both scripts send `ERROR` and `WARNING` to stderr and blank their colours when stdout
   is not a terminal.
 - In `packages.conf`, keys under `[common]` apply to every distro. A same-named key
   under `[apt]`, `[pacman]` or `[dnf]` overrides the package name passed to that
   distro's installer (`key=value`; a bare `key` means the name is identical
   everywhere).
-- `[hooks]`: `<package-key> = <shell command>` runs immediately after that package
-  installs successfully. Matched via awk against the common name, not the
-  distro-specific one.
 - `install` needs sudo. It prompts unless `--yes`, in which case it errors out rather
   than hanging on a password prompt.
+- **The rehearsal is `--dry-run` on both scripts.** It was `preview`, a command, on this
+  one, and the README printed both spellings in a single code block. The flag is the
+  shape that survives, because it composes: `install --dry-run` lists what is configured
+  and `repos --dry-run` names the repository steps, where a command could only ever
+  rehearse whichever one it was written for. Typing `preview` now reaches the
+  unknown-command branch, which names the flag that replaced it rather than printing the
+  command list and leaving the reader to spot what is missing.
+- `install --dry-run` returns before `check_sudo` and before `add_repos`, and
+  `repos --dry-run` skips the sudo check the same way, so no rehearsal asks for a
+  password, reaches the network or writes outside `$HOME`.
+- **Three flags are on one script and not the other, and each arises from the job.**
+  `--force` only means something where there is a real file to replace, `--yes` only
+  where there is sudo to prompt for, `--log FILE` only where a log is written. The four
+  that mean the same thing on both are spelled the same on both: `--dry-run`,
+  `--verbose`, `--no-color` and `-h`. Anything added to one from here answers that
+  question first.
 - On pacman, anything missing from the official repos falls back to an AUR helper
   (`paru`, `yay`, `pikaur`). `catnap` and `pipes.sh` have no official-repo version.
   `pfetch-rs` usually needs the AUR too, though a repo that rebuilds AUR packages, as
@@ -196,8 +221,6 @@ What was never executed, so nobody reads that number as broader than it is:
   `update_pkg_db` are reasoned from reading alone, including an unchecked
   `wget | gpg | tee` that writes an empty repository key when the download fails and
   leaves every later `apt-get update` broken.
-- `run_hooks` was analysed by running its awk program standalone. Its `system()` call
-  was never allowed to execute anything.
 - Everything ran on one CachyOS machine, so only the pacman branches met a real
   package manager. `install_fonts` and `init_dotfiles` were read and not run.
 - Two runs sharing a `$TIMESTAMP`, and behaviour under an empty `$HOME`, were reasoned
