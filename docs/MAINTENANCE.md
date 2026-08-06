@@ -717,11 +717,22 @@ hyprctl configerrors                      # empty means clean
 sway --validate -c .config/sway/config
 foot --check-config -c .config/foot/foot.ini
 ghostty +validate-config --config-file=.config/ghostty/config
-alacritty migrate --dry-run -c <file>     # flags deprecated syntax
+alacritty --config-file .config/alacritty/alacritty.toml -e true   # opens a window
+alacritty migrate --dry-run -c <file>     # TOML syntax and migration needs only
 kitty +runpy "from kitty.config import load_config; bad=[]; load_config('.config/kitty/kitty.conf', accumulate_bad_lines=bad); print(bad)"
 waybar -c <config> -s <style>             # warns about unknown modules
 nvim --headless "+checkhealth vim.deprecated" +qa
 ```
+
+alacritty has no validate flag, and `migrate --dry-run` is not one wearing another
+name: it fails on TOML that will not parse and accepts an invented key inside a real
+section at exit 0, both measured. The command above is the only thing that reports
+`Unused config key`, which is the failure that matters here, since a renamed key is
+written and never painted. Two things it costs. It opens a real window for an
+instant, because alacritty parses nothing without one, so on a machine with no
+display it is a skip and not a pass. And it reads the generated file through the `~`
+import in `alacritty.toml`, which means it is checking `$HOME`'s copy: what it says
+about this repository holds while `backup-configs.sh check` passes and not otherwise.
 
 kitty prints `[]` when clean; anything else is the list of bad lines. Its
 `--debug-config` flag no longer exists, gone by 0.48.1. For Neovim, a lazy-loaded

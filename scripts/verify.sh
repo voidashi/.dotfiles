@@ -120,6 +120,40 @@ if have ghostty; then
     verdict "$status" "ghostty"
 fi
 
+section "Alacritty" "alacritty --config-file .config/alacritty/alacritty.toml -e true"
+if have alacritty; then
+    # alacritty has no validate flag, and `migrate --dry-run` is not a substitute:
+    # measured, it accepts an invented key inside [colors.primary] and exits 0. It
+    # parses TOML and reports migration needs, which is a different question. What
+    # does answer it is alacritty's own config parser, which prints
+    # "Unused config key: <name>" for a key it does not know, including one in the
+    # imported generated file. Like kitty, the exit status is not the signal: an
+    # unused key still exits 0. Empty output is the pass.
+    #
+    # Two limits, both worth knowing before reading a pass. It opens and closes a
+    # real window for an instant, because nothing here parses a config without one.
+    # And it reaches the generated file through the "~" import inside
+    # alacritty.toml, so what it says about this repository's copy holds only while
+    # the symlink check below passes.
+    #
+    # The log-file lines are bookkeeping rather than diagnostics, and alacritty
+    # writes them only when it has something to log, which is what the rest of the
+    # output already says.
+    out=$(alacritty --config-file .config/alacritty/alacritty.toml -e true 2>&1 \
+        | grep -v "log file at")
+    case "$out" in
+        *"neither WAYLAND_DISPLAY"*)
+            SKIPPED=$((SKIPPED + 1))
+            printf 'skipped: no display, and alacritty needs a window to read a config\n'
+            ;;
+        "") ;;
+        *)
+            printf '%s\n' "$out"
+            verdict 1 "alacritty"
+            ;;
+    esac
+fi
+
 section "kitty" "kitty +runpy ... load_config(accumulate_bad_lines)"
 if have kitty; then
     # kitty exits 0 on a bad config and reports the offending lines in a list, so
