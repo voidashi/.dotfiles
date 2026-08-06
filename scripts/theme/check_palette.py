@@ -117,11 +117,11 @@ FORMS = (
      from_decimal),
 )
 
-# Tracked files that are not part of the live theme: the palette itself is the source
-# rather than a consumer, and a lock file and shell state carry colours nobody chose.
-# These are content exceptions. Scope exceptions used to live here too, .git/ and an
-# agent worktree, and the index answers both without an entry, which is why the walk
-# below reads it rather than the filesystem.
+# Files that are not part of the live theme: the palette itself is the source rather
+# than a consumer, and a lock file and shell state carry colours nobody chose. These
+# are content exceptions. Scope exceptions used to live here too, .git/ and an agent
+# worktree, and git answers both without an entry, which is why the walk below asks
+# it rather than the filesystem.
 SKIP_PARTS = (
     "lazy-lock.json",
     "fish_variables",
@@ -225,25 +225,40 @@ def palette_colours(p: dict) -> set:
     return known
 
 
-def tracked_files() -> list:
-    """Every path in the index, which is what "a tracked config" means.
+def listed_files() -> list:
+    """Every file git would show you: tracked, plus untracked and not ignored.
 
-    The walk used to be REPO_ROOT.rglob("*"). Measured before the change, every
-    file that leaves is untracked and none enters: the Iosevka .ttc build that
-    .gitignore already excludes, fontconfig's .uuid droppings, and an agent's
-    own settings. So this changes where the list comes from and not what drift
-    reports. What the index buys is that .git/ and an agent worktree stop
-    needing an entry in SKIP_PARTS, and so does the next directory anyone
-    gitignores.
+    The walk used to be REPO_ROOT.rglob("*") with a SKIP_PARTS entry for each
+    directory git already knows to leave alone, .git/ and then an agent
+    worktree. Asking git removes that whole class of edit, since .gitignore is
+    where an ignored directory is named once.
+
+    --others is not decoration and the first version of this went in without it.
+    Tracked-only is the wrong scope for a check whose job is to catch a pasted
+    hex before it is committed: measured, a new config carrying an off-palette
+    hex was reported by the old walk and passed silently under the index alone
+    (the value is not written out here, because this check reads its own source
+    and would report the example), and
+    CLAUDE.md tells you to run this before calling work done. So the list is
+    wider than the index and narrower than the filesystem, which is what the
+    docstring's "tracked config" was reaching for.
     """
-    out = subprocess.run(["git", "ls-files", "-z"], cwd=REPO_ROOT,
-                         check=True, capture_output=True, text=True).stdout
+    try:
+        out = subprocess.run(
+            ["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"],
+            cwd=REPO_ROOT, check=True, capture_output=True, text=True).stdout
+    except (OSError, subprocess.CalledProcessError) as exc:
+        # An exported tree has no index, and a stack trace is a poor way to say
+        # so. verify.sh already requires git; this script is documented as
+        # runnable on its own.
+        raise SystemExit(f"check_palette needs a git checkout to know what to "
+                         f"read: {exc}")
     return sorted(rel for rel in out.split("\0") if rel)
 
 
 def check_drift(known: set) -> list:
     problems = []
-    for rel in tracked_files():
+    for rel in listed_files():
         path = REPO_ROOT / rel
         # A path staged for deletion is in the index and not on disk.
         if not path.is_file():
