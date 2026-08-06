@@ -694,12 +694,23 @@ scope narrowly: two applications, chosen because their overrides are matched by 
 against something upstream owns and because they can be driven headless. Nothing here
 covers the rest.
 
-Two traps if you extend it. Set the window size on the pty with `TIOCSWINSZ`, not
+It prints every colour emitted, not only the ones it requires, and marks the ones the
+palette does not hold. Those are expected rather than a fault: yazi paints its icon
+glyphs from a table inside its own binary, which this repository does not override for
+the reason in [`design/THEMING.md`](design/THEMING.md), and no tracked file carries
+those hues, so `check_palette.py` cannot see them. A program with no such note printing
+a colour outside the palette is the case worth looking at.
+
+Three traps if you extend it. Set the window size on the pty with `TIOCSWINSZ`, not
 through `LINES` and `COLUMNS`: yazi drew into an 0x0 terminal and emitted 764 bytes
-with no colour in them, which is what a theme that failed to load also looks like. And
-match colours in two stages, finding each SGR and then reading every colour inside it,
+with no colour in them, which is what a theme that failed to load also looks like.
+Match colours in two stages, finding each SGR and then reading every colour inside it,
 because both programs write foreground and background in one sequence and a single
-anchored pattern silently counts only the first.
+anchored pattern silently counts only the first. And give the program a fixture whose
+surroundings you control: yazi draws a parent pane, so browsing `mkdtemp()` directly
+listed the machine's `/tmp` and painted an icon for everything in it. The output then
+moved between runs on one machine and meant nothing across two, which is fatal for a
+check whose whole output is the measurement. The fixture is nested one level down.
 
 `check_palette.py` also warns, without failing, when an `ansi16` slot holds a hex no
 scale and no alert tone does. That table is literal on purpose and is the one place a retired

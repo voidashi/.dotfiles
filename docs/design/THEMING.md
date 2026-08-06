@@ -159,6 +159,18 @@ roles so the cursor row moves with GTK's and Qt's selection; its file-type
 classification names scale steps, because which family marks an archive is a decision
 this document leaves to the application.
 
+The icon glyph beside each name is the one thing on that screen that is not ours.
+yazi's binary carries an `[icon]` table with a Material colour per file type, and it
+stays upstream's. Overriding it means restating hundreds of rules, each of which
+carries a glyph as well as a colour, so it would be a copy of somebody else's data
+that ages without a word: the same reason the ANSI mapping is canonical rather than
+re-derived per application. What it costs is a handful of Material hues among the
+glyphs. What limits the cost is that the filename beside the glyph is already on the
+palette through `[filetype]`, and a plain directory takes Ice from it, because yazi
+gives generic directories no colour of their own and only named ones like `.git` or
+`Downloads` carry upstream's. No tracked file holds those hues, so `check_palette.py`
+cannot see them and never could; `check_render.py` names them on every run instead.
+
 **Ordinary GTK applications** are themed by overriding the named colours GTK and
 libadwaita already paint from, not by shipping a theme. Window chrome sits at `void-10`
 and content at `void-00`, so a text view reads as recessed into the window, the same

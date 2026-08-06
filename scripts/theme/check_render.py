@@ -126,16 +126,25 @@ def render_yazi(p: dict, r: dict):
     three come from three different tables, so one of them missing localises the
     fault rather than only reporting it. They are also exactly what the renamed
     keys were carrying.
+
+    The fixture is nested one level inside the temporary directory because yazi
+    draws a parent pane, and browsing mkdtemp() directly put the machine's whole
+    /tmp in it: every icon in there was emitted, so the output moved between runs
+    on one machine and could not be compared across two. Measured, that pane was
+    contributing three colours the fixture never asks for, one of them seventeen
+    times.
     """
-    browse = tempfile.mkdtemp(prefix="voidashi-render-")
+    top = tempfile.mkdtemp(prefix="voidashi-render-")
+    browse = Path(top) / "fixture"
+    browse.mkdir()
     for name in ("alpha.txt", "beta.md", "gamma.rs"):
-        (Path(browse) / name).touch()
-    (Path(browse) / "a-directory").mkdir()
+        (browse / name).touch()
+    (browse / "a-directory").mkdir()
     try:
-        text = run_in_pty(["yazi", browse],
-                          {"YAZI_CONFIG_HOME": str(CONFIG / "yazi")}, browse)
+        text = run_in_pty(["yazi", str(browse)],
+                          {"YAZI_CONFIG_HOME": str(CONFIG / "yazi")}, str(browse))
     finally:
-        shutil.rmtree(browse, ignore_errors=True)
+        shutil.rmtree(top, ignore_errors=True)
     required = [
         ("bg", r["selection"]["bg"], "the cursor row, indicator.current"),
         ("bg", r["identity"]["cursor"], "the mode badge, mode.normal_main"),
@@ -162,22 +171,34 @@ def render_catnap(p: dict, r: dict):
     return text, required
 
 
+# Third element: what a colour outside the palette means for this program, or None
+# when nothing accounts for one. yazi's icons come from the [icon] table of the
+# default theme embedded in the binary, one colour per file type, and this
+# repository does not override it: the decision and its reasons are in THEMING.md.
+# Nothing overrides it in catnap either, so an unexplained colour there is a
+# finding rather than a note.
 PROGRAMS = (
-    ("yazi", render_yazi),
-    ("catnap", render_catnap),
+    ("yazi", render_yazi,
+     "yazi's own [icon] table, one colour per file type, which this repository "
+     "does not override. See docs/design/THEMING.md."),
+    ("catnap", render_catnap, None),
 )
 
 
 def main() -> int:
     sys.path.insert(0, str(SCRIPT_DIR))
+    import check_palette  # noqa: E402
     import generate_theme as gen  # noqa: E402
     import roles  # noqa: E402
 
     p = gen.load_palette()
     r = roles.build(p)
+    # Borrowed rather than restated: one definition of what the palette holds,
+    # and it is the one the drift check uses.
+    known = check_palette.palette_colours(p)
 
     failed = False
-    for name, render in PROGRAMS:
+    for name, render, exempt in PROGRAMS:
         print(f"\n{name}:")
         if shutil.which(name) is None:
             print(f"  skipped: {name} is not installed")
@@ -192,7 +213,17 @@ def main() -> int:
             continue
         print("  emitted:")
         for (kind, hexval), n in sorted(counts.items()):
-            print(f"    {kind} {hexval}  x{n}")
+            mark = "" if hexval in known else "   outside the palette"
+            print(f"    {kind} {hexval}  x{n}{mark}")
+        # Never a failure. A program paints things this repository does not
+        # configure, and the useful thing is that they are named rather than
+        # buried in a list of hex nobody reads twice.
+        outside = sorted({hexval for _, hexval in counts} - known)
+        if outside:
+            print(f"  outside the palette: {' '.join(outside)}")
+            print(f"    {exempt}" if exempt else
+                  "    Nothing here accounts for these, which is worth a look: the "
+                  "file checks cannot\n    see a colour that is not in a file.")
         print("  required:")
         for kind, hexval, what in required:
             n = counts.get((kind, hexval.lower()), 0)
