@@ -30,6 +30,7 @@ not affect the exit code.
 """
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -114,14 +115,12 @@ FORMS = (
      from_decimal),
 )
 
-# Paths that are not part of the live theme: the palette itself is the source rather
-# than a consumer, lock files and shell state carry colours nobody chose, and an agent
-# worktree is a second copy of the whole repository. That last one matters more than it
-# looks: SKIP_FILES below matches an exact relative path, so a decided exception like
-# .config/dunst/dunstrc is not skipped in a worktree copy and gets reported as drift.
+# Tracked files that are not part of the live theme: the palette itself is the source
+# rather than a consumer, and a lock file and shell state carry colours nobody chose.
+# These are content exceptions. Scope exceptions used to live here too, .git/ and an
+# agent worktree, and the index answers both without an entry, which is why the walk
+# below reads it rather than the filesystem.
 SKIP_PARTS = (
-    ".git/",
-    ".claude/worktrees/",
     "lazy-lock.json",
     "fish_variables",
     "scripts/theme/palette.json",
@@ -224,10 +223,27 @@ def palette_colours(p: dict) -> set:
     return known
 
 
+def tracked_files() -> list:
+    """Every path in the index, which is what "a tracked config" means.
+
+    The walk used to be REPO_ROOT.rglob("*"). Measured before the change, every
+    file that leaves is untracked and none enters: the Iosevka .ttc build that
+    .gitignore already excludes, fontconfig's .uuid droppings, and an agent's
+    own settings. So this changes where the list comes from and not what drift
+    reports. What the index buys is that .git/ and an agent worktree stop
+    needing an entry in SKIP_PARTS, and so does the next directory anyone
+    gitignores.
+    """
+    out = subprocess.run(["git", "ls-files", "-z"], cwd=REPO_ROOT,
+                         check=True, capture_output=True, text=True).stdout
+    return sorted(rel for rel in out.split("\0") if rel)
+
+
 def check_drift(known: set) -> list:
     problems = []
-    for path in sorted(REPO_ROOT.rglob("*")):
-        rel = path.relative_to(REPO_ROOT).as_posix()
+    for rel in tracked_files():
+        path = REPO_ROOT / rel
+        # A path staged for deletion is in the index and not on disk.
         if not path.is_file():
             continue
         if any(part in rel for part in SKIP_PARTS) or rel in SKIP_FILES:
