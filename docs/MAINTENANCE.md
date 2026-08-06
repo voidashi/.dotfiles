@@ -687,6 +687,16 @@ generated output gets caught; and a role in `roles.py` holding a colour the pale
 does not hold, which catches both a hex pasted in by hand and a token reference
 mistyped into some other valid colour.
 
+It also **warns** without failing when an `ansi16` slot holds a hex no scale and no
+alert tone holds any more, which is what a half-finished hue swap looks like on the way
+through. Read its scope narrowly: it looks at nothing under `scales.` or `alert.`, so a
+value inside the alert set that happens to equal a scale step is invisible to it. One
+pair is in exactly that state on purpose. `alert.neutral`'s `bg` and `border` are
+byte-equal to `ice.deep` and `ice-800` and are not references, so moving the Ice ramp
+leaves them behind in five generated files each with nothing reported. That is the
+decision rather than a gap, and `palette.json`'s `_alert_neutral_note` is where it is
+argued.
+
 What it cannot ask is whether any of that was painted, and that is a different check:
 
 ```bash

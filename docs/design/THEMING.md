@@ -212,6 +212,12 @@ table's mono-primary row, which is for bars that render their own text outside a
   is the route: `ansi16` is the one table that skips `roles.py` and is consumed raw by
   the four terminals and Neovim, so no role reaches that slot and changing it means
   editing the table itself.
+- **`alert.neutral` borrowed its ground from Ice and does not track it.** Its `bg` and
+  `border` are byte-equal to `ice.deep` and `ice-800`, which is where they came from and
+  not a reference: the alert tones are a tuned set, and `neutral.fg` is no Ice step at
+  all. Keeping them literal is what stops an informational surface from following Ice
+  when Ice moves for accent reasons. `palette.json`'s `_alert_neutral_note` argues it and
+  `MAINTENANCE.md` says why no check reports the pair.
 - **yazi's icon table stays upstream's.** The one deliberate patch of off-palette
   colour on the desktop, decided rather than overlooked, with the reasoning in the
   terminal file manager paragraph above. `check_render.py` names the colours on every

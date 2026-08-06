@@ -119,6 +119,7 @@
       "glyph": "i"
     }
   },
+  "_alert_neutral_note": "neutral.bg and neutral.border are byte-equal to scales.ice.deep and scales.ice.800. That is where they came from and not a reference, and the pair is deliberate rather than coincidence: the alert tones are a tuned set, and neutral.fg proves it by being no Ice step at all, sitting between ice-300 and ice-400. There is no separate info family to tune a ground against, so the tone was tuned and the ground borrowed from Ice. Moving the Ice ramp does not move these, and is not meant to, because Ice moves for accent reasons and an informational surface should not follow. The cost, measured: five generated files carry alert-neutral-bg and would keep the old hex, and five carry alert-neutral-border. check_palette.py's orphan warning skips everything under alert. by design and will not report it, which is correct here rather than a gap to close.",
   "ansi16": [
     "#191817",
     "#b44955",
