@@ -13,7 +13,9 @@ Three checks and a warning:
            any of the forms colour is written here rather than only "#rrggbb"
   sync     a generated file that differs from what the generator would write
            now, or a merged file whose owned sections a second merge would
-           change, both of which mean someone edited the output not the source
+           change, both of which mean someone edited the output not the source.
+           The merged INI files are compared by section and key rather than by
+           text, because KDE rewrites them in its own order
   names    a starship style naming a colour its generated palette table does
            not define, which renders that one segment uncoloured and says
            nothing. Measured: with 'ink-2' misspelt, the path lost its escape
@@ -346,6 +348,35 @@ def check_starship_names(p: dict) -> list:
     return problems
 
 
+# The merged files that are INI, where order carries nothing and a second owner
+# rewrites it. KConfig canonicalises kdeglobals whenever any KDE program writes to
+# it, sections and keys both alphabetical, and that reordering was committed twice:
+# once knowingly, and once swept into a commit about something else. Both times the
+# sync check below read it as a hand-edit, because it compared text. Measured on the
+# second: same sections, and zero key-value pairs different.
+MERGED_INI = (".config/kdeglobals", ".config/kcminputrc")
+
+
+def ini_pairs(text: str) -> dict:
+    """section -> key -> value, which is all of an INI file KConfig reads.
+
+    Deliberately not a full parser. It is only ever asked whether two texts say
+    the same thing to the program, so a comment removed from one of these files
+    is a difference it cannot see. Neither file carries a comment today, and
+    KDE's own writes strip them anyway, which is in docs/MAINTENANCE.md.
+    """
+    out, section = {}, None
+    for line in text.splitlines():
+        s = line.strip()
+        if s.startswith("[") and s.endswith("]"):
+            section = s[1:-1]
+            out.setdefault(section, {})
+        elif "=" in s:
+            key, value = s.split("=", 1)
+            out.setdefault(section, {})[key.strip()] = value.strip()
+    return out
+
+
 def check_sync(p: dict) -> list:
     stale = []
     for path, expected in gen.generated_files(p).items():
@@ -367,8 +398,12 @@ def check_sync(p: dict) -> list:
             stale.append((rel, "does not exist"))
             continue
         current = path.read_text(encoding="utf-8")
-        if merge(current) != current:
-            stale.append((rel, "a section the generator owns has been hand-edited"))
+        merged = merge(current)
+        if merged == current:
+            continue
+        if rel in MERGED_INI and ini_pairs(merged) == ini_pairs(current):
+            continue
+        stale.append((rel, "a section the generator owns has been hand-edited"))
     return stale
 
 

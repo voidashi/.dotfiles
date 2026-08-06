@@ -465,6 +465,15 @@ What was never executed, so nobody reads that number as broader than it is:
   join them. A merged file means one entry in `merged_files()` in
   `generate_theme.py`, which is the one list both the generator and the checker
   read.
+- **The INI ones among those are compared by section and key, not by text**, and
+  that is not fussiness. KConfig canonicalises `kdeglobals` whenever a KDE program
+  writes to it, sorting sections and keys alphabetically, so a file nobody touched
+  comes back reordered and the text comparison called it a hand-edit. It has been
+  committed in that state twice, once knowingly and once swept into a commit about
+  another file, and the checker was red both times: measured on the second, same
+  sections and not one key-value pair different. The cost of comparing this way is
+  that a comment removed from `kdeglobals` or `kcminputrc` is invisible to it,
+  which is academic, since KDE's own writes strip comments from both anyway.
 - **starship's generated palette table has to stay at the end of its file.**
   `[palettes.voidashi]` is a TOML table header, so every key below it belongs to
   that table until the next header: a module added underneath the markers becomes
