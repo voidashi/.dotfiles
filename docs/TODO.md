@@ -19,7 +19,15 @@ hardware, images or a decision come last. Inside a group, by priority.
 
 ## Start here next
 
-"Colour decisions the roles layer made visible", below.
+"Colour decisions the roles layer made visible", below, the whole group in one
+session, a commit each. That is how the group above it was closed, and these entries
+suit it better still: they are decisions rather than work, they open the same two
+files, and the expensive part is having them in front of you at once.
+
+Open it with the Ice step, which is the only one of them that changes what is on a
+screen, and the rest are cheaper once someone is already looking. The group's own
+note that some of this wants eyes on a running desktop rather than a diff is worth
+reading before starting rather than after.
 
 ## Colour decisions the roles layer made visible
 
