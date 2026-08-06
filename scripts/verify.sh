@@ -120,38 +120,53 @@ if have ghostty; then
     verdict "$status" "ghostty"
 fi
 
-section "Alacritty" "alacritty --config-file .config/alacritty/alacritty.toml -e true"
+section "Alacritty" "alacritty --config-file <each of the two> -e true"
 if have alacritty; then
     # alacritty has no validate flag, and `migrate --dry-run` is not a substitute:
     # measured, it accepts an invented key inside [colors.primary] and exits 0. It
     # parses TOML and reports migration needs, which is a different question. What
     # does answer it is alacritty's own config parser, which prints
-    # "Unused config key: <name>" for a key it does not know, including one in the
-    # imported generated file. Like kitty, the exit status is not the signal: an
-    # unused key still exits 0. Empty output is the pass.
+    # "Unused config key: <name>" for a key it does not know. Like kitty, the exit
+    # status is not the signal: an unused key still exits 0. Empty output is the
+    # pass.
     #
-    # Two limits, both worth knowing before reading a pass. It opens and closes a
-    # real window for an instant, because nothing here parses a config without one.
-    # And it reaches the generated file through the "~" import inside
-    # alacritty.toml, so what it says about this repository's copy holds only while
-    # the symlink check below passes.
+    # Both files, and that is not belt and braces. alacritty.toml reaches the
+    # generated one only through its "~" import, which resolves into $HOME: on a
+    # clone where the symlinks are not installed that import silently finds
+    # nothing, and this block then prints an empty pass for a file it never opened,
+    # which is the failure this whole battery exists to catch. Measured with HOME
+    # pointed elsewhere. Naming the generated file directly costs one more window
+    # and covers it whatever $HOME holds.
     #
-    # The log-file lines are bookkeeping rather than diagnostics, and alacritty
-    # writes them only when it has something to log, which is what the rest of the
-    # output already says.
-    out=$(alacritty --config-file .config/alacritty/alacritty.toml -e true 2>&1 \
-        | grep -v "log file at")
-    case "$out" in
-        *"neither WAYLAND_DISPLAY"*)
-            SKIPPED=$((SKIPPED + 1))
-            printf 'skipped: no display, and alacritty needs a window to read a config\n'
-            ;;
-        "") ;;
-        *)
-            printf '%s\n' "$out"
-            verdict 1 "alacritty"
-            ;;
-    esac
+    # It opens and closes a real window for each, since nothing here parses a
+    # config without one, so no display is a skip. The timeout is there because
+    # this is the first check in the battery to launch a GPU client and the script
+    # has already been hung once, by catnap on stdin; a run killed by it reports
+    # rather than passing on empty output. The log-file lines are bookkeeping, and
+    # alacritty writes them only when it has something else to say anyway.
+    ala_bad=0
+    for ala_conf in .config/alacritty/alacritty.toml \
+                    .config/alacritty/conf.d/voidashi-colors.toml; do
+        ala_raw=$(timeout 20 alacritty --config-file "$ala_conf" -e true 2>&1)
+        ala_status=$?
+        ala_out=$(printf '%s' "$ala_raw" | grep -v "log file at")
+        case "$ala_out" in
+            *"neither WAYLAND_DISPLAY"*)
+                SKIPPED=$((SKIPPED + 1))
+                printf 'skipped: no display, and alacritty needs a window to read a config\n'
+                ala_bad=0
+                break
+                ;;
+        esac
+        if [ "$ala_status" -eq 124 ]; then
+            printf '%s: timed out, so nothing was checked\n' "$ala_conf"
+            ala_bad=1
+        elif [ -n "$ala_out" ]; then
+            printf '%s: %s\n' "$ala_conf" "$ala_out"
+            ala_bad=1
+        fi
+    done
+    verdict "$ala_bad" "alacritty"
 fi
 
 section "kitty" "kitty +runpy ... load_config(accumulate_bad_lines)"

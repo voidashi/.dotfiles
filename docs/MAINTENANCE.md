@@ -742,7 +742,7 @@ hyprctl configerrors                      # empty means clean
 sway --validate -c .config/sway/config
 foot --check-config -c .config/foot/foot.ini
 ghostty +validate-config --config-file=.config/ghostty/config
-alacritty --config-file .config/alacritty/alacritty.toml -e true   # opens a window
+alacritty --config-file <alacritty.toml, then the generated file> -e true  # a window each
 alacritty migrate --dry-run -c <file>     # TOML syntax and migration needs only
 kitty +runpy "from kitty.config import load_config; bad=[]; load_config('.config/kitty/kitty.conf', accumulate_bad_lines=bad); print(bad)"
 waybar -c <config> -s <style>             # warns about unknown modules
@@ -753,11 +753,17 @@ alacritty has no validate flag, and `migrate --dry-run` is not one wearing anoth
 name: it fails on TOML that will not parse and accepts an invented key inside a real
 section at exit 0, both measured. The command above is the only thing that reports
 `Unused config key`, which is the failure that matters here, since a renamed key is
-written and never painted. Two things it costs. It opens a real window for an
-instant, because alacritty parses nothing without one, so on a machine with no
-display it is a skip and not a pass. And it reads the generated file through the `~`
-import in `alacritty.toml`, which means it is checking `$HOME`'s copy: what it says
-about this repository holds while `backup-configs.sh check` passes and not otherwise.
+written and never painted.
+
+Point it at both files, which is what `verify.sh` does. `alacritty.toml` reaches the
+generated one only through its `~` import, and that resolves into `$HOME`: with `HOME`
+pointed at a directory holding no `.config/alacritty`, the import finds nothing,
+alacritty says nothing, and the check prints an empty pass for a file it never opened.
+Measured, with an invented key sitting in the generated file throughout. Naming the
+generated file directly costs one more window and covers it whatever `$HOME` holds. It
+opens a real window for each, because alacritty parses nothing without one, so a
+machine with no display is a skip rather than a pass, and the run is under a `timeout`
+so a stalled client is reported instead of passing on empty output.
 
 kitty prints `[]` when clean; anything else is the list of bad lines. Its
 `--debug-config` flag no longer exists, gone by 0.48.1. For Neovim, a lazy-loaded
