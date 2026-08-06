@@ -27,11 +27,14 @@ CONFIG = REPO_ROOT / ".config"
 
 SOURCE_NOTE = "docs/design/RICE-GUIDE.md"
 
-# The scheme's name, which KDE uses as an identifier in three unrelated places: the
-# filename under color-schemes/, the Name and ColorScheme keys inside the generated
-# .colors file, and the ColorScheme key merged into kdeglobals. Written once because
-# they have to agree; a scheme named differently in two of them is one KDE cannot
-# find.
+# The scheme's name, which KDE uses as an identifier: the filename under
+# color-schemes/, the Name and ColorScheme keys inside the generated .colors file,
+# and the ColorScheme key merged into kdeglobals. They have to agree, since a scheme
+# named differently in two of them is one KDE cannot find. This constant covers the
+# ones this file writes and no others: scripts/config_files.conf names the .colors
+# path for the symlink, and docs/SETUP.md tells a reader to run
+# `plasma-apply-colorscheme Voidashi`. Renaming the scheme means editing those two by
+# hand.
 KDE_SCHEME = "Voidashi"
 
 HEX_COLOUR = re.compile(r"#[0-9a-fA-F]{6}\Z")
@@ -1149,8 +1152,9 @@ def kde_globals_merged(current: str, scheme: str, p: dict) -> str:
     # XDG_CONFIG_HOME holding this file and nothing else: without the key
     # `plasma-apply-colorscheme --list-schemes` marks BreezeLight as the current
     # scheme while the colours in force are these, and with it the mark moves to
-    # Voidashi. libKF6ColorScheme carries the key too, so the reader is not only
-    # that one tool.
+    # Voidashi. What is measured there is that one tool. The key lives in
+    # libKF6ColorScheme, which that tool links and so does everything KDE ships,
+    # so a second reader is likely and is not established here.
     body, section, emit = [], None, False
     for line in scheme.splitlines():
         stripped = line.strip()
@@ -1182,7 +1186,7 @@ def generated_files(p: dict) -> dict:
     without duplicating the list, which would drift the first time one of them
     gained an entry.
 
-    The three files merged into rather than written whole are in merged_files()
+    The files merged into rather than written whole are in merged_files()
     below, because what they should contain depends on what is already in them.
     """
     r = roles.build(p)
@@ -1204,8 +1208,16 @@ def generated_files(p: dict) -> dict:
     }
 
 
+# The merged files that are INI, as repo-relative paths. Named here rather than in
+# check_palette.py because merged_files() below is where a merged file is declared,
+# and two lists of the same files in two scripts is one rename away from disagreeing
+# in silence. What reads this is the sync check, which compares these by section and
+# key instead of by text, since KDE rewrites them in its own order.
+MERGED_INI = (".config/kdeglobals", ".config/kcminputrc")
+
+
 def merged_files(p: dict) -> dict:
-    """The three written by merging, as path -> what to do with what is there.
+    """The files written by merging, as path -> what to do with what is there.
 
     Each value takes the file's current text and returns what the generator
     would leave in it, so everything outside the sections it owns is copied

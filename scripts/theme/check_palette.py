@@ -365,20 +365,22 @@ def check_starship_names(p: dict) -> list:
 
 # The merged files that are INI, where order carries nothing and a second owner
 # rewrites it. KConfig canonicalises kdeglobals whenever any KDE program writes to
-# it, sections and keys both alphabetical, and that reordering was committed twice:
-# once knowingly, and once swept into a commit about something else. Both times the
-# sync check below read it as a hand-edit, because it compared text. Measured on the
-# second: same sections, and zero key-value pairs different.
-MERGED_INI = (".config/kdeglobals", ".config/kcminputrc")
+# it, sections and keys both alphabetical. That reordering reached the repository
+# once, swept into a commit about another file, and the sync check read it as a
+# hand-edit because it compared text: measured, same sections and zero key-value
+# pairs different. Which files these are is generate_theme.py's to say, not this
+# file's; matching by path string here is what would go quiet if one were renamed.
+MERGED_INI = gen.MERGED_INI
 
 
 def ini_pairs(text: str) -> dict:
     """section -> key -> value, which is all of an INI file KConfig reads.
 
     Deliberately not a full parser. It is only ever asked whether two texts say
-    the same thing to the program, so a comment removed from one of these files
-    is a difference it cannot see. Neither file carries a comment today, and
-    KDE's own writes strip them anyway, which is in docs/MAINTENANCE.md.
+    the same thing to the program, so any line that is neither a section header
+    nor key=value is invisible to it, a comment among them. That is the same
+    set KConfig itself discards on its next write, measured, so nothing here
+    can survive in one of these files anyway.
     """
     out, section = {}, None
     for line in text.splitlines():
@@ -400,7 +402,7 @@ def check_sync(p: dict) -> list:
             stale.append((rel, "does not exist"))
         elif path.read_text(encoding="utf-8") != expected:
             stale.append((rel, "differs from what the generator would write"))
-    # The three the generator merges into rather than writes whole. This loop
+    # The files the generator merges into rather than writes whole. This loop
     # iterated generated_files() alone, so a hand-edit to wofi's generated block,
     # to kdeglobals' colour sections or to kcminputrc's cursor keys was reported
     # by nothing: measured, one edit in each, and the checker returned 0 for all

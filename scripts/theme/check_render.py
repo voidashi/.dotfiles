@@ -130,9 +130,10 @@ def render_yazi(p: dict, r: dict):
     The fixture is nested one level inside the temporary directory because yazi
     draws a parent pane, and browsing mkdtemp() directly put the machine's whole
     /tmp in it: every icon in there was emitted, so the output moved between runs
-    on one machine and could not be compared across two. Measured, that pane was
-    contributing three colours the fixture never asks for, one of them seventeen
-    times.
+    on one machine and could not be compared across two. Measured, that pane
+    contributed three colours the fixture never asks for, the commonest of them
+    more than a dozen times and a different number on each measurement, which is
+    the instability itself and not a figure worth writing down.
     """
     top = tempfile.mkdtemp(prefix="voidashi-render-")
     browse = Path(top) / "fixture"

@@ -412,9 +412,11 @@ What was never executed, so nobody reads that number as broader than it is:
   missing without a symptom anyone would notice. What it changes is what reports the
   current scheme: measured under a throwaway `XDG_CONFIG_HOME` holding only this file,
   without the key `plasma-apply-colorscheme --list-schemes` marks BreezeLight as
-  current while every window on screen is Voidashi, and with it the mark moves.
-  `libKF6ColorScheme` carries the key as well, so the reader is not only that one
-  tool. It is set through the same key-by-key merge as the fonts. The other two keys
+  current while every window on screen is Voidashi, and with it the mark moves. That
+  measurement covers one tool. The key itself lives in `libKF6ColorScheme`, which that
+  tool links and so does every KDE application here, so a second reader is likely and
+  is not established. It is set through the same key-by-key merge as the fonts. The
+  other two keys
   of the scheme file's `[General]` stay out: `Name` is that file's own label, and
   `shadeSortColumn` is a sort setting rather than colour.
 - **The font weight in kdeglobals is Qt's 0-99 scale, not the CSS one.** Writing
@@ -478,12 +480,13 @@ What was never executed, so nobody reads that number as broader than it is:
 - **The INI ones among those are compared by section and key, not by text**, and
   that is not fussiness. KConfig canonicalises `kdeglobals` whenever a KDE program
   writes to it, sorting sections and keys alphabetically, so a file nobody touched
-  comes back reordered and the text comparison called it a hand-edit. It has been
-  committed in that state twice, once knowingly and once swept into a commit about
-  another file, and the checker was red both times: measured on the second, same
-  sections and not one key-value pair different. The cost of comparing this way is
-  that a comment removed from `kdeglobals` or `kcminputrc` is invisible to it,
-  which is academic, since KDE's own writes strip comments from both anyway.
+  comes back reordered and the text comparison called it a hand-edit. It reached the
+  repository that way once, swept into a commit about another file, and left the
+  checker red until this was fixed: measured, same sections and not one key-value pair
+  different. The cost of comparing this way is
+  that any line which is neither a section header nor `key=value` is invisible to it,
+  a comment among them. That is academic: KConfig discards exactly the same set on its
+  next write, so nothing of the kind survives in either file to be checked.
 - **starship's generated palette table has to stay at the end of its file.**
   `[palettes.voidashi]` is a TOML table header, so every key below it belongs to
   that table until the next header: a module added underneath the markers becomes

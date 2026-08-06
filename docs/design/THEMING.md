@@ -160,11 +160,14 @@ classification names scale steps, because which family marks an archive is a dec
 this document leaves to the application.
 
 The icon glyph beside each name is the one thing on that screen that is not ours.
-yazi's binary carries an `[icon]` table with a Material colour per file type, and it
-stays upstream's. Overriding it means restating hundreds of rules, each of which
+yazi's binary carries an `[icon]` table with a colour per file type, and it stays
+upstream's. Its sources are not one palette: the named directories are Material, and
+the file rules carry each language's own brand colour, Rust's for `.rs` and the
+Linguist shell green for `.bashrc`. Overriding it means restating hundreds of rules,
+each of which
 carries a glyph as well as a colour, so it would be a copy of somebody else's data
 that ages without a word: the same reason the ANSI mapping is canonical rather than
-re-derived per application. What it costs is a handful of Material hues among the
+re-derived per application. What it costs is a handful of off-palette hues among the
 glyphs. What limits the cost is that the filename beside the glyph is already on the
 palette through `[filetype]`, and a plain directory takes Ice from it, because yazi
 gives generic directories no colour of their own and only named ones like `.git` or
