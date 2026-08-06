@@ -19,67 +19,7 @@ hardware, images or a decision come last. Inside a group, by priority.
 
 ## Start here next
 
-"The generator and its checks", below.
-
-## The generator and its checks
-
-`scripts/theme/` and `scripts/verify.sh`: what the checkers look at, and what is
-emitted today without anything looking at it.
-
-- **yazi paints five off-palette colours and they come from its own icon table.** Found
-  by `check_render.py` on its first real run, which prints everything emitted and not
-  only what it required: `03a9f4` thirteen times, plus `89e051`, `cddc39`, `dddddd`
-  and `dea584`, written here without the leading hash because the drift check reads a
-  document's examples as applied colour and is right to. They are Material colours
-  from the `[icon]` section of the default
-  theme embedded in the binary, one per file type, and nothing here overrides them. So
-  this is not drift: no tracked file carries these, which is exactly why `check_palette`
-  cannot see them and never could. The question is whether a file manager's icon row
-  gets an exemption the way the ANSI table does, or whether `[icon]` belongs in the
-  generated flavor on the palette's families. Decide that before writing anything,
-  because the second answer is a large table and the guide's restraint rule argues
-  against a different hue per extension.
-  *Difficulty: trivial to decide, medium to write out. Priority: medium, since it is
-  colour on screen that no document accounts for.*
-
-- **`check_palette.py` should walk `git ls-files` rather than the filesystem.** Its
-  docstring promises "a colour in a tracked config" and it walks `REPO_ROOT.rglob("*")`,
-  which is why `SKIP_PARTS` keeps growing entries that patch around what git already
-  knows: `.git/`, and now `.claude/worktrees/`. Walking the index makes both unnecessary,
-  makes the docstring true, and means the next ignored directory needs no edit here.
-  Three entries stay, since `fish_variables`, `lazy-lock.json` and `palette.json` are
-  tracked and are content exceptions rather than scope ones.
-  *Difficulty: low, about ten lines. Priority: medium, and it removes a class of edit
-  rather than an instance.*
-
-- **`kdeglobals` never learns the scheme's name, and it is not clear that it should.**
-  `kde_globals_merged` drops the `[General]` of the generated `.colors` file, on the stated
-  grounds that it would collide with the `[General]` kdeglobals already has. That section
-  carries `ColorScheme=Voidashi`, `Name=Voidashi` and `shadeSortColumn=true`, and the first
-  two collide with nothing: kdeglobals holds only a stale KDE-written `ColorSchemeHash` and
-  no `ColorScheme` at all. So the justification covers `shadeSortColumn` and not the other
-  two. What is *not* established, and is the whole question, is whether any KDE component
-  reads `ColorScheme` from kdeglobals rather than from the `.colors` file; an audit could
-  not settle it from the installed binaries. One measurement since, which narrows it
-  without answering it: `plasma-apply-colorscheme --list-schemes` on this machine lists
-  `Voidashi` among the installed schemes and marks `BreezeLight (current color scheme)`,
-  while the colours actually painted are Voidashi's. So something reads a current scheme
-  name, gets it from neither the `.colors` file nor the colours in force, and reports a
-  scheme nothing is using. It is Plasma's own switching tool rather than an application
-  painting a window, which is the distinction the question turns on. Establish that before changing anything, since
-  the colours themselves are demonstrably applied today and this may be a key nobody reads.
-  *Difficulty: low to change, and the work is answering the question. Priority: low.*
-
-- **Alacritty's generated file is the one terminal output nothing validates.** The other
-  three are checked by their own programs in `scripts/verify.sh`, and alacritty is absent
-  from it. Ruled out as the validator: `alacritty migrate --dry-run` accepts a config
-  carrying `[colors.primary] bogus = "ffffff"` and exits 0, so it reports migration
-  needs and not correctness. The file is covered against hand-edits by `check_sync` and
-  against invented colours by drift, so what is unchecked is narrower than it sounds: that
-  the key names and TOML shape are the ones alacritty actually reads, which today rests on
-  inspection alone. A TOML parse plus a comparison against alacritty's documented key names
-  is the likely substitute.
-  *Difficulty: low. Priority: low.*
+"Colour decisions the roles layer made visible", below.
 
 ## Colour decisions the roles layer made visible
 
