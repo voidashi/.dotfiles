@@ -373,27 +373,6 @@ def check_starship_names(p: dict) -> list:
 MERGED_INI = gen.MERGED_INI
 
 
-def ini_pairs(text: str) -> dict:
-    """section -> key -> value, which is all of an INI file KConfig reads.
-
-    Deliberately not a full parser. It is only ever asked whether two texts say
-    the same thing to the program, so any line that is neither a section header
-    nor key=value is invisible to it, a comment among them. That is the same
-    set KConfig itself discards on its next write, measured, so nothing here
-    can survive in one of these files anyway.
-    """
-    out, section = {}, None
-    for line in text.splitlines():
-        s = line.strip()
-        if s.startswith("[") and s.endswith("]"):
-            section = s[1:-1]
-            out.setdefault(section, {})
-        elif "=" in s:
-            key, value = s.split("=", 1)
-            out.setdefault(section, {})[key.strip()] = value.strip()
-    return out
-
-
 def check_sync(p: dict) -> list:
     stale = []
     for path, expected in gen.generated_files(p).items():
@@ -418,7 +397,7 @@ def check_sync(p: dict) -> list:
         merged = merge(current)
         if merged == current:
             continue
-        if rel in MERGED_INI and ini_pairs(merged) == ini_pairs(current):
+        if rel in MERGED_INI and gen.ini_pairs(merged) == gen.ini_pairs(current):
             continue
         stale.append((rel, "a section the generator owns has been hand-edited"))
     return stale

@@ -1216,6 +1216,31 @@ def generated_files(p: dict) -> dict:
 MERGED_INI = (".config/kdeglobals", ".config/kcminputrc")
 
 
+def ini_pairs(text: str) -> dict:
+    """section -> key -> value, which is all of an INI file KConfig reads.
+
+    Deliberately not a full parser. It is only ever asked whether two texts say
+    the same thing to the program, so any line that is neither a section header
+    nor key=value is invisible to it, a comment among them. That is the same set
+    KConfig itself discards on its next write, measured, so nothing of the kind
+    survives in one of these files anyway.
+
+    Two callers, and they are the same question asked twice: main() below will
+    not rewrite a file that already says this, and check_palette.py will not
+    call one a hand-edit for saying it in a different order.
+    """
+    out, section = {}, None
+    for line in text.splitlines():
+        s = line.strip()
+        if s.startswith("[") and s.endswith("]"):
+            section = s[1:-1]
+            out.setdefault(section, {})
+        elif "=" in s:
+            key, value = s.split("=", 1)
+            out.setdefault(section, {})[key.strip()] = value.strip()
+    return out
+
+
 def merged_files(p: dict) -> dict:
     """The files written by merging, as path -> what to do with what is there.
 
@@ -1258,7 +1283,19 @@ def main() -> None:
         write(path, content)
     for path, merge in merged_files(p).items():
         current = path.read_text(encoding="utf-8") if path.exists() else ""
-        write(path, merge(current))
+        merged = merge(current)
+        rel = path.relative_to(REPO_ROOT).as_posix()
+        # Do not rewrite an INI that already says this. KConfig canonicalises
+        # these files whenever a KDE program touches one, sections and keys
+        # alphabetical, and writing them back in this script's order means the
+        # two orders take turns: every KDE file dialog then puts a diff of the
+        # whole file in the working tree, which has already been committed once
+        # by accident. check_sync compares these by section and key, so nothing
+        # downstream wants the bytes to match.
+        if rel in MERGED_INI and current and ini_pairs(merged) == ini_pairs(current):
+            print(f"  kept  {rel}, which already says this")
+            continue
+        write(path, merged)
     print("Done. Diff the results before committing.")
 
 

@@ -487,6 +487,11 @@ What was never executed, so nobody reads that number as broader than it is:
   that any line which is neither a section header nor `key=value` is invisible to it,
   a comment among them. That is academic: KConfig discards exactly the same set on its
   next write, so nothing of the kind survives in either file to be checked.
+  `generate_theme.py` asks the same question before writing and leaves the file alone
+  when the answer is yes, printing `kept` instead of `wrote`. Without that the two
+  orders take turns, and every KDE file dialog puts a diff of the whole file in the
+  working tree. So a run of the generator that reports `kept` for these two is the
+  normal outcome, not a sign it did nothing.
 - **starship's generated palette table has to stay at the end of its file.**
   `[palettes.voidashi]` is a TOML table header, so every key below it belongs to
   that table until the next header: a module added underneath the markers becomes
