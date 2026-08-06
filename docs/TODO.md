@@ -145,12 +145,14 @@ the question and cutting the other copy.
   *Difficulty: trivial. Priority: medium, because it is lost silently at deletion.*
 
 - **`THEMING.md` carries open work eight lines after saying this file owns it.** Delete its
-  "Not covered yet" section, whose three items are verbatim from here. Its first three
-  "Settled decisions"
-  bullets restate `RICE-GUIDE.md` in their opening sentences; cut those sentences and keep
-  the mechanism clause after each, which is this document's actual subject and exists only
-  here. Bullets 4 and 5 must survive whole: the relaxed accent budget for fetches, and
-  "Rollback is git, not a directory".
+  "Not covered yet" section, whose three items are verbatim from here. Three of its
+  "Settled decisions" bullets restate `RICE-GUIDE.md` in their opening sentences, the
+  role model, bright green and the two radii; cut those sentences and keep the mechanism
+  clause after each, which is this document's actual subject and exists only here. Named
+  rather than numbered on purpose, since a bullet was inserted among them since this
+  entry was written and the ordinals were already off by one before that. Three must
+  survive whole: the relaxed accent budget for fetches, "Rollback is git, not a
+  directory", and yazi's icon table, which is a decision this file now owns.
   *Difficulty: trivial. Priority: medium.*
 
 - **Decide whether `minimal/` survives its own rule.** `THEMING.md`'s "Rollback is git, not
