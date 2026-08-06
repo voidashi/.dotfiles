@@ -212,6 +212,28 @@ rice feel designed rather than assembled.
 | **Attention** | Alert tones | Battery low, disk full, urgent notification, failed unit, disconnected |
 | **Inert** | Ink / Edge | Everything else, which is most things |
 
+### The three steps of Ice
+
+Ice carries the focus role at three steps, and what separates them is what the colour is
+drawn against. That is the same reason unfocused window borders take `edge-30`: a colour
+that has to read across the gap to the wallpaper is a different problem from one sitting
+on a surface the theme chose.
+
+| Step | Hex | What it is | Where it lands |
+|---|---|---|---|
+| `ice-300` | `#6aa3c7` | The accent where it must be read, or must hold across the gap to the wallpaper | Links, active text, the compositor's focused window border |
+| `ice-400` | `#498bb2` | The accent decorating a surface it already knows | Focus and hover decorations, widget and dialog borders, progress and graph lines, a filled mode badge, the lock ring |
+| `ice-600` | `#215b7c` | The selection fill | Selected rows, selected text, the terminal's selection background |
+
+Against `void-40`, the lightest surface here, `ice-300` holds 5.52:1 and `ice-400`
+4.04:1. That is the line the split is drawn on: the second is enough for a decoration and
+not enough for body text. The ANSI table spends these same two steps as blue and bright
+blue, so a dialog border painted in `ice-300` reads as emphasised rather than as chrome.
+
+The lock screen is the clearest case, because it draws both at once while verifying: the
+word on screen is `ice-300` and the ring around it is `ice-400`. If a new surface makes
+the choice unobvious, ask which of those two the thing is.
+
 ### The accent budget
 
 At rest, with no notifications and nothing urgent, **no more than two accent families should be

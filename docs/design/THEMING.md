@@ -195,14 +195,17 @@ table's mono-primary row, which is for bars that render their own text outside a
 
 ## Settled decisions
 
-- **Role model.** Focus, active and selected are **Ice**, never Bordeaux. Bordeaux is
-  identity and primary action: terminal cursor, prompt accent, launcher prompt,
-  lockscreen accent. A **Verdigris** family fills the ANSI cyan slot the core palette has
-  no family for, and is not a UI accent. The semantic states are called **alert tones**.
-  Ice is spent at three steps and they are three different things: `ice-600` is the
-  selection surface, `ice-300` is the line form for rings, links and active text, and
-  `ice-400` is Qt's focus decoration. The third has never been written down anywhere but
-  in the code, and `docs/TODO.md` carries the question.
+- **Role model.** `RICE-GUIDE.md` owns which colour carries which role. What this file
+  owns is that `roles.py` names each one once and every emitter reads the name, which is
+  how the three steps of Ice reach four toolkits without being decided four times.
+  `selection.bg` is `ice-600`, read by GTK4's `accent_bg_color`, GTK3's
+  `theme_selected_bg_color`, Qt's `Selection` and yazi's hovered row. `accent.line` is
+  `ice-300`, read by Sway's focus variable, GTK4's `accent_color`, GTK3's `link_color`,
+  Qt's `ForegroundActive` and `ForegroundLink`, hyprtoolkit's `link_text` and yazi's cwd.
+  `accent.decoration` is `ice-400`, read by Qt's `DecorationFocus` and `DecorationHover`,
+  hyprtoolkit's `accent`, yazi's dialog borders and mode badge, bottom's graphs and
+  catnap's function row. The boundary between the last two is in `RICE-GUIDE.md`, "The
+  three steps of Ice"; swaylock is where to see it, since it draws both while verifying.
 - **Bright green is the one ANSI slot that does not follow its own rule.** Slots 9 and 11
   take alert tones because in a terminal bright red means error and bright yellow means
   warning, which `RICE-GUIDE.md` states and justifies. By that argument bright green

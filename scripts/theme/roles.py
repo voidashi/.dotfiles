@@ -90,18 +90,27 @@ def build(p: dict) -> dict:
             "fg_unfocused": s["ink"]["1"],
         },
 
-        # The line form of the accent, for anything drawn as a rule rather than
-        # as a filled surface: focus rings, links, active text. visited is the
-        # one place Ash appears in the generated half, and it is Ash precisely
-        # so that a followed link stops reading as focus.
-        # decoration is the one step of Ice no document sustains. Qt and
-        # hyprtoolkit both draw their focus decoration a step below the line
-        # accent and two above the selection surface, and the only
-        # justification on record was the name of a local variable. Two
-        # toolkits reading it is the argument for the step existing and not for
-        # its value. Named here so the question is visible;
-        # changing it is a decision that wants eyes on a screen, and it is
-        # written down in docs/TODO.md as exactly that.
+        # Ice is spent at three steps, and what separates them is what the
+        # colour is drawn against. That is the same argument RICE-GUIDE.md
+        # already makes for giving edge-30 to unfocused window borders.
+        #
+        # line is the accent where it has to be read, or has to hold across the
+        # gap to the wallpaper: links, active text, the compositor's focused
+        # border. decoration is the accent where it decorates a surface it
+        # already knows, and every consumer of it is inside a themed window:
+        # Qt's focus and hover, hyprtoolkit's accent, yazi's dialog borders and
+        # mode badge, swaylock's verifying ring, bottom's graphs. selection.bg
+        # is the fill. Measured against void-40, the lightest surface here,
+        # line holds 5.52:1 and decoration 4.04:1, which is a decoration and
+        # not body text.
+        #
+        # The ANSI table spends these same two steps as blue and bright blue,
+        # so a dialog border painted in the line step reads as emphasised
+        # rather than as chrome. RICE-GUIDE.md, "The three steps of Ice", is
+        # the authority and carries the rest.
+        #
+        # visited is the one place Ash appears in the generated half, and it is
+        # Ash precisely so that a followed link stops reading as focus.
         "accent": {
             "line": s["ice"]["300"],
             "decoration": s["ice"]["400"],
