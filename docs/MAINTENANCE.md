@@ -407,6 +407,16 @@ What was never executed, so nobody reads that number as broader than it is:
   set and nothing honours it, with no error. `generate_theme.py` merges only the
   `[Colors:*]`, `[WM]` and `[ColorEffects:*]` sections, and sets the font keys one by
   one, because they sit in `[General]` beside keys that are none of our business.
+- **`ColorScheme` in `[General]` is a name, and something reads it.** The colours are
+  in kdeglobals and are painted whether or not the key is there, which is why it went
+  missing without a symptom anyone would notice. What it changes is what reports the
+  current scheme: measured under a throwaway `XDG_CONFIG_HOME` holding only this file,
+  without the key `plasma-apply-colorscheme --list-schemes` marks BreezeLight as
+  current while every window on screen is Voidashi, and with it the mark moves.
+  `libKF6ColorScheme` carries the key as well, so the reader is not only that one
+  tool. It is set through the same key-by-key merge as the fonts. The other two keys
+  of the scheme file's `[General]` stay out: `Name` is that file's own label, and
+  `shadeSortColumn` is a sort setting rather than colour.
 - **The font weight in kdeglobals is Qt's 0-99 scale, not the CSS one.** Writing
   `500` does not fail; it clamps and renders as Black. `57` is the Medium that 500
   means.

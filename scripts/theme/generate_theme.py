@@ -27,6 +27,13 @@ CONFIG = REPO_ROOT / ".config"
 
 SOURCE_NOTE = "docs/design/RICE-GUIDE.md"
 
+# The scheme's name, which KDE uses as an identifier in three unrelated places: the
+# filename under color-schemes/, the Name and ColorScheme keys inside the generated
+# .colors file, and the ColorScheme key merged into kdeglobals. Written once because
+# they have to agree; a scheme named differently in two of them is one KDE cannot
+# find.
+KDE_SCHEME = "Voidashi"
+
 HEX_COLOUR = re.compile(r"#[0-9a-fA-F]{6}\Z")
 
 
@@ -1030,8 +1037,8 @@ def gen_kde_colors(p: dict, r: dict) -> str:
         "ColorEffect=2\nContrastAmount=0.1\nContrastEffect=2\n"
         "IntensityAmount=0\nIntensityEffect=0\n\n"
         "[General]\n"
-        "ColorScheme=Voidashi\n"
-        "Name=Voidashi\n"
+        f"ColorScheme={KDE_SCHEME}\n"
+        f"Name={KDE_SCHEME}\n"
         "shadeSortColumn=true\n"
     )
     return out
@@ -1112,6 +1119,7 @@ def kde_globals_merged(current: str, scheme: str, p: dict) -> str:
     t = p["typography"]
     keyed = {
         "General": {
+            "ColorScheme": KDE_SCHEME,
             "font": kde_font(p),
             "fixed": kde_font(p, mono=True),
             "menuFont": kde_font(p),
@@ -1131,8 +1139,18 @@ def kde_globals_merged(current: str, scheme: str, p: dict) -> str:
             kept.append(line)
     kept = merge_ini_keys(kept, keyed)
 
-    # Drop the scheme's own [General], which would collide with the one already
-    # in kdeglobals; only its colour sections are wanted here.
+    # Drop the scheme's own [General] and take only its colour sections. Of the
+    # three keys in there, one collides with what kdeglobals already has and two
+    # do not, so the collision justifies dropping the section and not the keys.
+    # They are dealt with one at a time above: shadeSortColumn is a KDE sort
+    # setting rather than colour and stays out, Name is the .colors file's own
+    # label and too generic a key to plant in kdeglobals, and ColorScheme is set
+    # through keyed because something does read it. Measured under a throwaway
+    # XDG_CONFIG_HOME holding this file and nothing else: without the key
+    # `plasma-apply-colorscheme --list-schemes` marks BreezeLight as the current
+    # scheme while the colours in force are these, and with it the mark moves to
+    # Voidashi. libKF6ColorScheme carries the key too, so the reader is not only
+    # that one tool.
     body, section, emit = [], None, False
     for line in scheme.splitlines():
         stripped = line.strip()
@@ -1182,7 +1200,7 @@ def generated_files(p: dict) -> dict:
         CONFIG / "gtk-3.0" / "voidashi.css": gen_gtk_app_css(p, r, "gtk3"),
         CONFIG / "gtk-4.0" / "voidashi.css": gen_gtk_app_css(p, r, "gtk4"),
         CONFIG / "nvim" / "lua" / "voidashi" / "theme" / "palette.lua": gen_nvim_palette(p),
-        REPO_ROOT / ".local" / "share" / "color-schemes" / "Voidashi.colors": gen_kde_colors(p, r),
+        REPO_ROOT / ".local" / "share" / "color-schemes" / f"{KDE_SCHEME}.colors": gen_kde_colors(p, r),
     }
 
 
