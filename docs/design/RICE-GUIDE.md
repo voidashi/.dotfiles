@@ -177,10 +177,22 @@ Plus the non-indexed slots:
 | selection background | `#215b7c` (ice-600) |
 | selection foreground | `#e8e8e8` |
 
-**On slots 9 and 11:** bright red and bright yellow deliberately use the alert tones
+**On slots 9, 10 and 11:** bright red and bright yellow deliberately use the alert tones
 rather than lighter identity tones. In a terminal, bright red means *error* and bright
 yellow means *warning*, so mapping them to the alert family makes program output
 semantically correct with no per-program configuration.
+
+**The boundary is hue.** An alert tone displaces the ramp step only where the identity
+family's hue does not carry the signal a terminal expects. Bordeaux is wine and not
+signal red, so the swap moves the hue from 15.9 to 30.1 degrees and raises chroma from
+0.121 to 0.189. Bronze is matte medal and not amber, chroma 0.090 to 0.140. Both buy a
+saturation the desaturated identity ramps cannot give a signal.
+
+Slot 10 is where that argument stops, which is why bright green stays `moss-300` and does
+not take `alert-good`. Moss is already green, so there is nothing to correct: the two are
+0.1 degrees apart in hue. Every ramp-derived pair in the table rises by exactly one step,
++0.080 in OKLCH lightness, while `alert-good` would *lower* bright green by 0.033 and
+leave it the flattest pair on the table.
 
 ### Colour depth
 

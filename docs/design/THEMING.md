@@ -206,12 +206,12 @@ table's mono-primary row, which is for bars that render their own text outside a
   hyprtoolkit's `accent`, yazi's dialog borders and mode badge, bottom's graphs and
   catnap's function row. The boundary between the last two is in `RICE-GUIDE.md`, "The
   three steps of Ice"; swaylock is where to see it, since it draws both while verifying.
-- **Bright green is the one ANSI slot that does not follow its own rule.** Slots 9 and 11
-  take alert tones because in a terminal bright red means error and bright yellow means
-  warning, which `RICE-GUIDE.md` states and justifies. By that argument bright green
-  means success and should take `alert.good.fg`; it takes `moss-300` instead. The value
-  is deliberate as far as the guide's table goes and unexplained as far as its prose
-  goes, so `docs/TODO.md` carries it as a decision rather than a bug.
+- **Bright green stays `moss-300`.** The alert tone displaces a ramp step only where the
+  family's hue does not carry the signal a terminal expects, and Moss is already green;
+  `RICE-GUIDE.md`, "On slots 9, 10 and 11", carries the measurement. What this file owns
+  is the route: `ansi16` is the one table that skips `roles.py` and is consumed raw by
+  the four terminals and Neovim, so no role reaches that slot and changing it means
+  editing the table itself.
 - **yazi's icon table stays upstream's.** The one deliberate patch of off-palette
   colour on the desktop, decided rather than overlooked, with the reasoning in the
   terminal file manager paragraph above. `check_render.py` names the colours on every
