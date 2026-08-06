@@ -216,13 +216,19 @@ rice feel designed rather than assembled.
 
 | Role | Colour | Examples |
 |---|---|---|
-| **Focus / active / selected** | Ice | Focused window border, active workspace, selected launcher entry, current tab, cursor line |
+| **Focus / active / selected** | Ice | Focused window border, selected launcher entry, current tab, cursor line |
 | **Identity / primary action** | Bordeaux | Terminal cursor, prompt accent, launcher prompt, power menu, lockscreen accent |
 | **Persistent good state** | Moss | Connected, charged, mounted, service running, VCS clean |
 | **Media / ambient** | Ash Violet | Music player accents, visualisers, screensaver, wallpaper-adjacent chrome |
 | **Rare highlight** | Bronze | Recording indicator, uptime milestones, anything genuinely exceptional |
 | **Attention** | Alert tones | Battery low, disk full, urgent notification, failed unit, disconnected |
 | **Inert** | Ink / Edge | Everything else, which is most things |
+
+The bar's active workspace is the one deliberate exception, and it takes a Bordeaux rule
+rather than an Ice one. A bar has nothing focused in the sense a window manager means, so
+the workspace is where the identity mark lands instead. Ice stays focus everywhere else.
+[`THEMING.md`](THEMING.md)'s bar paragraph is where that is settled and why the rule is a
+3px underline rather than a fill.
 
 ### The three steps of Ice
 
