@@ -788,7 +788,11 @@ def gen_gtk_css(p: dict, r: dict) -> str:
         out += f"@define-color alert-{name}-bg {entry['bg']};\n"
         out += f"@define-color alert-{name}-border {entry['border']};\n"
     out += "\n"
-    out += f"@define-color focus-ring {r['accent']['line']};\n"
+    # No semantic names here on purpose. This file is the palette under the
+    # palette's own names, and a stylesheet reaches for @ice-300 the same way
+    # it already reaches for @void-10. A focus-ring name lived here reading
+    # accent.line and no stylesheet ever referenced it, which is what a role
+    # exported into a file nobody consults looks like.
     g = p["geometry"]
     out += (
         "\n/* Non-colour tokens, for reference. GTK3 (waybar, wofi, wlogout) has no\n"

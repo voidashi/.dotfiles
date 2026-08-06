@@ -101,7 +101,6 @@
 @define-color alert-neutral-bg #0a141b;
 @define-color alert-neutral-border #113144;
 
-@define-color focus-ring #6aa3c7;
 
 /* Non-colour tokens, for reference. GTK3 (waybar, wofi, wlogout) has no
    CSS custom properties, so these cannot be consumed as variables there the
