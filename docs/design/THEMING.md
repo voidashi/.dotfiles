@@ -209,6 +209,10 @@ table's mono-primary row, which is for bars that render their own text outside a
   means success and should take `alert.good.fg`; it takes `moss-300` instead. The value
   is deliberate as far as the guide's table goes and unexplained as far as its prose
   goes, so `docs/TODO.md` carries it as a decision rather than a bug.
+- **yazi's icon table stays upstream's.** The one deliberate patch of off-palette
+  colour on the desktop, decided rather than overlooked, with the reasoning in the
+  terminal file manager paragraph above. `check_render.py` names the colours on every
+  run, since no tracked file carries them and the drift check cannot.
 - **Two radii, decided by whether a surface floats.** Floating takes 4px, docked takes
   0. No scale, no third value. Both live in `palette.json` under `geometry`; Hyprland and
   swaync read them, while GTK3 stylesheets carry the literal because GTK3 has no CSS
