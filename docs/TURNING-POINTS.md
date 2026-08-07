@@ -406,6 +406,31 @@ fell; what the move was for was removing the *clone* path, and that still holds,
 absolute path beat an environment that three different session managers arrange three
 different ways.
 
+**Read the paragraph above this one knowing that it costs the paragraph below it.**
+`~/scripts/wm` lost because it "keeps an absolute path in five config lines, which
+renames the coupling instead of removing it", and there are now absolute paths in five
+config lines. The fix does the thing the losing option was rejected for, so the
+argument that separated the two locations is gone, and anyone reading the rejection as
+still decisive is reading a reason that expired.
+
+The conclusion survived its own argument, which is worth saying plainly rather than
+quietly. `~/.local/bin` stays, and the tiebreaker today is smaller and honest: the
+helpers keep working when typed by name in a terminal, because `config.fish` puts the
+directory on PATH for shells even though nothing puts it there for sessions. Against
+that, `~/scripts/wm` would still isolate three generically-named scripts from a
+directory shared with everything else installed, which is the risk this entry already
+called real rather than theoretical. Choosing today, those two are close. They were not
+close when this was written, and the difference is not that anyone changed their mind.
+
+What would restore the original goal is a third thing neither option covers: the
+session arranging PATH itself, through a session entry of this repository's own that
+exports and then execs the compositor. That is the only route that puts the configs
+back to naming no path at all, and it would close the `environment.d` gap below in the
+same move, since both are the same missing thing. It was not taken because it is new
+mechanism on the path to a desktop, where being wrong costs the desktop. It is recorded
+here as available rather than refused, and reopening it does not require this entry to
+be wrong.
+
 Also learned, and it is the more useful half: `environment.d` does not reach a
 greetd-launched session either. This entry used to say that delivery "could not be
 isolated on this machine" because `conf/env_vars.lua` sets the same variables. Under
