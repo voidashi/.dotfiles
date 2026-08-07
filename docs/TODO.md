@@ -20,24 +20,18 @@ hardware, images or a decision come last. Inside a group, by priority.
 ## Start here next
 
 "Picked by hand, in this order", immediately below, and its first entry before anything
-else in this file. `~/.local/bin` is off PATH under the greeter this machine now boots
-through, which has the wallpaper, the clipboard picker and the bar's power button dead
-right now, and it retires the premise of a decision recorded in
-[`TURNING-POINTS.md`](TURNING-POINTS.md). The rest of that group was chosen rather than
-discovered, which is why it comes before everything under it.
+else in this file: one login confirms whether a fix that touched the wallpaper, a
+keybinding and the bar landed, and nothing else here can proceed on the assumption that
+it did.
 
-After it, "Four more documents that answer the same question twice", then "The reader
-deciding whether to install". Both finish at this keyboard, as does "While you are
-already in the file", which stays where it is because those entries are meant to be paid
-by a session that opened the file for another reason.
+After that group, "Four more documents that answer the same question twice", then "The
+reader deciding whether to install". Both finish at this keyboard, as does "While you
+are already in the file", which stays where it is because those entries are meant to be
+paid by a session that opened the file for another reason.
 
-Two groups were removed rather than reordered. "Documents that answer the same question
-twice" is done: each of its four facts now has one owner. "The two compositors" is done
-as well, and its outcome is a decision rather than a state, so it is in
-[`TURNING-POINTS.md`](TURNING-POINTS.md): sway follows Hyprland, one way. Read that
-before reopening any question about the two. Four things are recorded there as
-deliberately absent from sway, and one of the four is a decision rather than something
-sway is incapable of, which the entry says explicitly.
+Before reopening anything about the two compositors, read
+[`TURNING-POINTS.md`](TURNING-POINTS.md): sway follows Hyprland, one way, and four
+things are recorded there as deliberately absent from sway.
 
 
 ## Picked by hand, in this order
@@ -53,39 +47,17 @@ Each entry below was measured before it was written, and three of them do not sa
 they were first described as saying. Where that happened it is marked, because the
 description is what someone will remember.
 
-Four of these arrived from one afternoon: switching this machine to greetd, which was one
-entry here, produced three more. Two are bookkeeping the switch created and the first one
-is a live breakage it exposed rather than caused.
-
-- **`~/.local/bin` is not on PATH under a display-manager session, and four things call
-  into it by bare name.** Found by switching this machine to greetd. Measured on the
-  running session: Hyprland's own PATH is
-  `/usr/local/sbin:/usr/local/bin:/usr/bin:...` with no `~/.local/bin`, and waybar, being
-  its child, has the same. The visible symptom was no wallpaper, and the cause is exact:
-  `ps` shows `swaybg -m fill -i` with nothing after the flag, because
-  `select-random-wallpaper.sh` was not found and the command substitution returned empty.
-  Also broken by it and less obvious, because neither fails loudly: `clipboard-picker.sh`
-  on `$mod+Shift+V` in both compositors, and `power-menu.sh` on the bar's power button.
-  What makes this a repository problem rather than a machine one is in
-  [`TURNING-POINTS.md`](TURNING-POINTS.md), "The compositors reach this repo's helpers
-  through `~/.local/bin`". That entry chose the location "because it is already on PATH
-  and nothing has to arrange that", and says so on the strength of a measurement taken on
-  a session started by plasmalogin. The only thing putting it there is
-  `config.fish`, a shell profile, which a compositor launched by a display manager never
-  reads. So the premise was true of the session it was measured in and is not a property
-  of `~/.local/bin`. Nothing was wrong when it was written; the machine moved out from
-  under it.
-  **Fixed:** the five call sites spell out `$HOME/.local/bin/<name>`, and the turning
-  point's argument is corrected rather than left to be believed. The `environment.d`
-  route was ruled out by measurement rather than by preference: all three variables that
-  file sets are unset in Hyprland's own inherited environment under greetd, so it does
-  not reach this session at all. A shell profile was ruled out the same way, and the
-  proof was already on screen: `config.fish` prepends `~/.local/bin` and PATH still did
-  not have it, because a display-manager session runs no shell.
-  What is left of this entry is the check, which needs a screen: log out and back in, and
-  confirm the wallpaper appears, `$mod+Shift+V` opens the picker, and the bar's power
-  button opens the menu. Nothing here can verify a session it is not sitting in.
-  *Difficulty: done, pending that one look. Priority: high until it has been looked at.*
+- **Confirm the helper paths work in a real session.** The five call sites that reach
+  `scripts/wm/` helpers were changed from a bare name to `$HOME/.local/bin/<name>`, which
+  fixes a wallpaper, a clipboard bind and the bar's power button that a greetd session
+  left dead. Nothing has confirmed it on a screen: the change was verified only by
+  running the command under the PATH greetd hands the session, and a session cannot be
+  checked from outside itself. Log out and back in, then look for three things: the
+  wallpaper appears, `$mod+Shift+V` opens the picker, and the bar's power button opens
+  the menu. Why it broke and what was ruled out is in
+  [`TURNING-POINTS.md`](TURNING-POINTS.md), not here.
+  *Difficulty: trivial, it is one look. Priority: high, because until it is looked at
+  nobody knows whether the fix landed.*
 
 - **Sway under this greeter has no session environment at all.** Found while fixing the
   entry above and separate from it. `environment.d/50-voidashi.conf` is Sway's only
@@ -120,21 +92,6 @@ is a live breakage it exposed rather than caused.
   *Difficulty: trivial to change, and the decision is the work. Priority: medium, since
   it is wrong on screen every day.*
 
-- **Write down that the greetd path has been run, and what it cost.** It is no longer
-  hypothetical: this machine boots through greetd and tuigreet as of today, so the entry
-  under "Waiting on the world" saying it needs a second machine is spent. What `SETUP.md`
-  may now claim is that the path was exercised, and what it must also say is the thing
-  that went wrong, because the instructions caused it. `SETUP.md` said
-  `--cmd Hyprland`, and `hyprland.desktop` on Arch runs `Exec=/usr/bin/start-hyprland`;
-  launching the binary directly reaches a desktop and prints a startup warning that
-  doing so is not recommended. That line is fixed, along with the missing step about
-  disabling the previous display manager. What is owed here is the rest: the greetd
-  entry under "Waiting on the world" retired, and any sentence hedging the procedure as
-  untried brought into line with the fact that it has now been run once, on one machine,
-  on Arch.
-  *Difficulty: trivial. Priority: medium, because a document that hedges an exercised
-  path is as wrong as one that claims an unexercised one.*
-
 - **Bring the greeter onto the palette.** This was waiting on greetd actually running and
   now is not. `tuigreet` takes `--theme` in `component=color` form, and the string has to
   be derived from `palette.json` by hand and pasted into `/etc/greetd/config.toml`, which
@@ -143,32 +100,8 @@ is a live breakage it exposed rather than caused.
   `generate_theme.py` has nowhere to write and `check_palette.py` nothing to check. It is
   the one surface that will drift off-palette with no validator noticing, so the string
   wants a comment saying which palette entries it came from, and `SETUP.md` wants it for a
-  reader to paste. The duplicate of this entry under "Waiting on the world" is retired by
-  the same work.
+  reader to paste.
   *Difficulty: low. Priority: medium now that it is the first surface seen on every boot.*
-
-- **Switch this machine from plasmalogin to greetd.** Done. Kept until the three entries
-  above it are, because they are what it produced and one of them is a live breakage.
-  What follows is what was measured before the switch and stays accurate as the record of
-  a machine that had never run it. Measured then rather than assumed:
-  `greetd` and `tuigreet` are both on PATH, `/etc/greetd/config.toml` exists but is the
-  package's stock file and still runs `agreety --cmd /bin/sh`, so it has never been
-  pointed at this repository and tuigreet is installed but unreferenced.
-  `greetd.service` is `disabled`, `plasmalogin.service` is `enabled` and running, and
-  `/usr/share/wayland-sessions/` holds `hyprland.desktop`, `hyprland-uwsm.desktop`,
-  `sway.desktop` and `plasma.desktop`. So nothing needs installing and the change is two
-  unit commands plus a config this repository does not own, since it lives outside
-  `$HOME` and root owns it, for the reason in [`TURNING-POINTS.md`](TURNING-POINTS.md).
-  Two things the procedure was missing, both since fixed in `SETUP.md` and both worth
-  keeping here because they are what running it taught: the previous display manager has
-  to be disabled in the same sitting, since two enabled ones is a machine that does not
-  reach a desktop; and `--cmd` takes what the session's `.desktop` file execs, which on
-  Arch is `start-hyprland`, not `Hyprland`. Getting the second wrong still reaches a
-  desktop, which is why it produced a warning rather than a failure and why it is easy to
-  leave in place.
-  Delete this entry once the three above it are done. It is a record of a completed
-  change, and this file is for open work.
-  *Difficulty: done. Priority: none, it is bookkeeping.*
 
 - **Verdigris is on the lightness ladder and off the chroma curve.** This was written down
   as "check whether verdigris follows OKLCH like the others", and half of it is already
@@ -332,48 +265,36 @@ one file that leaves the repository at publication.
   *Difficulty: trivial. Priority: low.*
 
 - **The greetd section of `SETUP.md` explains greetd's own documentation.** The stock
-  config, the flag
-  meanings and `systemctl enable` are greetd's README and `tuigreet --help`. Three things
-  are not: the `systemctl cat` verification, the `--sessions`/`--cmd` values tuned to this
-  repository, and the "enable, not `enable --now`" footgun. Cut the per-flag prose only,
-  and carefully, since shortening an untested procedure is how a claim of having tried it
-  gets introduced by accident.
+  config, the flag meanings and `systemctl enable` are greetd's README and
+  `tuigreet --help`. What is not, and must survive any cut, is now five things rather
+  than the three this entry first listed, because running the procedure added two: the
+  `systemctl cat` verification, the `--sessions` and `--cmd` values tuned to this
+  repository, the "enable, not `enable --now`" footgun, the rule that `--cmd` takes what
+  the session's `.desktop` file execs rather than the compositor's name, and disabling
+  the previous display manager in the same sitting. Cut the per-flag prose only. The
+  caution about shortening an untested procedure no longer applies, since it has been
+  run, but the section is longer than it was and the two newest paragraphs are the ones
+  that cost something to learn.
   *Difficulty: trivial. Priority: low.*
 
 ## Waiting on the world
 
 None of these finishes at this keyboard today: they want a second machine, images, an
-icon set, or a look at a running screen. Two exceptions are marked in place, both greetd,
-and both stopped being blocked when the hand-picked group at the top took the switch on.
-The screenshots are the highest-priority entry in
-the file and still belong here, because they are the last thing to do rather than the next.
-Photographing a desktop that is still being edited is work done twice, so they wait until
-the groups above have stopped changing what the desktop looks like.
+icon set, or a look at a running screen. The screenshots are the highest-priority entry
+in the file and still belong here, because they are the last thing to do rather than the
+next. Photographing a desktop that is still being edited is work done twice, so they wait
+until the groups above have stopped changing what the desktop looks like.
 
-That condition is closer than it was. Nothing open above changes a Hyprland screenshot.
-The two groups above it are documentation, with one exception that touches the tree:
-deleting the duplicate PNG from `wallpapers/`, which removes one of two copies of the
-same image and so cannot change what a desktop looks like either. What the compositor
-work changed does not reach a Hyprland screenshot: the sway gaps and border width are
-sway's, and the hyprlauncher radius is not rendered by anything that runs today. So
-wallpaper curation is the one open entry that would make a photograph stale.
+That condition is nearly met. Nothing open above changes a Hyprland screenshot: the
+groups above are documentation apart from deleting a duplicate wallpaper file, which
+removes one of two copies of one image. Wallpaper curation is the one open entry that
+would make a photograph stale.
 
 - **The screenshots in the README predate the current theme.** Committed April 2025, they
   show the Kanagawa desktop this repo no longer contains. They stay until replaced, since
   a stale screenshot beats none.
   *Difficulty: low, blocked on taking new ones. Priority: high, because it is the first
   thing a visitor sees.*
-
-- **The greetd path has been run, and this entry is retired.** It sat here for as long as
-  this machine reached its desktop through `plasmalogin` and nothing had exercised the
-  config or the unit. That changed: greetd and tuigreet now boot it. What is owed is no
-  longer a test but a write-up, which is "Write down that the greetd path has been run,
-  and what it cost" in the hand-picked group at the top, so the work moved there and this
-  is the tombstone. Two things survive the move rather than the entry. It has been run
-  once, on one machine, on Arch, so `SETUP.md` may say it was tried and may not say it is
-  portable. And the run was not clean: the procedure's `--cmd Hyprland` bypasses the
-  `start-hyprland` that `hyprland.desktop` execs, which reaches a desktop and warns, so
-  what "exercised" bought was finding that rather than a confirmation.
 
 - **The apt and dnf names are written and have never been installed.** `[apt]` and
   `[dnf]` in `packages.conf` now carry the names that differ, and where a package

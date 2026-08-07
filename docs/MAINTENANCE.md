@@ -677,10 +677,13 @@ What was never executed, so nobody reads that number as broader than it is:
   battery does not cover. Two consequences when editing this: enabling greetd on a
   machine that already has a display manager conflicts with it over the
   `display-manager.service` alias, so the packages are declared with a comment saying to
-  drop them in that case; and the greetd path is a recommendation rather than something
-  exercised here, because this machine runs `plasmalogin`. Verified locally is only that
-  both packages exist in `extra` and that `hyprland.desktop` and `sway.desktop` are
-  installed into `/usr/share/wayland-sessions/` by the compositors themselves.
+  drop them in that case; and the greetd path has been exercised once, on this machine,
+  on Arch, which is enough to say it works and not enough to call it portable. Two things
+  it cost, both worth knowing before following the procedure. `--cmd` takes what the
+  session's `.desktop` file execs, which on Arch is `start-hyprland`; giving it
+  `Hyprland` still reaches a desktop and warns, so the mistake survives. And it exposed
+  that `~/.config/environment.d/` does not reach a greetd-launched session at all, which
+  matters for Sway rather than Hyprland and is in [`TODO.md`](TODO.md).
 - **Configs kept on purpose, not leftovers.** Several configs here belong to programs
   that are not in use, and treating one as dead weight is a mistake this repository has
   already watched an audit make. The complete list, and which file decides in each case,
