@@ -5,24 +5,81 @@
 # "consistency within a class" rule requires the theme to be mirrored between the
 # two: same colour, terminal and launcher. See docs/design/RICE-GUIDE.md.
 #
-# The commented example blocks sway ships by default (output, idle, input) were
-# removed. None held real config, together they ran to over forty lines, and it
-# was among them that a dead palette block went unnoticed through the whole
-# retheme. `man 5 sway` covers what they covered.
+# Behaviour is mirrored too, and the direction is one way: this file follows
+# .config/hypr/, never the reverse. Where a key means something under Hyprland it
+# means the same thing here, which is why several binds below are not the ones
+# sway ships with. What sway has and Hyprland has no counterpart for stays, as
+# long as it does not sit on a key Hyprland has already spent.
+#
+# Four things cannot be mirrored and are absent on purpose rather than forgotten:
+# a SIGKILL bind, because `kill` is sway's only verb; directional swap, because
+# sway swaps by criterion and not by direction, so the move binds recalculate the
+# split tree the way binds.lua:47-51 describes; pseudotiling; and the lid binds,
+# for the reason in docs/MAINTENANCE.md.
+#
+# The commented example blocks sway ships by default were removed: none held real
+# config, together they ran to over forty lines, and it was among them that a dead
+# palette block went unnoticed through the whole retheme. The output and input
+# blocks below are real ones, carrying what hypr/conf/monitors.lua and
+# hypr/conf/input.lua set. `man 5 sway` covers the rest.
+#
+# What none of this is: tested. `sway --validate` parses the file and stops there.
+# It rejects a malformed directive (an `output` with a bad mode fails), and it
+# accepts `bindsym $mod+x total_nonsense` in silence with exit 0, because a bind's
+# command is only resolved when the key is pressed. So every bind here is
+# unverified until someone boots sway. See docs/MAINTENANCE.md.
 
 ### Variables
 #
 # Logo key. Use Mod1 for Alt.
 set $mod Mod4
-# Home row direction keys, like vim
-set $left h
-set $down j
-set $up k
-set $right l
+# The home-row direction variables sway ships with were removed along with the
+# binds that read them. Nothing here uses h/j/k/l as a direction any more, and a
+# variable no line reads is the kind of thing that survived in this file once
+# already: a whole palette block, unreferenced, through an entire retheme.
 # The same terminal and launcher Hyprland uses, in conf/programs.lua. They had
 # diverged for no reason: foot and wmenu-run here, kitty and wofi there.
 set $term kitty
 set $menu wofi --show drun
+
+### Output
+#
+# Mirrors hypr/conf/monitors.lua. This file had no output directive at all, so
+# sway ran on defaults for both panels and the eDP-1 that the Hyprland lid binds
+# name had no counterpart here to name.
+#
+# Sway has no catch-all output the way monitors.lua's empty-name entry is, and it
+# does not need one: an output with no directive already comes up at its
+# preferred mode, auto-positioned. So the third line there has nothing to mirror.
+output eDP-1 mode 1920x1080@60Hz position 0,0 scale 1
+output DP-1 mode 1920x1080@144Hz position 1920,0 scale 1
+
+### Input
+#
+# Mirrors hypr/conf/input.lua, which this file had no equivalent of, so natural
+# scrolling, flat acceleration and the keyboard layout were all simply unset
+# under sway while being set under Hyprland.
+#
+# The two `0`s are the same idea in both: hypr's sensitivity and sway's
+# pointer_accel are both an adjustment on a -1 to 1 scale, and 0 is none.
+input type:keyboard {
+    xkb_layout us
+}
+
+input type:pointer {
+    accel_profile flat
+    pointer_accel 0
+    left_handed disabled
+}
+
+input type:touchpad {
+    accel_profile flat
+    pointer_accel 0
+    natural_scroll enabled
+}
+
+# hypr's follow_mouse = 1.
+focus_follows_mouse yes
 
 ### Key bindings
 #
@@ -31,12 +88,20 @@ set $menu wofi --show drun
     # Start a terminal
     bindsym $mod+Return exec $term
 
-    # Kill focused window
-    #bindsym $mod+Shift+q kill
+    # Kill focused window. Hyprland also binds $mod+Shift+q to a SIGKILL for a
+    # hung application; sway has no second verb for that, so the key is unbound
+    # here rather than aliased to the same graceful close.
     bindsym $mod+q kill
 
-    # Start your launcher
-    bindsym $mod+d exec $menu
+    # Start your launcher. $mod+r, not sway's default $mod+d, because $mod+r is
+    # the launcher under Hyprland. The resize mode that used to hold this key is
+    # on $mod+Shift+r below.
+    bindsym $mod+r exec $menu
+
+    # File managers, matching binds.lua. $mod+e is the graphical one, and its
+    # shift is the terminal one inside $term.
+    bindsym $mod+e exec dolphin
+    bindsym $mod+Shift+e exec $term -e yazi
 
     # Clipboard history. Same key and same script as Hyprland: the pipeline is
     # identical for both, so it lives in one place instead of two.
@@ -54,28 +119,31 @@ set $menu wofi --show drun
     # Reload the configuration file
     bindsym $mod+Shift+c reload
 
-    # Exit sway (logs you out of your Wayland session)
-    bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
+    # Exit the session. $mod+m, matching binds.lua, because $mod+Shift+e is the
+    # terminal file manager above. The confirmation stays: Hyprland's exit has
+    # none, but a dialog is not a keybind and costs nothing to keep.
+    bindsym $mod+m exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -B 'Yes, exit sway' 'swaymsg exit'
 #
 # Moving around:
 #
-    # Move your focus around
-    bindsym $mod+$left focus left
-    bindsym $mod+$down focus down
-    bindsym $mod+$up focus up
-    bindsym $mod+$right focus right
-    # Or use $mod+[up|down|left|right]
+    # Arrow keys only, matching binds.lua. The home-row row sway ships with
+    # ($mod+h/j/k/l) is gone, because $mod+j toggles the split under Hyprland and
+    # it does so here now too. With it go the $left/$down/$up/$right variables,
+    # which nothing reads once the resize mode is on arrows as well.
     bindsym $mod+Left focus left
     bindsym $mod+Down focus down
     bindsym $mod+Up focus up
     bindsym $mod+Right focus right
 
-    # Move the focused window with the same, but add Shift
-    bindsym $mod+Shift+$left move left
-    bindsym $mod+Shift+$down move down
-    bindsym $mod+Shift+$up move up
-    bindsym $mod+Shift+$right move right
-    # Ditto, with arrow keys
+    # Move the focused window, same keys plus Shift.
+    #
+    # Hyprland binds `swap` here, which exchanges the window with its neighbour
+    # and leaves the dwindle tree's geometry alone. Sway has no directional swap:
+    # `swap container with` takes a criterion (mark, con_id, instance), not a
+    # direction. So `move` stays, and it reinserts into the split tree, which
+    # recalculates proportions and makes windows change size as they travel. That
+    # difference is forced, not chosen. binds.lua:47-51 has the same trade-off
+    # written from the other side.
     bindsym $mod+Shift+Left move left
     bindsym $mod+Shift+Down move down
     bindsym $mod+Shift+Up move up
@@ -107,30 +175,48 @@ set $menu wofi --show drun
     bindsym $mod+Shift+0 move container to workspace number 10
     # Note: workspaces can have any name you want, not just numbers.
     # We just use 1-10 as the default.
+
+    # Scroll the mod key over the desktop to change workspace, as binds.lua does
+    # with mouse_down and mouse_up. button4 is scroll up and button5 is down, so
+    # the pairing reads inverted against the names Hyprland gives the same two.
+    #
+    # --whole-window is load-bearing. sway(5): "By default, mouse bindings are
+    # only triggered when over the title bar", and default_border below is
+    # `pixel 2`, which draws no title bar. Without the flag these two binds would
+    # have a region of almost nothing to fire in, and would read as dead keys.
+    # It also lets them fire over an empty workspace, which is where you would
+    # most want to scroll away from.
+    bindsym --whole-window $mod+button4 workspace prev
+    bindsym --whole-window $mod+button5 workspace next
 #
 # Layout stuff:
 #
-    # You can "split" the current object of your focus with
-    # $mod+b or $mod+v, for horizontal and vertical splits
-    # respectively.
+    # Split direction. $mod+b keeps the horizontal split, which no Hyprland bind
+    # wants. Vertical moves off $mod+v, which is the float toggle below.
     bindsym $mod+b splith
-    bindsym $mod+v splitv
+    bindsym $mod+Shift+b splitv
 
-    # Switch the current container between different layout styles
-    bindsym $mod+s layout stacking
-    bindsym $mod+w layout tabbed
-    bindsym $mod+e layout toggle split
+    # Switch the current container between layout styles. Sway is a manual tiler
+    # and Hyprland is not, so most of this row has no counterpart and is a sway
+    # extra. Two of them do have one and take its key:
+    #   $mod+j  matches Hyprland's togglesplit
+    #   $mod+g  matches Hyprland's group toggle, which is what tabs are there
+    # Stacking has no analogue at all, so it sits on the shift of tabbed.
+    bindsym $mod+j layout toggle split
+    bindsym $mod+g layout tabbed
+    bindsym $mod+Shift+g layout stacking
 
     # Make the current focus fullscreen
     bindsym $mod+f fullscreen
 
-    # Toggle the current focus between tiling and floating mode
-    bindsym $mod+Shift+space floating toggle
+    # Toggle the current focus between tiling and floating mode. $mod+v, matching
+    # binds.lua, not sway's $mod+Shift+space.
+    bindsym $mod+v floating toggle
 
-    # Swap focus between the tiling area and the floating area
+    # Swap focus between the tiling area and the floating area. Sway extra.
     bindsym $mod+space focus mode_toggle
 
-    # Move focus to the parent container
+    # Move focus to the parent container. Sway extra.
     bindsym $mod+a focus parent
 #
 # Scratchpad:
@@ -138,51 +224,77 @@ set $menu wofi --show drun
     # Sway has a "scratchpad", which is a bag of holding for windows.
     # You can send windows there and get them back later.
 
+    # $mod+s and its shift, matching Hyprland's special:magic workspace, not
+    # sway's $mod+minus pair. The two are not the same mechanism: Hyprland's
+    # special workspace holds many windows and toggles as a set, while sway's
+    # scratchpad show cycles through them one at a time. Same key, same intent,
+    # different feel.
+
     # Move the currently focused window to the scratchpad
-    bindsym $mod+Shift+minus move scratchpad
+    bindsym $mod+Shift+s move scratchpad
 
     # Show the next scratchpad window or hide the focused scratchpad window.
     # If there are multiple scratchpad windows, this command cycles through them.
-    bindsym $mod+minus scratchpad show
+    bindsym $mod+s scratchpad show
 #
 # Resizing containers:
 #
+# Arrows only and Escape only, matching the "resize" submap in binds.lua. The
+# home-row row and the Return exit that sway ships with are gone: Hyprland has
+# neither, and a mode you leave two different ways is a mode whose exit you have
+# to remember. The 10px step is the same on both sides.
 mode "resize" {
-    # left will shrink the containers width
-    # right will grow the containers width
-    # up will shrink the containers height
-    # down will grow the containers height
-    bindsym $left resize shrink width 10px
-    bindsym $down resize grow height 10px
-    bindsym $up resize shrink height 10px
-    bindsym $right resize grow width 10px
-
-    # Ditto, with arrow keys
+    # left shrinks the container's width, right grows it
+    # up shrinks the container's height, down grows it
     bindsym Left resize shrink width 10px
     bindsym Down resize grow height 10px
     bindsym Up resize shrink height 10px
     bindsym Right resize grow width 10px
 
     # Return to default mode
-    bindsym Return mode "default"
     bindsym Escape mode "default"
 }
-bindsym $mod+r mode "resize"
+# $mod+Shift+r, not sway's $mod+r, which is the launcher above.
+bindsym $mod+Shift+r mode "resize"
 #
 # Utilities:
 #
-    # Special keys to adjust volume via PulseAudio
-    bindsym --locked XF86AudioMute exec pactl set-sink-mute \@DEFAULT_SINK@ toggle
-    bindsym --locked XF86AudioLowerVolume exec pactl set-sink-volume \@DEFAULT_SINK@ -5%
-    bindsym --locked XF86AudioRaiseVolume exec pactl set-sink-volume \@DEFAULT_SINK@ +5%
-    bindsym --locked XF86AudioMicMute exec pactl set-source-mute \@DEFAULT_SOURCE@ toggle
+    # Volume, through wpctl rather than pactl. Same 5% step as before; the change
+    # is the backend. binds.lua drives wireplumber directly and this drove it
+    # through the pulse shim, so the two could disagree about what a sink is.
+    bindsym --locked XF86AudioRaiseVolume exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+
+    bindsym --locked XF86AudioLowerVolume exec wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
+    bindsym --locked XF86AudioMute exec wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+    bindsym --locked XF86AudioMicMute exec wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
+
+    # Media transport. Absent here until now, bound under Hyprland since the
+    # start, which is the shape most of this file's divergence took.
+    bindsym --locked XF86AudioPlay exec playerctl play-pause
+    bindsym --locked XF86AudioPrev exec playerctl previous
+    bindsym --locked XF86AudioNext exec playerctl next
+
     # Special keys to adjust brightness via brightnessctl
     # -e3 is load-bearing, not decoration: it makes the percentage a perceptual axis
     # instead of a raw one. Keep it in step with the same two binds in hypr/conf/binds.lua.
     bindsym --locked XF86MonBrightnessDown exec brightnessctl -e3 set 5%-
     bindsym --locked XF86MonBrightnessUp exec brightnessctl -e3 set 5%+
-    # Special key to take a screenshot with grim
+
+    # Screenshots, matching the three modes binds.lua binds to the same keys.
+    # Hyprland uses hyprshot, which talks to hyprctl and therefore cannot run
+    # here; grim and slurp are the equivalents. The window mode has no built-in
+    # form: it asks sway for the focused container's geometry and hands grim the
+    # rectangle. A scripts/wm/screenshot.sh was considered, as the clipboard
+    # picker is shared that way, and rejected: it would have to branch on the
+    # compositor anyway, so it trades three lines here for a file plus a branch.
+    # The window line is upstream's published form rather than one written here,
+    # because it is the quoting that is delicate, not the jq: a double-quoted
+    # $(...) holding a single-quoted filter that itself contains double quotes.
+    # The filter was run against a synthetic get_tree and returns exactly the
+    # focused container's geometry. The quoting has only been through
+    # `sway --validate`, which parses the line and does not run it.
     bindsym Print exec grim
+    bindsym Shift+Print exec grim -g "$(slurp)"
+    bindsym $mod+Print exec grim -g "$(swaymsg -t get_tree | jq -j '.. | select(.type?) | select(.focused).rect | "\(.x),\(.y) \(.width)x\(.height)"')"
 
 #
 # Status Bar:
@@ -194,12 +306,37 @@ bindsym $mod+r mode "resize"
 #
 # Appearance
 #
-default_border pixel 1
-default_floating_border normal
-hide_edge_borders smart
+# Border width matches appearance.lua's border_size = 2. Floating windows take a
+# plain border too, not sway's default `normal`, which draws a titlebar: nothing
+# under Hyprland has one.
+default_border pixel 2
+default_floating_border pixel 2
 
+# smart_borders replaces `hide_edge_borders smart`. They are different rules and
+# only the first has a counterpart: window_rules.lua sets border_size = 0 on a
+# workspace holding one window (w[tv1], f[1]), and sway(5) says smart_borders
+# "will only be enabled if the workspace has more than one visible child", which
+# is the same sentence. hide_edge_borders is about borders touching the screen
+# edge and Hyprland has no equivalent, so it goes rather than sitting on top.
+smart_borders on
+
+# smart_gaps is the other half of those same workspace rules, which zero gaps_in
+# and gaps_out for a single window.
 smart_gaps on
-gaps inner 10
+
+# Gaps. Not a copy of Hyprland's numbers, because the two count differently, and
+# reading sway(5) rather than assuming is what changed these:
+#   sway  inner = "spacing around each window", so the gap between two is 2x
+#   sway  outer = "in addition to inner gaps", so the screen edge is inner+outer
+#   hypr  gaps_in = 3 per window, gaps_out = 10 at the screen edge
+# So inner 3 gives the same 6 between two windows, and outer 7 puts the edge on
+# 3+7 = 10. The old `gaps inner 10` with no outer was 20 between windows and 10
+# at the edge, which is why sway looked airier than Hyprland.
+#
+# Computed from the manual, not measured on a screen. Nothing here has booted
+# sway to look at it.
+gaps inner 3
+gaps outer 7
 
 
 #
@@ -232,6 +369,11 @@ client.background       $vd_bg_content
 #
 # Autostart
 #
+# Radio and network, both of which autostart.lua has started since the beginning
+# and this file did not. Same order as there.
+exec rfkill block bluetooth
+exec nm-applet
+
 # Both compositors pass -c/-s explicitly: neither bar is "the default one",
 # and the module list is the only thing that differs between them.
 exec waybar -c $HOME/.config/waybar/sway.jsonc -s $HOME/.config/waybar/style.css
@@ -259,12 +401,33 @@ exec sh -c 'cliphist wipe; exec wl-paste --watch cliphist store'
 # Idle. swayidle has no config file: this schedule is the whole configuration,
 # which is why it is here and not beside hypr/hypridle.conf. The numbers are
 # deliberately the same as that file's, and both hand off to the same swaylock.
-exec swayidle -w \
-    timeout 900 'swaylock -f' \
+# The middle timeout is the lock's plus sixty seconds on purpose, so the screen
+# blanks after the lock rather than with it. Move one and move the other.
+#
+# Under systemd-cat, for the reason autostart.lua wraps hypridle. That incident
+# was Hyprland's, not this file's: hypridle writes only to stdout, nothing
+# captured it, and a night of unexplained locks had to be reconstructed from
+# suspend and PAM lines in the journal because no timeout had left a record.
+# swayidle logs the same way and had the same gap, so it gets the same wrapper
+# before it costs the same evening. `journalctl -t swayidle` shows each timeout
+# with a time.
+#
+# `lock` is the handler logind's Lock signal reaches, so `loginctl lock-session`
+# on the 900 timeout routes through it the way hypridle's lock_cmd does, and the
+# pidof guard means a second request does not stack a second locker.
+#
+# before-sleep is the deliberate exception and calls swaylock directly. Going
+# through loginctl there would return immediately, and -w is the flag that makes
+# swayidle hold the suspend until the locker is actually up; handing it a command
+# that exits at once defeats it. The guard still applies.
+exec systemd-cat -t swayidle swayidle -w \
+    lock 'pidof swaylock || swaylock -f' \
+    timeout 900 'loginctl lock-session' \
     timeout 960 'swaymsg "output * power off"' \
         resume 'swaymsg "output * power on"' \
     timeout 1800 'systemctl suspend' \
-    before-sleep 'swaylock -f'
+    before-sleep 'pidof swaylock || swaylock -f' \
+    after-resume 'swaymsg "output * power on"'
 
 
 include @sysconfdir@/sway/config.d/*
