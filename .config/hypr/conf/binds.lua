@@ -105,9 +105,11 @@ hl.bind("SHIFT + Print", hl.dsp.exec_cmd("hyprshot -m region"))
 -- SUPER + V is already float, so the history sits on SHIFT of the same finger.
 -- The whole pipeline lives in scripts/wm/clipboard-picker.sh rather than here,
 -- because Sway needs exactly the same one and two copies drift.
--- Bare name: backup-configs.sh install links the scripts/wm/ helpers into
--- ~/.local/bin, which is on PATH, so this no longer names the clone directory.
-hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("clipboard-picker.sh"))
+-- backup-configs.sh install links the scripts/wm/ helpers into ~/.local/bin, so
+-- this names a fixed location rather than the clone directory. The path is
+-- spelled out instead of trusted to PATH: a display-manager session reads no
+-- shell profile, and the profile is the only thing putting ~/.local/bin there.
+hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("$HOME/.local/bin/clipboard-picker.sh"))
 
 -- Lid. Nothing here locks the screen, on purpose. Closing the lid makes logind
 -- suspend, and hypridle's before_sleep_cmd locks on the way down, so a lock

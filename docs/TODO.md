@@ -75,17 +75,34 @@ is a live breakage it exposed rather than caused.
   reads. So the premise was true of the session it was measured in and is not a property
   of `~/.local/bin`. Nothing was wrong when it was written; the machine moved out from
   under it.
-  Three fixes, and they are not equivalent. Setting PATH in `conf/env_vars.lua` reaches
-  Hyprland and its children and leaves Sway needing the same line in
-  `environment.d/50-voidashi.conf`, which is the two-places pattern that file already
-  carries. Calling the helpers as `$HOME/.local/bin/<name>` puts a path back in four
-  config lines, but a fixed one that names no clone directory, which was the actual goal
-  the entry states. Or arrange PATH at the session level, which means a file outside
-  `$HOME` and is therefore out of scope here. Pick one and correct the turning point in
-  the same commit, because that entry currently argues from a measurement that no longer
-  holds.
-  *Difficulty: low to fix, and choosing which fix is the work. Priority: high, since three
-  keybindings and the wallpaper are dead on this machine right now.*
+  **Fixed:** the five call sites spell out `$HOME/.local/bin/<name>`, and the turning
+  point's argument is corrected rather than left to be believed. The `environment.d`
+  route was ruled out by measurement rather than by preference: all three variables that
+  file sets are unset in Hyprland's own inherited environment under greetd, so it does
+  not reach this session at all. A shell profile was ruled out the same way, and the
+  proof was already on screen: `config.fish` prepends `~/.local/bin` and PATH still did
+  not have it, because a display-manager session runs no shell.
+  What is left of this entry is the check, which needs a screen: log out and back in, and
+  confirm the wallpaper appears, `$mod+Shift+V` opens the picker, and the bar's power
+  button opens the menu. Nothing here can verify a session it is not sitting in.
+  *Difficulty: done, pending that one look. Priority: high until it has been looked at.*
+
+- **Sway under this greeter has no session environment at all.** Found while fixing the
+  entry above and separate from it. `environment.d/50-voidashi.conf` is Sway's only
+  source for session variables, because `man 5 sway` has no `env` directive and an `exec`
+  cannot change its parent's environment, and that file does not reach a greetd-launched
+  session: `XCURSOR_SIZE`, `HYPRCURSOR_SIZE` and `QT_QPA_PLATFORMTHEME` are all set in it
+  and all three are unset in the compositor's own inherited environment. Hyprland does not
+  care, because `conf/env_vars.lua` sets them again for everything it launches. Sway has
+  no equivalent, so under greetd it would come up with `QT_QPA_PLATFORMTHEME` unset, which
+  is the exact failure [`MAINTENANCE.md`](MAINTENANCE.md) records as having already
+  happened once: Qt applications light against a dark desktop. Unmeasured, because nobody
+  has booted Sway from this greeter, and the honest test is doing so and opening a Qt
+  application. If it reproduces, the options are a wrapper session that exports before
+  exec'ing sway, or a `.desktop` of this repository's own, and both are new mechanism for
+  a compositor nothing runs daily.
+  *Difficulty: low to confirm, and the fix is a design question. Priority: medium, and it
+  is the second thing this greeter exposed rather than caused.*
 
 - **The bar shows workspaces 6 to 10 with nothing in them.** `common.jsonc`'s
   `hyprland/workspaces` sets `all-outputs: true` and `persistent-workspaces: {"*": 5}`.

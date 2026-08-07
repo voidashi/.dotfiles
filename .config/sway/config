@@ -107,9 +107,12 @@ focus_follows_mouse yes
 
     # Clipboard history. Same key and same script as Hyprland: the pipeline is
     # identical for both, so it lives in one place instead of two.
-    # Bare name: backup-configs.sh install links the scripts/wm/ helpers into
-    # ~/.local/bin, which is on PATH, so this does not name the clone directory.
-    bindsym $mod+Shift+v exec clipboard-picker.sh
+    # backup-configs.sh install links the scripts/wm/ helpers into ~/.local/bin,
+    # so this names a fixed location and not the clone directory. The path is
+    # spelled out rather than left to PATH: a display-manager session reads no
+    # shell profile, and a shell profile is the only thing that puts
+    # ~/.local/bin on PATH here.
+    bindsym $mod+Shift+v exec $HOME/.local/bin/clipboard-picker.sh
 
     # Drag floating windows by holding down $mod and left mouse button.
     # Resize them with right mouse button + $mod.
@@ -412,7 +415,7 @@ exec nm-applet
 exec waybar -c $HOME/.config/waybar/sway.jsonc -s $HOME/.config/waybar/style.css
 # In order: the wallpapers in rotation, then the full collection, then the
 # repo's own sample wallpaper (which is what makes a fresh install work).
-exec swaybg -m fill -i "$(select-random-wallpaper.sh $HOME/Pictures/Current_wallpapers $HOME/Pictures/Wallpapers $HOME/.local/share/wallpapers/dotfiles)"
+exec swaybg -m fill -i "$($HOME/.local/bin/select-random-wallpaper.sh $HOME/Pictures/Current_wallpapers $HOME/Pictures/Wallpapers $HOME/.local/share/wallpapers/dotfiles)"
 
 # Environment. Sway has no `env` directive, and an `exec` cannot change its own
 # parent's environment, so the session variables this desktop needs live in

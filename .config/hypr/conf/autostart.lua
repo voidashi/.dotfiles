@@ -15,11 +15,17 @@ hl.on("hyprland.start", function()
     -- line below no longer names.
     hl.exec_cmd("waybar -c $HOME/.config/waybar/hyprland.jsonc -s $HOME/.config/waybar/style.css")
     -- In order: the wallpapers in rotation, then the full collection, then the
-    -- repo's own sample, which is what makes a fresh install work. The script is
-    -- called by bare name and the sample is read through the link, both created by
-    -- backup-configs.sh install, so neither names where the repo was cloned.
+    -- repo's own sample, which is what makes a fresh install work. The script and
+    -- the sample are both reached through links backup-configs.sh install creates,
+    -- so neither names where the repo was cloned.
+    --
+    -- $HOME/.local/bin is spelled out rather than relied on through PATH. A session
+    -- started by a display manager does not read a shell profile, and that profile
+    -- is the only thing putting ~/.local/bin on PATH here, so under greetd this
+    -- line resolved to nothing and swaybg ran with an empty -i. See
+    -- docs/TURNING-POINTS.md; the path is fixed and names no clone directory.
     hl.exec_cmd(
-        "swaybg -m fill -i \"$(select-random-wallpaper.sh "
+        "swaybg -m fill -i \"$($HOME/.local/bin/select-random-wallpaper.sh "
             .. "$HOME/Pictures/Current_wallpapers "
             .. "$HOME/Pictures/Wallpapers "
             .. "$HOME/.local/share/wallpapers/dotfiles)\""

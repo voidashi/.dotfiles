@@ -388,8 +388,34 @@ definition.
 `~/.local/bin` was chosen because it is already on PATH and nothing has to arrange
 that. Measured on a live session started by plasmalogin, Hyprland, waybar and swaync
 all carry it first in PATH, and `config.fish` prepends it as well, so the console
-start path has it too. That is the whole argument: the configs end up with no path in
-them at all.
+start path has it too.
+
+**That half of the argument expired, and the location survived it.** Switching this
+machine to greetd showed `~/.local/bin` absent from Hyprland's PATH and from every
+child it starts, which left `swaybg` running with an empty `-i` and no wallpaper, and
+the clipboard picker and the bar's power button silently doing nothing. The cause is
+that `config.fish` is the only thing that ever put it there, and a session started by
+a display manager reads no shell profile. The plasmalogin measurement was true of
+plasmalogin. It was never a property of `~/.local/bin`, and the sentence above read as
+though it were.
+
+So the five call sites now spell out `$HOME/.local/bin/<name>` instead of trusting
+PATH. The claim that "the configs end up with no path in them at all" is what actually
+fell; what the move was for was removing the *clone* path, and that still holds, since
+`$HOME/.local/bin` is fixed wherever the repository was cloned. A launcher-independent
+absolute path beat an environment that three different session managers arrange three
+different ways.
+
+Also learned, and it is the more useful half: `environment.d` does not reach a
+greetd-launched session either. This entry used to say that delivery "could not be
+isolated on this machine" because `conf/env_vars.lua` sets the same variables. Under
+greetd it isolates itself, because `env_vars.lua` applies to Hyprland's children and
+not to Hyprland's own inherited environment: `XCURSOR_SIZE`, `HYPRCURSOR_SIZE` and
+`QT_QPA_PLATFORMTHEME` are all set in `environment.d/50-voidashi.conf` and all three
+are unset in the compositor's own environ. Hyprland is fine, because it sets them
+again for everything it launches. Sway has no `env` directive and no second source, so
+under this greeter it has none at all, which is a real gap rather than a theoretical
+one. `TODO.md` carries it.
 
 What fell was a directory of this repository's own, `~/scripts/wm`. It fixes the same
 problem, since it is a fixed location independent of the clone, and it isolates these
