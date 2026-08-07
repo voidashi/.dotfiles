@@ -20,37 +20,8 @@ hardware, images or a decision come last. Inside a group, by priority.
 ## Start here next
 
 "Documents that answer the same question twice", below. It is the cheapest group left
-that finishes at this keyboard, and one of its entries has just shrunk: the `THEMING.md`
-entry lost two of the four cuts it asked for, which the entry now says.
+that finishes at this keyboard. After it, "The two compositors". Maybe in the same session.
 
-The group directly below is down to a single entry that wants a running `btm` on a
-screen, so it is not a session of its own any more; fold it into whatever session next
-has a terminal open for another reason.
-
-## Colour decisions the roles layer made visible
-
-`roles.py` and [`design/RICE-GUIDE.md`](design/RICE-GUIDE.md). The four questions this
-group held are settled and live in the documents that own them, with the measurements in
-their commit messages. What is left is one place where the code disagrees with the rule
-that got written down, which is the layer working as intended: naming a colour once is
-what made the odd one visible.
-
-- **bottom fills a selected row with the line step instead of the selection step.**
-  `generate_theme.py`'s bottom block sets `selected_text` to
-  `{ color = surface.content, bg_color = accent.line }`, so a selected row is a filled
-  `ice-300`. Everywhere else a filled selection is `selection.bg`: yazi's hovered row,
-  GTK3's `theme_selected_bg_color`, GTK4's `accent_bg_color`, Qt's `Selection`. Under
-  `RICE-GUIDE.md`'s "The three steps of Ice" the fill is `ice-600` and `ice-300` is the
-  step for things that are read, so bottom is the one consumer out of step.
-  The trap, measured, is that the two keys have to move together. `void-00` on `ice-300`
-  is 7.27:1 today; moving only `bg_color` to `selection.bg` leaves `void-00` on `ice-600`
-  at 2.70:1, which is not a text contrast. Moving `color` to `selection.fg` at the same
-  time gives `ink-0` on `ice-600` at 6.01:1, which is what every other toolkit here
-  already renders. Look at a running `btm` first: `ice-300` is a much louder row than
-  `ice-600` and the current value may be a deliberate answer to bottom's density rather
-  than an oversight.
-  *Difficulty: trivial to change, and the whole cost is looking at it first. Priority:
-  low, since nothing is wrong on screen, only inconsistent with the written rule.*
 
 ## The two compositors
 
