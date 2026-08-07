@@ -45,22 +45,28 @@ Each entry below was measured before it was written, and three of them do not sa
 they were first described as saying. Where that happened it is marked, because the
 description is what someone will remember.
 
-- **Sway under this greeter has no session environment at all.**
-  `environment.d/50-voidashi.conf` is Sway's only
-  source for session variables, because `man 5 sway` has no `env` directive and an `exec`
-  cannot change its parent's environment, and that file does not reach a greetd-launched
-  session: `XCURSOR_SIZE`, `HYPRCURSOR_SIZE` and `QT_QPA_PLATFORMTHEME` are all set in it
-  and all three are unset in the compositor's own inherited environment. Hyprland does not
-  care, because `conf/env_vars.lua` sets them again for everything it launches. Sway has
-  no equivalent, so under greetd it would come up with `QT_QPA_PLATFORMTHEME` unset, which
-  is the exact failure [`MAINTENANCE.md`](MAINTENANCE.md) records as having already
-  happened once: Qt applications light against a dark desktop. Unmeasured, because nobody
-  has booted Sway from this greeter, and the honest test is doing so and opening a Qt
-  application. If it reproduces, the options are a wrapper session that exports before
-  exec'ing sway, or a `.desktop` of this repository's own, and both are new mechanism for
-  a compositor nothing runs daily.
-  *Difficulty: low to confirm, and the fix is a design question. Priority: medium, and it
-  is the second thing this greeter exposed rather than caused.*
+- **Sway under this greeter has no session environment, and Qt applications come up
+  unthemed.** Confirmed on a booted Sway rather than predicted: Dolphin renders with no
+  theme. Measured by launching a process through `swaymsg exec` and reading what it
+  inherited, which is exactly what an application gets:
+  `QT_QPA_PLATFORMTHEME` unset, `HYPRCURSOR_SIZE` unset, `~/.local/bin` not on PATH.
+  `environment.d/50-voidashi.conf` sets the first two and delivered neither, which is the
+  same finding Hyprland gave and this makes it a live fault rather than a latent one.
+  One reading to avoid: `XCURSOR_SIZE` comes back as 24, which looks like delivery and is
+  not. Sway sets that itself and its default happens to be 24. `HYPRCURSOR_SIZE`, which
+  only `environment.d` sets, is the honest probe and it is unset.
+  Why Sway alone: `man 5 sway` has no `env` directive and an `exec` cannot change its
+  parent's environment, so that file is its only source, while Hyprland sets the same
+  values again through `conf/env_vars.lua` for everything it launches.
+  `MAINTENANCE.md` records this exact failure as having happened once before, under the
+  same variable.
+  Two options, both new mechanism: a session entry of this repository's own that exports
+  and then execs Sway, which is the same thing that would return the helper paths to bare
+  names and is recorded under the helpers entry in
+  [`TURNING-POINTS.md`](TURNING-POINTS.md); or accepting that Sway is only correct when
+  started from a shell, and saying so where a reader would meet it.
+  *Difficulty: low to confirm, done; the fix is a design question. Priority: high, since
+  it is a visibly broken desktop rather than a hypothetical.*
 
 - **The bar shows workspaces 6 to 10 with nothing in them.** `common.jsonc`'s
   `hyprland/workspaces` sets `all-outputs: true` and `persistent-workspaces: {"*": 5}`.

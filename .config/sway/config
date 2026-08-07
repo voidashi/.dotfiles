@@ -366,6 +366,10 @@ smart_gaps on
 # inner 3, which is half the gap Hyprland has. Do not re-derive these from that
 # sentence; re-measure if you change them.
 #
+# Confirmed on this machine with sway actually running, two windows side by side
+# on a 1920 output: gap between them 6, left edge 10, right edge 10, which is
+# what the headless numbers predicted and what Hyprland shows.
+#
 # One rule is knowingly broken. docs/design/RICE-GUIDE.md asks for gaps that are
 # even and drawn from the spacing scale 4, 8, 12, 16, 24. 4 is on it and 6 is
 # not. Parity with Hyprland won, because Hyprland's own 3 and 10 do not satisfy

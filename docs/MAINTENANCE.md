@@ -802,10 +802,21 @@ of the real config: an `output` line with a bad mode fails, prints the offending
 exits 1, while `bindsym $mod+Shift+z totally_not_a_command` is accepted in silence at
 exit 0, because a bind's command is only resolved when the key is pressed. So a clean
 `--validate` says the file loads. It does not say that a single keybinding, autostart
-line or idle handler in it works, and this repository has never booted sway to find out.
-Anything mirrored into that file from a Hyprland session is therefore parsed and never
-run. Treat it the way you would treat a config that looks right and paints nothing,
-because it is the same failure with a passing check in front of it.
+line or idle handler in it works. Treat it the way you would treat a config that looks
+right and paints nothing, because it is the same failure with a passing check in front of
+it.
+
+It has been booted once now, which is worth knowing precisely rather than as
+reassurance. Confirmed on that session: both outputs come up at the modes and positions
+the `output` block asks for; the `input` block applies, with the touchpad on flat
+acceleration, speed 0 and natural scrolling and the pointers on flat with natural
+scrolling off; gaps measure 6 between two windows and 10 at each screen edge, matching
+Hyprland; borders are `pixel` at 2; waybar, swaync, `nm-applet`, the cliphist watcher and
+swaybg all start, and swaybg gets a real wallpaper path; and swayidle runs with `-d -w`
+and every event the config gives it, with `journalctl -t swayidle` carrying real lines.
+Not confirmed, because looking at a desktop does not press keys: any keybinding, the
+screenshot binds among them. And one thing failed, which is the session environment, in
+[`TODO.md`](TODO.md).
 
 alacritty has no validate flag, and `migrate --dry-run` is not one wearing another
 name: it fails on TOML that will not parse and accepts an invented key inside a real
