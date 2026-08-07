@@ -19,105 +19,18 @@ hardware, images or a decision come last. Inside a group, by priority.
 
 ## Start here next
 
-"Documents that answer the same question twice", below. It is the cheapest group left
-that finishes at this keyboard. After it, "The two compositors". Maybe in the same session.
+"The reader deciding whether to install", below. It is the only group left that finishes
+at this keyboard, and its first entry is six cheap fixes to the same file that are worth
+one pass rather than six.
 
+Two groups were removed rather than reordered. "Documents that answer the same question
+twice" is done: each of its four facts now has one owner, and where the entry's premise
+was wrong the deviation is in the commit rather than here. "The two compositors" is done
+as well, and its outcome is a decision rather than a state, so it is in
+[`TURNING-POINTS.md`](TURNING-POINTS.md): sway follows Hyprland, one way. Read that
+before reopening any question about the two, including the three it closes as
+deliberately absent.
 
-## The two compositors
-
-`.config/hypr/` against `.config/sway/`: what is mirrored between them and has
-diverged, and what exists in one and not the other. The palette half of that divergence is
-in "Configs that still paste hex" and not here.
-
-- **The two compositors describe every runtime service twice, and have diverged.** The
-  autostart block in `autostart.lua` against the run of `exec` lines in `sway/config`; the
-  idle schedule in two syntaxes with a comment asking future editors to keep them in step;
-  three screenshot binds under Hyprland against one bare `grim` under Sway; different
-  launcher keys. The palette half of this divergence is closed: both compositors now read
-  generated colour, Sway through an included partial and Hyprland through `palette.lua`,
-  so what is left here is behaviour. Dropping Sway is not on the table: `sway/config` carries four findings that
-  could only come from booting it, including notifications that were dead under Sway with
-  the config themed and in place. The standing cost is that anything mirrored into
-  `sway/config` from a Hyprland session is checked by `sway --validate` and never run. The
-  brightness curve and the clipboard wipe both went in that way: confirmed working under
-  Hyprland, untried under Sway.
-  *Difficulty: high, now that the palette half has landed and what is left is the
-  divergence. Priority: medium.*
-
-- **The launcher and the keybinding open different terminals.** `.config/wofi/config` sets
-  `term=alacritty` while `.config/hypr/conf/programs.lua` sets `terminal = "kitty"`.
-  All four terminals are themed identically, which is why it went unnoticed. Pick one.
-  *Difficulty: trivial. Priority: low.*
-
-- **hyprlauncher's radius contradicts the floating rule.** `hyprtoolkit.conf` sets both
-  `rounding_large` and `rounding_small` to 0, but a launcher floats and the guide gives a
-  floating surface 4px. Confirmed on screen rather than only in the file: a capture of the
-  launcher's layer shows square corners. Nothing renders it in daily use today, so fix it
-  before switching back or the launcher arrives with the one geometry the design does not
-  allow. The two keys are hand-written and stay that way, since neither is colour.
-  *Difficulty: trivial. Priority: low while hyprlauncher stays off.*
-
-- **The bar carries laptop-only modules with no guard.** `battery` and `backlight` sit in
-  `modules-right` unconditionally, so on a desktop they are empty or absent, and
-  `SETUP.md` tells a reader to remove them, which is a workaround. Waybar has no
-  conditional module mechanism, so the options are a second `modules-right` in the
-  per-compositor files or accepting the manual step.
-  *Difficulty: low. Priority: low.*
-
-- **Per-application workspace layouts.** `hypr/conf/window_rules.lua` already drops gaps
-  and borders when a workspace holds one window, so this is an extension rather than
-  a build. What does not exist is any application-to-workspace assignment. Decide the rule
-  before writing it, because a workspace map that fights how you work is worse than none,
-  and mirror it in the Sway config, which has no equivalent selectors and would need
-  explicit `assign` rules.
-  *Difficulty: low to write, and the design is the real work. Priority: low.*
-
-## Documents that answer the same question twice
-
-`docs/` and `docs/design/`. Each entry is one fact with two owners, which is the
-failure the layout exists to prevent, so each is settled by deciding which document owns
-the question and cutting the other copy.
-
-- **`CLAUDE.md` holds one rule that exists nowhere else.** It claims it "can be deleted
-  without losing anything", which is true of four of its five rules. "Never write a count
-  that a config file owns" appears nowhere under `docs/`. Move it to `MAINTENANCE.md`
-  before the file goes, and move the general form with it: a file must not restate a fact
-  another file owns, only point at the owner. The count is the narrow case.
-  `hyprtoolkit.conf` carried the wide one twice. A line number is a third case worth
-  naming in the same breath, because it is a coordinate rather than a fact: a citation of
-  `README.md:161` went stale twice inside one session as the file grew, and both times
-  nothing failed. Cite the sentence, not where it currently sits.
-  *Difficulty: trivial. Priority: medium, because it is lost silently at deletion.*
-
-- **`THEMING.md` carries open work eight lines after saying this file owns it.** Delete its
-  "Not covered yet" section, whose three items are verbatim from here. One bullet is left
-  of the second half: the two radii, which still opens by restating `RICE-GUIDE.md`. Cut
-  that sentence and keep the mechanism clause after it, which is this document's actual
-  subject and exists only here. The role model and bright green bullets were the other
-  two and are done, rewritten to the mechanism half while the decisions behind them were
-  being settled. Named rather than numbered on purpose, and the reason keeps growing: one
-  bullet was inserted after this entry was written, the ordinals were already off by one
-  before that, and an `alert.neutral` bullet has since made a second.
-  Three must survive whole: the relaxed accent budget for fetches, "Rollback is git, not a
-  directory", and yazi's icon table, which is a decision this file now owns.
-  *Difficulty: trivial. Priority: medium.*
-
-- **Decide whether `minimal/` survives its own rule.** `THEMING.md`'s "Rollback is git, not
-  a directory" bullet settles "Do not reintroduce a legacy directory", and
-  `.config/fastfetch/minimal/` is five files whose own header calls them frozen snapshots
-  "NOT kept in sync". The presets are a recorded keep, so the two statements now disagree
-  and one has to move: either `minimal/` is the documented exception, or it is the thing
-  the rule was written about.
-  *Difficulty: trivial, and it is a decision rather than work. Priority: low.*
-
-- **`AESTHETIC-DIRECTION.md` states photography direction that two other documents also
-  state**, for a repository that has no photography; `RICE-GUIDE.md` already carries the
-  wallpaper rules standalone. Its temperature map overlaps `DESIGN-SYSTEM.md`'s but the
-  two disagree on row count and wording, so reconcile before deleting either, and decide
-  the map's home only once `DESIGN-SYSTEM.md`'s is decided. Untouchable: the material
-  references, "The right temperature of darkness", "What the system is not" and the note
-  on coherence over time.
-  *Difficulty: low. Priority: low.*
 
 ## The reader deciding whether to install
 
@@ -155,10 +68,12 @@ one file that leaves the repository at publication.
   The second exists because the first was run with `--include="*.md"` and reported clean
   while eight references sat in six config and script files. What it may legitimately
   return is prose about the file rather than a use of it: `CLAUDE.md`'s own title line,
-  this entry, "`CLAUDE.md` holds one rule that exists nowhere else", and the mention in
-  `TURNING-POINTS.md` of where the rules came from. Anything else is a real reference to
-  deal with first. Note the "Never write a count that a config file owns" rule still has no
-  home under `docs/`, which is that entry.
+  this entry, and the mention in `TURNING-POINTS.md` of where the rules came from.
+  Anything else is a real reference to deal with first. The blocker this entry used to
+  carry is gone: "Never write a count that a config file owns" was the one rule with no
+  home under `docs/`, and it is now in `MAINTENANCE.md` as the narrow case of the wider
+  rule about restating a fact another file owns. Nothing else in `CLAUDE.md` is unique to
+  it, so the file can go whenever publication does.
   *Difficulty: low. Priority: medium, and it blocks nothing until publication.*
 
 - **`wallpapers/` holds two files of one image.** `Topography.png` and `Topography.jpg`
@@ -184,6 +99,13 @@ icon set, or a look at a running screen. The screenshots are the highest-priorit
 the file and still belong here, because they are the last thing to do rather than the next.
 Photographing a desktop that is still being edited is work done twice, so they wait until
 the groups above have stopped changing what the desktop looks like.
+
+That condition is closer than it was. The only group left above is prose in `README.md`
+and `SETUP.md`, which changes nothing on screen. What the compositor work changed does
+not reach a Hyprland screenshot either: the sway gaps and border width are sway's, and
+the hyprlauncher radius is not rendered by anything that runs today. So a Hyprland
+desktop photographed now would not be made stale by anything still open, and wallpaper
+curation is the one entry that would.
 
 - **The screenshots in the README predate the current theme.** Committed April 2025, they
   show the Kanagawa desktop this repo no longer contains. They stay until replaced, since
@@ -240,8 +162,11 @@ the groups above have stopped changing what the desktop looks like.
   launcher was started against this repository's config and its layer captured with `grim`
   while converting `hyprtoolkit.conf`. Settled by that: the surface is `void-20`, measured
   at 87.9% of the window against `181818` for the toolkit's own default, and the corners
-  are square, which confirms the radius entry under "The two compositors" is a real defect
-  and not a paper one. Not settled: the input field one step lighter, the selected entry
+  were square, which is what made the radius a real defect rather than a paper one. That
+  half is now fixed: `hyprtoolkit.conf` sets both radii to 4, the value the guide gives a
+  floating surface. Nothing has rendered it since, so the fix is read and not seen, and
+  a capture of the layer is the check. Not settled: the input field one step lighter, the
+  selected entry
   Ice, and the identity mark Bordeaux rather than a second selection colour, because the
   finder listed nothing under a throwaway `$HOME` and none of the three was on screen.
   Anyone repeating this wants `hyprctl layers` rather than `hyprctl clients`, and a wait
