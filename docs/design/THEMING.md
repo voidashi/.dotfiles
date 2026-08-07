@@ -222,10 +222,6 @@ table's mono-primary row, which is for bars that render their own text outside a
   colour on the desktop, decided rather than overlooked, with the reasoning in the
   terminal file manager paragraph above. `check_render.py` names the colours on every
   run, since no tracked file carries them and the drift check cannot.
-- **Two radii, decided by whether a surface floats.** Floating takes 4px, docked takes
-  0. No scale, no third value. Both live in `palette.json` under `geometry`; Hyprland and
-  swaync read them, while GTK3 stylesheets carry the literal because GTK3 has no CSS
-  custom properties.
 - **Weight 500 is the UI font weight** for every GTK and Qt application. Regular thins
   out on surfaces this dark.
 - **The accent budget is relaxed for fetches only.** The guide's ceiling of two families
@@ -237,13 +233,8 @@ table's mono-primary row, which is for bars that render their own text outside a
   previous version beside it. Once the theme was proven, all 14 were deleted along with
   the commented references pointing at them, because they gave the impression of an
   active choice between themes where there was none. Do not reintroduce a legacy
-  directory.
-
-## Not covered yet
-
-Wallpaper curation is the largest remaining visual gap and the only one that needs
-assets rather than config. Dolphin still uses `breeze-dark` icons, so folders come out
-blue. Three things about the bar are settled only provisionally: numerals against app
-glyphs on the workspace buttons, whether the right-hand modules want separators, and
-whether 15px at weight 500 survives being lived with. All of these are in
-[`TODO.md`](../TODO.md) with what each one needs.
+  directory. What the rule forbids is a copy of an earlier state, so
+  `.config/fastfetch/minimal/` is not an exception to it: those five files are a variant
+  taking the guide's other reading, one accent instead of the semantic mapping, and both
+  readings are live. A variant is a choice you can still make. A snapshot is one you
+  already made.
