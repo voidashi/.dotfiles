@@ -250,8 +250,9 @@ outputs have different names you are fine. If you *do* have an `eDP-1` or a `DP-
 another resolution, change these or delete them and let the catch-all handle it. Run
 `hyprctl monitors` to see what yours are called.
 
-**The lid switch**, `.config/hypr/conf/binds.lua:114` and `:116`, also names `eDP-1`.
-Change it to your internal display, or delete both lines if you are on a desktop.
+**The lid switch**, the two `switch:on:Lid Switch` and `switch:off:Lid Switch` binds at
+the end of `.config/hypr/conf/binds.lua`, also names `eDP-1`. Change it to your internal
+display, or delete both lines if you are on a desktop.
 
 **Laptop-only bar modules.** `.config/waybar/common.jsonc` puts `backlight` and
 `battery` in the bar. On a desktop they will be empty or missing. Remove them from

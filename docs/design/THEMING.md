@@ -234,7 +234,7 @@ table's mono-primary row, which is for bars that render their own text outside a
   the commented references pointing at them, because they gave the impression of an
   active choice between themes where there was none. Do not reintroduce a legacy
   directory. What the rule forbids is a copy of an earlier state, so
-  `.config/fastfetch/minimal/` is not an exception to it: those five files are a variant
-  taking the guide's other reading, one accent instead of the semantic mapping, and both
-  readings are live. A variant is a choice you can still make. A snapshot is one you
+  `.config/fastfetch/minimal/` is not an exception to it: everything in that directory is
+  a variant taking the guide's other reading, one accent instead of the semantic mapping,
+  and both readings are live. A variant is a choice you can still make. A snapshot is one you
   already made.

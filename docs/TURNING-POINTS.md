@@ -188,8 +188,8 @@ that line changes, with nothing to catch it.
 - `.config/fastfetch/` beyond the preset that file runs. The other presets are
   dormant by choice, kept for the day the greeting changes rather than as history.
   `minimal/` is named separately because it is the one that looked like history and
-  was not: five files taking the guide's other reading of a fetch, one accent instead
-  of the semantic mapping. Their own header used to call them "frozen snapshots ...
+  was not: a variant of every preset beside it, taking the guide's other reading of a
+  fetch, one accent instead of the semantic mapping. Their own header used to call them "frozen snapshots ...
   NOT kept in sync", which is what `design/THEMING.md`'s "Rollback is git, not a
   directory" forbids, so the two entries read as contradicting each other for as long
   as that wording stood. The wording was the error. Nothing keeps `minimal/` in step

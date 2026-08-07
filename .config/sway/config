@@ -14,8 +14,9 @@
 # Four things cannot be mirrored and are absent on purpose rather than forgotten:
 # a SIGKILL bind, because `kill` is sway's only verb; directional swap, because
 # sway swaps by criterion and not by direction, so the move binds recalculate the
-# split tree the way binds.lua:47-51 describes; pseudotiling; and the lid binds,
-# for the reason in docs/MAINTENANCE.md.
+# split tree the way the comment above binds.lua's arrow-key move binds
+# describes; pseudotiling; and the lid binds, for the reason in
+# docs/MAINTENANCE.md.
 #
 # The commented example blocks sway ships by default were removed: none held real
 # config, together they ran to over forty lines, and it was among them that a dead
@@ -142,8 +143,8 @@ focus_follows_mouse yes
     # `swap container with` takes a criterion (mark, con_id, instance), not a
     # direction. So `move` stays, and it reinserts into the split tree, which
     # recalculates proportions and makes windows change size as they travel. That
-    # difference is forced, not chosen. binds.lua:47-51 has the same trade-off
-    # written from the other side.
+    # difference is forced, not chosen. The comment above binds.lua's own
+    # arrow-key move binds has the same trade-off written from the other side.
     bindsym $mod+Shift+Left move left
     bindsym $mod+Shift+Down move down
     bindsym $mod+Shift+Up move up

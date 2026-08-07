@@ -175,8 +175,9 @@ something does not work.
 
 ## Keybindings
 
-The entry points under Hyprland, with `Super` as the modifier. The full set is in
-`.config/hypr/conf/binds.lua`, which is readable Lua rather than a config dialect.
+The entry points, with `Super` as the modifier. These are the same under both
+compositors: `.config/sway/config` follows `.config/hypr/conf/binds.lua`, which is
+readable Lua rather than a config dialect, and the full set is there.
 
 | Keys | Action |
 |---|---|
@@ -191,11 +192,14 @@ The entry points under Hyprland, with `Super` as the modifier. The full set is i
 | `Super` + `M` | Exit the compositor |
 
 The power menu opens from the bar's power button. Closing the lid suspends the machine
-and the screen locks on the way down, which comes from logind and `hypridle` rather than
-from a binding here.
+and the screen locks on the way down, which comes from logind and the idle daemon
+(`hypridle` or `swayidle`) rather than from a binding here.
 
-Sway's bindings are in `.config/sway/config` and are close but not identical: its
-launcher is on `$mod` + `D`.
+One row does not carry across. `Super` + `Shift` + `Q`, the SIGKILL for a hung
+application, exists only under Hyprland: `kill` is sway's only verb for closing a
+window, so there is nothing to bind it to. Sway also keeps a few binds of its own for
+things Hyprland's layout has no equivalent of, splitting and stacking among them, and
+`.config/sway/config` says which and why beside each.
 
 ## Repository layout
 
