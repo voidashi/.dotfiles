@@ -66,7 +66,9 @@ description is what someone will remember.
   it is wrong on screen every day.*
 
 - **Switch this machine from plasmalogin to greetd.** Measured now rather than assumed:
-  `greetd` and `tuigreet` are both on PATH, `/etc/greetd/config.toml` already exists,
+  `greetd` and `tuigreet` are both on PATH, `/etc/greetd/config.toml` exists but is the
+  package's stock file and still runs `agreety --cmd /bin/sh`, so it has never been
+  pointed at this repository and tuigreet is installed but unreferenced.
   `greetd.service` is `disabled`, `plasmalogin.service` is `enabled` and running, and
   `/usr/share/wayland-sessions/` holds `hyprland.desktop`, `hyprland-uwsm.desktop`,
   `sway.desktop` and `plasma.desktop`. So nothing needs installing and the change is two
