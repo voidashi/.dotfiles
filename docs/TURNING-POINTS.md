@@ -481,13 +481,11 @@ manual step stays. It is one of several that document already lists, so it costs
 line in a section a reader is reading anyway rather than a step in an otherwise
 untouched install.
 
-The alternative that looks obvious does not work. Waybar here is one config split
-three ways: `common.jsonc` holds every module definition and the whole of
-`modules-right`, while `hyprland.jsonc` and `sway.jsonc` add only their own
-`modules-left`. So a per-compositor `modules-right` is available and answers the
-wrong question, because this is a hardware axis and not a compositor one. A desktop
-running Hyprland wants the same removal as a desktop running sway. Waybar has no
-conditional module mechanism to key off the hardware instead.
+The alternative that looks obvious does not work. Given how waybar is split here,
+which `MAINTENANCE.md` describes and owns, a per-compositor `modules-right` is
+available. It answers the wrong question: this is a hardware axis and not a compositor
+one, and a desktop running Hyprland wants the same removal as a desktop running sway.
+Waybar has no conditional module mechanism to key off the hardware instead.
 
 Not measured, and worth saying rather than implying: whether waybar hides a `battery`
 module on a machine with no battery was never tested, because the machine this was

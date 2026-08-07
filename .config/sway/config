@@ -11,12 +11,13 @@
 # sway ships with. What sway has and Hyprland has no counterpart for stays, as
 # long as it does not sit on a key Hyprland has already spent.
 #
-# Four things cannot be mirrored and are absent on purpose rather than forgotten:
-# a SIGKILL bind, because `kill` is sway's only verb; directional swap, because
-# sway swaps by criterion and not by direction, so the move binds recalculate the
-# split tree the way the comment above binds.lua's arrow-key move binds
-# describes; pseudotiling; and the lid binds, for the reason in
-# docs/MAINTENANCE.md.
+# Four things are absent on purpose rather than forgotten, and only three of them
+# because sway cannot express them: a SIGKILL bind, since `kill` is its only
+# verb; a directional swap, since it swaps by criterion and not by direction, so
+# the move binds recalculate the split tree the way the comment above binds.lua's
+# arrow-key move binds describes; and pseudotiling. The fourth is a decision, not
+# a limit. Sway has `bindswitch` and could bind the lid; it does not because no
+# lid event should lock the screen, for the reason in docs/MAINTENANCE.md.
 #
 # The commented example blocks sway ships by default were removed: none held real
 # config, together they ran to over forty lines, and it was among them that a dead
@@ -202,9 +203,13 @@ focus_follows_mouse yes
     # extra. Two of them do have one and take its key:
     #   $mod+j  matches Hyprland's togglesplit
     #   $mod+g  matches Hyprland's group toggle, which is what tabs are there
-    # Stacking has no analogue at all, so it sits on the shift of tabbed.
+    # Both are toggles because both of Hyprland's are. A bare `layout tabbed`
+    # only goes one way, so pressing the key twice would leave you in tabs with
+    # no way back on that finger, which is not what group.toggle does.
+    # Stacking has no analogue at all, so it sits on the shift of tabbed and is
+    # one-way on purpose.
     bindsym $mod+j layout toggle split
-    bindsym $mod+g layout tabbed
+    bindsym $mod+g layout toggle tabbed split
     bindsym $mod+Shift+g layout stacking
 
     # Make the current focus fullscreen
@@ -245,11 +250,13 @@ focus_follows_mouse yes
 # neither, and a mode you leave two different ways is a mode whose exit you have
 # to remember. The 10px step is the same on both sides.
 mode "resize" {
-    # left shrinks the container's width, right grows it
-    # up shrinks the container's height, down grows it
+    # Directions follow binds.lua's submap, which passes a positive delta to
+    # grow: up grows the height and down shrinks it. Sway ships these two the
+    # other way round, and they were left inverted here under a comment claiming
+    # they matched. Left and right already agreed and are unchanged.
     bindsym Left resize shrink width 10px
-    bindsym Down resize grow height 10px
-    bindsym Up resize shrink height 10px
+    bindsym Down resize shrink height 10px
+    bindsym Up resize grow height 10px
     bindsym Right resize grow width 10px
 
     # Return to default mode
@@ -280,20 +287,32 @@ bindsym $mod+Shift+r mode "resize"
     bindsym --locked XF86MonBrightnessDown exec brightnessctl -e3 set 5%-
     bindsym --locked XF86MonBrightnessUp exec brightnessctl -e3 set 5%+
 
-    # Screenshots, matching the three modes binds.lua binds to the same keys.
-    # Hyprland uses hyprshot, which talks to hyprctl and therefore cannot run
-    # here; grim and slurp are the equivalents. The window mode has no built-in
-    # form: it asks sway for the focused container's geometry and hands grim the
-    # rectangle. A scripts/wm/screenshot.sh was considered, as the clipboard
-    # picker is shared that way, and rejected: it would have to branch on the
-    # compositor anyway, so it trades three lines here for a file plus a branch.
-    # The window line is upstream's published form rather than one written here,
-    # because it is the quoting that is delicate, not the jq: a double-quoted
-    # $(...) holding a single-quoted filter that itself contains double quotes.
-    # The filter was run against a synthetic get_tree and returns exactly the
-    # focused container's geometry. The quoting has only been through
-    # `sway --validate`, which parses the line and does not run it.
-    bindsym Print exec grim
+    # Screenshots, on the same three keys binds.lua uses. Hyprland uses hyprshot,
+    # which talks to hyprctl and cannot run here; grim and slurp are the
+    # equivalents. Neither the output nor the window mode has a built-in form, so
+    # both ask sway for a rectangle and hand it to grim.
+    #
+    # The -o on the output bind is load-bearing now that this file declares two
+    # outputs. Measured on a headless sway with the two panels this config
+    # places side by side: a bare `grim` writes 3840x1080, every output
+    # composited into one image, while `grim -o <name>` writes 1920x1080, which
+    # is what `hyprshot -m output` means by an output. The bind was bare here
+    # before and was a single-monitor assumption nobody had written down.
+    #
+    # Two things still differ from hyprshot and are not worth a wrapper: it
+    # copies to the clipboard and sends a notification, and these do not.
+    #
+    # A scripts/wm/screenshot.sh was considered, as the clipboard picker is
+    # shared that way, and rejected: it would have to branch on the compositor
+    # anyway, so it trades three lines here for a file plus a branch.
+    #
+    # The two jq lines are upstream's published form rather than ones written
+    # here, because it is the quoting that is delicate, not the jq: a
+    # double-quoted $(...) holding a single-quoted filter that itself contains
+    # double quotes. Both filters were run against a real get_tree and a real
+    # get_outputs. The quoting has been through `sway --validate`, which parses
+    # the line and does not run it.
+    bindsym Print exec grim -o "$(swaymsg -t get_outputs | jq -r '.[] | select(.focused) | .name')"
     bindsym Shift+Print exec grim -g "$(slurp)"
     bindsym $mod+Print exec grim -g "$(swaymsg -t get_tree | jq -j '.. | select(.type?) | select(.focused).rect | "\(.x),\(.y) \(.width)x\(.height)"')"
 
@@ -313,31 +332,44 @@ bindsym $mod+Shift+r mode "resize"
 default_border pixel 2
 default_floating_border pixel 2
 
-# smart_borders replaces `hide_edge_borders smart`. They are different rules and
-# only the first has a counterpart: window_rules.lua sets border_size = 0 on a
-# workspace holding one window (w[tv1], f[1]), and sway(5) says smart_borders
-# "will only be enabled if the workspace has more than one visible child", which
-# is the same sentence. hide_edge_borders is about borders touching the screen
-# edge and Hyprland has no equivalent, so it goes rather than sitting on top.
+# smart_borders replaces `hide_edge_borders smart`, and this is a rename rather
+# than a change: sway(5) says the smart option of hide_edge_borders is
+# "equivalent to setting smart_borders smart and hide_edge_borders none". So the
+# old line was already doing this and nothing was dropped. It is spelled out
+# because the behaviour is what window_rules.lua asks for on the Hyprland side,
+# where border_size goes to 0 on a workspace holding one window (w[tv1], f[1]),
+# and a rule worth mirroring should be legible as itself.
 smart_borders on
 
 # smart_gaps is the other half of those same workspace rules, which zero gaps_in
 # and gaps_out for a single window.
 smart_gaps on
 
-# Gaps. Not a copy of Hyprland's numbers, because the two count differently, and
-# reading sway(5) rather than assuming is what changed these:
-#   sway  inner = "spacing around each window", so the gap between two is 2x
-#   sway  outer = "in addition to inner gaps", so the screen edge is inner+outer
-#   hypr  gaps_in = 3 per window, gaps_out = 10 at the screen edge
-# So inner 3 gives the same 6 between two windows, and outer 7 puts the edge on
-# 3+7 = 10. The old `gaps inner 10` with no outer was 20 between windows and 10
-# at the edge, which is why sway looked airier than Hyprland.
+# Gaps. Not a copy of Hyprland's numbers, because the two count differently.
+# Measured rather than reasoned about, on a headless sway with two tiled windows
+# on a 1920x1080 output, reading the rects back out of `swaymsg -t get_tree`:
 #
-# Computed from the manual, not measured on a screen. Nothing here has booted
-# sway to look at it.
-gaps inner 3
-gaps outer 7
+#   inner  3 outer  7  ->  edge 10, between 3
+#   inner  6 outer  4  ->  edge 10, between 6
+#   inner 10 outer  0  ->  edge 10, between 10
+#
+# So sway's inner is the whole gap BETWEEN two windows, and the screen edge is
+# inner + outer. Hyprland's gaps_in is a per-window inset, so its 3 shows as 6
+# between two windows, and gaps_out = 10 is the edge. inner 6 / outer 4 is
+# therefore the pair that mirrors it.
+#
+# sway(5) calls inner "spacing around each window", which reads as a per-window
+# inset and is what an earlier version of this comment computed from. It gave
+# inner 3, which is half the gap Hyprland has. Do not re-derive these from that
+# sentence; re-measure if you change them.
+#
+# One rule is knowingly broken. docs/design/RICE-GUIDE.md asks for gaps that are
+# even and drawn from the spacing scale 4, 8, 12, 16, 24. 4 is on it and 6 is
+# not. Parity with Hyprland won, because Hyprland's own 3 and 10 do not satisfy
+# that rule either and matching a sibling beats half-satisfying a scale in one
+# compositor. TODO.md carries the conflict.
+gaps inner 6
+gaps outer 4
 
 
 #
@@ -409,9 +441,15 @@ exec sh -c 'cliphist wipe; exec wl-paste --watch cliphist store'
 # was Hyprland's, not this file's: hypridle writes only to stdout, nothing
 # captured it, and a night of unexplained locks had to be reconstructed from
 # suspend and PAM lines in the journal because no timeout had left a record.
-# swayidle logs the same way and had the same gap, so it gets the same wrapper
-# before it costs the same evening. `journalctl -t swayidle` shows each timeout
-# with a time.
+#
+# -d is half of that wrapper and not a debugging leftover. swayidle does not log
+# its timeouts at default verbosity, which hypridle does, so the tag alone buys
+# almost nothing. Measured: `systemd-cat -t X swayidle -w timeout 1 true` puts
+# one startup warning in the journal and nothing when the timeout fires, while
+# the same line with -d logs "Cmd exec" for every one. Without it the 900 lock
+# and the 1800 suspend leave no record at all, which is exactly the evening this
+# wrapper exists to prevent. With it, `journalctl -t swayidle` shows each
+# timeout with a time.
 #
 # `lock` is the handler logind's Lock signal reaches, so `loginctl lock-session`
 # on the 900 timeout routes through it the way hypridle's lock_cmd does, and the
@@ -421,7 +459,7 @@ exec sh -c 'cliphist wipe; exec wl-paste --watch cliphist store'
 # through loginctl there would return immediately, and -w is the flag that makes
 # swayidle hold the suspend until the locker is actually up; handing it a command
 # that exits at once defeats it. The guard still applies.
-exec systemd-cat -t swayidle swayidle -w \
+exec systemd-cat -t swayidle swayidle -d -w \
     lock 'pidof swaylock || swaylock -f' \
     timeout 900 'loginctl lock-session' \
     timeout 960 'swaymsg "output * power off"' \

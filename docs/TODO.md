@@ -69,6 +69,19 @@ them was introduced by the work that closed it; they were simply never looked fo
   rather than a check. Reconcile against the script rather than against either paragraph.
   *Difficulty: trivial. Priority: low.*
 
+- **Neither compositor's gaps come from the spacing scale the guide names.**
+  `design/RICE-GUIDE.md` asks for window gaps that are even and drawn from 4, 8, 12, 16,
+  24, and `CLAUDE.md` makes that document the authority for desktop work. Hyprland runs
+  `gaps_in = 3`, `gaps_out = 10`; sway now runs `inner 6`, `outer 4`, which are the
+  values that reproduce Hyprland's spacing, measured rather than derived. So 4 is the
+  only one of the four on the scale and 3 is not even. Parity between the two
+  compositors was chosen over the scale when sway was converged, deliberately and in one
+  direction, but that only moved the conflict rather than settling it. Settling it means
+  picking scale values for Hyprland first and letting sway follow, which is a visible
+  change to the desktop and wants an eye on it rather than arithmetic.
+  *Difficulty: low to change, and the judgement is whether the current spacing is
+  actually wrong. Priority: low.*
+
 - **A pointer in `THEMING.md` promises four explanations and the target holds two.** It
   says why "the last row is only four entries" is in `TURNING-POINTS.md`; the row names
   fastfetch, fish, `waybar/common.jsonc` and `nvim/theme/roles.lua`, and the entry it
@@ -145,12 +158,13 @@ the file and still belong here, because they are the last thing to do rather tha
 Photographing a desktop that is still being edited is work done twice, so they wait until
 the groups above have stopped changing what the desktop looks like.
 
-That condition is closer than it was. The only group left above is prose in `README.md`
-and `SETUP.md`, which changes nothing on screen. What the compositor work changed does
-not reach a Hyprland screenshot either: the sway gaps and border width are sway's, and
-the hyprlauncher radius is not rendered by anything that runs today. So a Hyprland
-desktop photographed now would not be made stale by anything still open, and wallpaper
-curation is the one entry that would.
+That condition is closer than it was. Nothing open above changes a Hyprland screenshot.
+The two groups above it are documentation, with one exception that touches the tree:
+deleting the duplicate PNG from `wallpapers/`, which removes one of two copies of the
+same image and so cannot change what a desktop looks like either. What the compositor
+work changed does not reach a Hyprland screenshot: the sway gaps and border width are
+sway's, and the hyprlauncher radius is not rendered by anything that runs today. So
+wallpaper curation is the one open entry that would make a photograph stale.
 
 - **The screenshots in the README predate the current theme.** Committed April 2025, they
   show the Kanagawa desktop this repo no longer contains. They stay until replaced, since

@@ -159,8 +159,10 @@ it is semantic.
 
 ## Temperature: the general map
 
-To avoid future ambiguity, the temperature of each element in plain terms. Ordered warm
-to cold, which is the spectrum the paragraph below describes:
+To avoid future ambiguity, the temperature of each element in plain terms. Grouped rather
+than sorted: the two neutrals everything else sits on, then the five families, then the
+two semantic states. Reading down the temperature column is not a spectrum, and the
+paragraph after the table is where the spectrum is described.
 
 | Element | Temperature | Material reference |
 |---|---|---|

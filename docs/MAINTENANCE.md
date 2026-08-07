@@ -63,9 +63,14 @@ already been written into this repository:
   above it does. A citation of `README.md:161` went stale twice inside one session as the
   file grew, and nothing failed either time. Cite the sentence, not where it currently
   sits.
-- **A rule stated where it is not owned.** `hyprtoolkit.conf` carried the same one twice.
-  When two files disagree, each is authoritative only on its own question, so the fix
-  belongs in the file that lost ownership, not in whichever copy you happened to open.
+- **A rule stated where it is not owned.** `hyprtoolkit.conf` restated the guide's radius
+  rule and got it backwards, asserting that a launcher takes sharp corners where
+  `design/RICE-GUIDE.md` names a launcher as a floating surface. That comment is gone.
+  The same file still restates the guide's role assignment for launchers, which is
+  correct today and is the same shape, so it is the worked example of both halves: a
+  restated rule that went wrong, and a restated rule that has not yet. When two files
+  disagree, each is authoritative only on its own question, so the fix belongs in the
+  file that lost ownership, not in whichever copy you happened to open.
 
 ## The management scripts
 
