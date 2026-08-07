@@ -45,7 +45,3 @@ anything; everything it references lives under `docs/`.
 - **Writing style for every file here:** no em dashes, and never state a thing then
   restate it inverted. Documentation in English. Code comments follow the language of
   the surrounding file, never two languages in one file.
-- **Never write a count that a config file owns.** "56 packages", "31 paths". Those
-  files exist to be edited, so the number is wrong the first time anyone edits one, and
-  nothing fails when it goes stale. Name the source instead: "every package in
-  `packages.conf`". The scripts already count at runtime; prose should point, not tally.

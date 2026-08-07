@@ -48,6 +48,25 @@ matching how Unix names executables, where hyphens outnumber underscores about t
 to one in `/usr/bin`. Python files use underscores because `check_palette.py` does
 `import generate_theme`, and a module name cannot contain a hyphen.
 
+**A file must not restate a fact another file owns. It points at the owner.** A restated
+fact has two homes, and the copy goes stale in silence: nothing runs it, nothing checks
+it, and the reader who finds the wrong one has no way to tell which is which. Every
+document here answers exactly one question for that reason, and
+[`docs/README.md`](README.md) says which. Three cases are worth naming because each has
+already been written into this repository:
+
+- **A count that a config file owns.** "56 packages", "31 paths". Those files exist to be
+  edited, so the number is wrong the first time anyone edits one, and nothing fails when
+  it goes stale. Name the source instead: "every package in `packages.conf`". The scripts
+  already count at runtime; prose should point, not tally.
+- **A line number.** It is a coordinate rather than a fact, and it moves whenever anything
+  above it does. A citation of `README.md:161` went stale twice inside one session as the
+  file grew, and nothing failed either time. Cite the sentence, not where it currently
+  sits.
+- **A rule stated where it is not owned.** `hyprtoolkit.conf` carried the same one twice.
+  When two files disagree, each is authoritative only on its own question, so the fix
+  belongs in the file that lost ownership, not in whichever copy you happened to open.
+
 ## The management scripts
 
 All three resolve their `.conf` files from the script's own location (`SCRIPT_DIR`),
