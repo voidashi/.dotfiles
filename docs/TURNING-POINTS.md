@@ -400,7 +400,12 @@ plasmalogin. It was never a property of `~/.local/bin`, and the sentence above r
 though it were.
 
 So the five call sites now spell out `$HOME/.local/bin/<name>` instead of trusting
-PATH. The claim that "the configs end up with no path in them at all" is what actually
+PATH. Confirmed on a real session rather than only in a shell: after a reboot into the
+greeter, the wallpaper came back, which is the call site that failed visibly. The other
+four run through the same two expansions, and both are demonstrated rather than assumed.
+Hyprland's `exec_cmd` is what the wallpaper line uses. waybar's exec strings reach a
+shell, which its own `custom/media` module proves in the same file, since it is written
+with `$HOME` and the running process shows the expanded path. The claim that "the configs end up with no path in them at all" is what actually
 fell; what the move was for was removing the *clone* path, and that still holds, since
 `$HOME/.local/bin` is fixed wherever the repository was cloned. A launcher-independent
 absolute path beat an environment that three different session managers arrange three

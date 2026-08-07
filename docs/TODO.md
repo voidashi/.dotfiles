@@ -19,10 +19,8 @@ hardware, images or a decision come last. Inside a group, by priority.
 
 ## Start here next
 
-"Picked by hand, in this order", immediately below, and its first entry before anything
-else in this file: one login confirms whether a fix that touched the wallpaper, a
-keybinding and the bar landed, and nothing else here can proceed on the assumption that
-it did.
+"Picked by hand, in this order", immediately below. It is the only group here that was
+chosen rather than discovered, which is why it comes before everything under it.
 
 After that group, "Four more documents that answer the same question twice", then "The
 reader deciding whether to install". Both finish at this keyboard, as does "While you
@@ -47,20 +45,8 @@ Each entry below was measured before it was written, and three of them do not sa
 they were first described as saying. Where that happened it is marked, because the
 description is what someone will remember.
 
-- **Confirm the helper paths work in a real session.** The five call sites that reach
-  `scripts/wm/` helpers were changed from a bare name to `$HOME/.local/bin/<name>`, which
-  fixes a wallpaper, a clipboard bind and the bar's power button that a greetd session
-  left dead. Nothing has confirmed it on a screen: the change was verified only by
-  running the command under the PATH greetd hands the session, and a session cannot be
-  checked from outside itself. Log out and back in, then look for three things: the
-  wallpaper appears, `$mod+Shift+V` opens the picker, and the bar's power button opens
-  the menu. Why it broke and what was ruled out is in
-  [`TURNING-POINTS.md`](TURNING-POINTS.md), not here.
-  *Difficulty: trivial, it is one look. Priority: high, because until it is looked at
-  nobody knows whether the fix landed.*
-
-- **Sway under this greeter has no session environment at all.** Found while fixing the
-  entry above and separate from it. `environment.d/50-voidashi.conf` is Sway's only
+- **Sway under this greeter has no session environment at all.**
+  `environment.d/50-voidashi.conf` is Sway's only
   source for session variables, because `man 5 sway` has no `env` directive and an `exec`
   cannot change its parent's environment, and that file does not reach a greetd-launched
   session: `XCURSOR_SIZE`, `HYPRCURSOR_SIZE` and `QT_QPA_PLATFORMTHEME` are all set in it
