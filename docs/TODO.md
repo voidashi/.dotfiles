@@ -63,18 +63,38 @@ description is what someone will remember.
   its parent's environment, so that file is its only source, while Hyprland sets the same
   values again through `conf/env_vars.lua` for everything it launches. `MAINTENANCE.md`
   records this exact failure as having happened once before, under the same variable.
-  So the fix is a bridge rather than a new source, and there are three. `uwsm` is in
-  `extra` and starts a compositor as a systemd user unit, which is the ecosystem's answer
-  to exactly this and which Hyprland already expects, since
-  `/usr/share/wayland-sessions/hyprland-uwsm.desktop` ships with it; Sway has no such
-  file. `tuigreet --session-wrapper` can wrap the session in a command that imports the
-  systemd user environment first, which needs nothing installed but puts a fiddly quoted
-  line in a root-owned config. Or a session entry of this repository's own that exports
-  and then execs, which is in `$HOME` and tracked but reinvents `uwsm`. Whichever is
-  chosen, adding `PATH` to `environment.d` would return the helper calls to bare names
-  and settle the entry in [`TURNING-POINTS.md`](TURNING-POINTS.md) that had to compromise.
-  *Difficulty: low, and choosing the bridge is the work. Priority: high, since it is a
-  visibly broken desktop rather than a hypothetical.*
+  The bridge chosen is `uwsm`, which starts a compositor as a systemd user unit so that
+  it inherits the environment by construction. It is the mechanism the ecosystem already
+  provides rather than one written here, and Hyprland expects it: it ships
+  `hyprland-uwsm.desktop` on its own. It is declared in `packages.conf` and not yet
+  installed. Rejected, and why, so neither gets re-proposed: `tuigreet
+  --session-wrapper` needs nothing installed but buries nested quoting in a root-owned
+  TOML that nobody will remember writing; a session entry of this repository's own stays
+  in `$HOME` and under version control but reinvents `uwsm` worse, and greetd's
+  `--sessions` points only at `/usr/share`, so an absolute `$HOME` path lands in the root
+  config anyway.
+
+  **Do it in two stages, and do not start the second until the first is proven**, because
+  the second undoes something that currently works.
+
+  Stage one, the bridge. Install `uwsm`, then find out what it ships rather than
+  assuming: whether it provides a Sway session entry, or whether one is needed following
+  the pattern Hyprland's uses, `Exec=uwsm start -e -D <names> <session>.desktop`. Pick
+  the uwsm entry from the greeter's menu; the plain entries stay in the list, which is
+  what makes this cheap to abandon. The check is `scripts/check-session-env.sh`, run from
+  inside the session, which is the probe that found the fault written down so it does not
+  have to be rebuilt. It currently reports FAIL, which is how you know it is not inert.
+  Dolphin rendering themed is the confirmation on screen.
+
+  Stage two, the PATH, only once stage one passes. Add `PATH=${HOME}/.local/bin:${PATH}`
+  to `environment.d/50-voidashi.conf`, confirm it arrives by the same probe, and only
+  then return the five helper call sites to bare names. That settles the compromise
+  recorded in [`TURNING-POINTS.md`](TURNING-POINTS.md), which had to give up on the
+  configs naming no path at all, and that entry gets rewritten rather than left saying
+  the goal fell. Doing this before stage one passes breaks a wallpaper, a keybinding and
+  the bar's power button that work today.
+  *Difficulty: low per stage, and the sequencing is the part that matters. Priority: high
+  for stage one, since it is a visibly broken desktop; stage two is tidying and waits.*
 
 - **The bar shows workspaces 6 to 10 with nothing in them.** `common.jsonc`'s
   `hyprland/workspaces` sets `all-outputs: true` and `persistent-workspaces: {"*": 5}`.
