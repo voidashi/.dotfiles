@@ -190,8 +190,21 @@ curation is the one entry that would.
 
 ## While you are already in the file
 
-Never a session of their own. The cost of each is opening the file, so they are paid by
-whatever task opens it for another reason.
+Never a session of their own. The cost of each is paid by whatever task opens the file
+for another reason. The exception is the first entry, which is one pass over one file and
+sits here because nothing else will ever open that file.
+
+- **Every link in `DESIGN-SYSTEM.md`'s table of contents is dead.** All seventeen of them.
+  The links assume two spaces after the section number (`#1--operating-principles`) and
+  the headings carry one (`## 1 Operating principles`), so every anchor misses. Found by a
+  link checker written to verify a different change and pointed at the whole tree; it is
+  not this repo's oldest defect, only its quietest, since a markdown anchor that does not
+  resolve scrolls nowhere and reports nothing. Fix the links rather than the headings:
+  seventeen link targets against seventeen headings is the same count, but a heading is
+  quoted elsewhere and an anchor is not. Nothing under `scripts/` checks markdown, so this
+  will not be caught again on its own.
+  *Difficulty: trivial. Priority: low, since the document is optional reading by its own
+  entry in `README.md`.*
 
 - **Many comments under `.config/hypr/` are in Portuguese** while the rest of the tree is
   English. Translate on touch, which is how the two in `autostart.lua` that the
