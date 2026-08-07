@@ -352,14 +352,19 @@ What was never executed, so nobody reads that number as broader than it is:
   whole schedule as CLI arguments in `.config/sway/config`. Both carry the same three
   timeouts, and the middle one is the lock's plus sixty seconds on purpose, so that
   the screen blanks after the lock rather than with it: move one and the other has to
-  move too. They reach the locker differently: hypridle fires `loginctl lock-session`,
-  which routes every request through its own `lock_cmd`, while swayidle calls
-  `swaylock -f` directly. Changing how the screen locks therefore means editing both.
-- **hypridle runs under `systemd-cat -t hypridle`**, so `journalctl -t hypridle` shows
-  every timeout with a time. It writes only to stdout, and launched bare from
-  `autostart.lua` nothing captured that: a night of unexplained locks had to be
-  reconstructed from suspend and PAM lines in the journal because not one of them had
-  left a record. Do not drop the wrapper to tidy the line.
+  move too. They now reach the locker the same way, which they did not before: both
+  fire `loginctl lock-session`, hypridle routing it through its `lock_cmd` and swayidle
+  through its `lock` handler, and both guard with `pidof swaylock` so a second request
+  cannot stack a second locker. One asymmetry is deliberate. swayidle's `before-sleep`
+  still calls `swaylock -f` directly, because `-w` is what holds the suspend until the
+  locker is actually up, and handing it a `loginctl` call that returns immediately
+  defeats that. Changing how the screen locks still means editing both files.
+- **Both idle daemons run under `systemd-cat`**, so `journalctl -t hypridle` and
+  `journalctl -t swayidle` show every timeout with a time. They write only to stdout, and
+  launched bare from `autostart.lua` nothing captured that: a night of unexplained locks
+  had to be reconstructed from suspend and PAM lines in the journal because not one of
+  them had left a record. That was hypridle's evening; swayidle got the wrapper on the
+  strength of it rather than after repeating it. Do not drop either to tidy the line.
 - **No lid event locks the screen, and none should.** Closing the lid makes
   `systemd-logind` suspend, which is its default (`HandleLidSwitch=suspend`) and which
   this repo neither sets nor may depend on, and hypridle's
@@ -782,6 +787,17 @@ kitty +runpy "from kitty.config import load_config; bad=[]; load_config('.config
 waybar -c <config> -s <style>             # warns about unknown modules
 nvim --headless "+checkhealth vim.deprecated" +qa
 ```
+
+**`sway --validate` does not check what a bind runs.** It parses the file and stops
+there, and the difference between the two is most of `sway/config`. Measured, on a copy
+of the real config: an `output` line with a bad mode fails, prints the offending line and
+exits 1, while `bindsym $mod+Shift+z totally_not_a_command` is accepted in silence at
+exit 0, because a bind's command is only resolved when the key is pressed. So a clean
+`--validate` says the file loads. It does not say that a single keybinding, autostart
+line or idle handler in it works, and this repository has never booted sway to find out.
+Anything mirrored into that file from a Hyprland session is therefore parsed and never
+run. Treat it the way you would treat a config that looks right and paints nothing,
+because it is the same failure with a passing check in front of it.
 
 alacritty has no validate flag, and `migrate --dry-run` is not one wearing another
 name: it fails on TOML that will not parse and accepts an invented key inside a real

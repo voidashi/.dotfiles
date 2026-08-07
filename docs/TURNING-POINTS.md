@@ -438,5 +438,64 @@ should stay spaced only, and whether 15px at weight 500 is the right text size.
 Nothing is owed on these. They are recorded so that changing one is not mistaken for
 undoing a decision.
 
+## Sway follows Hyprland, and the direction is the decision
+
+The two compositors had drifted apart in everything but colour: different launcher
+key, no media keys, one screenshot mode against three, no input block, no output
+block, and an idle schedule that agreed on its numbers while reaching the locker by
+a different route. The choice was between converging them and writing the divergence
+down as intentional. They converged, one way: `sway/config` follows `.config/hypr/`
+and never the reverse, so a key that means something under one means it under the
+other. Sway keeps what Hyprland has no counterpart for, as long as it does not sit on
+a key Hyprland has already spent, which is why the home-row focus row went.
+
+The cost was known and taken. Sway is validated and never booted here, so every line
+mirrored into it is parsed and unrun, and full convergence enlarges that surface on
+purpose rather than by accident. `sway --validate` does not narrow it much:
+`MAINTENANCE.md` has the measurement, but it accepts an invented command inside a
+`bindsym` at exit 0.
+
+Four things stayed different because sway cannot express them: a SIGKILL bind, since
+`kill` is its only verb; directional swap, since sway swaps by criterion rather than
+direction; pseudotiling; and the lid binds, which are absent for the separate reason
+in `MAINTENANCE.md`. Those are written into the file as absent on purpose, so the
+next reader does not close them as gaps.
+
+What this does not settle: nothing above says the two must stay identical forever.
+It says which file moves when they differ.
+
+## The bar carries laptop modules on every machine
+
+`battery` and `backlight` sit in `modules-right` unconditionally, and on a desktop
+they are empty or absent. `SETUP.md` tells such a reader to delete them, which is a
+manual step in an install that otherwise has none, and it stays.
+
+The alternative that looks obvious does not work. Waybar here is one config split
+three ways: `common.jsonc` holds every module definition and the whole of
+`modules-right`, while `hyprland.jsonc` and `sway.jsonc` add only their own
+`modules-left`. So a per-compositor `modules-right` is available and answers the
+wrong question, because this is a hardware axis and not a compositor one. A desktop
+running Hyprland wants the same removal as a desktop running sway. Waybar has no
+conditional module mechanism to key off the hardware instead.
+
+Not measured, and worth saying rather than implying: whether waybar hides a `battery`
+module on a machine with no battery was never tested, because the machine this was
+written on is a laptop. If it does, the manual step is unnecessary and this entry is
+the thing to revisit.
+
+## Per-application workspace layouts will not be built
+
+Neither compositor assigns an application to a workspace today, and neither will.
+`window_rules.lua` already drops gaps and borders when a workspace holds one window,
+so the mechanism to extend was there and the design was the whole job: a map that
+fights how you actually work is worse than no map, and nothing in daily use asks for
+one. Deciding not to write it is cheaper than writing one to find out.
+
+This is about the application-to-workspace map and nothing else. The smart-gaps rules
+in `window_rules.lua` stay, adding a rule for some other reason stays open, and if a
+workspace habit ever becomes stable enough to write down, this entry is not the
+argument against writing it. It is the record that no such habit existed when the
+question was asked.
+
 Open work of every kind lives in `docs/TODO.md`, including what is diagnosed and
 deliberately parked. It is not repeated here.
