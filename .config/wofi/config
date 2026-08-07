@@ -1,5 +1,10 @@
 allow_images=true
 hide_scroll=true
 no_actions=false
-term=alacritty
+# The terminal wofi spawns for a desktop entry marked Terminal=true. Both
+# compositors bind kitty (hypr/conf/programs.lua, sway/config), and this said
+# alacritty, so launching a TUI application from the launcher opened a different
+# terminal than launching one from the keyboard. All four terminals here are
+# themed identically, which is why it went unnoticed.
+term=kitty
 mode=drun
