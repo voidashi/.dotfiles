@@ -20,8 +20,8 @@ hardware, images or a decision come last. Inside a group, by priority.
 ## Start here next
 
 "Documents that answer the same question twice", below. It is the cheapest group left
-that finishes at this keyboard, and one of its three entries has just shrunk: the
-`THEMING.md` entry lost two of the four cuts it asked for, which the entry now says.
+that finishes at this keyboard, and one of its entries has just shrunk: the `THEMING.md`
+entry lost two of the four cuts it asked for, which the entry now says.
 
 The group directly below is down to a single entry that wants a running `btm` on a
 screen, so it is not a session of its own any more; fold it into whatever session next
@@ -119,14 +119,14 @@ the question and cutting the other copy.
   *Difficulty: trivial. Priority: medium, because it is lost silently at deletion.*
 
 - **`THEMING.md` carries open work eight lines after saying this file owns it.** Delete its
-  "Not covered yet" section, whose three items are verbatim from here. What remains of the
-  second half is one bullet: the two radii still open by restating `RICE-GUIDE.md`, and it
-  wants that sentence cut and the mechanism clause after it kept, which is this document's
-  actual subject and exists only here. The role model and bright green bullets were the
-  other two and are done, rewritten to the mechanism half while the decisions behind them
-  were being settled. Named rather than numbered on purpose, and now for a second reason:
-  two bullets have been inserted among them since this entry was written, the ordinals
-  were already off by one before that, and an `alert.neutral` bullet has joined the list.
+  "Not covered yet" section, whose three items are verbatim from here. One bullet is left
+  of the second half: the two radii, which still opens by restating `RICE-GUIDE.md`. Cut
+  that sentence and keep the mechanism clause after it, which is this document's actual
+  subject and exists only here. The role model and bright green bullets were the other
+  two and are done, rewritten to the mechanism half while the decisions behind them were
+  being settled. Named rather than numbered on purpose, and the reason keeps growing: one
+  bullet was inserted after this entry was written, the ordinals were already off by one
+  before that, and an `alert.neutral` bullet has since made a second.
   Three must survive whole: the relaxed accent budget for fetches, "Rollback is git, not a
   directory", and yazi's icon table, which is a decision this file now owns.
   *Difficulty: trivial. Priority: medium.*
