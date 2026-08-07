@@ -189,12 +189,15 @@ that line changes, with nothing to catch it.
   dormant by choice, kept for the day the greeting changes rather than as history.
   `minimal/` is named separately because it is the one that looked like history and
   was not: a variant of every preset beside it, taking the guide's other reading of a
-  fetch, one accent instead of the semantic mapping. Their own header used to call them "frozen snapshots ...
-  NOT kept in sync", which is what `design/THEMING.md`'s "Rollback is git, not a
-  directory" forbids, so the two entries read as contradicting each other for as long
-  as that wording stood. The wording was the error. Nothing keeps `minimal/` in step
-  with the presets above it and no check would report the drift, so a module added
-  there has to be added here by hand.
+  fetch, one accent instead of the semantic mapping. It is worth knowing why that needs
+  saying at all. The files used to describe themselves, in their own header, as frozen
+  snapshots of an earlier state kept deliberately out of sync, and
+  `design/THEMING.md`'s "Rollback is git, not a directory" forbids exactly that. So this
+  entry and that rule appeared to contradict one another, when what was actually wrong
+  was the header: a variant of a reading still open is not a copy of a decision already
+  made. The header says so now. True either way, and the part that matters if you are
+  editing: nothing keeps `minimal/` in step with the presets above it and no check
+  reports the drift, so a module added there has to be added here by hand.
 
 These stay themed and tracked so that switching is reading a file rather than
 writing one.
@@ -447,7 +450,10 @@ a different route. The choice was between converging them and writing the diverg
 down as intentional. They converged, one way: `sway/config` follows `.config/hypr/`
 and never the reverse, so a key that means something under one means it under the
 other. Sway keeps what Hyprland has no counterpart for, as long as it does not sit on
-a key Hyprland has already spent, which is why the home-row focus row went.
+a key Hyprland has already spent. That last clause has one visible casualty: sway ships
+`$mod+h/j/k/l` as a second way to move focus, Hyprland uses `$mod+j` to toggle the
+split, and the split toggle won. Sway's arrow keys still move focus and its home-row
+keys now do nothing.
 
 The cost was known and taken. Sway is validated and never booted here, so every line
 mirrored into it is parsed and unrun, and full convergence enlarges that surface on
@@ -455,11 +461,14 @@ purpose rather than by accident. `sway --validate` does not narrow it much:
 `MAINTENANCE.md` has the measurement, but it accepts an invented command inside a
 `bindsym` at exit 0.
 
-Four things stayed different because sway cannot express them: a SIGKILL bind, since
-`kill` is its only verb; directional swap, since sway swaps by criterion rather than
-direction; pseudotiling; and the lid binds, which are absent for the separate reason
-in `MAINTENANCE.md`. Those are written into the file as absent on purpose, so the
-next reader does not close them as gaps.
+Four things stayed different, and only three of them for the same reason. Sway cannot
+express a SIGKILL bind, since `kill` is its only verb; it cannot express a directional
+swap, since it swaps by criterion rather than by direction; and it has no pseudotiling.
+The fourth is not a limit at all. Sway has `bindswitch` and could bind the lid
+perfectly well; it does not, because no lid event should lock the screen, which
+`MAINTENANCE.md` argues and which is a decision rather than a constraint. All four are
+written into `sway/config` as absent on purpose, so the next reader does not close them
+as gaps, but do not read the fourth as something sway is unable to do.
 
 What this does not settle: nothing above says the two must stay identical forever.
 It says which file moves when they differ.
@@ -467,8 +476,10 @@ It says which file moves when they differ.
 ## The bar carries laptop modules on every machine
 
 `battery` and `backlight` sit in `modules-right` unconditionally, and on a desktop
-they are empty or absent. `SETUP.md` tells such a reader to delete them, which is a
-manual step in an install that otherwise has none, and it stays.
+they are empty or absent. `SETUP.md` tells such a reader to delete them, and that
+manual step stays. It is one of several that document already lists, so it costs a
+line in a section a reader is reading anyway rather than a step in an otherwise
+untouched install.
 
 The alternative that looks obvious does not work. Waybar here is one config split
 three ways: `common.jsonc` holds every module definition and the whole of

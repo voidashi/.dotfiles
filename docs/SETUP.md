@@ -276,8 +276,16 @@ menu = "wofi --show drun"   -- line 22
 All four terminals are configured and themed identically, so switching `terminal` to
 `ghostty`, `alacritty` or `foot` costs nothing.
 
-**Sway sets no outputs at all**, so it uses whatever your compositor detects. If you
-need a specific layout there, add `output` lines to `.config/sway/config`.
+**Sway names the same two outputs**, in its own `### Output` section, and this is the
+one place its config is more brittle than Hyprland's. Sway has no catch-all line, so
+where Hyprland falls back to a preferred mode for an output it does not recognise, sway
+simply has no directive for it, which is fine, and it also has no way to say "that one,
+but at whatever mode it prefers". If your internal panel is not `eDP-1`, or is `eDP-1`
+at another resolution, edit or delete those two lines the same way you edited the
+Hyprland ones. An output with no directive comes up at its preferred mode and
+auto-positioned, so deleting is safe. A wrong mode is not: it is the one thing
+`sway --validate` does fail on, which at least means you find out immediately. Run
+`swaymsg -t get_outputs` to see what yours are called.
 
 **If you already run KDE.** `~/.config/kdeglobals` and `~/.config/kcminputrc` are tracked
 entries, and they are where Plasma reads its palette, fonts, icon theme and cursor. On a

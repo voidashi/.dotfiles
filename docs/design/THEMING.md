@@ -111,8 +111,10 @@ configured too and takes its appearance from `.config/hypr/hyprtoolkit.conf`, si
 own config covers behaviour only; that file's six colour keys are sourced from a
 generated partial and the rest of it, rounding and fonts, stays hand-written. Rendered
 and sampled once: the surface comes out `191817`, against `181818` for the toolkit's
-own default, and the corners are square. The selected entry and the identity mark were
-not on screen in that capture, since the list was empty.
+own default. The corners were square in that capture, which is what identified the
+radius as a real defect rather than a paper one; both rounding keys are now 4, the value
+the guide gives a floating surface, and nothing has rendered them since. The selected
+entry and the identity mark were not on screen either, since the list was empty.
 
 **Notifications.** swaync on `void-20`, painting from custom properties on `:root`
 rather than from our own selectors, which is what makes upstream's radius and surfaces

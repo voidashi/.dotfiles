@@ -462,7 +462,10 @@ The system does not define a proprietary set, it defines criteria any library mu
 
 ## 10 Photography and image
 
-*Detailed editing guide in its own document.*
+*This section is the whole of it. A separate editing guide has been referred to here
+since before this document owned photography, and no such document exists in this
+repository; if one is ever written, it goes beside this section rather than replacing
+it.*
 
 Photography within this system should feel like a frame from a film that was never graded
 to be beautiful, only to be real and specific. The permanent visual reference is Robert

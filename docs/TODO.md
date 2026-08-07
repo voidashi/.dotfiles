@@ -19,18 +19,63 @@ hardware, images or a decision come last. Inside a group, by priority.
 
 ## Start here next
 
-"The reader deciding whether to install", below. It is the only group left that finishes
-at this keyboard, and its first entry is six cheap fixes to the same file that are worth
-one pass rather than six.
+"Four more documents that answer the same question twice", below. Two of its entries are
+a document stating something untrue rather than merely stating it twice, which is why it
+comes before "The reader deciding whether to install", the larger group under it. Both
+finish at this keyboard. So does "While you are already in the file", which stays where
+it is because those entries are meant to be paid by a session that opened the file for
+another reason.
 
 Two groups were removed rather than reordered. "Documents that answer the same question
-twice" is done: each of its four facts now has one owner, and where the entry's premise
-was wrong the deviation is in the commit rather than here. "The two compositors" is done
+twice" is done: each of its four facts now has one owner. "The two compositors" is done
 as well, and its outcome is a decision rather than a state, so it is in
 [`TURNING-POINTS.md`](TURNING-POINTS.md): sway follows Hyprland, one way. Read that
-before reopening any question about the two, including the three it closes as
-deliberately absent.
+before reopening any question about the two. Four things are recorded there as
+deliberately absent from sway, and one of the four is a decision rather than something
+sway is incapable of, which the entry says explicitly.
 
+
+## Four more documents that answer the same question twice
+
+The group of this name was closed, and then a reviewer reading the documents cold found
+four more instances of the same failure. They are listed separately rather than reopening
+that group, because the four it held are settled and these are not the same four. None of
+them was introduced by the work that closed it; they were simply never looked for.
+
+- **Nothing owns the keybindings.** `docs/README.md` says every document answers exactly
+  one question and lists eight questions. "What are the keys" is not among them, and the
+  only answer in the repository is the table in the root `README.md`. That table is now
+  correct for both compositors, since sway's binds were converged onto Hyprland's, so what
+  is missing is not the content but the index entry pointing at it. Decide whether the
+  root `README.md` is a legitimate owner of a question, given that it is written for a
+  reader deciding whether to install rather than for one already using it.
+  *Difficulty: low, and the real work is the decision. Priority: medium, because it is
+  the question a user has most often.*
+
+- **`THEMING.md` describes a check `check_palette.py` does not perform.** It says the
+  warning fires "when a role literal holds a hex no scale or alert tone holds". The script
+  says an `ansi16` slot, in its own header and in the function's docstring, and that
+  docstring records that the roles case was deliberately removed because a role names a
+  token and cannot hold a retired value. `MAINTENANCE.md` and `SETUP.md` both say `ansi16`
+  correctly, so `THEMING.md` is the sole outlier. It is also duplication: that whole
+  passage restates `check_palette.py`'s behaviour, which `MAINTENANCE.md` owns under
+  "Validating a change". Cut it there and point, which fixes the error by removing it.
+  *Difficulty: trivial. Priority: medium, since it is wrong rather than merely doubled.*
+
+- **`MAINTENANCE.md` states the `ansi16` warning twice**, about forty lines apart, in the
+  document that now opens with the rule against restating a fact another file owns. Its
+  list of what `check_palette.py` fails on gives five conditions where the script's own
+  header says three checks and a warning; the fifth is a load-time refusal in `roles.py`
+  rather than a check. Reconcile against the script rather than against either paragraph.
+  *Difficulty: trivial. Priority: low.*
+
+- **A pointer in `THEMING.md` promises four explanations and the target holds two.** It
+  says why "the last row is only four entries" is in `TURNING-POINTS.md`; the row names
+  fastfetch, fish, `waybar/common.jsonc` and `nvim/theme/roles.lua`, and the entry it
+  points at is about the two the survey found no route for. Nothing explains fish or
+  `nvim/theme/roles.lua`. Either the pointer narrows to the two it can deliver, or the
+  entry grows the other two.
+  *Difficulty: trivial. Priority: low.*
 
 ## The reader deciding whether to install
 
