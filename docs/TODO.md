@@ -19,12 +19,14 @@ hardware, images or a decision come last. Inside a group, by priority.
 
 ## Start here next
 
-"Four more documents that answer the same question twice", below. Two of its entries are
-a document stating something untrue rather than merely stating it twice, which is why it
-comes before "The reader deciding whether to install", the larger group under it. Both
-finish at this keyboard. So does "While you are already in the file", which stays where
-it is because those entries are meant to be paid by a session that opened the file for
-another reason.
+"Picked by hand, in this order", immediately below. It is the only group in this file
+that was chosen rather than discovered, and it takes precedence over everything under it
+for that reason alone.
+
+After it, "Four more documents that answer the same question twice", then "The reader
+deciding whether to install". Both finish at this keyboard, as does "While you are
+already in the file", which stays where it is because those entries are meant to be paid
+by a session that opened the file for another reason.
 
 Two groups were removed rather than reordered. "Documents that answer the same question
 twice" is done: each of its four facts now has one owner. "The two compositors" is done
@@ -34,6 +36,109 @@ before reopening any question about the two. Four things are recorded there as
 deliberately absent from sway, and one of the four is a decision rather than something
 sway is incapable of, which the entry says explicitly.
 
+
+## Picked by hand, in this order
+
+Every other group here shares a file or a question, which is what makes a group worth
+sitting down to. This one does not: it is what the repository's owner asked for next, and
+its entries touch the bar, the palette, a package list and the greeter. Ordered by
+priority like the others, and a session taking it will open unrelated files. That is the
+cost of the group existing, and it exists because the order came from outside the file.
+
+Each entry below was measured before it was written, and three of them do not say what
+they were first described as saying. Where that happened it is marked, because the
+description is what someone will remember.
+
+- **The bar shows workspaces 6 to 10 with nothing in them.** `common.jsonc`'s
+  `hyprland/workspaces` sets `all-outputs: true` and `persistent-workspaces: {"*": 5}`.
+  The `*` is not "five workspaces" but "five per output", so a second monitor
+  manufactures a second run of five and the bar carries ten buttons where at most a few
+  hold windows. Both halves were deliberate and are recorded: the `{"*": 5}` form
+  replaced a legacy one during the click bisect in "Parked" below, and it is the form
+  waybar documents. So the fix is choosing what the pair should be rather than correcting
+  a mistake. Naming the primary output explicitly instead of `*` keeps five buttons on
+  one monitor and none manufactured on the other, at the cost of writing an output name
+  into a config that is meant to travel. Dropping `all-outputs` scopes each bar to its
+  own monitor, which is a different desktop rather than a smaller one. Decide which,
+  because both are defensible and only one survives a machine with a different monitor
+  layout.
+  *Difficulty: trivial to change, and the decision is the work. Priority: medium, since
+  it is wrong on screen every day.*
+
+- **Switch this machine from plasmalogin to greetd.** Measured now rather than assumed:
+  `greetd` and `tuigreet` are both on PATH, `/etc/greetd/config.toml` already exists,
+  `greetd.service` is `disabled`, `plasmalogin.service` is `enabled` and running, and
+  `/usr/share/wayland-sessions/` holds `hyprland.desktop`, `hyprland-uwsm.desktop`,
+  `sway.desktop` and `plasma.desktop`. So nothing needs installing and the change is two
+  unit commands plus a config this repository does not own, since it lives outside
+  `$HOME` and root owns it, for the reason in [`TURNING-POINTS.md`](TURNING-POINTS.md).
+  The procedure is `SETUP.md` step 6, which is written for a reader with no display
+  manager at all and therefore does not cover the one step that matters here: the old
+  manager has to be disabled in the same breath as the new one is enabled, because two
+  enabled display managers is a machine that does not reach a desktop. Do not use
+  `enable --now`, which is the footgun that section already names. Keep a TTY reachable
+  before rebooting.
+  This unblocks two entries under "Waiting on the world" that are marked as needing a
+  second machine, and both should be re-read rather than trusted once it is done: "The
+  greetd path has never been run" stops being true of this machine, and "Bring the
+  greeter onto the palette" was waiting on exactly this.
+  *Difficulty: low, and the risk is the reboot rather than the edit. Priority: medium,
+  and it is the first surface a visitor sees.*
+
+- **Verdigris is on the lightness ladder and off the chroma curve.** This was written down
+  as "check whether verdigris follows OKLCH like the others", and half of it is already
+  answered. Measured, converting `palette.json` to OKLCH: verdigris 300/400/500 sit at
+  L\* 68.94, 60.92, 52.96, against ice at 68.99, 60.94, 52.97, so it tracks the eight-point
+  ladder every other family uses to two decimal places, and its hue drifts 0.9 degrees
+  across the three, which is tighter than ice. What it does not share is chroma. Verdigris
+  runs 0.070, 0.075, 0.075 where bordeaux, ice, ash, moss and bronze all run roughly 0.080
+  to 0.100 at the same steps, and every one of them peaks at 400 and comes back down while
+  verdigris is flat. So it is a family built to the right lightness and a visibly weaker
+  saturation. Whether that is the defect or the point is the actual question, and
+  `palette.json`'s own note argues for the point: verdigris is a terminal-only extension
+  filling the cyan ANSI slots, never a UI accent, and a colour that must not compete for
+  attention has a reason to sit under the accent families. Settle it as a decision either
+  way, because a family that is deliberately off the curve should say so where the curve
+  is defined.
+  *Difficulty: low to change, and it is a judgement rather than a computation. Priority:
+  medium, since an unexplained outlier in the palette invites someone to "fix" it.*
+
+- **OKLCH is used everywhere and explained nowhere at the depth CIELAB is.** This was asked
+  for as documenting OKLCH "in that same brightness script", and there is no brightness
+  script: the stepping lives in the two `brightnessctl -e3` binds, and the CIE L\* argument
+  behind them is a paragraph in [`MAINTENANCE.md`](MAINTENANCE.md), with a measured curve,
+  the numbers from this machine's panel, and the two assumptions it rests on named. That
+  paragraph is the standard to match. OKLCH appears in `design/DESIGN-SYSTEM.md` and
+  `design/RICE-GUIDE.md` as the space the scales are built in, and the eight-point ladder
+  in the verdigris entry above is visible in the numbers with nothing written down that
+  says it is eight, why eight, or what happens at the ends where the steps compress to
+  five. Write that where the palette is defined rather than where a compositor is
+  configured, and include the measurement, since the whole point of the CIELAB paragraph
+  is that it shows its working.
+  *Difficulty: medium, because it is the writing rather than the finding. Priority: medium,
+  and it is what makes the verdigris decision above arguable instead of a matter of taste.*
+
+- **`vlc` is named in `packages.conf` and not declared by it.** The Qt theming comment
+  names VLC as one of the applications the platform theme reaches, so a reader would fairly
+  conclude the repository installs it. Nothing does: there is no media player of any kind
+  in the list. Either add it or stop naming it, and if it goes in, the `[apt]` and `[dnf]`
+  sections take the same name, which is one of the few where all three agree.
+  *Difficulty: trivial. Priority: low, and it is a one-line entry in a list built for
+  exactly this.*
+
+- **The brightness exponent could be 2.4 instead of 3, and it is a native flag.** Asked as
+  whether this needs a script, and it does not. Measured on this machine, reading the
+  percentage back for one raw value at three exponents: `-e2` gives 66%, `-e2.4` gives 70%,
+  `-e3` gives 75%, each matching `(raw/max)^(1/e)` exactly, so `brightnessctl` parses a
+  fractional exponent and the change is one character in two files. What it decides is
+  which curve the keys walk. 3 is the cube root in CIE L\*, which
+  [`MAINTENANCE.md`](MAINTENANCE.md) derives and measures; 2.4 is the sRGB transfer
+  exponent, which is a display convention rather than a perceptual one. So this is a
+  smaller step at the dark end against a curve that matches how the panel is driven. Try
+  it before writing it down, and keep the current reasoning in the file rather than
+  replacing it, since the CIELAB paragraph is what makes either choice legible. Both
+  compositors carry these binds and both change together.
+  *Difficulty: trivial. Priority: low, since the current curve was measured and works.*
 
 ## Four more documents that answer the same question twice
 
@@ -153,7 +258,9 @@ one file that leaves the repository at publication.
 ## Waiting on the world
 
 None of these finishes at this keyboard today: they want a second machine, images, an
-icon set, or a look at a running screen. The screenshots are the highest-priority entry in
+icon set, or a look at a running screen. Two exceptions are marked in place, both greetd,
+and both stopped being blocked when the hand-picked group at the top took the switch on.
+The screenshots are the highest-priority entry in
 the file and still belong here, because they are the last thing to do rather than the next.
 Photographing a desktop that is still being edited is work done twice, so they wait until
 the groups above have stopped changing what the desktop looks like.
@@ -179,7 +286,12 @@ wallpaper curation is the one open entry that would make a photograph stale.
   README, and `/usr/share/wayland-sessions/` already holds `hyprland.desktop` and
   `sway.desktop`. Unverified is the whole path end to end. A spare machine or a VM is the
   honest test, and until then `SETUP.md` must not gain a sentence claiming it was tried.
-  *Difficulty: low, blocked on a second machine. Priority: medium.*
+  This is no longer blocked the way it says. "Switch this machine from plasmalogin to
+  greetd" in the hand-picked group at the top does it on this keyboard, which is what the
+  entry was waiting for. It stays here rather than merging into that one, because what it
+  asks for is different: booting greetd once proves the path, and this entry is the licence
+  to write that down in `SETUP.md`. Do not exercise it and then leave this open.
+  *Difficulty: low, and no longer blocked once the switch above happens. Priority: medium.*
 
 - **The apt and dnf names are written and have never been installed.** `[apt]` and
   `[dnf]` in `packages.conf` now carry the names that differ, and where a package
@@ -212,9 +324,10 @@ wallpaper curation is the one open entry that would make a photograph stale.
   put it in `SETUP.md` for a reader to paste. It is the one surface that would then drift
   off-palette with no validator noticing, so the string wants a comment saying where it
   came from. Wait until the greetd path has actually been booted; theming a path nobody
-  has reached is the wrong order.
-  *Difficulty: low. Priority: low, and it is the first surface a visitor sees, which
-  argues it up once greetd is in use.*
+  has reached is the wrong order. That wait is about to end: the hand-picked group at the
+  top switches this machine to greetd, and the sentence above about it being the first
+  surface a visitor sees stops being hypothetical the moment it does.
+  *Difficulty: low. Priority: low until greetd is running here, medium the day after.*
 
 - **Half of hyprlauncher has now been seen on a screen, and the other half has not.**
   `programs.lua` still runs wofi and the hyprlauncher line stays commented, but the
