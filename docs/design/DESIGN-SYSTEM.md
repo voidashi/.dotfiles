@@ -235,20 +235,10 @@ between "bordeaux as presence" and "red as error" is structural, not merely chro
 
 ### 2.10 Temperature map
 
-| Element | Temperature | Material reference |
-|---|---|---|
-| Void / Edge | Very subtle neutral-warm | Charcoal, dark stone, iron |
-| Ink | Pure neutral | Cold smoke |
-| Bordeaux | Slightly warm | Blood, wine, oxblood |
-| Bronze | Warm | Matte bronze, amber |
-| Moss | Subtle neutral-warm | Moss, patina |
-| Ice | Restrained cold | Steel, instrument |
-| Ash Violet | Cold | Mist, moon |
-| Error | Saturated warm | Fresh blood |
-| Warning | Light warm | Lit amber |
-
-The spectrum runs from warm-organic to cold-immaterial, with text as neutral mediator.
-Temperature contrast is an active mechanism of hierarchy, not an accident to be suppressed.
+The map is in [`AESTHETIC-DIRECTION.md`](AESTHETIC-DIRECTION.md), "Temperature: the
+general map", which owns it: a temperature is a sensory judgement and carries no value.
+It covers every family plus Error and Warning. This document owns what those elements are
+worth, in 2.1 to 2.9 above.
 
 ### 2.11 Cross-family compatibility
 
@@ -472,7 +462,13 @@ The system does not define a proprietary set, it defines criteria any library mu
 
 ## 10 Photography and image
 
-*Full direction in `AESTHETIC-DIRECTION.md`. Detailed editing guide in its own document.*
+*Detailed editing guide in its own document.*
+
+Photography within this system should feel like a frame from a film that was never graded
+to be beautiful, only to be real and specific. The permanent visual reference is Robert
+Eggers: not the "Eggers palette" as an abstract concept, but the actual frames of The
+Witch, The Lighthouse and The Northman, how light exists in them, how shadows have
+texture, how white is not white and black is not black.
 
 Operational summary:
 

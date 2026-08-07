@@ -159,21 +159,30 @@ it is semantic.
 
 ## Temperature: the general map
 
-To avoid future ambiguity, the temperature of each element in plain terms:
+To avoid future ambiguity, the temperature of each element in plain terms. Ordered warm
+to cold, which is the spectrum the paragraph below describes:
 
 | Element | Temperature | Material reference |
 |---|---|---|
-| Surfaces / Void | Very subtle neutral-warm | Charcoal, dark stone, iron |
+| Surfaces / Void and Edge | Very subtle neutral-warm | Charcoal, dark stone, iron |
 | Text / Ink | Pure neutral | Smoke grey |
 | Bordeaux | Slightly warm | Blood, wine, oxblood |
-| Ice | Neutral-cold | Steel, instrument, crystal |
-| Ash Violet | Cold | Mist, moon, the immaterial |
-| Moss | Very subtle neutral-warm | Moss, patina, lichen |
 | Bronze | Warm | Matte bronze, amber, medal |
+| Moss | Subtle neutral-warm | Moss, patina, lichen |
+| Ice | Restrained cold | Steel, instrument, crystal |
+| Ash Violet | Cold | Mist, moon, the immaterial |
+| Error | Saturated warm | Fresh blood |
+| Warning | Light warm | Lit amber |
 
 The spectrum runs from warm-organic (bordeaux, bronze, surfaces) to cold-immaterial (ash
 violet, ice), with text as a neutral mediator of reading. This creates real temperature
-contrast, something a uniformly cold palette does not have.
+contrast, something a uniformly cold palette does not have, and that contrast is an
+active mechanism of hierarchy rather than an accident to be suppressed.
+
+Error and Warning are on the map because they are the two places where a temperature is
+chosen against a family's meaning rather than with it: both are warm because a warning is
+urgent, not because they belong to Bordeaux or Bronze. Their values are in
+[`DESIGN-SYSTEM.md`](DESIGN-SYSTEM.md), which owns values.
 
 ---
 
@@ -233,26 +242,17 @@ The terminal is one of the voices, not the central identity.
 
 ---
 
-## Photography and image: the right direction
+## Photography and image
 
-*This topic is expanded in a separate editing guide.*
+Photography is in [`DESIGN-SYSTEM.md`](DESIGN-SYSTEM.md) section 10, which owns it. The
+direction is a treatment with numbers behind it (how far to desaturate, how much
+contrast, what an overlay is worth), and it is for the web and document work that
+document is written for. This repository has no photography in it.
 
-Photography within this system should feel like a frame from a film that was never graded
-to be beautiful, only to be real and specific.
-
-**The right treatment** is significant desaturation at a **neutral** temperature, with no
-shift toward cold. Highlights may carry the faintest cool touch, like haze, not like
-blue. Shadows should have a **slightly warm** cast, like charcoal, not like dark blue. The
-result should feel like film photography on an analogue camera with high-ISO stock,
-developed with care.
-
-**The wrong treatment** is anything that looks like an app filter, whether a vibrant warm
-filter (Instagram vintage) or an excessively cold one (surveillance camera, blued Twitter
-aesthetic). Both are surface processing, not vision.
-
-The permanent visual reference: Robert Eggers. Not the "Eggers palette" as an abstract
-concept, but the actual frames of The Witch, The Lighthouse, The Northman: how light
-exists in them, how shadows have texture, how white is not white and black is not black.
+What stays here is the test the treatment answers to, and it is above in "The right
+temperature of darkness": does this look made of material, or made of light? An image
+fails that test the same way a surface does, and the Eggers reference behind it is the
+same reference.
 
 ---
 

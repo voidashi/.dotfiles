@@ -426,9 +426,9 @@ everything else.
 - Solid `void-00` is always legitimate, and often the strongest choice.
 - Never: neon, glow, vibrant gradients, saturated primaries.
 
-If an image needs treatment to comply, the photography rules in `AESTHETIC-DIRECTION.md`
-apply: heavy desaturation, neutral temperature, slightly warm shadows, faintly cool
-highlights.
+If an image needs treatment to comply, the photography rules in `DESIGN-SYSTEM.md`
+section 10 apply: heavy desaturation, neutral temperature, slightly warm shadows, faintly
+cool highlights.
 
 ---
 
