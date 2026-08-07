@@ -19,64 +19,38 @@ hardware, images or a decision come last. Inside a group, by priority.
 
 ## Start here next
 
-"Colour decisions the roles layer made visible", below, the whole group in one
-session, a commit each. That is how the group above it was closed, and these entries
-suit it better still: they are decisions rather than work, they open the same two
-files, and the expensive part is having them in front of you at once.
+"Documents that answer the same question twice", below. It is the cheapest group left
+that finishes at this keyboard, and one of its three entries has just shrunk: the
+`THEMING.md` entry lost two of the four cuts it asked for, which the entry now says.
 
-Open it with the Ice step, which is the only one of them that changes what is on a
-screen, and the rest are cheaper once someone is already looking. The group's own
-note that some of this wants eyes on a running desktop rather than a diff is worth
-reading before starting rather than after.
+The group directly below is down to a single entry that wants a running `btm` on a
+screen, so it is not a session of its own any more; fold it into whatever session next
+has a terminal open for another reason.
 
 ## Colour decisions the roles layer made visible
 
-`roles.py` and [`design/RICE-GUIDE.md`](design/RICE-GUIDE.md). None of these is a bug
-and none has a check that would catch it, which is why they are questions rather than
-work. Two of them want eyes on a screen rather than a refactor.
+`roles.py` and [`design/RICE-GUIDE.md`](design/RICE-GUIDE.md). The four questions this
+group held are settled and live in the documents that own them, with the measurements in
+their commit messages. What is left is one place where the code disagrees with the rule
+that got written down, which is the layer working as intended: naming a colour once is
+what made the odd one visible.
 
-- **Three role decisions the layer made visible and did not settle.** `roles.py` names
-  each of them now, so each is legible in one place. None is a bug and none has a check
-  that would catch it, which is why they are here rather than in the code.
-  - **Ice is spent at three steps and only two are written down.** `ice-600` is the
-    selection surface and `ice-300` the line form for rings, links and active text, both
-    in `RICE-GUIDE.md`. `ice-400` is Qt's focus decoration and is documented nowhere: the
-    only justification on record was the name of a local variable, `ice_focus`. It has a
-    second reader now: hyprtoolkit's `accent` is the same step, which was pasted as
-    `ice-400` before the conversion and reads the role after it. Two toolkits on a step is
-    an argument for the step existing, not for its value. Decide whether that focus
-    decoration belongs between the two or should join one of them. It changes what Qt
-    applications and the launcher look like, so it wants eyes on a screen rather than a
-    refactor.
-  - **Bright green does not follow the rule that placed bright red and bright yellow.**
-    `RICE-GUIDE.md` justifies slots 9 and 11 taking alert tones, because in a terminal
-    bright red means *error* and bright yellow means *warning*. By that argument bright
-    green means *success* and should take `alert.good.fg`; it takes `moss-300` instead,
-    which the guide's own ANSI table states without explaining. Either the argument
-    extends and the slot moves, or it has a boundary and the guide should say where.
-  - **`alert.neutral` is the Ice family without saying so.** Its `bg` and `border` are
-    `ice-deep` and `ice-800` exactly, while its `fg` is a step of nothing; the other three
-    alert families have a `bg` and `border` of their own. Turning the pair into references
-    would *create* a coupling that today may be coincidence, so the question is whether
-    the coincidence was intent. Worth knowing while deciding: the orphan warning cannot
-    see this pair, because it skips everything under `alert.`, and moving `scales.ice.deep`
-    leaves four generated lines behind with nothing reported.
-  *Difficulty: trivial each, and they are decisions rather than work. Priority: medium,
-  and the first is the only one of the three that shows on a screen.*
-
-- **`focus-ring` is a GTK variable nobody reads.** `gen_gtk_css` emits
-  `@define-color focus-ring` into the shared partial and into wofi's block, and no
-  stylesheet uses `@focus-ring`: measured, the only two hits in the tree are the two
-  definitions. It follows the Ice ramp correctly now that it is a role, so nothing renders
-  wrong; what is open is what it should be. Emit it as `@define-color focus-ring @ice-300`,
-  which is GTK's own named-colour reference, renders identically and puts the dependency in
-  the output where a reader sees it. Delete it, which is cheapest, and means the next
-  stylesheet wanting a focus ring pastes a hex, which is the thing this pipeline exists to
-  prevent. Or leave it as an export for a consumer that does not exist yet. One thing to
-  check before the first option: no stylesheet here uses the `@name` reference form at all
-  today, so it would be the first, and it has to be tried on GTK3 as well as GTK4, since
-  waybar and wlogout are GTK3 while swaync is GTK4.
-  *Difficulty: trivial. Priority: low, since nothing renders wrong either way.*
+- **bottom fills a selected row with the line step instead of the selection step.**
+  `generate_theme.py`'s bottom block sets `selected_text` to
+  `{ color = surface.content, bg_color = accent.line }`, so a selected row is a filled
+  `ice-300`. Everywhere else a filled selection is `selection.bg`: yazi's hovered row,
+  GTK3's `theme_selected_bg_color`, GTK4's `accent_bg_color`, Qt's `Selection`. Under
+  `RICE-GUIDE.md`'s "The three steps of Ice" the fill is `ice-600` and `ice-300` is the
+  step for things that are read, so bottom is the one consumer out of step.
+  The trap, measured, is that the two keys have to move together. `void-00` on `ice-300`
+  is 7.27:1 today; moving only `bg_color` to `selection.bg` leaves `void-00` on `ice-600`
+  at 2.70:1, which is not a text contrast. Moving `color` to `selection.fg` at the same
+  time gives `ink-0` on `ice-600` at 6.01:1, which is what every other toolkit here
+  already renders. Look at a running `btm` first: `ice-300` is a much louder row than
+  `ice-600` and the current value may be a deliberate answer to bottom's density rather
+  than an oversight.
+  *Difficulty: trivial to change, and the whole cost is looking at it first. Priority:
+  low, since nothing is wrong on screen, only inconsistent with the written rule.*
 
 ## The two compositors
 
@@ -145,13 +119,15 @@ the question and cutting the other copy.
   *Difficulty: trivial. Priority: medium, because it is lost silently at deletion.*
 
 - **`THEMING.md` carries open work eight lines after saying this file owns it.** Delete its
-  "Not covered yet" section, whose three items are verbatim from here. Three of its
-  "Settled decisions" bullets restate `RICE-GUIDE.md` in their opening sentences, the
-  role model, bright green and the two radii; cut those sentences and keep the mechanism
-  clause after each, which is this document's actual subject and exists only here. Named
-  rather than numbered on purpose, since a bullet was inserted among them since this
-  entry was written and the ordinals were already off by one before that. Three must
-  survive whole: the relaxed accent budget for fetches, "Rollback is git, not a
+  "Not covered yet" section, whose three items are verbatim from here. What remains of the
+  second half is one bullet: the two radii still open by restating `RICE-GUIDE.md`, and it
+  wants that sentence cut and the mechanism clause after it kept, which is this document's
+  actual subject and exists only here. The role model and bright green bullets were the
+  other two and are done, rewritten to the mechanism half while the decisions behind them
+  were being settled. Named rather than numbered on purpose, and now for a second reason:
+  two bullets have been inserted among them since this entry was written, the ordinals
+  were already off by one before that, and an `alert.neutral` bullet has joined the list.
+  Three must survive whole: the relaxed accent budget for fetches, "Rollback is git, not a
   directory", and yazi's icon table, which is a decision this file now owns.
   *Difficulty: trivial. Priority: medium.*
 
