@@ -157,12 +157,30 @@ Then write `/etc/greetd/config.toml`. This needs root, it is outside `$HOME`, an
 vt = 1
 
 [default_session]
-command = "tuigreet --time --remember --asterisks --sessions /usr/share/wayland-sessions --cmd Hyprland"
+command = "tuigreet --time --remember --asterisks --sessions /usr/share/wayland-sessions --cmd start-hyprland"
 user = "greeter"
 ```
 
 `--cmd` is the fallback if you press Enter without choosing; `--sessions` is what puts
-Hyprland and Sway on the menu. Enable it for the *next* boot rather than starting it now:
+Hyprland and Sway on the menu.
+
+**Give `--cmd` what the session file gives it, not the compositor's own name.** On Arch
+today `/usr/share/wayland-sessions/hyprland.desktop` runs `Exec=/usr/bin/start-hyprland`,
+and Hyprland warns on startup when it is launched any other way. This line used to say
+`--cmd Hyprland`, which reaches a desktop and prints that warning, so check the `Exec=`
+line of the session you actually want rather than copying this one. Choosing the session
+from tuigreet's menu runs the `.desktop` file and is correct whatever `--cmd` says; the
+fallback is the path that goes wrong quietly.
+
+**If you are replacing an existing display manager, disable it in the same sitting.** Two
+enabled display managers is a machine that does not reach a desktop:
+
+```bash
+sudo systemctl disable plasmalogin.service   # or sddm, gdm, whichever you have
+systemctl is-enabled plasmalogin.service greetd.service   # expect: disabled, enabled
+```
+
+Enable it for the *next* boot rather than starting it now:
 
 ```bash
 sudo systemctl enable greetd.service
