@@ -1,19 +1,21 @@
 // Voidashi, restrained variant: one accent family, Bordeaux, and nothing else.
 //
-// These are frozen snapshots of the presets one level up as they were before the
-// semantic mapping went in. Keep them if the reading of a fetch as "the desktop's
-// cover page" wins: a cover page wants a single focal point, which here is the
-// logo and the name, with the whole table in ink.
+// A variant, not a snapshot. It takes the guide's other reading of a fetch, as
+// the desktop's cover page: a cover page wants a single focal point, which here
+// is the logo and the name, with the whole table in ink.
 //
-// The versions one level up take the other reading, that a family may appear on
-// the rows that mean it: Bordeaux identity, Ice function, Moss duration, Ash
-// media. Both are legitimate under the guide and this is a matter of taste.
+// The versions one level up take the reading that a family may appear on the
+// rows that mean it: Bordeaux identity, Ice function, Moss duration, Ash media.
+// Both are legitimate under the guide and this is a matter of taste, which is
+// why both are live. Neither is the other's history.
 //
 // Use one with: fastfetch -c ~/.config/fastfetch/minimal/<file>
 // For the fish greeter, edit the fastfetch line in .config/fish/config.fish.
 //
-// These are snapshots and are NOT kept in sync with the ones above. If a module
-// is added there, it will not appear here.
+// Nothing keeps the two in step. Add a module to the preset one level up and
+// add it here too, or the variant stops being the same fetch. No check reports
+// the difference: verify.sh renders every config and reads stderr, which proves
+// each one parses and says nothing about what the two contain.
 {
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/master/doc/json_schema.json",
   "logo": {
