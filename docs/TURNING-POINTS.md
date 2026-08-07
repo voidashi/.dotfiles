@@ -437,7 +437,12 @@ here as available rather than refused, and reopening it does not require this en
 be wrong.
 
 Also learned, and it is the more useful half: `environment.d` does not reach a
-greetd-launched session either. This entry used to say that delivery "could not be
+greetd-launched session either. Not because it fails, which took a second measurement to
+establish: `systemctl --user show-environment` carries every variable that file sets, and
+so does the environment generator run by hand. The compositor is simply not a systemd
+user unit when greetd execs it directly, so nothing hands the environment over. The
+source works and the bridge is missing, which is a different problem with different
+fixes, and `TODO.md` carries them. This entry used to say that delivery "could not be
 isolated on this machine" because `conf/env_vars.lua` sets the same variables. Under
 greetd it isolates itself, because `env_vars.lua` applies to Hyprland's children and
 not to Hyprland's own inherited environment: `XCURSOR_SIZE`, `HYPRCURSOR_SIZE` and

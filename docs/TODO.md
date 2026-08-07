@@ -50,23 +50,31 @@ description is what someone will remember.
   theme. Measured by launching a process through `swaymsg exec` and reading what it
   inherited, which is exactly what an application gets:
   `QT_QPA_PLATFORMTHEME` unset, `HYPRCURSOR_SIZE` unset, `~/.local/bin` not on PATH.
-  `environment.d/50-voidashi.conf` sets the first two and delivered neither, which is the
-  same finding Hyprland gave and this makes it a live fault rather than a latent one.
-  One reading to avoid: `XCURSOR_SIZE` comes back as 24, which looks like delivery and is
-  not. Sway sets that itself and its default happens to be 24. `HYPRCURSOR_SIZE`, which
-  only `environment.d` sets, is the honest probe and it is unset.
-  Why Sway alone: `man 5 sway` has no `env` directive and an `exec` cannot change its
-  parent's environment, so that file is its only source, while Hyprland sets the same
-  values again through `conf/env_vars.lua` for everything it launches.
-  `MAINTENANCE.md` records this exact failure as having happened once before, under the
-  same variable.
-  Two options, both new mechanism: a session entry of this repository's own that exports
-  and then execs Sway, which is the same thing that would return the helper paths to bare
-  names and is recorded under the helpers entry in
-  [`TURNING-POINTS.md`](TURNING-POINTS.md); or accepting that Sway is only correct when
-  started from a shell, and saying so where a reader would meet it.
-  *Difficulty: low to confirm, done; the fix is a design question. Priority: high, since
-  it is a visibly broken desktop rather than a hypothetical.*
+  **The cause is not what it first looked like, and knowing which changes the fix.**
+  `environment.d` is not failing. `systemctl --user show-environment` carries
+  `QT_QPA_PLATFORMTHEME=kde`, `XCURSOR_SIZE=24` and `HYPRCURSOR_SIZE=24`, and the
+  environment generator emits all three when run by hand. What is missing is the bridge:
+  greetd execs the compositor directly, so it is not a systemd user unit and never
+  inherits that environment. The variables exist and nothing hands them over.
+  One reading to avoid: `XCURSOR_SIZE` comes back as 24 in the session, which looks like
+  delivery and is not. Sway sets that itself and its default happens to be 24.
+  `HYPRCURSOR_SIZE`, which only `environment.d` sets, is the honest probe and it is unset.
+  Why Sway alone feels it: `man 5 sway` has no `env` directive and an `exec` cannot change
+  its parent's environment, so that file is its only source, while Hyprland sets the same
+  values again through `conf/env_vars.lua` for everything it launches. `MAINTENANCE.md`
+  records this exact failure as having happened once before, under the same variable.
+  So the fix is a bridge rather than a new source, and there are three. `uwsm` is in
+  `extra` and starts a compositor as a systemd user unit, which is the ecosystem's answer
+  to exactly this and which Hyprland already expects, since
+  `/usr/share/wayland-sessions/hyprland-uwsm.desktop` ships with it; Sway has no such
+  file. `tuigreet --session-wrapper` can wrap the session in a command that imports the
+  systemd user environment first, which needs nothing installed but puts a fiddly quoted
+  line in a root-owned config. Or a session entry of this repository's own that exports
+  and then execs, which is in `$HOME` and tracked but reinvents `uwsm`. Whichever is
+  chosen, adding `PATH` to `environment.d` would return the helper calls to bare names
+  and settle the entry in [`TURNING-POINTS.md`](TURNING-POINTS.md) that had to compromise.
+  *Difficulty: low, and choosing the bridge is the work. Priority: high, since it is a
+  visibly broken desktop rather than a hypothetical.*
 
 - **The bar shows workspaces 6 to 10 with nothing in them.** `common.jsonc`'s
   `hyprland/workspaces` sets `all-outputs: true` and `persistent-workspaces: {"*": 5}`.

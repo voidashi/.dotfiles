@@ -814,8 +814,9 @@ scrolling off; gaps measure 6 between two windows and 10 at each screen edge, ma
 Hyprland; borders are `pixel` at 2; waybar, swaync, `nm-applet`, the cliphist watcher and
 swaybg all start, and swaybg gets a real wallpaper path; and swayidle runs with `-d -w`
 and every event the config gives it, with `journalctl -t swayidle` carrying real lines.
-Not confirmed, because looking at a desktop does not press keys: any keybinding, the
-screenshot binds among them. And one thing failed, which is the session environment, in
+The keybindings were then pressed rather than assumed, and the three that reach this
+repository's own helpers work: both screenshot binds, the clipboard picker and the bar's
+power button. One thing failed, which is the session environment, in
 [`TODO.md`](TODO.md).
 
 alacritty has no validate flag, and `migrate --dry-run` is not one wearing another
