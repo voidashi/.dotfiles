@@ -109,6 +109,9 @@ hl.bind("SHIFT + Print", hl.dsp.exec_cmd("hyprshot -m region"))
 -- this names a fixed location rather than the clone directory. The path is
 -- spelled out instead of trusted to PATH: a display-manager session reads no
 -- shell profile, and the profile is the only thing putting ~/.local/bin there.
+-- Bare name form, which works only in a session that carries ~/.local/bin on
+-- PATH, meaning one started through uwsm or from a shell:
+--   hl.dsp.exec_cmd("clipboard-picker.sh")
 hl.bind(mainMod .. " + SHIFT + V", hl.dsp.exec_cmd("$HOME/.local/bin/clipboard-picker.sh"))
 
 -- Lid. Nothing here locks the screen, on purpose. Closing the lid makes logind

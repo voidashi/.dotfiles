@@ -221,8 +221,25 @@ and a home directory at `0700` is unreadable to it, so the entry would never app
 the menu.
 
 Both compositors already call `uwsm finalize` on startup, which is what exports
-`WAYLAND_DISPLAY` and reports the unit as started. Then pick the uwsm entry at the
-greeter. The plain entries stay in the menu, which is what makes trying this cheap. To
+`WAYLAND_DISPLAY` and reports the unit as started.
+
+**Make the uwsm entry the one you get by default**, or you will keep picking it and
+eventually forget to. Two flags do different halves of that, and the config above has
+neither:
+
+```
+--remember-user-session    # remembers the session you last chose, per user
+--cmd 'uwsm start -e -D Hyprland hyprland.desktop'
+```
+
+`--remember-user-session` makes your choice stick after picking it once, which covers
+every login after the first. `--cmd` is what runs when you press Enter without opening
+the session menu at all, so it covers the first login and any account with no history;
+pointing it at the plain compositor, which is what the line above does, is what makes the
+non-uwsm session the quiet default. Change both or the default depends on which of the
+two paths you happen to take.
+
+Then pick the uwsm entry at the greeter. The plain entries stay in the menu, which is what makes trying this cheap. To
 check it worked, from inside the session:
 
 ```bash

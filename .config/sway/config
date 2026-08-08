@@ -112,6 +112,9 @@ focus_follows_mouse yes
     # spelled out rather than left to PATH: a display-manager session reads no
     # shell profile, and a shell profile is the only thing that puts
     # ~/.local/bin on PATH here.
+    # Bare name form, which works only in a session that carries ~/.local/bin on
+    # PATH, meaning one started through uwsm or from a shell:
+    #   bindsym $mod+Shift+v exec clipboard-picker.sh
     bindsym $mod+Shift+v exec $HOME/.local/bin/clipboard-picker.sh
 
     # Drag floating windows by holding down $mod and left mouse button.
@@ -435,6 +438,9 @@ exec nm-applet
 exec waybar -c $HOME/.config/waybar/sway.jsonc -s $HOME/.config/waybar/style.css
 # In order: the wallpapers in rotation, then the full collection, then the
 # repo's own sample wallpaper (which is what makes a fresh install work).
+# Bare name form, which works only in a session that carries ~/.local/bin on PATH,
+# meaning one started through uwsm or from a shell:
+#   exec swaybg -m fill -i "$(select-random-wallpaper.sh ...)"
 exec swaybg -m fill -i "$($HOME/.local/bin/select-random-wallpaper.sh $HOME/Pictures/Current_wallpapers $HOME/Pictures/Wallpapers $HOME/.local/share/wallpapers/dotfiles)"
 
 # Environment. Sway has no `env` directive, and an `exec` cannot change its own

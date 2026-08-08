@@ -165,6 +165,9 @@
         // no shell profile, and the profile is the only thing that puts
         // ~/.local/bin on PATH here. $HOME is expanded because waybar runs
         // on-click through a shell.
+        // Bare name form, which works only in a session that carries ~/.local/bin
+        // on PATH, meaning one started through uwsm or from a shell:
+        //   "on-click": "power-menu.sh"
         "on-click": "$HOME/.local/bin/power-menu.sh"
     },
     // The dot marking unread notifications is alert-critical from the palette,

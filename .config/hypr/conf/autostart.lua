@@ -35,6 +35,9 @@ hl.on("hyprland.start", function()
     -- is the only thing putting ~/.local/bin on PATH here, so under greetd this
     -- line resolved to nothing and swaybg ran with an empty -i. See
     -- docs/TURNING-POINTS.md; the path is fixed and names no clone directory.
+    -- Bare name form, which works only in a session that carries ~/.local/bin on
+    -- PATH, meaning one started through uwsm or from a shell:
+    --   swaybg -m fill -i "$(select-random-wallpaper.sh ...)"
     hl.exec_cmd(
         "swaybg -m fill -i \"$($HOME/.local/bin/select-random-wallpaper.sh "
             .. "$HOME/Pictures/Current_wallpapers "
