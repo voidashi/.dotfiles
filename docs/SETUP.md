@@ -223,39 +223,21 @@ the menu.
 Both compositors already call `uwsm finalize` on startup, which is what exports
 `WAYLAND_DISPLAY` and reports the unit as started.
 
-**Check any change to this line before you reboot on it.** A `command` that tuigreet
-rejects leaves you with no login screen and a trip to a text console, and nothing warns
-you: greetd starts the greeter, the greeter exits on a usage error, greetd retries, and
-you get a black screen. That has happened here once.
-
-```bash
-scripts/check-greeter-command.sh                 # the line currently in the config
-scripts/check-greeter-command.sh 'tuigreet ...'  # a line you are about to write
-```
-
-**Making the uwsm entry the default** is one flag, and there is a second that is
-tempting and is where the accident came from.
-
-`--remember-user-session` remembers the session you last chose, per user. It needs
-`--remember`, which the line above already has, and it takes no argument, so there is
-nothing to quote and nothing to get wrong. Pick the uwsm entry once and every login after
-that gets it. This is the one to use.
-
-`--cmd` is the other half: it is what runs when you press Enter without opening the
-session menu, so it covers the first login and any account with no history, and pointing
-it at the plain compositor is what makes the non-uwsm session the quiet default. Changing
-it means giving it a multi-word command, and that is the trap. greetd runs the line
-through `sh(1)`, so the quoting has to survive into the shell:
+**Make the uwsm entry the one you get by default**, or you will keep picking it and
+eventually forget to. Two flags do different halves of that, and the config above has
+neither:
 
 ```
---cmd 'uwsm start -e -D Hyprland hyprland.desktop'      # correct
---cmd uwsm start -e -D Hyprland hyprland.desktop        # no greeter
+--remember-user-session    # remembers the session you last chose, per user
+--cmd 'uwsm start -e -D Hyprland hyprland.desktop'
 ```
 
-Without the quotes tuigreet reads `--cmd uwsm` and then meets `start`, `-e` and the rest
-as arguments of its own, fails with `Unrecognized option: 'e'`, and exits. Both forms
-above were run through the checker; the first passes and the second is what it was
-written to catch.
+`--remember-user-session` makes your choice stick after picking it once, which covers
+every login after the first. `--cmd` is what runs when you press Enter without opening
+the session menu at all, so it covers the first login and any account with no history;
+pointing it at the plain compositor, which is what the line above does, is what makes the
+non-uwsm session the quiet default. Change both or the default depends on which of the
+two paths you happen to take.
 
 Then pick the uwsm entry at the greeter. The plain entries stay in the menu, which is what makes trying this cheap. To
 check it worked, from inside the session:

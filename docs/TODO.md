@@ -45,77 +45,15 @@ Each entry below was measured before it was written, and three of them do not sa
 they were first described as saying. Where that happened it is marked, because the
 description is what someone will remember.
 
-- **Sway under this greeter has no session environment, and Qt applications come up
-  unthemed.** Confirmed on a booted Sway rather than predicted: Dolphin renders with no
-  theme. Measured by launching a process through `swaymsg exec` and reading what it
-  inherited, which is exactly what an application gets:
-  `QT_QPA_PLATFORMTHEME` unset, `HYPRCURSOR_SIZE` unset, `~/.local/bin` not on PATH.
-  **The cause is not what it first looked like, and knowing which changes the fix.**
-  `environment.d` is not failing. `systemctl --user show-environment` carries
-  `QT_QPA_PLATFORMTHEME=kde`, `XCURSOR_SIZE=24` and `HYPRCURSOR_SIZE=24`, and the
-  environment generator emits all three when run by hand. What is missing is the bridge:
-  greetd execs the compositor directly, so it is not a systemd user unit and never
-  inherits that environment. The variables exist and nothing hands them over.
-  One reading to avoid: `XCURSOR_SIZE` comes back as 24 in the session, which looks like
-  delivery and is not. Sway sets that itself and its default happens to be 24.
-  `HYPRCURSOR_SIZE`, which only `environment.d` sets, is the honest probe and it is unset.
-  Why Sway alone feels it: `man 5 sway` has no `env` directive and an `exec` cannot change
-  its parent's environment, so that file is its only source, while Hyprland sets the same
-  values again through `conf/env_vars.lua` for everything it launches. `MAINTENANCE.md`
-  records this exact failure as having happened once before, under the same variable.
-  The bridge chosen is `uwsm`, which starts a compositor as a systemd user unit so that
-  it inherits the environment by construction. It is the mechanism the ecosystem already
-  provides rather than one written here, and Hyprland expects it: it ships
-  `hyprland-uwsm.desktop` on its own. It is declared in `packages.conf` and not yet
-  installed. Rejected, and why, so neither gets re-proposed: `tuigreet
-  --session-wrapper` needs nothing installed but buries nested quoting in a root-owned
-  TOML that nobody will remember writing; a session entry of this repository's own stays
-  in `$HOME` and under version control but reinvents `uwsm` worse, and greetd's
-  `--sessions` points only at `/usr/share`, so an absolute `$HOME` path lands in the root
-  config anyway.
-
-  **Do it in two stages, and do not start the second until the first is proven**, because
-  the second undoes something that currently works.
-
-  Stage one, the bridge. `uwsm` is installed. What it does not do, measured rather than
-  assumed after installing it: ship any session entry at all. `hyprland-uwsm.desktop`
-  comes from the Hyprland package, which is why one compositor appeared to be covered and
-  the other did not. So Sway needs an entry written by hand, and `SETUP.md` now carries
-  it. It has to go in `/usr/share/wayland-sessions/`, not `~/.local/share/`: the greeter
-  runs as its own `greeter` user and this home directory is `0700`, so an entry there
-  would never be readable and never appear in the menu. That puts it in the same category
-  as greetd's own config, root-owned and documented rather than tracked.
-  Both compositors now call `uwsm finalize` at startup, which is what exports
-  `WAYLAND_DISPLAY` and reports the unit started; without it the unit sits in activating
-  and times out. It is unconditional, which is safe: measured in a plain session, it
-  prints one stderr line and exits 0.
-  What is left is writing that file and picking the uwsm entry at the greeter. The plain
-  entries stay in the menu, which is what makes it cheap to abandon. The check is
-  `scripts/check-session-env.sh`, run from inside the session. It reports FAIL today,
-  which is how you know it is not inert. Dolphin rendering themed is the confirmation on
-  screen.
-
-  Stage one passed. `scripts/check-session-env.sh` reports `QT_QPA_PLATFORMTHEME=kde`
-  and `HYPRCURSOR_SIZE=24` from inside a uwsm-started Sway, and
-  `wayland-wm@sway.desktop.service` is the unit carrying it.
-
-  Stage two is half done and half in question. `PATH=${HOME}/.local/bin:${PATH}` is in
-  `environment.d/50-voidashi.conf`; the expansion was tested against the generator in an
-  isolated config dir and resolves. It takes effect on the next login after this is
-  merged, because `~/.config/environment.d/` links to the checkout rather than to a
-  worktree.
-  What is in question is the other half, returning the five helper call sites to bare
-  names, and the reason is new. The plain `Sway` and `Hyprland` entries stay in the
-  greeter's menu, which is what makes uwsm cheap to abandon and is worth keeping. A
-  session started from one of those gets no `PATH` from here, so bare names would break
-  the wallpaper, the clipboard picker and the bar's power button again, silently, on a
-  menu choice. The explicit paths work under every launcher, including a bare TTY and
-  another machine's display manager. So the compromise recorded in
-  [`TURNING-POINTS.md`](TURNING-POINTS.md) may be the right answer rather than a
-  concession, and undoing it buys conformity with a decision whose argument already
-  collapsed. Settle that before touching the call sites.
-  *Difficulty: low. Priority: low, since what is left is tidying and the argument for
-  doing it got weaker.*
+- **The greeter still defaults to the non-uwsm session.** Both halves of the default are
+  pointed the old way in `/etc/greetd/config.toml`: `--cmd` is `start-hyprland`, and the
+  only remember flag is `--remember`, which remembers the username and not the session.
+  So the environment a session gets depends on remembering to open the menu.
+  `SETUP.md` carries the two flags and what each one covers, since they cover different
+  logins and neither alone is enough. Root-owned and outside `$HOME`, so it is a change
+  to make by hand.
+  *Difficulty: trivial. Priority: medium, since forgetting it produces a desktop that is
+  subtly wrong rather than one that fails.*
 
 - **A systemd user unit for swaync now fails on every uwsm session.** Introduced by the
   bridge, and the shape is worth knowing rather than the instance. `uwsm` brings the
@@ -191,6 +129,21 @@ description is what someone will remember.
   is that it shows its working.
   *Difficulty: medium, because it is the writing rather than the finding. Priority: medium,
   and it is what makes the verdigris decision above arguable instead of a matter of taste.*
+
+- **Decide whether the helper calls go back to bare names.** Five call sites reach
+  `scripts/wm/` helpers as `$HOME/.local/bin/<name>`, each carrying the bare-name form
+  in a comment above it. `environment.d` now puts `~/.local/bin` on PATH, so bare names
+  would work in a `uwsm` session, and that would restore what
+  [`TURNING-POINTS.md`](TURNING-POINTS.md) records as the original goal: no path in any
+  config.
+  The argument against arrived with the fix and is the reason this is a decision rather
+  than a task. The plain session entries stay in the greeter's menu on purpose, so a
+  session may or may not carry that PATH depending on a menu choice, and bare names would
+  break the wallpaper, the clipboard picker and the bar's power button silently when the
+  wrong one is picked. Explicit paths work under every launcher, including a bare TTY.
+  Deciding to keep them is a legitimate answer; if it is taken, say so in the turning
+  point, which currently reads as though the goal merely fell.
+  *Difficulty: trivial either way. Priority: low.*
 
 - **`vlc` is named in `packages.conf` and not declared by it.** The Qt theming comment
   names VLC as one of the applications the platform theme reaches, so a reader would fairly

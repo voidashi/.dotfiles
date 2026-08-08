@@ -567,5 +567,40 @@ workspace habit ever becomes stable enough to write down, this entry is not the
 argument against writing it. It is the record that no such habit existed when the
 question was asked.
 
+## The session reaches the compositor through `uwsm`
+
+A greeter that `exec`s a compositor does not make it a systemd user unit, so
+`~/.config/environment.d/` is read and never handed over. Under Hyprland this is
+invisible, because `conf/env_vars.lua` sets the same values again for everything it
+launches. Under Sway it is not: it has no `env` directive and no second source, so
+`QT_QPA_PLATFORMTHEME` never arrives and Qt applications come up unthemed, which is
+the same failure this repository had once before under the same variable.
+
+The important part is which half was broken. `environment.d` works:
+`systemctl --user show-environment` carries every variable it sets, and the generator
+emits them when run by hand. The source was never the problem and the bridge was
+missing, which is a different fault with different fixes. Diagnosing it as a broken
+source would have led to writing a second source.
+
+`uwsm` is that bridge, and it is the mechanism the ecosystem already provides rather
+than one invented here. Hyprland expects it and ships `hyprland-uwsm.desktop` itself.
+Two alternatives fell. `tuigreet --session-wrapper` needs nothing installed and buries
+nested quoting in a root-owned TOML nobody will remember writing. A session entry under
+`~/.local/share/wayland-sessions/` would be tracked, and cannot work at all: the greeter
+runs as its own user and a home directory at `0700` is unreadable to it.
+
+So Sway's entry lives in `/usr/share/wayland-sessions/`, root-owned and documented in
+`SETUP.md` rather than tracked, in the same category as greetd's own config and for the
+same reason. `uwsm` ships no session entries of its own, which is why one compositor
+appeared covered and the other did not. Both compositors call `uwsm finalize` at
+startup, unconditionally: outside a uwsm session it prints one line and exits 0, which
+is cheaper than a condition that has to stay correct.
+
+What this does not settle, and what a reader should not assume from it: the plain
+session entries stay in the greeter's menu, deliberately, because that is what makes
+`uwsm` cheap to abandon. So a session on this machine may or may not have the
+environment, depending on a menu choice, and anything that must work either way cannot
+depend on it. That is why the helper calls keep an explicit path.
+
 Open work of every kind lives in `docs/TODO.md`, including what is diagnosed and
 deliberately parked. It is not repeated here.
