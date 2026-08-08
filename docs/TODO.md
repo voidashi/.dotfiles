@@ -77,14 +77,23 @@ description is what someone will remember.
   **Do it in two stages, and do not start the second until the first is proven**, because
   the second undoes something that currently works.
 
-  Stage one, the bridge. Install `uwsm`, then find out what it ships rather than
-  assuming: whether it provides a Sway session entry, or whether one is needed following
-  the pattern Hyprland's uses, `Exec=uwsm start -e -D <names> <session>.desktop`. Pick
-  the uwsm entry from the greeter's menu; the plain entries stay in the list, which is
-  what makes this cheap to abandon. The check is `scripts/check-session-env.sh`, run from
-  inside the session, which is the probe that found the fault written down so it does not
-  have to be rebuilt. It currently reports FAIL, which is how you know it is not inert.
-  Dolphin rendering themed is the confirmation on screen.
+  Stage one, the bridge. `uwsm` is installed. What it does not do, measured rather than
+  assumed after installing it: ship any session entry at all. `hyprland-uwsm.desktop`
+  comes from the Hyprland package, which is why one compositor appeared to be covered and
+  the other did not. So Sway needs an entry written by hand, and `SETUP.md` now carries
+  it. It has to go in `/usr/share/wayland-sessions/`, not `~/.local/share/`: the greeter
+  runs as its own `greeter` user and this home directory is `0700`, so an entry there
+  would never be readable and never appear in the menu. That puts it in the same category
+  as greetd's own config, root-owned and documented rather than tracked.
+  Both compositors now call `uwsm finalize` at startup, which is what exports
+  `WAYLAND_DISPLAY` and reports the unit started; without it the unit sits in activating
+  and times out. It is unconditional, which is safe: measured in a plain session, it
+  prints one stderr line and exits 0.
+  What is left is writing that file and picking the uwsm entry at the greeter. The plain
+  entries stay in the menu, which is what makes it cheap to abandon. The check is
+  `scripts/check-session-env.sh`, run from inside the session. It reports FAIL today,
+  which is how you know it is not inert. Dolphin rendering themed is the confirmation on
+  screen.
 
   Stage two, the PATH, only once stage one passes. Add `PATH=${HOME}/.local/bin:${PATH}`
   to `environment.d/50-voidashi.conf`, confirm it arrives by the same probe, and only

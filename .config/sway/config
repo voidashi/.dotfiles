@@ -409,6 +409,22 @@ client.background       $vd_bg_content
 #
 # Autostart
 #
+# uwsm, when the session was started through it, needs this to export
+# WAYLAND_DISPLAY into the systemd user manager and report the compositor unit as
+# started. Without it the unit sits in activating and times out. It is first
+# because everything below is launched by a manager that wants the session up.
+#
+# Unconditional on purpose. Measured in a plain sway session started directly by
+# the greeter: it prints one line to stderr saying it could not find an
+# activating Wayland session, and exits 0. So the cost of the line when uwsm is
+# not in use is a journal entry, and the cost of guarding it is a condition that
+# has to stay correct.
+#
+# Why uwsm is involved at all: a greeter that execs the compositor never makes it
+# a systemd user unit, so ~/.config/environment.d/ is read and never handed over,
+# and Qt applications come up unthemed. See docs/TODO.md.
+exec uwsm finalize
+
 # Radio and network, both of which autostart.lua has started since the beginning
 # and this file did not. Same order as there.
 exec rfkill block bluetooth

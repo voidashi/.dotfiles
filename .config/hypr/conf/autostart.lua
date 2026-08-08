@@ -5,6 +5,17 @@
 -- https://wiki.hypr.land/Configuring/Basics/Autostart/
 
 hl.on("hyprland.start", function()
+    -- uwsm, when the session was started through it, needs this to export
+    -- WAYLAND_DISPLAY into the systemd user manager and report the compositor
+    -- unit as started; without it the unit sits in activating and times out.
+    -- /usr/share/wayland-sessions/hyprland-uwsm.desktop is what starts a session
+    -- that way, and it ships with Hyprland rather than with uwsm.
+    --
+    -- Unconditional on purpose. Measured in a session started directly by the
+    -- greeter: it prints one line to stderr and exits 0. Keep it in step with
+    -- the same line in sway/config. See docs/TODO.md for why uwsm is involved.
+    hl.exec_cmd("uwsm finalize")
+
     hl.exec_cmd("rfkill block bluetooth")
 
     hl.exec_cmd("nm-applet")

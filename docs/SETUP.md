@@ -190,6 +190,48 @@ Use `enable` and reboot, not `enable --now`. Starting a display manager on top o
 session you are already sitting in takes that session down with it, and if the config has
 a typo you want to land at a text console rather than a blank screen.
 
+**A greeter that starts the compositor directly gives it no session environment.** This
+is worth doing something about rather than discovering later. `~/.config/environment.d/`
+is read by `systemd --user`, and a compositor the greeter `exec`s is not a systemd user
+unit, so it inherits nothing from there. Under Hyprland it does not show, because
+`conf/env_vars.lua` sets the same values again for everything it launches. Under Sway it
+shows immediately: `QT_QPA_PLATFORMTHEME` never arrives and Qt applications come up
+unthemed against a dark desktop.
+
+`uwsm`, declared in `packages.conf`, fixes it by starting the compositor as a systemd
+user unit. Hyprland ships its own entry for this, `hyprland-uwsm.desktop`. Sway has none,
+and `uwsm` ships no session entries at all, so write one:
+
+```bash
+sudo tee /usr/share/wayland-sessions/sway-uwsm.desktop >/dev/null <<'EOF'
+[Desktop Entry]
+Name=Sway (uwsm-managed)
+Comment=An i3-compatible Wayland compositor
+Exec=uwsm start -e -D sway:wlroots sway.desktop
+TryExec=uwsm
+Type=Application
+DesktopNames=sway;wlroots
+EOF
+```
+
+This one needs root and lives outside `$HOME`, the same as greetd's own config and for
+the same reason, so `backup-configs.sh` neither creates nor checks it. It cannot live in
+`~/.local/share/wayland-sessions/` instead: the greeter runs as its own `greeter` user
+and a home directory at `0700` is unreadable to it, so the entry would never appear in
+the menu.
+
+Both compositors already call `uwsm finalize` on startup, which is what exports
+`WAYLAND_DISPLAY` and reports the unit as started. Then pick the uwsm entry at the
+greeter. The plain entries stay in the menu, which is what makes trying this cheap. To
+check it worked, from inside the session:
+
+```bash
+./scripts/check-session-env.sh
+```
+
+It reads what the compositor actually hands its children, and it says why
+`XCURSOR_SIZE` is not evidence.
+
 **Or skip the display manager entirely.** Log in at a text console and type the
 compositor's name:
 
