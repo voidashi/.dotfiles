@@ -95,15 +95,42 @@ description is what someone will remember.
   which is how you know it is not inert. Dolphin rendering themed is the confirmation on
   screen.
 
-  Stage two, the PATH, only once stage one passes. Add `PATH=${HOME}/.local/bin:${PATH}`
-  to `environment.d/50-voidashi.conf`, confirm it arrives by the same probe, and only
-  then return the five helper call sites to bare names. That settles the compromise
-  recorded in [`TURNING-POINTS.md`](TURNING-POINTS.md), which had to give up on the
-  configs naming no path at all, and that entry gets rewritten rather than left saying
-  the goal fell. Doing this before stage one passes breaks a wallpaper, a keybinding and
-  the bar's power button that work today.
-  *Difficulty: low per stage, and the sequencing is the part that matters. Priority: high
-  for stage one, since it is a visibly broken desktop; stage two is tidying and waits.*
+  Stage one passed. `scripts/check-session-env.sh` reports `QT_QPA_PLATFORMTHEME=kde`
+  and `HYPRCURSOR_SIZE=24` from inside a uwsm-started Sway, and
+  `wayland-wm@sway.desktop.service` is the unit carrying it.
+
+  Stage two is half done and half in question. `PATH=${HOME}/.local/bin:${PATH}` is in
+  `environment.d/50-voidashi.conf`; the expansion was tested against the generator in an
+  isolated config dir and resolves. It takes effect on the next login after this is
+  merged, because `~/.config/environment.d/` links to the checkout rather than to a
+  worktree.
+  What is in question is the other half, returning the five helper call sites to bare
+  names, and the reason is new. The plain `Sway` and `Hyprland` entries stay in the
+  greeter's menu, which is what makes uwsm cheap to abandon and is worth keeping. A
+  session started from one of those gets no `PATH` from here, so bare names would break
+  the wallpaper, the clipboard picker and the bar's power button again, silently, on a
+  menu choice. The explicit paths work under every launcher, including a bare TTY and
+  another machine's display manager. So the compromise recorded in
+  [`TURNING-POINTS.md`](TURNING-POINTS.md) may be the right answer rather than a
+  concession, and undoing it buys conformity with a decision whose argument already
+  collapsed. Settle that before touching the call sites.
+  *Difficulty: low. Priority: low, since what is left is tidying and the argument for
+  doing it got weaker.*
+
+- **A systemd user unit for swaync now fails on every uwsm session.** Introduced by the
+  bridge, and the shape is worth knowing rather than the instance. `uwsm` brings the
+  systemd user manager properly into the session, and `/usr/lib/systemd/user/swaync.service`
+  ships with the package. It tried five times, failed each time with status 1, and hit
+  the start limit, because `sway/config` already ran `exec swaync` and that instance owns
+  the D-Bus name. Notifications work; what is left is a failed unit in every session and
+  a `systemctl --user --failed` that is never empty, which is the kind of noise that
+  trains someone to ignore the command. Nothing else doubles up: waybar, swaybg, the
+  cliphist watcher, `nm-applet` and swayidle have no competing units. The fix is choosing
+  which mechanism starts swaync, and the answer is not obvious, because dropping the
+  `exec` line makes the plain non-uwsm sessions lose notifications entirely, which is a
+  failure this repository has already had once.
+  *Difficulty: low. Priority: medium, because a permanently failed unit is a broken
+  check rather than a broken feature.*
 
 - **The bar shows workspaces 6 to 10 with nothing in them.** `common.jsonc`'s
   `hyprland/workspaces` sets `all-outputs: true` and `persistent-workspaces: {"*": 5}`.
