@@ -27,10 +27,6 @@ reader deciding whether to install". Both finish at this keyboard, as does "Whil
 are already in the file", which stays where it is because those entries are meant to be
 paid by a session that opened the file for another reason.
 
-Before reopening anything about the two compositors, read
-[`TURNING-POINTS.md`](TURNING-POINTS.md): sway follows Hyprland, one way, and four
-things are recorded there as deliberately absent from sway.
-
 
 ## Picked by hand, in this order
 
@@ -44,31 +40,6 @@ outside the file.
 Each entry below was measured before it was written, and three of them do not say what
 they were first described as saying. Where that happened it is marked, because the
 description is what someone will remember.
-
-- **The greeter still defaults to the non-uwsm session.** Both halves of the default are
-  pointed the old way in `/etc/greetd/config.toml`: `--cmd` is `start-hyprland`, and the
-  only remember flag is `--remember`, which remembers the username and not the session.
-  So the environment a session gets depends on remembering to open the menu.
-  `SETUP.md` carries the two flags and what each one covers, since they cover different
-  logins and neither alone is enough. Root-owned and outside `$HOME`, so it is a change
-  to make by hand.
-  *Difficulty: trivial. Priority: medium, since forgetting it produces a desktop that is
-  subtly wrong rather than one that fails.*
-
-- **A systemd user unit for swaync now fails on every uwsm session.** Introduced by the
-  bridge, and the shape is worth knowing rather than the instance. `uwsm` brings the
-  systemd user manager properly into the session, and `/usr/lib/systemd/user/swaync.service`
-  ships with the package. It tried five times, failed each time with status 1, and hit
-  the start limit, because `sway/config` already ran `exec swaync` and that instance owns
-  the D-Bus name. Notifications work; what is left is a failed unit in every session and
-  a `systemctl --user --failed` that is never empty, which is the kind of noise that
-  trains someone to ignore the command. Nothing else doubles up: waybar, swaybg, the
-  cliphist watcher, `nm-applet` and swayidle have no competing units. The fix is choosing
-  which mechanism starts swaync, and the answer is not obvious, because dropping the
-  `exec` line makes the plain non-uwsm sessions lose notifications entirely, which is a
-  failure this repository has already had once.
-  *Difficulty: low. Priority: medium, because a permanently failed unit is a broken
-  check rather than a broken feature.*
 
 - **The bar shows workspaces 6 to 10 with nothing in them.** `common.jsonc`'s
   `hyprland/workspaces` sets `all-outputs: true` and `persistent-workspaces: {"*": 5}`.
@@ -164,7 +135,7 @@ description is what someone will remember.
   smaller step at the dark end against a curve that matches how the panel is driven. Try
   it before writing it down, and keep the current reasoning in the file rather than
   replacing it, since the CIELAB paragraph is what makes either choice legible. Both
-  compositors carry these binds and both change together.
+  compositors carry these binds and both change together. If changed, keep the old one as a comment below or above.
   *Difficulty: trivial. Priority: low, since the current curve was measured and works.*
 
 ## Four more documents that answer the same question twice
